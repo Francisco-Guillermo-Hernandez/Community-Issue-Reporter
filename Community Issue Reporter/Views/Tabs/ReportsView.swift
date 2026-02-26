@@ -173,6 +173,7 @@ struct ReportsView: View {
             }
 
         }
+        .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
 //        .transition(.scale(scale: 0, anchor: .top).combined(with: .opacity))
        
 //        .animation(.easeInOut(duration: 0.25), value: showSearchOverlay)

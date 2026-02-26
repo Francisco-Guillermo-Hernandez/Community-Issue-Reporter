@@ -1,0 +1,227 @@
+//
+//  SignRequests.swift
+//  Community Issue Reporter
+//
+//  Created by Francisco Hernandez on 18/2/26.
+//
+
+import SwiftUI
+
+enum OrderFilter: String, CaseIterable, Identifiable {
+    case ascending = "Ascending"
+    case descending = "Descending"
+    
+    var id: Self { self }
+}
+
+struct SignRequestsView: View {
+    @State private var isPrimaryActionVisible: Bool = false
+    @State private var title: String?
+    @State private var subtitle: String?
+    @State private var activeSubtitleIndex: Int?
+    @State private var isSearchBarVisible: Bool = false
+    @State private var searchText: String = ""
+    @State private var issueType: IssueTypes = .road
+    @State private var orderFilter: String = ""
+    @State private var severity: Severity = .low
+    
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 15) {
+                    HeaderView()
+                    VStack(alignment: .leading, spacing: 15) {
+                        Text("Nearby Events")
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                        
+                        ForEach(sampleEvents.indices, id: \.self) { index in
+                            EventsOnDay(index)
+                        }
+                    }
+                    .padding(.bottom, 500)
+                }
+                .padding(15)
+            }
+    
+            .customToolBar(isPrimaryActionVisible: isPrimaryActionVisible, title: title, subtitle: subtitle) {
+
+            } trailing: {
+                HStack(spacing: 16) {
+                    Menu {
+                        
+                        Picker("Issue Type", selection: $issueType) {
+                            ForEach(IssueTypes.allCases, id: \.self) { issueType in
+                                Text(issueType.title).tag(issueType.title)
+                            }
+                        }
+                        
+                        Picker("Severity", selection: $severity) {
+                            ForEach(Severity.allCases, id: \.self) { severity in
+                                Text(severity.title).tag(severity.title)
+                            }
+                        }
+                            
+                        Picker("OrderFilter", selection: $orderFilter) {
+                            ForEach(OrderFilter.allCases, id: \.self) { filter in
+                                Text(filter.rawValue.capitalized).tag(filter.rawValue)
+                            }
+                        }
+                       
+                    } label: {
+                        Label("Options", systemImage: "line.3.horizontal.decrease")
+                    }
+                    
+                }
+                .padding(.horizontal, 4)
+            } primaryAction: {
+                Button("Add", systemImage: "plus") {
+                    
+                }
+                .buttonStyle(.glassProminent)
+                .tint(.orange)
+            }
+        }
+        .navigationTitle("Report")
+        .onChange(of: activeSubtitleIndex) { oldValue, newValue in
+            if let newValue {
+                subtitle = sampleEvents[newValue]
+            } else {
+                subtitle = nil
+            }
+        }
+        
+    }
+        
+    
+    /// Header View
+    @ViewBuilder
+    func HeaderView() -> some View {
+        VStack(alignment: .leading, spacing: 15) {
+//            Image(systemName: "swift")
+//                .font(.system(size: 40))
+//                .foregroundStyle(.orange)
+//                .padding(15)
+//                .background(.orange.tertiary, in: .circle)
+//                .padding(.bottom, 5)
+            
+            Text("Swift/SwiftUI")
+                .font(.title.bold())
+                .onGeometryChange(for: Bool.self) {
+                    let height = abs($0.size.height - 5)
+                    let offset = $0.frame(in: .global).minY
+                    return -offset > height
+                } action: { newValue in
+                    title = newValue ? "Swift/SwiftUI" : nil
+                }
+
+            
+            Text("**125** Events   **5.6K** Subscribers")
+                .font(.callout)
+            
+            Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.")
+                .font(.callout)
+                .lineLimit(5)
+            
+
+        }
+        .padding(.bottom, 16)
+        .overlay(alignment: .bottom) {
+            Divider()
+                .padding(.horizontal, -15)
+        }
+    
+    }
+
+    @ViewBuilder
+    func CenterDummyContent() -> some View {
+        VStack(alignment: .leading, spacing: 15) {
+            HStack {
+                Text("Popular Events")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(.gray)
+            }
+            
+            RoundedRectangle(cornerRadius: 30)
+                .foregroundStyle(.gray.tertiary)
+                .frame(height: 220)
+        }
+        .padding(.top, 10)
+        .padding(.bottom, 20)
+        .overlay(alignment: .bottom) {
+            Divider()
+                .padding(.horizontal, -15)
+        }
+    }
+    
+    @ViewBuilder
+    func EventsOnDay(_ index: Int) -> some View {
+        let title: String = sampleEvents[index]
+        
+        VStack(alignment: .leading, spacing: 15) {
+            Text(title)
+                .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
+                    content
+                        .opacity(activeSubtitleIndex == index ? 0 : 1)
+//                        .scaleEffect(activeSubtitleIndex == index ? 0.01 : 1, anchor: .top)
+                }
+                .onGeometryChange(for: Bool.self) {
+                    let offset = $0.frame(in: .scrollView).minY
+                    return -offset > 25
+                } action: { newValue in
+                    let previousIndex = index - 1
+                    activeSubtitleIndex = newValue ? index : (previousIndex < 0 ? nil : previousIndex)
+                }
+            
+            ForEach(1...5, id: \.self) { index in
+                NavigationLink(destination: PetitionDetailView(idx: index)) {
+                    
+                    VStack( spacing: 16) {
+                        RequestViewPost(idx: index)
+                    }
+                }
+            }
+        }
+    }
+  
+    var sampleEvents: [String] {
+        ["Tomorrow / Thursday", "Feb 12 / Friday"]
+    }
+}
+
+
+struct RequestViewPost: View {
+    var idx: Int
+    var body: some View {
+    
+        HStack(spacing: 10) {
+            RoundedRectangle(cornerRadius: 10)
+                .frame(width: 100, height: 100)
+            
+            VStack(alignment: .leading, spacing: 10) {
+                RoundedRectangle(cornerRadius: 5)
+                    .frame(width: 250, height: 25)
+                
+                RoundedRectangle(cornerRadius: 5)
+                    .frame(height: 25)
+                
+                RoundedRectangle(cornerRadius: 5)
+                    .frame(width: 150, height: 25)
+            }
+        }
+        .foregroundStyle(.gray.tertiary)
+        
+        Divider()
+            .opacity(0.8)
+    }
+}
+
+
+
+#Preview {
+    SignRequestsView()
+}

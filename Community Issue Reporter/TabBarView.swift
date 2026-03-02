@@ -40,9 +40,7 @@ struct TabBarView: View {
         .sheet(isPresented: $isPresented) {
             ReportView()
         }
-        .overlay {
-            
-        }
+        
     }
 }
 

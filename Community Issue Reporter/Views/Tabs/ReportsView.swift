@@ -25,22 +25,33 @@ struct ReportsView: View {
     @State private var locationManager = LocationManager()
     @State private var showSearchOverlay: Bool = false
     @State private var showUserProfileOverlay: Bool = false
+    @State private var showDetailView: Bool = false
     @State private var isPresented: Bool = false
     @StateObject private var searchCompleter = SearchCompleter()
     @FocusState private var isSearchFocused: Bool
     @FocusState private var isOverlaySearchFocused: Bool
     @State private var offsetY: CGFloat = 0
+    @State private var selectedPlaceID: UUID?
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismissSheet
+    @Namespace private var animationID
+    @State private var expandedItem: IssueMarker?
+    @Environment(\.dismiss) private var dismiss
+    
+    private let animation = Animation.easeInOut(duration: 0.25)
+    
     
     var progress: CGFloat {
         return max(min(offsetY / 100, 1), 0)
     }
 
     private let issues: [IssueMarker] = [
-        IssueMarker(title: String(localized: "Pothole near park"), status: .reported, coordinate: CLLocationCoordinate2D(latitude: 13.6996, longitude: -89.1915)),
-        IssueMarker(title: String(localized: "Lamp not working"), status: .inProgress, coordinate: CLLocationCoordinate2D(latitude: 13.7048, longitude: -89.2234)),
-        IssueMarker(title: String(localized: "Fixed sidewalk"), status: .fixed, coordinate: CLLocationCoordinate2D(latitude: 13.6894, longitude: -89.2308)),
-        IssueMarker(title: String(localized: "Water leak"), status: .reported, coordinate: CLLocationCoordinate2D(latitude: 13.6881, longitude: -89.2091)),
-        IssueMarker(title: String(localized: "Fallen tree"), status: .inProgress, coordinate: CLLocationCoordinate2D(latitude: 13.7072, longitude: -89.2047))
+        IssueMarker(
+            title: String(localized: "Pothole near park"), status: .reported, coordinate: CLLocationCoordinate2D(latitude: 13.6996, longitude: -89.1915), issueType: .road),
+        IssueMarker(title: String(localized: "Lamp not working"), status: .inProgress, coordinate: CLLocationCoordinate2D(latitude: 13.7048, longitude: -89.2234), issueType: .publicSpace),
+        IssueMarker(title: String(localized: "Fixed sidewalk"), status: .fixed, coordinate: CLLocationCoordinate2D(latitude: 13.6894, longitude: -89.2308), issueType: .publicSpace),
+        IssueMarker(title: String(localized: "Water leak"), status: .reported, coordinate: CLLocationCoordinate2D(latitude: 13.6881, longitude: -89.2091), issueType: .road),
+        IssueMarker(title: String(localized: "Fallen tree"), status: .inProgress, coordinate: CLLocationCoordinate2D(latitude: 13.7072, longitude: -89.2047), issueType: .publicSpace),
     ]
 
     private var filteredIssues: [IssueMarker] {
@@ -48,13 +59,13 @@ struct ReportsView: View {
     }
 
     var body: some View {
-        ZStack {
+        MapReader { proxy in
             Map(position: $cameraPosition) {
                 UserAnnotation()
 
                 ForEach(filteredIssues) { issue in
                     Annotation(issue.title, coordinate: issue.coordinate) {
-                        IssuePin(status: issue.status)
+                        AnnotationView(issue)
                     }
                 }
 
@@ -67,7 +78,6 @@ struct ReportsView: View {
                     }
                 }
             }
-
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 16) {
@@ -96,6 +106,7 @@ struct ReportsView: View {
         }
         .onAppear {
             locationManager.requestAuthorization()
+           
         }
         .onChange(of: locationManager.lastLocation) { _, newLocation in
             guard let newLocation, !hasCenteredOnUser else { return }
@@ -109,6 +120,13 @@ struct ReportsView: View {
         }
         .sheet(isPresented: $showUserProfileOverlay) {
             UserProfileView()
+        }
+        .sheet(item: $expandedItem) { issue in
+            DetailView(onDismiss: {
+                showDetailView = false
+                dismiss()
+            }, issue: issue)
+                .navigationTransition(.zoom(sourceID: issue.id, in: animationID))
         }
         .overlay {
             /// customized overlay to show the list of places into a List
@@ -139,10 +157,8 @@ struct ReportsView: View {
                                 let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
                                 if trimmed.isEmpty {
                                     Text(String(localized: "Start typing to search."))
-                                        .foregroundStyle(.secondary)
                                 } else if searchCompleter.suggestions.isEmpty {
                                     Text(String(localized: "No matches found."))
-                                        .foregroundStyle(.secondary)
                                 } else {
                                     ForEach(searchCompleter.suggestions) { suggestion in
                                         Button {
@@ -150,15 +166,18 @@ struct ReportsView: View {
                                         } label: {
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text(suggestion.title)
-                                                    .foregroundStyle(.primary)
+                                                    .fontWeight(.semibold)
+                                                    .font(.title3)
+                                            
                                                 if !suggestion.subtitle.isEmpty {
                                                     Text(suggestion.subtitle)
                                                         .font(.caption)
-                                                        .foregroundStyle(.secondary)
+                                                        
                                                 }
                                             }
                                             .padding(.vertical, 6)
                                         }
+                                        .buttonStyle(.plain)
                                     }
                                 }
                             }
@@ -174,8 +193,11 @@ struct ReportsView: View {
 
         }
         .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
+        .onAppear {
+            // TODO: fetch
+        }
 //        .transition(.scale(scale: 0, anchor: .top).combined(with: .opacity))
-       
+//       
 //        .animation(.easeInOut(duration: 0.25), value: showSearchOverlay)
 //        .overlay(alignment: .bottomTrailing) {
 //            Group {
@@ -199,7 +221,7 @@ struct ReportsView: View {
         search.start { response, _ in
             guard let item = response?.mapItems.first else { return }
             let coordinate = item.location.coordinate
-            searchMarker = IssueMarker(title: item.name ?? String(localized: "Result"), status: .reported, coordinate: coordinate)
+            searchMarker = IssueMarker(title: item.name ?? String(localized: "Result"), status: .reported, coordinate: coordinate, issueType: .all)
             cameraPosition = .region(
                 MKCoordinateRegion(
                     center: coordinate,
@@ -217,7 +239,7 @@ struct ReportsView: View {
         search.start { response, _ in
             guard let item = response?.mapItems.first else { return }
             let coordinate = item.location.coordinate
-            searchMarker = IssueMarker(title: item.name ?? String(localized: "Result"), status: .reported, coordinate: coordinate)
+            searchMarker = IssueMarker(title: item.name ?? String(localized: "Result"), status: .reported, coordinate: coordinate, issueType: .all)
             cameraPosition = .region(
                 MKCoordinateRegion(
                     center: coordinate,
@@ -251,6 +273,19 @@ struct ReportsView: View {
             span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
         )
     }
+
+    private func centerMapOnUserLocation() {
+        locationManager.requestAuthorization()
+        guard let location = locationManager.lastLocation else { return }
+        hasCenteredOnUser = true
+        cameraPosition = .region(
+            MKCoordinateRegion(
+                center: location.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.0082, longitudeDelta: 0.0082)
+                
+            )
+        )
+    }
     
     @ViewBuilder
     private func BottomFloatingToolBar() -> some View {
@@ -262,7 +297,7 @@ struct ReportsView: View {
                 }
                 
                 Button {
-                    
+                    centerMapOnUserLocation()
                 } label: {
                     Image(systemName: "location")
                 }
@@ -272,13 +307,46 @@ struct ReportsView: View {
             .padding(.vertical, 55)
             .padding(.horizontal, 16)
         }
+    
+    
+    @ViewBuilder
+    private func AnnotationView(_ issue: IssueMarker) -> some View {
+        let isSelected = issue.id == selectedPlaceID
+       
+
+        Image(systemName: issue.issueType.iconName)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .padding(isSelected ? 8 : 3)
+            .frame(width: isSelected ? 50 : 20, height: isSelected ? 50 : 20)
+            .background {
+                Circle()
+                    .fill(.white)
+                    .padding(-1)
+            }
+            .animation(animation, value: isSelected)
+            .background {
+                if isSelected {
+                    PulseRingView(tint: issue.status.color, size: 80)
+                }
+            }
+            .contentShape(.rect)
+            .onTapGesture {
+                expandedItem = issue
+                showDetailView.toggle()
+                withAnimation(animation) {
+                    selectedPlaceID = issue.id
+                }
+            }
+    }
 }
 
-private struct IssueMarker: Identifiable {
+fileprivate struct IssueMarker: Identifiable {
     let id = UUID()
     let title: String
     let status: IssueStatus
     let coordinate: CLLocationCoordinate2D
+    let issueType: IssueTypes
 }
 
 private struct IssuePin: View {
@@ -333,83 +401,6 @@ private final class SearchCompleter: NSObject, ObservableObject, MKLocalSearchCo
         suggestions = []
     }
 }
-
-private struct SearchBar: View {
-    
-    @Binding var text: String
-    let onSubmit: () -> Void
-    let onFocusChange: (Bool) -> Void
-    let onUserProfileTap: () -> Void
-    @FocusState.Binding var isFocused: Bool
-
-    var body: some View {
-        
-        VStack {
-            HStack() {
-                HStack() {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.secondary)
-                        .padding(.leading, 16)
-                    
-                    TextField("Search...", text: $text)
-                        .textInputAutocapitalization(.words)
-                        .disableAutocorrection(true)
-                        .padding(.vertical, 12)
-                        .focused($isFocused)
-                        .onSubmit(onSubmit)
-                        .onChange(of: isFocused) { _, newValue in
-                            onFocusChange(newValue)
-                        }
-                }
-                .glassEffect()
-                .animation(
-                    .interpolatingSpring(duration: 0.3, bounce: 0, initialVelocity: 0),
-                    value: isFocused
-                )
-                
-                HStack {
-                    if isFocused {
-                        Button {
-                            isFocused = false
-                            text = ""
-                        } label: {
-                            ZStack {
-                                Group {
-                                    if #available(iOS 26, *) {
-                                        Image(systemName: "xmark")
-                                            .frame(width: 48, height: 48)
-                                            .glassEffect(in: .circle)
-                                    } else {
-                                        Image(systemName: "xmark")
-                                            .frame(width: 48, height: 48)
-                                            .background(.ultraThinMaterial, in: .circle)
-                                    }
-                                }
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(Color.primary)
-                                .transition(.blurReplace)
-                            }
-                        }
-                    } else {
-                        Button {
-                            onUserProfileTap()
-                        } label: {
-                            Text("FH")
-                                .font(.title2.bold())
-                                .frame(width: 48, height: 48)
-                                .foregroundStyle(.white)
-                                .background(.gray, in: .circle)
-                                .transition(.blurReplace)
-                        }
-                    }
-                }
-            }
-        }
-       
-    }
-}
-
 
 private struct StatusFilterRow: View {
     @Binding var selectedStatuses: Set<IssueStatus>
@@ -522,8 +513,42 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 }
 
-
-
+fileprivate struct DetailView: View {
+    let onDismiss: () -> Void
+    var issue: IssueMarker
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading) {
+                Text(issue.title)
+                    .font(.subheadline)
+                    .bold()
+            }
+            .toolbar {
+                
+//                ToolbarItem(placement: .cancellationAction) {
+//                    Button("Close", systemImage: "xmark") {
+//                        onDismiss()
+//                    }
+//                }
+                
+                ToolbarItem(placement: .title) {
+                    Text(issue.title)
+                }
+                
+                ToolbarSpacer(.fixed)
+                
+                ToolbarItem() {
+                    ShareLink(item: "") {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                }
+            }
+            
+        }
+        .presentationDetents([.medium, .fraction(0.2)])
+        .presentationDragIndicator(.visible)
+    }
+}
 
 #Preview {
     ReportsView()

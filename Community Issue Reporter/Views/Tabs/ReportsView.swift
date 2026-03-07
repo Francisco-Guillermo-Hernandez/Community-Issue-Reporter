@@ -464,6 +464,7 @@ private struct StatusFilterRow: View {
                                 )
                             
                         }
+                        .sensoryFeedback(.selection, trigger: isSelected)
                     }
                     .accessibility(identifier: "statusFilterButtons")
                 }

@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+enum OrderFilter: String, CaseIterable, Identifiable {
+    case ascending = "Ascending"
+    case descending = "Descending"
+    
+    var id: Self { self }
+}

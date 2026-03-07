@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-enum OrderFilter: String, CaseIterable, Identifiable {
-    case ascending = "Ascending"
-    case descending = "Descending"
-    
-    var id: Self { self }
-}
 
 struct SignRequestsView: View {
     @State private var isPrimaryActionVisible: Bool = false
@@ -24,6 +18,7 @@ struct SignRequestsView: View {
     @State private var issueType: IssueTypes = .road
     @State private var orderFilter: String = ""
     @State private var severity: Severity = .low
+    @State private var selectedItem: Int?
     
     
     var body: some View {
@@ -91,6 +86,7 @@ struct SignRequestsView: View {
                 subtitle = nil
             }
         }
+        .sensoryFeedback(.selection, trigger: subtitle != nil)
         
     }
         

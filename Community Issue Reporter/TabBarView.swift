@@ -40,6 +40,7 @@ struct TabBarView: View {
         .sheet(isPresented: $isPresented) {
             ReportView()
         }
+        .sensoryFeedback(.selection, trigger: selectedTab)
         
     }
 }

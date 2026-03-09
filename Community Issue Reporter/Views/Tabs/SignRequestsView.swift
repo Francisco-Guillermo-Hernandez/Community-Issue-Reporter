@@ -19,20 +19,21 @@ struct SignRequestsView: View {
     @State private var orderFilter: String = ""
     @State private var severity: Severity = .low
     @State private var selectedItem: Int?
+    @State private var petitions: [Petition] = []
     
     
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 15) {
+                LazyVStack(alignment: .leading, spacing: 16) {
                     HeaderView()
-                    VStack(alignment: .leading, spacing: 15) {
+                    VStack(alignment: .leading, spacing: 16) {
                         Text("Nearby Events")
                             .font(.title3)
                             .fontWeight(.semibold)
                         
-                        ForEach(sampleEvents.indices, id: \.self) { index in
-                            EventsOnDay(index)
+                        ForEach(petitions.indices, id: \.self) { index in
+                            EventsOnDay(petition: petitions[index], selectedIndex: index)
                         }
                     }
                     .padding(.bottom, 500)
@@ -81,9 +82,14 @@ struct SignRequestsView: View {
         .navigationTitle("Report")
         .onChange(of: activeSubtitleIndex) { oldValue, newValue in
             if let newValue {
-                subtitle = sampleEvents[newValue]
+                subtitle = petitions[newValue].title
             } else {
                 subtitle = nil
+            }
+        }
+        .onAppear {
+            Task {
+               petitions = await PetitionRepository.list()
             }
         }
         .sensoryFeedback(.selection, trigger: subtitle != nil)
@@ -95,21 +101,14 @@ struct SignRequestsView: View {
     @ViewBuilder
     func HeaderView() -> some View {
         VStack(alignment: .leading, spacing: 15) {
-//            Image(systemName: "swift")
-//                .font(.system(size: 40))
-//                .foregroundStyle(.orange)
-//                .padding(15)
-//                .background(.orange.tertiary, in: .circle)
-//                .padding(.bottom, 5)
-            
-            Text("Swift/SwiftUI")
+            Text("Sign Request Petitions")
                 .font(.title.bold())
                 .onGeometryChange(for: Bool.self) {
                     let height = abs($0.size.height - 5)
                     let offset = $0.frame(in: .global).minY
                     return -offset > height
                 } action: { newValue in
-                    title = newValue ? "Swift/SwiftUI" : nil
+                    title = newValue ? "Sign Request Petitions" : nil
                 }
 
             
@@ -125,16 +124,16 @@ struct SignRequestsView: View {
         .padding(.bottom, 16)
         .overlay(alignment: .bottom) {
             Divider()
-                .padding(.horizontal, -15)
+                .padding(.horizontal, -16)
         }
     
     }
 
     @ViewBuilder
     func CenterDummyContent() -> some View {
-        VStack(alignment: .leading, spacing: 15) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Popular Events")
+                Text("Latest petitions")
                     .font(.title3)
                     .fontWeight(.semibold)
                     
@@ -142,7 +141,7 @@ struct SignRequestsView: View {
                     .foregroundStyle(.gray)
             }
             
-            RoundedRectangle(cornerRadius: 30)
+            RoundedRectangle(cornerRadius: 32)
                 .foregroundStyle(.gray.tertiary)
                 .frame(height: 220)
         }
@@ -150,27 +149,27 @@ struct SignRequestsView: View {
         .padding(.bottom, 20)
         .overlay(alignment: .bottom) {
             Divider()
-                .padding(.horizontal, -15)
+                .padding(.horizontal, -16)
         }
     }
     
     @ViewBuilder
-    func EventsOnDay(_ index: Int) -> some View {
-        let title: String = sampleEvents[index]
+    func EventsOnDay(petition: Petition, selectedIndex: Int) -> some View {
         
-        VStack(alignment: .leading, spacing: 15) {
-            Text(title)
+        
+        VStack(alignment: .leading, spacing: 16) {
+            Text(petition.title)
                 .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
                     content
-                        .opacity(activeSubtitleIndex == index ? 0 : 1)
+                        .opacity(activeSubtitleIndex == selectedIndex ? 0 : 1)
 //                        .scaleEffect(activeSubtitleIndex == index ? 0.01 : 1, anchor: .top)
                 }
                 .onGeometryChange(for: Bool.self) {
                     let offset = $0.frame(in: .scrollView).minY
                     return -offset > 25
                 } action: { newValue in
-                    let previousIndex = index - 1
-                    activeSubtitleIndex = newValue ? index : (previousIndex < 0 ? nil : previousIndex)
+                    let previousIndex = selectedIndex - 1
+                    activeSubtitleIndex = newValue ? selectedIndex : (previousIndex < 0 ? nil : previousIndex)
                 }
             
             ForEach(1...5, id: \.self) { index in
@@ -182,10 +181,6 @@ struct SignRequestsView: View {
                 }
             }
         }
-    }
-  
-    var sampleEvents: [String] {
-        ["Tomorrow / Thursday", "Feb 12 / Friday"]
     }
 }
 

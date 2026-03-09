@@ -37,6 +37,7 @@ struct ReportsView: View {
     @Namespace private var animationID
     @State private var expandedItem: IssueMarker?
     @Environment(\.dismiss) private var dismiss
+    @State private var issues: [IssueMarker] = []
     
     private let animation = Animation.easeInOut(duration: 0.25)
     
@@ -44,16 +45,7 @@ struct ReportsView: View {
     var progress: CGFloat {
         return max(min(offsetY / 100, 1), 0)
     }
-
-    private let issues: [IssueMarker] = [
-        IssueMarker(
-            title: String(localized: "Pothole near park"), status: .reported, coordinate: CLLocationCoordinate2D(latitude: 13.6996, longitude: -89.1915), issueType: .road),
-        IssueMarker(title: String(localized: "Lamp not working"), status: .inProgress, coordinate: CLLocationCoordinate2D(latitude: 13.7048, longitude: -89.2234), issueType: .publicSpace),
-        IssueMarker(title: String(localized: "Fixed sidewalk"), status: .fixed, coordinate: CLLocationCoordinate2D(latitude: 13.6894, longitude: -89.2308), issueType: .publicSpace),
-        IssueMarker(title: String(localized: "Water leak"), status: .reported, coordinate: CLLocationCoordinate2D(latitude: 13.6881, longitude: -89.2091), issueType: .road),
-        IssueMarker(title: String(localized: "Fallen tree"), status: .inProgress, coordinate: CLLocationCoordinate2D(latitude: 13.7072, longitude: -89.2047), issueType: .publicSpace),
-    ]
-
+    
     private var filteredIssues: [IssueMarker] {
         issues.filter { selectedStatuses.contains($0.status) }
     }
@@ -194,7 +186,9 @@ struct ReportsView: View {
         }
         .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
         .onAppear {
-            // TODO: fetch
+            Task {
+                issues = await ReportRepository.list()
+            }
         }
 //        .transition(.scale(scale: 0, anchor: .top).combined(with: .opacity))
 //       
@@ -341,7 +335,7 @@ struct ReportsView: View {
     }
 }
 
-fileprivate struct IssueMarker: Identifiable {
+ struct IssueMarker: Identifiable {
     let id = UUID()
     let title: String
     let status: IssueStatus

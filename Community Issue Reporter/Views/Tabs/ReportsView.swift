@@ -70,6 +70,9 @@ struct ReportsView: View {
                     }
                 }
             }
+            .onMapCameraChange(frequency: .onEnd) { context in
+                handleMapMovement(center: context.camera.centerCoordinate)
+            }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 16) {
@@ -150,23 +153,31 @@ struct ReportsView: View {
                                 if trimmed.isEmpty {
                                     Text(String(localized: "Start typing to search."))
                                 } else if searchCompleter.suggestions.isEmpty {
-                                    Text(String(localized: "No matches found."))
+                                    ContentUnavailableView.search(text: String(localized: "No matches found."))
                                 } else {
                                     ForEach(searchCompleter.suggestions) { suggestion in
                                         Button {
                                             applySuggestion(suggestion)
                                         } label: {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(suggestion.title)
-                                                    .fontWeight(.semibold)
-                                                    .font(.title3)
-                                            
-                                                if !suggestion.subtitle.isEmpty {
-                                                    Text(suggestion.subtitle)
-                                                        .font(.caption)
-                                                        
+                                            HStack(spacing: 8) {
+                                                Image(systemName: "mappin")
+                                                    .frame(width: 32, height: 32)
+                                                    .clipShape(Circle())
+                                                    .background(.thinMaterial, in: .circle)
+                                                    .transition(.blurReplace)
+                                                VStack(alignment: .leading, spacing: 4) {
+                                                    Text(suggestion.title)
+                                                        .fontWeight(.semibold)
+                                                        .font(.title3)
+                                                
+                                                    if !suggestion.subtitle.isEmpty {
+                                                        Text(suggestion.subtitle)
+                                                            .font(.caption)
+                                                            
+                                                    }
                                                 }
                                             }
+                                            
                                             .padding(.vertical, 6)
                                         }
                                         .buttonStyle(.plain)
@@ -175,7 +186,7 @@ struct ReportsView: View {
                             }
                             .listStyle(.insetGrouped)
                             .scrollContentBackground(.hidden)
-                            .clipped()
+//                            .clipped()
                         }
                         .onAppear {
                             isOverlaySearchFocused = true
@@ -191,19 +202,44 @@ struct ReportsView: View {
             }
         }
 //        .transition(.scale(scale: 0, anchor: .top).combined(with: .opacity))
-//       
+       
 //        .animation(.easeInOut(duration: 0.25), value: showSearchOverlay)
-//        .overlay(alignment: .bottomTrailing) {
+//        .overlay(alignment: .bottom) {
 //            Group {
 //                if #available(iOS 26, *) {
-//                    BottomFloatingToolBar()
-//                        .glassEffect(.regular, in: .capsule)
+//                    CustomAlert(message: "Hi")
+//                     
+////                    BottomFloatingToolBar()
+////                        .glassEffect(.regular, in: .capsule)
 //                }
 //            }
-//            .offset(x: -16, y: 0)
+//            .offset(x: 0, y: -22)
 //        }
         
         
+    }
+    
+    private func handleMapMovement(center: CLLocationCoordinate2D) {
+        let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
+
+        Task {
+            guard let request = MKReverseGeocodingRequest(location: location) else { return }
+            let mapItems = try? await request.mapItems
+            guard let mapItem = mapItems?.first else { return }
+            
+            let country = mapItem.addressRepresentations?.region?.identifier
+                ?? mapItem.addressRepresentations?.regionName
+                ?? "-1"
+            
+            let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
+            
+        
+            print("\n")
+      
+            
+            print(country)
+            print(cityName)
+        }
     }
 
     private func performSearch() {
@@ -300,7 +336,7 @@ struct ReportsView: View {
             .foregroundStyle(Color.primary)
             .padding(.vertical, 55)
             .padding(.horizontal, 16)
-        }
+    }
     
     
     @ViewBuilder

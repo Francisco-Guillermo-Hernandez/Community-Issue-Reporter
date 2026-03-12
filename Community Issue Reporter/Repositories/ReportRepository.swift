@@ -30,4 +30,35 @@ struct ReportRepository {
             return []
         }
     }
+    
+    static func create(report: Report) async  -> String {
+        do {
+            let response = try await ReportsService().createReport(
+                report: Report(
+                    id: nil,
+                    coordinate: [
+                        String(report.latitude ?? 0),
+                        String(report.longitude ?? 0)
+                    ],
+                    address: report.address,
+                    description: report.description,
+                    severityId: 1,
+                    statusId: 1,
+                    issueTypeId: 1,
+                    matterToSolveId: 1,
+                    reportedAt: nil,
+                    cellIndex: "0",
+                    createdAt: nil,
+                    updatedAt: nil,
+                    reportedBy: ""
+                )
+            )
+            
+            print(response)
+            
+            return response.id
+        } catch {
+            return ""
+        }
+    }
 }

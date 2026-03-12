@@ -40,7 +40,11 @@ struct SignRequestsView: View {
                 }
                 .padding(15)
             }
-    
+            .refreshable {
+                Task {
+                    petitions = await PetitionRepository.list()
+                }
+            }
             .customToolBar(isPrimaryActionVisible: isPrimaryActionVisible, title: title, subtitle: subtitle) {
 
             } trailing: {
@@ -172,12 +176,10 @@ struct SignRequestsView: View {
                     activeSubtitleIndex = newValue ? selectedIndex : (previousIndex < 0 ? nil : previousIndex)
                 }
             
-            ForEach(1...5, id: \.self) { index in
-                NavigationLink(destination: PetitionDetailView(idx: index)) {
-                    
-                    VStack( spacing: 16) {
-                        RequestViewPost(idx: index)
-                    }
+            NavigationLink(destination: PetitionDetailView(petition: petition)) {
+                
+                VStack( spacing: 16) {
+                    RequestViewPost(petition: petition)
                 }
             }
         }
@@ -186,7 +188,7 @@ struct SignRequestsView: View {
 
 
 struct RequestViewPost: View {
-    var idx: Int
+    var petition: Petition
     var body: some View {
     
         HStack(spacing: 10) {
@@ -202,7 +204,10 @@ struct RequestViewPost: View {
                 
                 RoundedRectangle(cornerRadius: 5)
                     .frame(width: 150, height: 25)
+                
             }
+            
+            Image(systemName: "chevron.compact.right")
         }
         .foregroundStyle(.gray.tertiary)
         

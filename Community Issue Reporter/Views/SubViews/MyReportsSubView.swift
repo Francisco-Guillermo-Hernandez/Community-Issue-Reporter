@@ -8,11 +8,17 @@
 import SwiftUI
 
 struct MyReportsSubView: View {
+    var subViewName: String
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack {
+            Text("Hello")
+        }
+        .navigationTitle(subViewName)
+        .navigationBarTitleDisplayMode(.inline)
+        .interactiveDismissDisabled(true)
     }
 }
 
 #Preview {
-    MyReportsSubView()
+    MyReportsSubView(subViewName: "My Reports")
 }

@@ -25,7 +25,7 @@ struct UserProfileView: View {
         ReportItem(title: "Road damage on Oak Avenue", dateText: "Reported on 04/20/2024", imageName: "pothole_b"),
     ]
     
-    let options: [String] = ["My Reports", "My Petitions", "Signed Petitions"]
+    let options: [String] = ["My Reports", "My Petitions", "Signed Petitions", "Settings", "Licences"]
     
     @State private var selectedOption: String = "My Reports"
     
@@ -33,90 +33,120 @@ struct UserProfileView: View {
         NavigationStack {
             
             VStack {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        
-                        ScrollView {
-                            ZStack {
-                                Image("user")
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 128, height: 128)
-                                    .clipShape(Circle())
-                            }
-                            
-                            VStack(spacing: 6) {
-                                Text("Sophia Clark")
-                                    .font(.title3)
-                                    .fontWeight(.semibold)
-                                
-                                Text("San Francisco, CA")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                            
-                            
-                            VStack(alignment: .leading, spacing: 16) {
-                                
-                                
-                                
-                                Picker("Options", selection: $selectedOption) {
-                                    ForEach(options, id: \.self) { option in
-                                        Text(option).tag(option)
-                                    }
-                                }
-                                .pickerStyle(.segmented)
-                                .padding(.top, 32)
-                                
-                                VStack(spacing: 14) {
-                                    ForEach(reports) { report in
-                                        HStack(spacing: 12) {
-                                            Image(report.imageName)
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 52, height: 52)
-                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                            
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(report.title)
-                                                    .font(.subheadline)
-                                                    .fontWeight(.semibold)
-                                                    .foregroundStyle(.primary)
-                                                
-                                                Text(report.dateText)
-                                                    .font(.caption)
-                                                    .foregroundStyle(.secondary)
-                                            }
-                                            
-                                            Spacer(minLength: 0)
-                                        }
-                                    }
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            
-                            
-                            
-                            
-                            
-//                                                VStack(alignment: .leading, spacing: 12) {
-//                                                    Text("Settings")
-//                                                        .font(.headline)
-//                                                        .fontWeight(.semibold)
-//                                                        .foregroundStyle(.primary)
-//                            
-//                                                    VStack(alignment: .leading, spacing: 18) {
-//                                                        Text("Change language")
-//                                                        Text("Credits...")
-//                                                        Text("Coming soon ......")
-//                                                    }
-//                                                    .font(.subheadline)
-//                                                    .foregroundStyle(.primary)
-//                                                }
-//                                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
+                ZStack {
+                    Image("user")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 128, height: 128)
+                        .clipShape(Circle())
+                }
+                
+                VStack(spacing: 6) {
+                    Text("Sophia Clark")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    
+                    Text("San Francisco, CA")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                
+                List(options, id: \.self) { option in
+                    NavigationLink {
+                        destinationView(for: option)
+                    } label: {
+                        Text(option)
                     }
                 }
+                .listStyle(.plain)
+                .padding(.top, 32)
+//                .opacity(0.7)
+//                .presentationBackground(.thinMaterial)
+                
+                //                ScrollView {
+                //                    VStack(spacing: 16) {
+                //
+                //                        ScrollView {
+                ////                            ZStack {
+                //                                Image("user")
+                //                                    .resizable()
+                //                                    .scaledToFill()
+                //                                    .frame(width: 128, height: 128)
+                //                                    .clipShape(Circle())
+                ////                            }
+                //
+                //                            VStack(spacing: 6) {
+                //                                Text("Sophia Clark")
+                //                                    .font(.title3)
+                //                                    .fontWeight(.semibold)
+                //
+                //                                Text("San Francisco, CA")
+                //                                    .font(.subheadline)
+                //                                    .foregroundStyle(.secondary)
+                //                            }
+                //
+                //
+                //                            VStack(alignment: .leading, spacing: 16) {
+                //
+                //
+                //
+                //                                Picker("Options", selection: $selectedOption) {
+                //                                    ForEach(options, id: \.self) { option in
+                //                                        Text(option).tag(option)
+                //                                    }
+                //                                }
+                //                                .pickerStyle(.segmented)
+                //                                .padding(.top, 32)
+                //
+                //                                VStack(spacing: 14) {
+                //                                    ForEach(reports) { report in
+                //                                        HStack(spacing: 12) {
+                //                                            Image(report.imageName)
+                //                                                .resizable()
+                //                                                .scaledToFill()
+                //                                                .frame(width: 52, height: 52)
+                //                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                //
+                //                                            VStack(alignment: .leading, spacing: 4) {
+                //                                                Text(report.title)
+                //                                                    .font(.subheadline)
+                //                                                    .fontWeight(.semibold)
+                //                                                    .foregroundStyle(.primary)
+                //
+                //                                                Text(report.dateText)
+                //                                                    .font(.caption)
+                //                                                    .foregroundStyle(.secondary)
+                //                                            }
+                //
+                //                                            Spacer(minLength: 0)
+                //                                        }
+                //                                    }
+                //                                }
+                //                            }
+                //                            .frame(maxWidth: .infinity, alignment: .leading)
+                //
+                //
+                //
+                //
+                //
+                ////                                                VStack(alignment: .leading, spacing: 12) {
+                ////                                                    Text("Settings")
+                ////                                                        .font(.headline)
+                ////                                                        .fontWeight(.semibold)
+                ////                                                        .foregroundStyle(.primary)
+                ////
+                ////                                                    VStack(alignment: .leading, spacing: 18) {
+                ////                                                        Text("Change language")
+                ////                                                        Text("Credits...")
+                ////                                                        Text("Coming soon ......")
+                ////                                                    }
+                ////                                                    .font(.subheadline)
+                ////                                                    .foregroundStyle(.primary)
+                ////                                                }
+                ////                                                .frame(maxWidth: .infinity, alignment: .leading)
+                //                        }
+                //                    }
+                //                }
                 
                 VStack(spacing: 16) {
                     
@@ -131,7 +161,7 @@ struct UserProfileView: View {
                     }
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
-    
+                    
                 }
                 .padding(.bottom, 16)
                 .padding(.top, 32)
@@ -153,6 +183,26 @@ struct UserProfileView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             
+        }
+//        .presentationBackground(.ultraThinMaterial)
+//        .background(.background.opacity(0.25))
+    }
+
+    @ViewBuilder
+    private func destinationView(for option: String) -> some View {
+        switch option {
+        case "My Reports":
+            MyReportsSubView(subViewName: option)
+        case "My Petitions":
+            MyPetitionsSubView(subViewName: option)
+        case "Signed Petitions":
+            SignedPetitionsSubView(subViewName: option)
+        case "Settings":
+            SettingsSubView(subViewName: option)
+        case "Licences":
+            LicencesSubView(subViewName: option)
+        default:
+            Text("\(option) selected")
         }
     }
 }

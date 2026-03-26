@@ -82,7 +82,7 @@ struct ReportsView: View {
                                 stops: [
                                     .init(color: .clear, location: 0),
                                     .init(color: .black.opacity(0.1), location: 0.5),
-                                    .init(color: .black.opacity(0.6), location: 1)
+                                    .init(color: .black.opacity(0.9), location: 1)
                                 ],
                                 startPoint: .top,
                                 endPoint: .bottom
@@ -216,8 +216,9 @@ struct ReportsView: View {
             }
 
         }
-//        .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
+        .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
         .onAppear {
+            showSearchOverlay = false
             Task {
                 issues = await ReportRepository.list()
             }
@@ -368,6 +369,7 @@ struct ReportsView: View {
         Image(systemName: issue.issueType.iconName)
             .resizable()
             .aspectRatio(contentMode: .fit)
+            .foregroundStyle(.black)
             .padding(isSelected ? 8 : 3)
             .frame(width: isSelected ? 50 : 20, height: isSelected ? 50 : 20)
             .background {
@@ -462,25 +464,20 @@ private struct StatusFilterRow: View {
         HStack {
         
             Group {
-                Menu {
-                    
-                    Picker("Issue Type", selection: $issueType) {
-                        ForEach(IssueTypes.allCases, id: \.self) { issueType in
-                            Text(issueType.title).tag(issueType.title)
-                        }
-                    }
-                
-                } label: {
-                    Image(systemName: "line.3.horizontal.decrease")
-                       .fontWeight(.semibold)
-                       .foregroundStyle(.primary)
-                       .transition(.blurReplace)
-                       .frame(width: 24, height: 24)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                
-                
+//                Picker(selection: $issueType) {
+//                    ForEach(IssueTypes.allCases, id: \.self) { issueType in
+//                        Text(issueType.title).tag(issueType)
+//                    }
+//                } label: {
+//                    Image(systemName: "line.3.horizontal.decrease")
+//                        .fontWeight(.semibold)
+//                        .foregroundStyle(.primary)
+//                        .transition(.blurReplace)
+//                        .frame(width: 24, height: 24)
+//                }
+//                .pickerStyle(.menu)
+//                .buttonStyle(.glass)
+//                .buttonBorderShape(.circle)
                 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
@@ -522,7 +519,7 @@ private struct StatusFilterRow: View {
                     }
                 }
                 .scrollClipDisabled()
-                .frame(width: 300)
+//                .frame(width: 300)
             }
         }
     }

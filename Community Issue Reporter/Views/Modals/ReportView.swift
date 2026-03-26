@@ -28,6 +28,8 @@ struct ReportView: View {
     @State private var cameraCompletion: (([UIImage]) -> Void)?
     @State private var previewImage: UIImage?
     @State private var isImagePreviewPresented = false
+    @State private var showMapPickerSheet: Bool = false
+    
     var onCompletion: (String, AlertType) -> Void
     
 
@@ -41,163 +43,233 @@ struct ReportView: View {
         ZStack {
             NavigationStack {
                 Form {
-                Section("Issue Details") {
-                    
-                    Picker("Issue type", selection: $issueType) {
-                        ForEach(IssueTypes.allCases, id: \.self) { issue in
-                            HStack(spacing: 8) {
-                                Text(issue.title)
-                                Image(systemName: issue.iconName)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .tag(issue)
-                        }
-                    }
-                    
-                    Picker("Severity level", selection: $severityLevel) {
-                        ForEach(Severity.allCases, id: \.self) { level in
-                            HStack(spacing: 8) {
-                                Text(level.title).tag(level.title)
-                                Image(systemName: level.iconName)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .tag(level)
-                        }
-                    }
-                    
-                }
-
-                Section("Location") {
-                    TextField("Address", text: $location)
-                    
-                }
-                
-                Section("Description") {
-                    TextEditor(text: $descriptionText)
-                        .frame(minHeight: 60)
-                }
-
-                Section("Photos") {
-                    VStack {
-                        HStack(spacing: 16) {
-                            Button {
-                                takePhotoUsingCamera { images in
-                                    handleSelectedImages(images)
+                    Section("Issue Details") {
+                        
+                        Picker("Issue type", selection: $issueType) {
+                            ForEach(IssueTypes.allCases, id: \.self) { issue in
+                                HStack(spacing: 8) {
+                                    Text(issue.title)
+                                    Image(systemName: issue.iconName)
                                 }
-                            } label: {
-                                Label("Camera", systemImage: "camera")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(.secondary)
-
-                            PhotosPicker(selection: $selectedPhotoItems, maxSelectionCount: 6, matching: .images) {
-                                Label("Gallery", systemImage: "photo.on.rectangle")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(.secondary)
-                            .onChange(of: selectedPhotoItems) { _, newItems in
-                                loadSelectedImages(from: newItems) { images in
-                                    handleSelectedImages(images)
-                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .tag(issue)
                             }
                         }
                         
-                        Divider()
-                            .padding(.bottom, 8)
-                            .padding(.top, 8)
+                        Picker("Severity level", selection: $severityLevel) {
+                            ForEach(Severity.allCases, id: \.self) { level in
+                                HStack(spacing: 8) {
+                                    Text(level.title).tag(level.title)
+                                    Image(systemName: level.iconName)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .tag(level)
+                            }
+                        }
                         
-                        ScrollView(.horizontal, showsIndicators: true) {
-                            LazyHStack(spacing: 12) {
-                                ForEach(0..<selectedImages.count, id: \.self) { index in
-                                    ZStack(alignment: .topLeading) {
-                                        Image(uiImage: selectedImages[index])
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 80, height: 80)
-                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                            .contentShape(RoundedRectangle(cornerRadius: 8))
-                                            .onTapGesture {
-                                                showPreview(for: selectedImages[index])
-                                            }
-                                            .onLongPressGesture(minimumDuration: 0.4) {
-                                                triggerHaptic()
-                                                showPreview(for: selectedImages[index])
-                                            }
-                                        
-                                        Button {
-                                            deleteImage(at: index)
-                                        } label: {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .symbolRenderingMode(.multicolor)
-                                                .font(Font.headline.bold())
-                                        }
-                                        .padding(4)
+                    }
+                    
+                    Section("Location") {
+                        TextField("Address", text: $location)
+                        
+                        Button {
+                            showMapPickerSheet.toggle()
+                        } label: {
+                            Text("Locate on map")
+                        }
+                        
+                    }
+                    
+                    Section("Description") {
+                        TextEditor(text: $descriptionText)
+                            .frame(minHeight: 60)
+                    }
+                    
+                    Section("Photos") {
+                        VStack {
+                            HStack(spacing: 16) {
+                                Button {
+                                    takePhotoUsingCamera { images in
+                                        handleSelectedImages(images)
+                                    }
+                                } label: {
+                                    Label("Camera", systemImage: "camera")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(.secondary)
+                                
+                                PhotosPicker(selection: $selectedPhotoItems, maxSelectionCount: 6, matching: .images) {
+                                    Label("Gallery", systemImage: "photo.on.rectangle")
+                                        .frame(maxWidth: .infinity)
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(.secondary)
+                                .onChange(of: selectedPhotoItems) { _, newItems in
+                                    loadSelectedImages(from: newItems) { images in
+                                        handleSelectedImages(images)
                                     }
                                 }
                             }
-                            .padding(.vertical, 4)
+                            
+                            Divider()
+                                .padding(.bottom, 8)
+                                .padding(.top, 8)
+                            
+                            ScrollView(.horizontal, showsIndicators: true) {
+                                LazyHStack(spacing: 12) {
+                                    ForEach(0..<selectedImages.count, id: \.self) { index in
+                                        ZStack(alignment: .topLeading) {
+                                            Image(uiImage: selectedImages[index])
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 80, height: 80)
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                .contentShape(RoundedRectangle(cornerRadius: 8))
+                                                .onTapGesture {
+                                                    showPreview(for: selectedImages[index])
+                                                }
+                                                .onLongPressGesture(minimumDuration: 0.4) {
+                                                    triggerHaptic()
+                                                    showPreview(for: selectedImages[index])
+                                                }
+                                            
+                                            Button {
+                                                deleteImage(at: index)
+                                            } label: {
+                                                Image(systemName: "xmark.circle.fill")
+                                                    .symbolRenderingMode(.multicolor)
+                                                    .font(Font.headline.bold())
+                                            }
+                                            .padding(4)
+                                        }
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                        
+                    }
+                }
+                .navigationTitle("Report")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button {
+                            if isFormFilled {
+                                showDiscardAlert = true
+                            } else {
+                                dismiss()
+                            }
+                        } label: {
+                            Image(systemName: "xmark")
+                        }
+                        .accessibilityLabel("Close")
+                        .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
+                            
+                            Button("Keep editing", role: .cancel) {
+                                showDiscardAlert = false
+                            }
+                            Button("Discard changes", role: .destructive) {
+                                dismiss()
+                            }
+                        } message: {
+                            Text("You have unsaved information in this report.")
                         }
                     }
                     
-                }
-            }
-            .navigationTitle("Report")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        if isFormFilled {
-                            showDiscardAlert = true
-                        } else {
-                            dismiss()
-                        }
-                    } label: {
-                        Image(systemName: "xmark")
+                    ToolbarItem(placement: .title) {
+                        Text("Report a new issue")
                     }
-                    .accessibilityLabel("Close")
-                    .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
-                       
-                        Button("Keep editing", role: .cancel) {
-                            showDiscardAlert = false
-                        }
-                        Button("Discard changes", role: .destructive) {
-                            dismiss()
-                        }
-                    } message: {
-                        Text("You have unsaved information in this report.")
-                    }
-                }
-                
-                ToolbarItem(placement: .title) {
-                    Text("Report a new issue")
-                }
-
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        isSubmitting = true
-
-                        Task {
-                            let id = await ReportRepository.create(report: Report(id: nil, coordinate: [], address: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAt: nil, cellIndex: "", createdAt: nil, updatedAt: nil, reportedBy: ""))
-                            print(id)
-                            await MainActor.run {
-                                dismiss()
-                                onCompletion("Report submitted successfully.", .success)
+                    
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button {
+                            isSubmitting = true
+                            
+                            Task {
+//                                let reportId = await ReportRepository
+//                                    .create(report:
+//                                                Report(
+//                                                    id: nil,
+//                                                    coordinate: ["13.7168",
+//                                                                 "-89.1834"],
+//                                                    address: "",
+//                                                    description: "",
+//                                                    severityId: 1,
+//                                                    statusId: 1,
+//                                                    issueTypeId: 1,
+//                                                    matterToSolveId: 1,
+//                                                    reportedAt: nil,
+//                                                    cellIndex: "",
+//                                                    createdAt: nil,
+//                                                    updatedAt: nil,
+//                                                    reportedBy: ""
+//                                                )
+//                                    )
+//                                
+//                                if selectedImages.count > 0 {
+//                                    ImageEncoderService().prepareToSent(
+//                                        reportId: reportId,
+//                                        images: selectedImages,
+//                                        completion: { data in
+//                                            print("completed")
+//                                        }
+//                                    )
+//                                }
+                                
+//                                do {
+//                                    try await withTimeout(after: .seconds(10)) {
+//                                        let reportId = await ReportRepository
+//                                            .create(report:
+//                                                        Report(
+//                                                            id: nil,
+//                                                            coordinate: ["13.7168",
+//                                                                         "-89.1834"],
+//                                                            address: "",
+//                                                            description: "",
+//                                                            severityId: 1,
+//                                                            statusId: 1,
+//                                                            issueTypeId: 1,
+//                                                            matterToSolveId: 1,
+//                                                            reportedAt: nil,
+//                                                            cellIndex: "",
+//                                                            createdAt: nil,
+//                                                            updatedAt: nil,
+//                                                            reportedBy: ""
+//                                                        )
+//                                            )
+//                                        
+//                                        if selectedImages.count > 0 {
+//                                            ImageEncoderService().prepareToSent(
+//                                                reportId: reportId,
+//                                                images: selectedImages,
+//                                                completion: { data in
+//                                                    print("completed")
+//                                                }
+//                                            )
+//                                        }
+//                                    }
+//                                } catch {
+//                                    
+//                                }
+                                
+                                await MainActor.run {
+                                    dismiss()
+                                    onCompletion("Report submitted successfully.", .success)
+                                }
+                            }
+                        } label: {
+                            if isSubmitting {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                            } else {
+                                Label("Submit", systemImage: "checkmark")
                             }
                         }
-                    } label: {
-                        if isSubmitting {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                        } else {
-                            Label("Submit", systemImage: "checkmark")
-                        }
+                        .disabled(isSubmitting)
                     }
-                    .disabled(isSubmitting)
                 }
-            }
-            .interactiveDismissDisabled(isFormFilled)
+                .interactiveDismissDisabled(isFormFilled)
                 .sheet(isPresented: $isCameraPresented) {
                     ImagePicker(sourceType: .camera) { image in
                         if let image {
@@ -236,6 +308,11 @@ struct ReportView: View {
                 .transition(.opacity)
                 .animation(.easeInOut(duration: 0.2), value: isImagePreviewPresented)
             }
+        }
+        .sheet(isPresented: $showMapPickerSheet)  {
+            MapPickerView(onConfirm: { location in
+                print(location)
+            })
         }
     }
 
@@ -277,7 +354,10 @@ struct ReportView: View {
         isCameraPresented = true
     }
 
-    private func loadSelectedImages(from items: [PhotosPickerItem], onComplete: @escaping ([UIImage]) -> Void) {
+    private func loadSelectedImages(
+        from items: [PhotosPickerItem],
+        onComplete: @escaping ([UIImage]
+    ) -> Void) {
         Task {
             var images: [UIImage] = []
             images.reserveCapacity(items.count)

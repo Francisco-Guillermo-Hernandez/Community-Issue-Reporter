@@ -8,7 +8,7 @@
 import SwiftUI
 
 @ViewBuilder
-func CustomAlert(message: String, type: AlertType = .success) -> some View {
+func CustomAlert(message: String, type: AlertType = .success) -> some View {    
     ZStack {
         HStack(spacing: 16) {
             Image(systemName: type.icon)
@@ -21,10 +21,10 @@ func CustomAlert(message: String, type: AlertType = .success) -> some View {
         .padding(.horizontal, 12)
         .frame(minWidth: 100, maxWidth: 250)
         .frame(height: 40)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(.ultraThinMaterial)
-        )
+//        .background(
+//            RoundedRectangle(cornerRadius: 36)
+//                .fill(.ultraThinMaterial)
+//        )
     }
 }
 

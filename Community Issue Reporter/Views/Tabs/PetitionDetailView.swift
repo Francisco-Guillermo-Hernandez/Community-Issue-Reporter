@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct PetitionDetailView: View {
-    var idx: Int
+    var petition: Petition
     var offline: Bool = false
     private var shareURL: URL {
-        if let url = URL(string: "https://community-issue-reporter.app/petitions/\(idx)") {
+        if let url = URL(string: "https://community-issue-reporter.app/petitions/\(petition.id)") {
             return url
         }
         return URL(string: "https://community-issue-reporter.app") ?? URL(fileURLWithPath: "/")
@@ -29,7 +29,7 @@ struct PetitionDetailView: View {
                         .padding(.top, 4)
                     
                     SectionHeader(title: "Description")
-                    Text("Large pothole, approximately 12 inches in diameter and 4 inches deep. Located in the southbound lane, posing a significant hazard to vehicles.")
+                    Text(petition.description)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                     
@@ -208,5 +208,5 @@ struct CommentRow: View {
 }
 
 #Preview {
-    PetitionDetailView(idx: 0)
+//    PetitionDetailView(idx: 0)
 }

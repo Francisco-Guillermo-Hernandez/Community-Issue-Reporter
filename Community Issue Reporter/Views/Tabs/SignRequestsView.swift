@@ -16,7 +16,7 @@ struct SignRequestsView: View {
     @State private var isSearchBarVisible: Bool = false
     @State private var searchText: String = ""
     @State private var issueType: IssueTypes = .road
-    @State private var orderFilter: String = ""
+    @State private var orderFilter: OrderFilter = .ascending
     @State private var severity: Severity = .low
     @State private var selectedItem: Int?
     @State private var petitions: [Petition] = []

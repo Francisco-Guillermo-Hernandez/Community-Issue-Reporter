@@ -2,7 +2,7 @@
 //  ServiceClient.swift
 //  Community Issue Reporter
 //
-//  Created by Codex on 8/3/26.
+//  Created by Francisco Hernandez on 8/3/26.
 //
 
 import Foundation
@@ -24,7 +24,7 @@ struct ServiceClient {
         self.decoder = ServiceClient.makeJSONDecoder()
     }
 
-    func get<T: Decodable>(path: String) async throws -> T {
+    func get<T: Decodable>(path: String, headers: Array<HTTPHeader> = []) async throws -> T {
         let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         guard let baseURL else {
             throw ServiceError.baseURLMissing
@@ -33,6 +33,12 @@ struct ServiceClient {
         let url = baseURL.appendingPathComponent(sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        
+        if headers.count > 0 {
+            for header in headers {
+                request.setValue(header.content, forHTTPHeaderField: header.name)
+            }
+        }
 
         let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -45,14 +51,164 @@ struct ServiceClient {
 
         return try decoder.decode(T.self, from: data)
     }
+    
+    func post<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = []) async throws -> V {
+        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard let baseURL else {
+            throw ServiceError.baseURLMissing
+        }
+        
+        let url = baseURL.appendingPathComponent(sanitizedPath)
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if headers.count > 0 {
+            for header in headers {
+                request.setValue(header.content, forHTTPHeaderField: header.name)
+            }
+        }
+        
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(body)
+        
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ServiceError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw ServiceError.httpStatus(httpResponse.statusCode)
+        }
+        
+        return try decoder.decode(V.self, from: data)
+    }
+    
+    func patch<T: Encodable, V: Decodable>(
+        path: String,
+        body: T,
+        headers: [HTTPHeader] = [],
+        formFiles: [MultipartFormFile] = []
+    ) async throws -> V {
+        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard let baseURL else {
+            throw ServiceError.baseURLMissing
+        }
+
+        print("Sanitized path: \(sanitizedPath)")
+        
+        let url = baseURL.appendingPathComponent(sanitizedPath)
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+
+        if formFiles.isEmpty {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } else {
+            let boundary = "Boundary-\(UUID().uuidString)"
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            let fields = try makeFormFields(from: body)
+            request.httpBody = makeMultipartBody(fields: fields, files: formFiles, boundary: boundary)
+        }
+
+        if headers.count > 0 {
+            for header in headers {
+                request.setValue(header.content, forHTTPHeaderField: header.name)
+            }
+        }
+
+        if formFiles.isEmpty {
+            let encoder = JSONEncoder()
+            request.httpBody = try encoder.encode(body)
+        }
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ServiceError.invalidResponse
+        }
+
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw ServiceError.httpStatus(httpResponse.statusCode)
+        }
+
+        return try decoder.decode(V.self, from: data)
+    }
+
+    private func makeFormFields<T: Encodable>(from body: T) throws -> [String: String] {
+        if let fields = body as? [String: String] {
+            return fields
+        }
+
+        let data = try JSONEncoder().encode(body)
+        let json = try JSONSerialization.jsonObject(with: data)
+
+        if let object = json as? [String: Any] {
+            var fields = [String: String]()
+            var hasUnsupportedValue = false
+
+            for (key, value) in object {
+                if let stringValue = Self.stringValue(for: value) {
+                    fields[key] = stringValue
+                } else {
+                    hasUnsupportedValue = true
+                }
+            }
+
+            if !hasUnsupportedValue {
+                return fields
+            }
+        }
+
+        let payload = String(data: data, encoding: .utf8) ?? ""
+        return payload.isEmpty ? [:] : ["payload": payload]
+    }
+
+    private func makeMultipartBody(
+        fields: [String: String],
+        files: [MultipartFormFile],
+        boundary: String
+    ) -> Data {
+        var body = Data()
+
+        for (name, value) in fields {
+            body.appendString("--\(boundary)\r\n")
+            body.appendString("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n")
+            body.appendString("\(value)\r\n")
+        }
+
+        for file in files {
+            body.appendString("--\(boundary)\r\n")
+            body.appendString("Content-Disposition: form-data; name=\"\(file.name)\"; filename=\"\(file.filename)\"\r\n")
+            body.appendString("Content-Type: \(file.mimeType)\r\n\r\n")
+            body.append(file.data)
+            body.appendString("\r\n")
+        }
+
+        body.appendString("--\(boundary)--\r\n")
+        return body
+    }
+
+    private static func stringValue(for value: Any) -> String? {
+        if let string = value as? String {
+            return string
+        }
+        if let bool = value as? Bool {
+            return bool ? "true" : "false"
+        }
+        if let number = value as? NSNumber {
+            return number.stringValue
+        }
+        return nil
+    }
 
     private static func makeJSONDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
         let formatter = ISO8601DateFormatter()
+        
         formatter.formatOptions = [
             .withInternetDateTime,
             .withFractionalSeconds
         ]
+        
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let value = try container.decode(String.self)
@@ -61,6 +217,28 @@ struct ServiceClient {
             }
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO-8601 date: \(value)")
         }
+        
         return decoder
     }
+}
+
+private extension Data {
+    mutating func appendString(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
+}
+
+struct MultipartFormFile {
+    var name: String
+    var filename: String
+    var mimeType: String
+    var data: Data
+}
+
+
+struct HTTPHeader {
+    var name: String
+    var content: String
 }

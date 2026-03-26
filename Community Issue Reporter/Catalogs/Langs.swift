@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+let langs: [Lang] = [
+    Lang(id: 1, name: "English", code: "en"),
+    Lang(id: 2, name: "Español", code: "es"),
+]

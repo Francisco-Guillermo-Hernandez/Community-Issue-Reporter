@@ -1,0 +1,110 @@
+//
+//  MexicoCatalog.swift
+//  Community Issue Reporter
+//
+//  Created by Francisco Hernandez on 24/3/26.
+//
+
+import Foundation
+
+let mexico = Country(id: 3, name: "Mexico", regions: [
+    Region(id: 1, name: "Estado de México", cities: [
+        City(id: 1, name: "Ecatepec"),
+        City(id: 2, name: "Nezahualcóyotl"),
+        City(id: 3, name: "Toluca"),
+        City(id: 4, name: "Naucalpan"),
+        City(id: 5, name: "Chimalhuacán"),
+        City(id: 6, name: "Tlalnepantla"),
+        City(id: 7, name: "Cuautitlán Izcalli"),
+        City(id: 8, name: "Tecámac"),
+        City(id: 9, name: "Ixtapaluca"),
+        City(id: 10, name: "Atizapán de Zaragoza"),
+    ]),
+    Region(id: 2, name: "Ciudad de México", cities: [
+        City(id: 1, name: "Iztapalapa"),
+        City(id: 2, name: "Gustavo A. Madero"),
+        City(id: 3, name: "Álvaro Obregón"),
+        City(id: 4, name: "Tlalpan"),
+        City(id: 5, name: "Coyoacán"),
+        City(id: 6, name: "Cuauhtémoc"),
+        City(id: 7, name: "Venustiano Carranza"),
+        City(id: 8, name: "Xochimilco"),
+        City(id: 9, name: "Benito Juárez"),
+        City(id: 10, name: "Azcapotzalco"),
+    ]),
+    Region(id: 3, name: "Jalisco", cities: [
+        City(id: 1, name: "Guadalajara"),
+        City(id: 2, name: "Zapopan"),
+        City(id: 3, name: "Tlaquepaque"),
+        City(id: 4, name: "Tonalá"),
+        City(id: 5, name: "Puerto Vallarta"),
+        City(id: 6, name: "Tlajomulco de Zúñiga"),
+        City(id: 7, name: "El Salto"),
+        City(id: 8, name: "Lagos de Moreno"),
+        City(id: 9, name: "Tepatitlán de Morelos"),
+        City(id: 10, name: "Ciudad Guzmán"),
+    ]),
+    Region(id: 4, name: "Veracruz", cities: [
+        City(id: 1, name: "Veracruz"),
+        City(id: 2, name: "Xalapa"),
+        City(id: 3, name: "Coatzacoalcos"),
+        City(id: 4, name: "Orizaba"),
+        City(id: 5, name: "Minatitlán"),
+        City(id: 6, name: "Poza Rica"),
+        City(id: 7, name: "Córdoba"),
+        City(id: 8, name: "Boca del Río"),
+        City(id: 9, name: "Tuxpan"),
+        City(id: 10, name: "Papantla"),
+    ]),
+    Region(id: 5, name: "Puebla", cities: [
+        City(id: 1, name: "Puebla"),
+        City(id: 2, name: "Tehuacán"),
+        City(id: 3, name: "San Martín Texmelucan"),
+        City(id: 4, name: "Cholula"),
+        City(id: 5, name: "Atlixco"),
+        City(id: 6, name: "Amozoc"),
+        City(id: 7, name: "Huauchinango"),
+        City(id: 8, name: "Teziutlán"),
+    ]),
+    Region(id: 6, name: "Guanajuato", cities: [
+        City(id: 1, name: "León"),
+        City(id: 2, name: "Irapuato"),
+        City(id: 3, name: "Celaya"),
+        City(id: 4, name: "Salamanca"),
+        City(id: 5, name: "Guanajuato"),
+        City(id: 6, name: "Silao"),
+        City(id: 7, name: "San Miguel de Allende"),
+        City(id: 8, name: "Valle de Santiago"),
+    ]),
+    Region(id: 7, name: "Chiapas", cities: [
+        City(id: 1, name: "Tuxtla Gutiérrez"),
+        City(id: 2, name: "Tapachula"),
+        City(id: 3, name: "San Cristóbal de las Casas"),
+        City(id: 4, name: "Comitán de Domínguez"),
+        City(id: 5, name: "Palenque"),
+    ]),
+    Region(id: 8, name: "Nuevo León", cities: [
+        City(id: 1, name: "Monterrey"),
+        City(id: 2, name: "Guadalupe"),
+        City(id: 3, name: "Apodaca"),
+        City(id: 4, name: "San Nicolás de los Garza"),
+        City(id: 5, name: "Santa Catarina"),
+        City(id: 6, name: "General Escobedo"),
+        City(id: 7, name: "San Pedro Garza García"),
+        City(id: 8, name: "Juárez"),
+    ]),
+    Region(id: 9, name: "Michoacán", cities: [
+        City(id: 1, name: "Morelia"),
+        City(id: 2, name: "Uruapan"),
+        City(id: 3, name: "Zamora"),
+        City(id: 4, name: "Lázaro Cárdenas"),
+        City(id: 5, name: "Apatzingán"),
+    ]),
+    Region(id: 10, name: "Oaxaca", cities: [
+        City(id: 1, name: "Oaxaca de Juárez"),
+        City(id: 2, name: "Juchitán de Zaragoza"),
+        City(id: 3, name: "San Juan Bautista Tuxtepec"),
+        City(id: 4, name: "Salina Cruz"),
+        City(id: 5, name: "Huajuapan de León"),
+    ]),
+])

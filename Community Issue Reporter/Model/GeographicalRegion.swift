@@ -1,5 +1,5 @@
 //
-//  AdministrativeDivision.swift
+//  GeographicalRegion.swift
 //  Community Issue Reporter
 //
 //  Created by Francisco Hernandez on 22/3/26.
@@ -24,7 +24,7 @@ struct Country: Identifiable, Codable {
     let regions: [Region]
 }
 
-struct Contient: Identifiable, Codable {
+struct GeographicalRegion: Identifiable, Codable {
     let id: Int
     let name: String
     let countries: [Country]

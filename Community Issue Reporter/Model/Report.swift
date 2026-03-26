@@ -8,7 +8,7 @@
 import Foundation
 
 struct Report: Identifiable, Codable {
-    let id: String
+    let id: String?
     let coordinate: [String]
     let address: String
     let description: String
@@ -16,10 +16,10 @@ struct Report: Identifiable, Codable {
     let statusId: Int
     let issueTypeId: Int
     let matterToSolveId: Int
-    let reportedAt: Date
+    let reportedAt: Date?
     let cellIndex: String
-    let createdAt: Date
-    let updatedAt: Date
+    let createdAt: Date?
+    let updatedAt: Date?
     let reportedBy: String
 
     var latitude: Double? {

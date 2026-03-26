@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct Lang {
+    let id: Int
+    let name: String
+    let code: String
+}

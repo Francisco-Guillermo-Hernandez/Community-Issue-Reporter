@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+struct Locator: Identifiable, Codable {
+    let id: String?
+    let country: String
+    let region: String
+    let city: String
+}

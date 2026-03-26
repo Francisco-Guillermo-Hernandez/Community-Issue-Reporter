@@ -52,28 +52,49 @@ struct ReportsView: View {
 
     var body: some View {
         MapReader { proxy in
-            Map(position: $cameraPosition) {
-                UserAnnotation()
+            ZStack(alignment: .bottom) {
+                Map(position: $cameraPosition) {
+                    UserAnnotation()
 
-                ForEach(filteredIssues) { issue in
-                    Annotation(issue.title, coordinate: issue.coordinate) {
-                        AnnotationView(issue)
+                    ForEach(filteredIssues) { issue in
+                        Annotation(issue.title, coordinate: issue.coordinate) {
+                            AnnotationView(issue)
+                        }
+                    }
+
+                    if let searchMarker {
+                        Annotation(searchMarker.title, coordinate: searchMarker.coordinate) {
+                            Image(systemName: "mappin.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(.red)
+                                .shadow(radius: 3)
+                        }
                     }
                 }
-
-                if let searchMarker {
-                    Annotation(searchMarker.title, coordinate: searchMarker.coordinate) {
-                        Image(systemName: "mappin.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.red)
-                            .shadow(radius: 3)
-                    }
+                .contentMargins(.bottom, 90, for: .scrollContent)
+                .onMapCameraChange(frequency: .onEnd) { context in
+                    handleMapMovement(center: context.camera.centerCoordinate)
                 }
-            }
-            .onMapCameraChange(frequency: .onEnd) { context in
-                handleMapMovement(center: context.camera.centerCoordinate)
+                
+                Rectangle()
+                        .fill(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .clear, location: 0),
+                                    .init(color: .black.opacity(0.1), location: 0.5),
+                                    .init(color: .black.opacity(0.6), location: 1)
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        
+                        .frame(height: 125)
+                        .allowsHitTesting(false)
+                
             }
         }
+        .ignoresSafeArea(edges: .bottom)
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 16) {
                 SearchBar(
@@ -195,7 +216,7 @@ struct ReportsView: View {
             }
 
         }
-        .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
+//        .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
         .onAppear {
             Task {
                 issues = await ReportRepository.list()
@@ -440,64 +461,68 @@ private struct StatusFilterRow: View {
         
         HStack {
         
-            Menu {
-                
-                Picker("Issue Type", selection: $issueType) {
-                    ForEach(IssueTypes.allCases, id: \.self) { issueType in
-                        Text(issueType.title).tag(issueType.title)
-                    }
-                }
-            
-            } label: {
-                Image(systemName: "line.3.horizontal.decrease")
-                   .fontWeight(.semibold)
-                   .foregroundStyle(.primary)
-                   .transition(.blurReplace)
-                   .frame(width: 24, height: 24)
-            }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            
-            
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
+            Group {
+                Menu {
                     
-                    ForEach(IssueStatus.allCases) { status in
-                        let isSelected = selectedStatuses.contains(status)
-                        Button {
-                            toggle(status)
-                        } label: {
-                            
-                            HStack {
-                                Image(systemName: status.iconName)
-                                    .tint(.white)
-                                    
-                                Text(LocalizedStringKey(status.title))
-                                    .font(.subheadline.weight(.semibold))
-                                    
-                            }
-                               
-                                .foregroundStyle(isSelected ? Color.white : Color.primary)
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(
-                                    Capsule()
-                                        .fill(isSelected ? status.color : status.color.opacity(0.55))
-                                        .brightness(-0.2)
-                                )
-                                .glassEffect(in: .capsule)
-                                .transition(.blurReplace)
-                                .overlay(
-                                    Capsule()
-                                        .stroke(status.color.opacity(isSelected ? 0.0 : 0.7), lineWidth: 1)
-                                )
-                            
+                    Picker("Issue Type", selection: $issueType) {
+                        ForEach(IssueTypes.allCases, id: \.self) { issueType in
+                            Text(issueType.title).tag(issueType.title)
                         }
-                        .sensoryFeedback(.selection, trigger: isSelected)
                     }
-                    .accessibility(identifier: "statusFilterButtons")
+                
+                } label: {
+                    Image(systemName: "line.3.horizontal.decrease")
+                       .fontWeight(.semibold)
+                       .foregroundStyle(.primary)
+                       .transition(.blurReplace)
+                       .frame(width: 24, height: 24)
                 }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                
+                
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        
+                        ForEach(IssueStatus.allCases) { status in
+                            let isSelected = selectedStatuses.contains(status)
+                            Button {
+                                toggle(status)
+                            } label: {
+                                
+                                HStack {
+                                    Image(systemName: status.iconName)
+                                        .tint(.white)
+                                        
+                                    Text(LocalizedStringKey(status.title))
+                                        .font(.subheadline.weight(.semibold))
+                                        
+                                }
+                                   
+                                    .foregroundStyle(isSelected ? Color.white : Color.primary)
+                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 16)
+                                    .background(
+                                        Capsule()
+                                            .fill(isSelected ? status.color : status.color.opacity(0.55))
+                                            .brightness(-0.2)
+                                    )
+                                    .glassEffect(in: .capsule)
+                                    .transition(.blurReplace)
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(status.color.opacity(isSelected ? 0.0 : 0.7), lineWidth: 1)
+                                    )
+                                
+                            }
+                            .sensoryFeedback(.selection, trigger: isSelected)
+                        }
+                        .accessibility(identifier: "statusFilterButtons")
+                    }
+                }
+                .scrollClipDisabled()
+                .frame(width: 300)
             }
         }
     }

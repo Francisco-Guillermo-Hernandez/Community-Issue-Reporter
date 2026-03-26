@@ -10,6 +10,22 @@ import SwiftUI
 struct LocatorView: View {
     var body: some View {
         Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        
+        Button("Find by City") {
+            findByCity()
+        }
+        .padding()
+        .buttonStyle(.bordered)
+    }
+    
+    private func findByCity() {
+        do {
+            let dao = LocatorDAO()
+            let details = try? dao.findBy(cityName: "New York Cityeeee")
+            print(details)
+        } catch {
+            print("that city doesn't exist")
+        }
     }
 }
 

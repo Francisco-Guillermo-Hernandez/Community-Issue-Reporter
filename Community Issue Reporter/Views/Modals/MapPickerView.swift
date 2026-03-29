@@ -10,24 +10,44 @@ import CoreLocation
 import MapKit
 
 struct MapPickerView: View {
+    @Binding var coordinate: Coordinate
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
-    @State private var cameraPosition: MapCameraPosition = .region(
-        MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 13.6929, longitude: -89.2182),
-            span: MKCoordinateSpan(latitudeDelta: 0.00088, longitudeDelta: 0.00088)
-        )
-    )
-    @State private var selectedCoordinate = CLLocationCoordinate2D(latitude: 13.6929, longitude: -89.2182)
-    @State private var searchText = ""
+    @State private var cameraPosition: MapCameraPosition
+    @State private var selectedCoordinate: CLLocationCoordinate2D
+    @State private var searchText: String
     @State private var hasCenteredOnUser = false
     @State private var locationManager = LocationManager()
     @FocusState private var isSearchFocused: Bool
-    var onConfirm: ((CLLocationCoordinate2D) -> Void)?
+    
+    private let span = MKCoordinateSpan(latitudeDelta: 0.00088, longitudeDelta: 0.00088)
+    
+    var onConfirm: ((Coordinate) -> Void)?
+    
+    init(coordinate: Binding<Coordinate>, onConfirm: ((Coordinate) -> Void)? = nil) {
+        print("creating map picker view")
+        
+        self.onConfirm = onConfirm
+        self._coordinate = coordinate
+        self.selectedCoordinate = getLocation(coordinate)
+        self.searchText = ""
+        self.hasCenteredOnUser = false
+        self.cameraPosition = .region(
+            MKCoordinateRegion(
+                center: getLocation(coordinate),
+                span: span
+            )
+        )
+    }
 
     var body: some View {
         NavigationStack {
             VStack {
+                
+                Text("Move the map where you want to report the issue")
+                    .font(.subheadline)
+                    .padding(.top, 8)
+                
                 ZStack {
                     Map(position: $cameraPosition) {
                         UserAnnotation()
@@ -36,21 +56,21 @@ struct MapPickerView: View {
                         selectedCoordinate = context.camera.centerCoordinate
                     }
                     .onAppear {
-                        locationManager.requestAuthorization()
+//                        locationManager.requestAuthorization()
                     }
                     .onChange(of: locationManager.lastLocation) { _, newLocation in
-                        guard let newLocation, !hasCenteredOnUser else { return }
-                        hasCenteredOnUser = true
-                        cameraPosition = .region(
-                            MKCoordinateRegion(
-                                center: newLocation.coordinate,
-                                span: MKCoordinateSpan(latitudeDelta: 0.00088, longitudeDelta: 0.00088)
-                            )
-                        )
-                        selectedCoordinate = newLocation.coordinate
+//                        guard let newLocation, !hasCenteredOnUser else { return }
+//                        hasCenteredOnUser = true
+//                        cameraPosition = .region(
+//                            MKCoordinateRegion(
+//                                center: newLocation.coordinate,
+//                                span: span
+//                            )
+//                        )
+//                        selectedCoordinate = newLocation.coordinate
                     }
-                    .ignoresSafeArea(edges: .bottom)
-
+//                    .padding(.top, 4)
+                    
                     centerMarker
                     mapControls
                 }
@@ -68,7 +88,12 @@ struct MapPickerView: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
-                        onConfirm?(selectedCoordinate)
+                        onConfirm?(
+                            Coordinate(
+                                latitude: selectedCoordinate.latitude,
+                                longitude: selectedCoordinate.longitude
+                            )
+                        )
                         dismiss()
                     } label: {
                         Label("Submit", systemImage: "checkmark")
@@ -95,6 +120,8 @@ struct MapPickerView: View {
        
 
     }
+    
+   
 
     private var centerMarker: some View {
         Image(systemName: "mappin.circle.fill")
@@ -156,7 +183,7 @@ struct MapPickerView: View {
         let maximumDelta: CLLocationDegrees = 120.0
         let fallbackRegion = MKCoordinateRegion(
             center: selectedCoordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+            span: span
         )
         let currentRegion = cameraPosition.region ?? fallbackRegion
         
@@ -208,7 +235,7 @@ struct MapPickerView: View {
             cameraPosition = .region(
                 MKCoordinateRegion(
                     center: lastLocation.coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
+                    span: span
                 )
             )
             selectedCoordinate = lastLocation.coordinate
@@ -218,6 +245,15 @@ struct MapPickerView: View {
     }
 }
 
+func getLocation(_ coordinate: Binding<Coordinate>) -> CLLocationCoordinate2D {
+    return CLLocationCoordinate2D(
+        latitude: coordinate.wrappedValue.latitude,
+        longitude: coordinate.wrappedValue.longitude
+    )
+}
+
 #Preview {
-    MapPickerView()
+    @Previewable
+    @State var coordinate: Coordinate = .init(latitude: 13.6929, longitude: -89.2182)
+    MapPickerView(coordinate: $coordinate)
 }

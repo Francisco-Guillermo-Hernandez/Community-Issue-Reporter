@@ -19,6 +19,7 @@ struct ReportView: View {
     @State private var issueType: IssueTypes = .all
     @State private var severityLevel: Severity = .low
     @State private var location = ""
+    @State private var coordinate: Coordinate = .init(latitude: 13.6929, longitude: -89.2182)
     @State private var descriptionText = ""
     @State private var showDiscardAlert = false
     @State private var isSubmitting = false
@@ -310,8 +311,9 @@ struct ReportView: View {
             }
         }
         .sheet(isPresented: $showMapPickerSheet)  {
-            MapPickerView(onConfirm: { location in
-                print(location)
+            MapPickerView(coordinate: $coordinate, onConfirm: { coordinate in
+                self.coordinate = coordinate
+                print("coordinate \(self.coordinate.latitude), \(self.coordinate.longitude)")
             })
         }
     }

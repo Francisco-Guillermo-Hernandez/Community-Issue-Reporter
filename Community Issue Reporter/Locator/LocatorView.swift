@@ -19,13 +19,9 @@ struct LocatorView: View {
     }
     
     private func findByCity() {
-        do {
-            let dao = LocatorDAO()
-            let details = try? dao.findBy(cityName: "New York Cityeeee")
-            print(details)
-        } catch {
-            print("that city doesn't exist")
-        }
+        let dao = LocatorDAO()
+        let details = dao.findBy(cityName: "San Salvador")
+        print(details)
     }
 }
 

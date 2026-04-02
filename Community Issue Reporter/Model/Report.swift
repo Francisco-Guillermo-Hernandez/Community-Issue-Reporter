@@ -9,7 +9,7 @@ import Foundation
 
 struct Report: Identifiable, Codable {
     let id: String?
-    let coordinate: [String]
+    let coordinate: Coordinate
     let address: String
     let description: String
     let severityId: Int
@@ -20,19 +20,35 @@ struct Report: Identifiable, Codable {
     let cellIndex: String
     let createdAt: Date?
     let updatedAt: Date?
-    let reportedBy: String
-
-    var latitude: Double? {
-        guard let value = coordinate.first else {
-            return nil
+    let reportedBy: String?
+    
+    init(
+            id: String? = nil,
+            coordinate: Coordinate,
+            address: String,
+            description: String,
+            severityId: Int,
+            statusId: Int,
+            issueTypeId: Int,
+            matterToSolveId: Int,
+            reportedAt: Date? = nil,
+            cellIndex: String,
+            createdAt: Date? = nil,
+            updatedAt: Date? = nil,
+            reportedBy: String? = nil
+        ) {
+            self.id = id
+            self.coordinate = coordinate
+            self.address = address
+            self.description = description
+            self.severityId = severityId
+            self.statusId = statusId
+            self.issueTypeId = issueTypeId
+            self.matterToSolveId = matterToSolveId
+            self.reportedAt = reportedAt
+            self.cellIndex = cellIndex
+            self.createdAt = createdAt
+            self.updatedAt = updatedAt
+            self.reportedBy = reportedBy
         }
-        return Double(value)
-    }
-
-    var longitude: Double? {
-        guard coordinate.count > 1 else {
-            return nil
-        }
-        return Double(coordinate[1])
-    }
 }

@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct Validator {
+    var name: String
+    var message: String
+    var fn: (_ input: String) -> Bool
+}

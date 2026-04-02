@@ -22,8 +22,8 @@ struct ReportsService {
         return try await client.get(path: "reports/\(reportId)")
     }
     
-    func createReport(report: Report) async throws -> GenericResponse {
-        return try await client.post(path: "reports/create", body: report)
+    func createReport(report: Report, headers: Array<HTTPHeader>) async throws -> GenericResponse {
+        return try await client.post(path: "reports/create", body: report, headers: headers)
     }
     
     func attachPicture(reportId: String, imagesData: [Data]) async throws -> Array<GenericResponse> {

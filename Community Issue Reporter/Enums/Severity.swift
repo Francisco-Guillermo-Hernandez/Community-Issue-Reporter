@@ -25,5 +25,16 @@ enum Severity: String, CaseIterable, Identifiable {
         }
     }
     
+    var identifier: Int {
+        switch self {
+        case .low:
+            return 1
+        case .medium:
+            return 2
+        case .high:
+            return 3
+        }
+    }
+    
     var iconName: String { self.rawValue }
 }

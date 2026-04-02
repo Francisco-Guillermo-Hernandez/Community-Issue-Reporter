@@ -29,6 +29,21 @@ enum IssueTypes: String, CaseIterable, Identifiable {
             return "Other"
         }
     }
+    
+    var identifier: Int {
+        switch self {
+        case .road:
+            return 1
+        case .publicSpace:
+            return 2
+        case .building:
+            return 3
+        case .other:
+            return 4
+        default:
+            return 1
+        }
+    }
 
     var iconName: String { self.rawValue }
 }

@@ -37,4 +37,19 @@ enum IssueStatus: String, CaseIterable, Identifiable {
             case .confirmed: return .green
         }
     }
+    
+    var identifier: Int {
+        switch self {
+        case .reported:
+            return 1
+        case .confirmed:
+            return 2
+        case .inProgress:
+            return 3
+        case .petitionToSign:
+            return 4
+        case .fixed:
+            return 5
+        }
+    }
 }

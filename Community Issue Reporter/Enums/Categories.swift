@@ -31,5 +31,18 @@ enum Categories: String, CaseIterable, Codable {
             case .emergency: return "Emergency"
         }
     }
+    
+    var minimunAmountOfSignatures: Int {
+        switch self {
+            case .all: return 100
+            case .prevention: return 10
+            case .corrective: return 10
+            case .replacement: return 20
+            case .construction: return 50
+            case .installation: return 40
+            case .inspection: return 20
+            case .emergency: return 5
+        }
+    }
 
 }

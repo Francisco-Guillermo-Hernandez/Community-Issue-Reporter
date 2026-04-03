@@ -49,19 +49,19 @@ struct ReportsView: View {
     private var filteredIssues: [IssueMarker] {
         issues.filter { selectedStatuses.contains($0.status) }
     }
-
+    
     var body: some View {
         MapReader { proxy in
             ZStack(alignment: .bottom) {
                 Map(position: $cameraPosition) {
                     UserAnnotation()
-
+                    
                     ForEach(filteredIssues) { issue in
                         Annotation(issue.title, coordinate: issue.coordinate) {
                             AnnotationView(issue)
                         }
                     }
-
+                    
                     if let searchMarker {
                         Annotation(searchMarker.title, coordinate: searchMarker.coordinate) {
                             Image(systemName: "mappin.circle.fill")
@@ -76,21 +76,7 @@ struct ReportsView: View {
                     handleMapMovement(center: context.camera.centerCoordinate)
                 }
                 
-                Rectangle()
-                        .fill(
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .clear, location: 0),
-                                    .init(color: .black.opacity(0.1), location: 0.5),
-                                    .init(color: .black.opacity(0.9), location: 1)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        
-                        .frame(height: 125)
-                        .allowsHitTesting(false)
+                bottom
                 
             }
         }
@@ -118,11 +104,11 @@ struct ReportsView: View {
             .padding(.top, 10)
         }
         .onChange(of: searchText) { _, newValue in
-            searchCompleter.update(query: newValue, region: currentRegion())
+            searchCompleter.update(query: newValue, region: currentRegion(c: cameraPosition))
         }
         .onAppear {
             locationManager.requestAuthorization()
-           
+            
         }
         .onChange(of: locationManager.lastLocation) { _, newLocation in
             guard let newLocation, !hasCenteredOnUser else { return }
@@ -138,10 +124,7 @@ struct ReportsView: View {
             UserProfileView()
         }
         .sheet(item: $expandedItem) { issue in
-            DetailView(onDismiss: {
-                showDetailView = false
-                dismiss()
-            }, issue: issue)
+            DetailView(issue: issue)
                 .navigationTransition(.zoom(sourceID: issue.id, in: animationID))
         }
         .overlay {
@@ -169,106 +152,70 @@ struct ReportsView: View {
                             .padding(.trailing, 16)
                             .padding(.top, 10)
                             
-                            List {
-                                let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-                                if trimmed.isEmpty {
-                                    Text(String(localized: "Start typing to search."))
-                                } else if searchCompleter.suggestions.isEmpty {
-                                    ContentUnavailableView.search(text: String(localized: "No matches found."))
-                                } else {
-                                    ForEach(searchCompleter.suggestions) { suggestion in
-                                        Button {
-                                            applySuggestion(suggestion)
-                                        } label: {
-                                            HStack(spacing: 8) {
-                                                Image(systemName: "mappin")
-                                                    .frame(width: 32, height: 32)
-                                                    .clipShape(Circle())
-                                                    .background(.thinMaterial, in: .circle)
-                                                    .transition(.blurReplace)
-                                                VStack(alignment: .leading, spacing: 4) {
-                                                    Text(suggestion.title)
-                                                        .fontWeight(.semibold)
-                                                        .font(.title3)
-                                                
-                                                    if !suggestion.subtitle.isEmpty {
-                                                        Text(suggestion.subtitle)
-                                                            .font(.caption)
-                                                            
-                                                    }
-                                                }
-                                            }
-                                            
-                                            .padding(.vertical, 6)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
-                            }
-                            .listStyle(.insetGrouped)
-                            .scrollContentBackground(.hidden)
-//                            .clipped()
+                            SuggestionsResultList(searchText: $searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
+                                applySuggestion(suggestion)
+                            })
                         }
                         .onAppear {
                             isOverlaySearchFocused = true
                         }
                     }
+                    .zIndex(10)
             }
-
+            
         }
         .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
         .onAppear {
             showSearchOverlay = false
+            
             Task {
                 issues = await ReportRepository.list()
             }
         }
-//        .transition(.scale(scale: 0, anchor: .top).combined(with: .opacity))
-       
-//        .animation(.easeInOut(duration: 0.25), value: showSearchOverlay)
-//        .overlay(alignment: .bottom) {
-//            Group {
-//                if #available(iOS 26, *) {
-//                    CustomAlert(message: "Hi")
-//                     
-////                    BottomFloatingToolBar()
-////                        .glassEffect(.regular, in: .capsule)
-//                }
-//            }
-//            .offset(x: 0, y: -22)
-//        }
-        
-        
+    }
+    
+    private var bottom: some View {
+        Rectangle()
+            .fill(
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0),
+                        .init(color: colorScheme == .dark ? .black.opacity(0.1) : .white.opacity(0.1), location: 0.5),
+                        .init(color: colorScheme == .dark ? .black.opacity(0.9) : .white.opacity(0.9), location: 1)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .blur(radius: 30, opaque: false)
+            .frame(height: 225)
+            .allowsHitTesting(false)
     }
     
     private func handleMapMovement(center: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
-
+        
         Task {
             guard let request = MKReverseGeocodingRequest(location: location) else { return }
             let mapItems = try? await request.mapItems
             guard let mapItem = mapItems?.first else { return }
             
             let country = mapItem.addressRepresentations?.region?.identifier
-                ?? mapItem.addressRepresentations?.regionName
-                ?? "-1"
+            ?? mapItem.addressRepresentations?.regionName
+            ?? "-1"
             
             let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
-            
-        
-            print("\n")
-      
             
             print(country)
             print(cityName)
         }
     }
-
+    
     private func performSearch() {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchText
-        request.region = currentRegion()
-
+        request.region = currentRegion(c: cameraPosition)
+        
         let search = MKLocalSearch(request: request)
         search.start { response, _ in
             guard let item = response?.mapItems.first else { return }
@@ -282,11 +229,11 @@ struct ReportsView: View {
             )
         }
     }
-
+    
     private func performSearch(with completion: MKLocalSearchCompletion) {
         let request = MKLocalSearch.Request(completion: completion)
-        request.region = currentRegion()
-
+        request.region = currentRegion(c: cameraPosition)
+        
         let search = MKLocalSearch(request: request)
         search.start { response, _ in
             guard let item = response?.mapItems.first else { return }
@@ -300,32 +247,14 @@ struct ReportsView: View {
             )
         }
     }
-
+    
     private func applySuggestion(_ suggestion: SearchSuggestion) {
         searchText = suggestion.title
         performSearch(with: suggestion.completion)
         showSearchOverlay = false
         isOverlaySearchFocused = false
     }
-
-    private func currentRegion() -> MKCoordinateRegion {
-        if let region = cameraPosition.region {
-            return region
-        }
-
-        if let camera = cameraPosition.camera {
-            return MKCoordinateRegion(
-                center: camera.centerCoordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-            )
-        }
-
-        return MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 13.6929, longitude: -89.2182),
-            span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-        )
-    }
-
+    
     private func centerMapOnUserLocation() {
         locationManager.requestAuthorization()
         guard let location = locationManager.lastLocation else { return }
@@ -341,31 +270,31 @@ struct ReportsView: View {
     
     @ViewBuilder
     private func BottomFloatingToolBar() -> some View {
-            VStack(spacing: 35) {
-                Button {
-                    
-                } label: {
-                    Image(systemName: "car.fill")
-                }
+        VStack(spacing: 35) {
+            Button {
                 
-                Button {
-                    centerMapOnUserLocation()
-                } label: {
-                    Image(systemName: "location")
-                }
+            } label: {
+                Image(systemName: "car.fill")
             }
-            .font(.title3)
-            .foregroundStyle(Color.primary)
-            .padding(.vertical, 55)
-            .padding(.horizontal, 16)
+            
+            Button {
+                centerMapOnUserLocation()
+            } label: {
+                Image(systemName: "location")
+            }
+        }
+        .font(.title3)
+        .foregroundStyle(Color.primary)
+        .padding(.vertical, 55)
+        .padding(.horizontal, 16)
     }
     
     
     @ViewBuilder
     private func AnnotationView(_ issue: IssueMarker) -> some View {
         let isSelected = issue.id == selectedPlaceID
-       
-
+        
+        
         Image(systemName: issue.issueType.iconName)
             .resizable()
             .aspectRatio(contentMode: .fit)
@@ -394,7 +323,7 @@ struct ReportsView: View {
     }
 }
 
- struct IssueMarker: Identifiable {
+struct IssueMarker: Identifiable {
     let id = UUID()
     let title: String
     let status: IssueStatus
@@ -404,7 +333,7 @@ struct ReportsView: View {
 
 private struct IssuePin: View {
     let status: IssueStatus
-
+    
     var body: some View {
         Image(systemName: "mappin.and.ellipse")
             .font(.title2)
@@ -413,71 +342,29 @@ private struct IssuePin: View {
     }
 }
 
-private struct SearchSuggestion: Identifiable {
-    let title: String
-    let subtitle: String
-    let completion: MKLocalSearchCompletion
-
-    var id: String {
-        "\(title)|\(subtitle)"
-    }
-}
-
-private final class SearchCompleter: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
-    @Published private(set) var suggestions: [SearchSuggestion] = []
-    private let completer = MKLocalSearchCompleter()
-
-    override init() {
-        super.init()
-        completer.delegate = self
-        completer.resultTypes = [.pointOfInterest, .address]
-    }
-
-    func update(query: String, region: MKCoordinateRegion) {
-        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            suggestions = []
-            return
-        }
-
-        completer.region = region
-        completer.queryFragment = trimmed
-    }
-
-    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
-        suggestions = completer.results.map {
-            SearchSuggestion(title: $0.title, subtitle: $0.subtitle, completion: $0)
-        }
-    }
-
-    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
-        suggestions = []
-    }
-}
-
 private struct StatusFilterRow: View {
     @Binding var selectedStatuses: Set<IssueStatus>
     @State private var issueType: IssueTypes = .all
-
+    
     var body: some View {
         
         HStack {
-        
+            
             Group {
-//                Picker(selection: $issueType) {
-//                    ForEach(IssueTypes.allCases, id: \.self) { issueType in
-//                        Text(issueType.title).tag(issueType)
-//                    }
-//                } label: {
-//                    Image(systemName: "line.3.horizontal.decrease")
-//                        .fontWeight(.semibold)
-//                        .foregroundStyle(.primary)
-//                        .transition(.blurReplace)
-//                        .frame(width: 24, height: 24)
-//                }
-//                .pickerStyle(.menu)
-//                .buttonStyle(.glass)
-//                .buttonBorderShape(.circle)
+                //                Picker(selection: $issueType) {
+                //                    ForEach(IssueTypes.allCases, id: \.self) { issueType in
+                //                        Text(issueType.title).tag(issueType)
+                //                    }
+                //                } label: {
+                //                    Image(systemName: "line.3.horizontal.decrease")
+                //                        .fontWeight(.semibold)
+                //                        .foregroundStyle(.primary)
+                //                        .transition(.blurReplace)
+                //                        .frame(width: 24, height: 24)
+                //                }
+                //                .pickerStyle(.menu)
+                //                .buttonStyle(.glass)
+                //                .buttonBorderShape(.circle)
                 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 16) {
@@ -491,26 +378,26 @@ private struct StatusFilterRow: View {
                                 HStack {
                                     Image(systemName: status.iconName)
                                         .tint(.white)
-                                        
+                                    
                                     Text(LocalizedStringKey(status.title))
                                         .font(.subheadline.weight(.semibold))
-                                        
+                                    
                                 }
-                                   
-                                    .foregroundStyle(isSelected ? Color.white : Color.primary)
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 16)
-                                    .background(
-                                        Capsule()
-                                            .fill(isSelected ? status.color : status.color.opacity(0.55))
-                                            .brightness(-0.2)
-                                    )
-                                    .glassEffect(in: .capsule)
-                                    .transition(.blurReplace)
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(status.color.opacity(isSelected ? 0.0 : 0.7), lineWidth: 1)
-                                    )
+                                
+                                .foregroundStyle(isSelected ? Color.white : Color.primary)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 16)
+                                .background(
+                                    Capsule()
+                                        .fill(isSelected ? status.color : status.color.opacity(0.55))
+                                        .brightness(-0.2)
+                                )
+                                .glassEffect(in: .capsule)
+                                .transition(.blurReplace)
+                                .overlay(
+                                    Capsule()
+                                        .stroke(status.color.opacity(isSelected ? 0.0 : 0.7), lineWidth: 1)
+                                )
                                 
                             }
                             .sensoryFeedback(.selection, trigger: isSelected)
@@ -519,11 +406,11 @@ private struct StatusFilterRow: View {
                     }
                 }
                 .scrollClipDisabled()
-//                .frame(width: 300)
+                //                .frame(width: 300)
             }
         }
     }
-
+    
     private func toggle(_ status: IssueStatus) {
         if selectedStatuses.contains(status) {
             selectedStatuses.remove(status)
@@ -537,17 +424,17 @@ private struct StatusFilterRow: View {
 final class LocationManager: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     var lastLocation: CLLocation?
-
+    
     override init() {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
     }
-
+    
     func requestAuthorization() {
         manager.requestWhenInUseAuthorization()
     }
-
+    
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
@@ -560,46 +447,9 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
             break
         }
     }
-
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         lastLocation = locations.last
-    }
-}
-
-fileprivate struct DetailView: View {
-    let onDismiss: () -> Void
-    var issue: IssueMarker
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading) {
-                Text(issue.title)
-                    .font(.subheadline)
-                    .bold()
-            }
-            .toolbar {
-                
-//                ToolbarItem(placement: .cancellationAction) {
-//                    Button("Close", systemImage: "xmark") {
-//                        onDismiss()
-//                    }
-//                }
-                
-                ToolbarItem(placement: .title) {
-                    Text(issue.title)
-                }
-                
-                ToolbarSpacer(.fixed)
-                
-                ToolbarItem() {
-                    ShareLink(item: "") {
-                        Label("Share", systemImage: "square.and.arrow.up")
-                    }
-                }
-            }
-            
-        }
-        .presentationDetents([.medium, .fraction(0.2)])
-        .presentationDragIndicator(.visible)
     }
 }
 

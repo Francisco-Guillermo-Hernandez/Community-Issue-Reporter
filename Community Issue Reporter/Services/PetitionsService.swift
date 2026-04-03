@@ -22,4 +22,18 @@ struct PetitionsService {
         return try await self.client.get(path: "petitions/\(id)")
     }
     
+    func createPetition(petition: Petition) async throws -> GenericResponse {
+        return try await self.client.post(path: "petitions", body: petition)
+    }
+    
+    func updatePetition(id: String, petition: Petition) async throws -> GenericResponse {
+        return try await self.client.put(path: "petitions/\(id)", body: petition)
+    }
+    
+    func signPetition(id: String) async throws -> GenericResponse {
+        return try await self.client.patch(
+            path: "petitions/\(id)/sign-petition",
+            body: [String: String]()
+        )
+    }
 }

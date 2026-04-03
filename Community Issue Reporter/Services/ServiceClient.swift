@@ -84,6 +84,38 @@ struct ServiceClient {
         return try decoder.decode(V.self, from: data)
     }
     
+    func put<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = []) async throws -> V {
+        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard let baseURL else {
+            throw ServiceError.baseURLMissing
+        }
+        
+        let url = baseURL.appendingPathComponent(sanitizedPath)
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if headers.count > 0 {
+            for header in headers {
+                request.setValue(header.content, forHTTPHeaderField: header.name)
+            }
+        }
+        
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(body)
+        
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ServiceError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw ServiceError.httpStatus(httpResponse.statusCode)
+        }
+        
+        return try decoder.decode(V.self, from: data)
+    }
+    
     func patch<T: Encodable, V: Decodable>(
         path: String,
         body: T,

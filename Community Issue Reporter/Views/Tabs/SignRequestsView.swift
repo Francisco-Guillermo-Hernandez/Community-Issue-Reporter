@@ -20,7 +20,7 @@ struct SignRequestsView: View {
     @State private var severity: Severity = .low
     @State private var selectedItem: Int?
     @State private var petitions: [Petition] = []
-    
+    @State private var showCreateRequestView: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -48,7 +48,13 @@ struct SignRequestsView: View {
             .customToolBar(isPrimaryActionVisible: isPrimaryActionVisible, title: title, subtitle: subtitle) {
 
             } trailing: {
+                
                 HStack(spacing: 16) {
+                    
+                    Button("Add", systemImage: "plus") {
+                        showCreateRequestView.toggle()
+                    }
+
                     Menu {
                         
                         Picker("Issue Type", selection: $issueType) {
@@ -72,16 +78,9 @@ struct SignRequestsView: View {
                     } label: {
                         Label("Options", systemImage: "line.3.horizontal.decrease")
                     }
-                    
                 }
                 .padding(.horizontal, 4)
-            } primaryAction: {
-                Button("Add", systemImage: "plus") {
-                    
-                }
-                .buttonStyle(.glassProminent)
-                .tint(.orange)
-            }
+            } primaryAction: { }
         }
         .navigationTitle("Report")
         .onChange(of: activeSubtitleIndex) { oldValue, newValue in
@@ -95,6 +94,9 @@ struct SignRequestsView: View {
             Task {
                petitions = await PetitionRepository.list()
             }
+        }
+        .sheet(isPresented: $showCreateRequestView) {
+            CreateRequestPetitionView()
         }
         .sensoryFeedback(.selection, trigger: subtitle != nil)
         
@@ -196,17 +198,21 @@ struct RequestViewPost: View {
                 .frame(width: 100, height: 100)
             
             VStack(alignment: .leading, spacing: 10) {
-                RoundedRectangle(cornerRadius: 5)
-                    .frame(width: 250, height: 25)
+ 
+                Text("Category: \(getCategoryName(id: petition.categoryId))")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                   
+                Text("Target Signatures: \(petition.targetSignatures)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
                 
-                RoundedRectangle(cornerRadius: 5)
-                    .frame(height: 25)
-                
-                RoundedRectangle(cornerRadius: 5)
-                    .frame(width: 150, height: 25)
-                
+                Text(petition.description)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+        
             }
-            
+                        
             Image(systemName: "chevron.compact.right")
         }
         .foregroundStyle(.gray.tertiary)
@@ -216,7 +222,9 @@ struct RequestViewPost: View {
     }
 }
 
-
+func getCategoryName(id: Int) -> String {
+    return Categories.allCases.first(where: { $0.identifier == id })?.title ?? "Unknown"
+}
 
 #Preview {
     SignRequestsView()

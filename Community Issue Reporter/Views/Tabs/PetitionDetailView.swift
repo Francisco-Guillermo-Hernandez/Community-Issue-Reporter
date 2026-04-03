@@ -11,11 +11,12 @@ struct PetitionDetailView: View {
     var petition: Petition
     var offline: Bool = false
     private var shareURL: URL {
-        if let url = URL(string: "https://community-issue-reporter.app/petitions/\(petition.id)") {
+        if let url = URL(string: "https://community-issue-reporter.app/petitions/\(petition.id!)") {
             return url
         }
         return URL(string: "https://community-issue-reporter.app") ?? URL(fileURLWithPath: "/")
     }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -32,6 +33,9 @@ struct PetitionDetailView: View {
                     Text(petition.description)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                    
+                    SectionHeader(title: "Category")
+                    Text(getCategoryName(id: petition.categoryId))
                     
                     SectionHeader(title: "Location")
                     HStack(alignment: .top, spacing: 16) {

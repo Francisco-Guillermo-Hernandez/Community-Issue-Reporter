@@ -125,7 +125,7 @@ struct ReportsView: View {
         }
         .sheet(item: $expandedItem) { issue in
             DetailView(issue: issue)
-                .navigationTransition(.zoom(sourceID: issue.id, in: animationID))
+            //                .navigationTransition(.zoom(sourceID: issue.id, in: animationID))
         }
         .overlay {
             /// customized overlay to show the list of places into a List

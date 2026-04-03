@@ -8,6 +8,7 @@
 import PhotosUI
 import SwiftUI
 import UIKit
+import MapKit
 
 struct Option: Hashable {
     var icon: String
@@ -16,26 +17,45 @@ struct Option: Hashable {
 
 struct ReportView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var issueType: IssueTypes = .all
-    @State private var severityLevel: Severity = .low
-    @State private var location = ""
-    @State private var coordinate: Coordinate = .init(latitude: 13.6929, longitude: -89.2182)
-    @State private var descriptionText = ""
-    @State private var showDiscardAlert = false
-    @State private var isSubmitting = false
+    @State private var issueType: IssueTypes
+    @State private var severityLevel: Severity
+    @State private var address: String
+    @State private var coordinate: Coordinate
+    @State private var descriptionText: String
+    @State private var showDiscardAlert: Bool
+    @State private var isSubmitting: Bool
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var selectedImages: [UIImage] = []
-    @State private var isCameraPresented = false
+    @State private var isCameraPresented: Bool
     @State private var cameraCompletion: (([UIImage]) -> Void)?
     @State private var previewImage: UIImage?
-    @State private var isImagePreviewPresented = false
-    @State private var showMapPickerSheet: Bool = false
+    @State private var isImagePreviewPresented: Bool
+    @State private var showMapPickerSheet: Bool
+    
+    @State private var locator: Locator
+  
+    init(onCompletion: @escaping (String, AlertType) -> Void) {
+       
+        self.issueType = .all
+        self.severityLevel = .low
+        self.address = ""
+        self.coordinate = .init(lat: 13.6929, lng: -89.2182)
+        self.descriptionText = ""
+        self.showDiscardAlert = false
+        self.isSubmitting = false
+        self.selectedPhotoItems = []
+        self.selectedImages = []
+        self.isCameraPresented = false
+        self.isImagePreviewPresented = false
+        self.showMapPickerSheet = false
+        self.locator = .init(countryCode: "", country: "", region: "", city: "")
+        self.onCompletion = onCompletion
+    }
     
     var onCompletion: (String, AlertType) -> Void
     
-
     private var isFormFilled: Bool {
-        !location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         || !descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         || !selectedImages.isEmpty
     }
@@ -44,46 +64,12 @@ struct ReportView: View {
         ZStack {
             NavigationStack {
                 Form {
-                    Section("Issue Details") {
-                        
-                        Picker("Issue type", selection: $issueType) {
-                            ForEach(IssueTypes.allCases, id: \.self) { issue in
-                                HStack(spacing: 8) {
-                                    Text(issue.title)
-                                    Image(systemName: issue.iconName)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .tag(issue)
-                            }
-                        }
-                        
-                        Picker("Severity level", selection: $severityLevel) {
-                            ForEach(Severity.allCases, id: \.self) { level in
-                                HStack(spacing: 8) {
-                                    Text(level.title).tag(level.title)
-                                    Image(systemName: level.iconName)
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .tag(level)
-                            }
-                        }
-                        
-                    }
                     
                     Section("Location") {
-                        TextField("Address", text: $location)
-                        
-                        Button {
+                        MiniMapLocator(coordinate: $coordinate, onExpandMap: { coordinate in
+                            self.coordinate = coordinate
                             showMapPickerSheet.toggle()
-                        } label: {
-                            Text("Locate on map")
-                        }
-                        
-                    }
-                    
-                    Section("Description") {
-                        TextEditor(text: $descriptionText)
-                            .frame(minHeight: 60)
+                        })
                     }
                     
                     Section("Photos") {
@@ -151,33 +137,79 @@ struct ReportView: View {
                         }
                         
                     }
+                        
+//                        Button {
+//                            showMapPickerSheet.toggle()
+//                        } label: {
+//                            Text("Locate on map")
+//                        }
+                        
+//                        TextField("Address", text: $address)
+                        
+//                        TextInput(name: "Address", label: "", value: $address)
+//                            .disabled(true)
+                        
+//                    }
+                    
+                    Section("Issue Details") {
+                        
+                        Picker("Issue type", selection: $issueType) {
+                            ForEach(IssueTypes.allCases, id: \.self) { issue in
+                                HStack(spacing: 8) {
+                                    Text(issue.title)
+                                    Image(systemName: issue.iconName)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .tag(issue)
+                            }
+                        }
+                        
+                        Picker("Severity level", selection: $severityLevel) {
+                            ForEach(Severity.allCases, id: \.self) { level in
+                                HStack(spacing: 8) {
+                                    Text(level.title).tag(level.title)
+                                    Image(systemName: level.iconName)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .tag(level)
+                            }
+                        }
+                        
+                    }
+                    Section("Description") {
+                        TextEditor(text: $descriptionText)
+                            .frame(minHeight: 60)
+                    }
+                    
+                   
                 }
                 .navigationTitle("Report")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button {
-                            if isFormFilled {
-                                showDiscardAlert = true
-                            } else {
-                                dismiss()
-                            }
-                        } label: {
-                            Image(systemName: "xmark")
-                        }
-                        .accessibilityLabel("Close")
-                        .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
-                            
-                            Button("Keep editing", role: .cancel) {
-                                showDiscardAlert = false
-                            }
-                            Button("Discard changes", role: .destructive) {
-                                dismiss()
-                            }
-                        } message: {
-                            Text("You have unsaved information in this report.")
-                        }
-                    }
+                    
+//                    ToolbarItem(placement: .cancellationAction) {
+//                        Button {
+//                            if isFormFilled {
+//                                showDiscardAlert = true
+//                            } else {
+//                                dismiss()
+//                            }
+//                        } label: {
+//                            Image(systemName: "xmark")
+//                        }
+//                        .accessibilityLabel("Close")
+//                        .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
+//                            
+//                            Button("Keep editing", role: .cancel) {
+//                                showDiscardAlert = false
+//                            }
+//                            Button("Discard changes", role: .destructive) {
+//                                dismiss()
+//                            }
+//                        } message: {
+//                            Text("You have unsaved information in this report.")
+//                        }
+//                    }
                     
                     ToolbarItem(placement: .title) {
                         Text("Report a new issue")
@@ -188,35 +220,29 @@ struct ReportView: View {
                             isSubmitting = true
                             
                             Task {
-//                                let reportId = await ReportRepository
-//                                    .create(report:
-//                                                Report(
-//                                                    id: nil,
-//                                                    coordinate: ["13.7168",
-//                                                                 "-89.1834"],
-//                                                    address: "",
-//                                                    description: "",
-//                                                    severityId: 1,
-//                                                    statusId: 1,
-//                                                    issueTypeId: 1,
-//                                                    matterToSolveId: 1,
-//                                                    reportedAt: nil,
-//                                                    cellIndex: "",
-//                                                    createdAt: nil,
-//                                                    updatedAt: nil,
-//                                                    reportedBy: ""
-//                                                )
-//                                    )
-//                                
-//                                if selectedImages.count > 0 {
-//                                    ImageEncoderService().prepareToSent(
-//                                        reportId: reportId,
-//                                        images: selectedImages,
-//                                        completion: { data in
-//                                            print("completed")
-//                                        }
-//                                    )
-//                                }
+                                let reportId = await ReportRepository
+                                    .create(report: Report(
+                                        coordinate: self.coordinate,
+                                        address: self.address,
+                                        description: self.descriptionText,
+                                        severityId: self.severityLevel.identifier,
+                                        statusId: 1,
+                                        issueTypeId: self.issueType.identifier,
+                                        matterToSolveId: 1,
+                                        cellIndex: "",
+                                    ),
+                                            locator: self.locator
+                                    )
+                                
+                                if selectedImages.count > 0 {
+                                    ImageEncoderService().prepareToSent(
+                                        reportId: reportId,
+                                        images: selectedImages,
+                                        completion: { data in
+                                            print("completed")
+                                        }
+                                    )
+                                }
                                 
 //                                do {
 //                                    try await withTimeout(after: .seconds(10)) {
@@ -255,8 +281,13 @@ struct ReportView: View {
 //                                }
                                 
                                 await MainActor.run {
-                                    dismiss()
-                                    onCompletion("Report submitted successfully.", .success)
+                                    if reportId != "-1" {
+                                        dismiss()
+                                        onCompletion("Report submitted successfully.", .success)
+                                    } else {
+                                        dismiss()
+                                        onCompletion("Error submitting report.", .error)
+                                    }
                                 }
                             }
                         } label: {
@@ -311,9 +342,14 @@ struct ReportView: View {
             }
         }
         .sheet(isPresented: $showMapPickerSheet)  {
-            MapPickerView(coordinate: $coordinate, onConfirm: { coordinate in
+            MapPickerView(coordinate: $coordinate, onConfirm: { coordinate, locator, address in
                 self.coordinate = coordinate
-                print("coordinate \(self.coordinate.latitude), \(self.coordinate.longitude)")
+                self.locator = locator
+                self.address = address
+                
+                print("coordinate \(self.coordinate.lat), \(self.coordinate.lng)")
+                print("locator \(self.locator)")
+                self.showMapPickerSheet = false
             })
         }
     }

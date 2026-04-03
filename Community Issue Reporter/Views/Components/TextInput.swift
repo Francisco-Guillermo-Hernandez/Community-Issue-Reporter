@@ -31,7 +31,7 @@ struct TextInput: View {
     var name: String = "placeholder"
     var label: String = "label"
     var validators: [Validator] = []
-    var regex: String = "[az-AZ0-9]"
+    var regex: String = "[a-zA-Z0-9, ]"
     
     @State private var message: String = ""
     @State private var isValid: Bool = false
@@ -49,10 +49,13 @@ struct TextInput: View {
                 .overlay(
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(self.status.color, lineWidth: 2)
-                    )
-       
+                )
                 .onChange(of: value) { _, newValue in
-                    self.isValid = checkValidations(newValue)
+                    let filteredValue = filterValue(newValue)
+                    if filteredValue != newValue {
+                        self.value = filteredValue
+                    }
+                    self.isValid = checkValidations(filteredValue)
                 }
                 
                 
@@ -84,6 +87,15 @@ struct TextInput: View {
         }
         
         return result
+    }
+
+    private func filterValue(_ value: String) -> String {
+        guard !regex.isEmpty else { return value }
+
+        let allowedPattern = "^(?:\(regex))$"
+        return String(value.filter { character in
+            String(character).range(of: allowedPattern, options: .regularExpression) != nil
+        })
     }
 }
 

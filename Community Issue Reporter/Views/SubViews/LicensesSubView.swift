@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct LicencesSubView: View {
+struct LicensesSubView: View {
     var subViewName: String
     var body: some View {
         NavigationStack {
@@ -20,5 +20,5 @@ struct LicencesSubView: View {
 }
 
 #Preview {
-    LicencesSubView(subViewName: "Licences")
+    LicensesSubView(subViewName: "Licences")
 }

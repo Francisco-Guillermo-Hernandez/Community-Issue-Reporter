@@ -94,6 +94,7 @@ struct MiniMapLocator: View {
                 Image(systemName: "location")
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Locate")
@@ -110,6 +111,7 @@ struct MiniMapLocator: View {
                 Image(systemName: "arrow.up.left.and.arrow.down.right")
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Expand Map")

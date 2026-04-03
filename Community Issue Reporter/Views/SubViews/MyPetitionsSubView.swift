@@ -13,9 +13,6 @@ struct MyPetitionsSubView: View {
         NavigationStack {
             Text("Hello")
         }
-        .navigationTitle(subViewName)
-        .navigationBarTitleDisplayMode(.inline)
-        .interactiveDismissDisabled(true)
     }
 }
 

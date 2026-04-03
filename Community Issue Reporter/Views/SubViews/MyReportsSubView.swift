@@ -11,11 +11,8 @@ struct MyReportsSubView: View {
     var subViewName: String
     var body: some View {
         NavigationStack {
-            Text("Hello")
+            Text("My reports")
         }
-        .navigationTitle(subViewName)
-        .navigationBarTitleDisplayMode(.inline)
-        .interactiveDismissDisabled(true)
     }
 }
 

@@ -11,18 +11,16 @@ import CoreLocation
 struct ReportRepository {
     static func list() async -> [IssueMarker] {
         do {
-            let reports = try await ReportsService().fetchReports()
+            let reports: [Report] = try await ReportsService().fetchReports()
 
             return reports.compactMap { report in
-                guard let latitude = report.latitude,
-                      let longitude = report.longitude else {
-                    return nil
-                }
-
                 return IssueMarker(
                     title: report.description,
                     status: .inProgress,
-                    coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude),
+                    coordinate: CLLocationCoordinate2D(
+                        latitude: report.coordinate.lat,
+                        longitude: report.coordinate.lng
+                    ),
                     issueType: .road
                 )
             }
@@ -31,34 +29,37 @@ struct ReportRepository {
         }
     }
     
-    static func create(report: Report) async  -> String {
+    static func listReports() async -> [Report] {
+        do {
+            return try await ReportsService().fetchReports()
+        } catch {
+            return []
+        }
+    }
+    
+    static func create(report: Report, locator: Locator) async  -> String {
         do {
             let response = try await ReportsService().createReport(
                 report: Report(
-                    id: nil,
-                    coordinate: [
-                        String(report.latitude ?? 0),
-                        String(report.longitude ?? 0)
-                    ],
+                    coordinate: report.coordinate,
                     address: report.address,
                     description: report.description,
-                    severityId: 1,
-                    statusId: 1,
-                    issueTypeId: 1,
-                    matterToSolveId: 1,
-                    reportedAt: nil,
-                    cellIndex: "0",
-                    createdAt: nil,
-                    updatedAt: nil,
-                    reportedBy: ""
-                )
+                    severityId: report.severityId,
+                    statusId: report.statusId,
+                    issueTypeId: report.issueTypeId,
+                    matterToSolveId: report.matterToSolveId,
+                    cellIndex: report.cellIndex,
+                ),
+                headers: [
+                    HTTPHeader(name: "Country", content: locator.country),
+                    HTTPHeader(name: "Region", content: locator.region),
+                    HTTPHeader(name: "City", content: locator.city),
+                ]
             )
-            
-            print(response)
-            
             return response.id
         } catch {
-            return ""
+            print(error)
+            return "-1"
         }
     }
 }

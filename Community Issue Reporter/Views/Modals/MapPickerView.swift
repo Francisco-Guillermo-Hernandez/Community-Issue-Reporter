@@ -18,20 +18,27 @@ struct MapPickerView: View {
     @State private var searchText: String
     @State private var hasCenteredOnUser = false
     @State private var locationManager = LocationManager()
+    @StateObject private var searchCompleter = SearchCompleter()
     @FocusState private var isSearchFocused: Bool
+    @State private var locator: Locator
+    @State private var address: String
+    @State private var isSearchActive: Bool = false
+    @Environment(\.dismissSearch) private var dismissSearch
     
+    private let dao = LocatorDAO()
     private let span = MKCoordinateSpan(latitudeDelta: 0.00088, longitudeDelta: 0.00088)
     
-    var onConfirm: ((Coordinate) -> Void)?
+    var onConfirm: ((Coordinate, Locator, String) -> Void)?
     
-    init(coordinate: Binding<Coordinate>, onConfirm: ((Coordinate) -> Void)? = nil) {
-        print("creating map picker view")
+    init(coordinate: Binding<Coordinate>, onConfirm: ((Coordinate, Locator, String) -> Void)? = nil) {
         
         self.onConfirm = onConfirm
         self._coordinate = coordinate
         self.selectedCoordinate = getLocation(coordinate)
         self.searchText = ""
+        self.address = ""
         self.hasCenteredOnUser = false
+        self.locator = Locator(countryCode: "", country: "", region: "", city: "")
         self.cameraPosition = .region(
             MKCoordinateRegion(
                 center: getLocation(coordinate),
@@ -54,28 +61,37 @@ struct MapPickerView: View {
                     }
                     .onMapCameraChange { context in
                         selectedCoordinate = context.camera.centerCoordinate
+                        handleMapMovement(center: context.camera.centerCoordinate)
                     }
                     .onAppear {
-//                        locationManager.requestAuthorization()
+                        self.isSearchFocused = false
                     }
                     .onChange(of: locationManager.lastLocation) { _, newLocation in
-//                        guard let newLocation, !hasCenteredOnUser else { return }
-//                        hasCenteredOnUser = true
-//                        cameraPosition = .region(
-//                            MKCoordinateRegion(
-//                                center: newLocation.coordinate,
-//                                span: span
-//                            )
-//                        )
-//                        selectedCoordinate = newLocation.coordinate
+                        
                     }
-//                    .padding(.top, 4)
+                    .searchable(text: $searchText,  isPresented: $isSearchActive,  prompt: "Search a place")
+                    .searchFocused($isSearchFocused)
+                    .onChange(of: searchText) { _, newValue in
+                        searchCompleter.update(query: newValue, region: currentRegion(c: cameraPosition))
+                    }
                     
                     centerMarker
                     mapControls
                 }
             }
-        
+            .overlay {
+                if isSearchFocused {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .ignoresSafeArea(edges: .all)
+                        .overlay {
+                            SuggestionsResultList(searchText: $searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
+                                applySuggestion(suggestion)
+                            })
+                        }
+                }
+            }
+            .interactiveDismissDisabled()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
@@ -90,9 +106,11 @@ struct MapPickerView: View {
                     Button {
                         onConfirm?(
                             Coordinate(
-                                latitude: selectedCoordinate.latitude,
-                                longitude: selectedCoordinate.longitude
-                            )
+                                lat: selectedCoordinate.latitude,
+                                lng: selectedCoordinate.longitude
+                            ),
+                            locator,
+                            address
                         )
                         dismiss()
                     } label: {
@@ -102,33 +120,37 @@ struct MapPickerView: View {
             }
             .navigationTitle("Location")
             .navigationBarTitleDisplayMode(.inline)
-//            .safeAreaInset(edge: .bottom, spacing: 0) {
-//                SearchBar(
-//                    text: $searchText,
-//                    onSubmit: {
-//                        performSearch()
-//                        isSearchFocused = false
-//                    },
-//                    onFocusChange: { _ in },
-//                    onUserProfileTap: {},
-//                    isFocused: $isSearchFocused
-//                )
-//                .padding(.horizontal, 16)
-//                .padding(.bottom, 10)
-//            }
         }
-       
-
     }
     
+    private func applySuggestion(_ suggestion: SearchSuggestion) {
+        searchText = suggestion.title
+        performSearch(with: suggestion.completion)
+        self.isSearchFocused.toggle()
+        self.isSearchActive.toggle()
+        dismissSearch()
+    }
    
+    private func handleMapMovement(center: CLLocationCoordinate2D) {
+          let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
 
+          Task {
+              guard let request = MKReverseGeocodingRequest(location: location) else { return }
+              let mapItems = try? await request.mapItems
+              guard let mapItem = mapItems?.first else { return }
+              
+              address = mapItem.address?.fullAddress ?? mapItem.address?.shortAddress ?? "No Address"
+              
+              let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
+              locator = dao.findBy(cityName: cityName)
+          }
+      }
+    
     private var centerMarker: some View {
-        Image(systemName: "mappin.circle.fill")
-            .font(.system(size: 34, weight: .semibold))
-            .foregroundStyle(Color.blue)
-            .shadow(radius: 4, y: 2)
-            .offset(y: -12)
+        Image(systemName: "dot.scope")
+            .font(.system(size: 50, ))
+            .foregroundStyle(Color.accentColor)
+            .symbolEffect(.breathe.pulse.wholeSymbol, options: .repeat(.continuous))
             .accessibilityHidden(true)
     }
 
@@ -141,6 +163,8 @@ struct MapPickerView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
             }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
             .accessibilityLabel("Center on user location")
             
             Button {
@@ -150,6 +174,8 @@ struct MapPickerView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
             }
+            .buttonStyle(.plain)
+            .contentShape(Rectangle())
             .accessibilityLabel("Zoom in")
             
             
@@ -160,6 +186,7 @@ struct MapPickerView: View {
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
             }
+            .buttonStyle(.plain)
             .accessibilityLabel("Zoom out")
         }
         .foregroundStyle(Color.primary)
@@ -190,43 +217,29 @@ struct MapPickerView: View {
         let latitudeDelta = min(max(currentRegion.span.latitudeDelta * factor, minimumDelta), maximumDelta)
         let longitudeDelta = min(max(currentRegion.span.longitudeDelta * factor, minimumDelta), maximumDelta)
         
+        let span = MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
         cameraPosition = .region(
             MKCoordinateRegion(
                 center: currentRegion.center,
-                span: MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
+                span: span
             )
         )
     }
     
-    private func performSearch() {
-        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+    private func performSearch(with completion: MKLocalSearchCompletion) {
+        let request = MKLocalSearch.Request(completion: completion)
+        request.region = currentRegion(c: cameraPosition)
 
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = trimmed
-        request.region = MKCoordinateRegion(
-            center: selectedCoordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.06, longitudeDelta: 0.06)
-        )
-
-        Task {
-            let result = try? await MKLocalSearch(request: request).start()
-            let coordinate: CLLocationCoordinate2D?
-            if #available(iOS 26, *) {
-                coordinate = result?.mapItems.first?.location.coordinate
-            } else {
-                coordinate = result?.mapItems.first?.placemark.coordinate
-            }
-            guard let coordinate else { return }
-            await MainActor.run {
-                cameraPosition = .region(
-                    MKCoordinateRegion(
-                        center: coordinate,
-                        span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
-                    )
+        let search = MKLocalSearch(request: request)
+        search.start { response, _ in
+            guard let item = response?.mapItems.first else { return }
+            let coordinate = item.location.coordinate
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.0178, longitudeDelta: 0.0178)
                 )
-                selectedCoordinate = coordinate
-            }
+            )
         }
     }
 
@@ -247,13 +260,20 @@ struct MapPickerView: View {
 
 func getLocation(_ coordinate: Binding<Coordinate>) -> CLLocationCoordinate2D {
     return CLLocationCoordinate2D(
-        latitude: coordinate.wrappedValue.latitude,
-        longitude: coordinate.wrappedValue.longitude
+        latitude: coordinate.wrappedValue.lat,
+        longitude: coordinate.wrappedValue.lng
+    )
+}
+
+func getLocation(c coordinate: Coordinate) -> CLLocationCoordinate2D {
+    return CLLocationCoordinate2D(
+        latitude: coordinate.lat,
+        longitude: coordinate.lng
     )
 }
 
 #Preview {
-    @Previewable
-    @State var coordinate: Coordinate = .init(latitude: 13.6929, longitude: -89.2182)
+    @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
     MapPickerView(coordinate: $coordinate)
+
 }

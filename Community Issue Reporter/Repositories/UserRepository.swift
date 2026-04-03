@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+struct UserRepository {
+    
+ 
+    static func logout() -> Void {
+        
+    }
+}

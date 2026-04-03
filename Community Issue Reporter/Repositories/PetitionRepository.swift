@@ -10,11 +10,18 @@ import Foundation
 struct PetitionRepository {
     static func list() async -> [Petition] {
       do {
-          let petitions = try await PetitionsService().fetchPetitions()
-          return petitions
-          
+          return try await PetitionsService().fetchPetitions()
         } catch {
           return []
       }
+    }
+    
+    static func create(_ petition: Petition) async -> String {
+        do {
+            let createdPetition = try await PetitionsService().createPetition(petition: petition)
+            return createdPetition.id
+        } catch {
+            return "-1"
+        }
     }
 }

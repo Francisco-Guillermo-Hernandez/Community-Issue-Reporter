@@ -7,12 +7,23 @@
 
 import SwiftUI
 
-struct ClearButton_Modifier: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+struct ClearButtonModifier: ViewModifier {
+    @Binding var text: String
+    
+    func body(content: Content) -> some View {
+        content
+            .padding(.trailing, text.isEmpty ? 0 : 28)
+            .overlay(alignment: .trailing) {
+                if !text.isEmpty {
+                    Button {
+                        text = ""
+                    } label: {
+                        Image(systemName: "delete.left.fill")
+                            .foregroundStyle(Color(.secondaryLabel))
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.trailing, 8)
+                }
+            }
     }
-}
-
-#Preview {
-    ClearButton_Modifier()
 }

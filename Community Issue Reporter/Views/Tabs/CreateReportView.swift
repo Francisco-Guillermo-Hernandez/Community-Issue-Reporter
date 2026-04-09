@@ -10,7 +10,10 @@ import SwiftUI
 struct CreateReportView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var searchText = ""
- 
+    @State private var message: String = ""
+    @State private var type: AlertType = .success
+    @State private var show = false
+    
     var body: some View {
         NavigationStack {
             ScrollView(.vertical) {
@@ -22,6 +25,18 @@ struct CreateReportView: View {
                     }
                 }
             }
+            .overlay(alignment: .bottom) {
+                if show {
+                    Group {
+                        if #available(iOS 26, *) {
+                            CustomAlert(message: message, type: type)
+                                .transition(.asymmetric(insertion: .identity, removal: .opacity))
+                                .optionalGlassEffect(colorScheme, cornerRadius: 16)
+                        }
+                    }
+                    .offset(x: 0, y: -62)
+                }
+            }
             .padding(.horizontal)
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search")
             .toolbarTitleDisplayMode(.inlineLarge)
@@ -30,15 +45,22 @@ struct CreateReportView: View {
         }
         
     }
-
+    
     private var description: some View {
-        ReportView(onCompletion: { _, _ in
+        
+        
+        ReportView(onCompletion: { incomingMessage, alertType in
+            message = incomingMessage
+            type = alertType
+            show = true
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
-               
+                self.show = false
+                
             }
         })
     }
-
+    
     private var filteredMatters: [MatterToSolve] {
         let trimmedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedQuery.isEmpty {
@@ -50,7 +72,7 @@ struct CreateReportView: View {
         }
     }
     
-   
+    
     private static let gridColumns: [GridItem] = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
@@ -66,14 +88,14 @@ struct CardView: View {
                 .frame(maxWidth: .infinity)
                 .aspectRatio(1.45, contentMode: .fit)
                 .shadow(color: Color.black.opacity(0.25), radius: 10, x: 0, y: 6)
-
+            
             if let icon = matter.icon, !icon.isEmpty {
                 Image(systemName: icon)
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.9))
                     .padding(12)
             }
-
+            
             VStack(alignment: .leading, spacing: 6) {
                 Spacer()
                 Text(matter.title)
@@ -89,8 +111,8 @@ struct CardView: View {
             .padding(12)
         }
     }
-
-  
+    
+    
     private static func colorIndex(for id: String) -> Int {
         abs(id.hashValue) % cardColors.count
     }

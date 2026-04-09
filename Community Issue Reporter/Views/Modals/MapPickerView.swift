@@ -135,14 +135,18 @@ struct MapPickerView: View {
           let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
 
           Task {
+              try? await Task.sleep(nanoseconds: 500_000_000)
+              guard !Task.isCancelled else { return }
               guard let request = MKReverseGeocodingRequest(location: location) else { return }
               let mapItems = try? await request.mapItems
               guard let mapItem = mapItems?.first else { return }
               
-              address = mapItem.address?.fullAddress ?? mapItem.address?.shortAddress ?? "No Address"
+              let country = mapItem.addressRepresentations?.region?.identifier
+              ?? mapItem.addressRepresentations?.regionName
+              ?? "-1"
               
               let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
-              locator = dao.findBy(cityName: cityName)
+              locator = dao.findBy(cityName: cityName, country: country)
           }
       }
     
@@ -237,7 +241,7 @@ struct MapPickerView: View {
             cameraPosition = .region(
                 MKCoordinateRegion(
                     center: coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.0178, longitudeDelta: 0.0178)
+                    span: MKCoordinateSpan(latitudeDelta: 0.00445, longitudeDelta: 0.00445)
                 )
             )
         }

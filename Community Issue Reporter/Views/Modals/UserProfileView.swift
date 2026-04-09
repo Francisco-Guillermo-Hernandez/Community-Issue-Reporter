@@ -8,7 +8,12 @@
 import SwiftUI
 
 struct UserProfileView: View {
+    @State private var sheetSizePreference = "normal"
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.mySettings) private var settings
+    @State private var showSheet = false
+    @State private var sheetDetents: Set<PresentationDetent> = [.fraction(0.55)]
+    @State private var selectedOption: String = ""
     
     let options: [String] = ["Settings", "Licenses"]
     
@@ -16,33 +21,46 @@ struct UserProfileView: View {
         NavigationStack {
             
             VStack {
-                ZStack {
-                    Image("user")
+                
+                VStack(spacing: 6) {
+                    Image("user_b")
                         .resizable()
                         .scaledToFill()
                         .frame(width: 100, height: 100)
                         .clipShape(Circle())
-                }
-                
-                VStack(spacing: 6) {
-                    Text("Sophia Clark")
+                    
+                    Text("Visitor")
                         .font(.title3)
                         .fontWeight(.semibold)
                     
-                    Text("San Francisco, CA")
+                    Text(countryName)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 
                 List(options, id: \.self) { option in
-                    NavigationLink {
-                        destinationView(for: option)
+                    
+                    Button {
+                        selectedOption = option
+                        showSheet.toggle()
                     } label: {
-                        Text(option)
+                        HStack {
+                            Text(option)
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                        }
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
+                    
+                    
                 }
-                .listStyle(.plain)
-                .padding(.top, 32)
+                .scrollContentBackground(.hidden)
+                .scrollDisabled(true)
+                .sheet(isPresented: $showSheet) {
+                    destinationView(for: selectedOption)
+                        .presentationDetents([.fraction(0.78)])
+                }
                 
                 VStack(spacing: 16) {
                     
@@ -54,15 +72,14 @@ struct UserProfileView: View {
                             .fontWeight(.bold)
                             .padding(8)
                     }
+                    .buttonSizing(.flexible)
                     .buttonStyle(.bordered)
                     .buttonBorderShape(.capsule)
                     
                 }
-                .padding(.bottom, 16)
-                .padding(.top, 32)
+                .padding()
                 
             }
-            .padding(.horizontal, 16)
             .toolbar {
                 
                 ToolbarItem(placement: .title) {
@@ -73,14 +90,15 @@ struct UserProfileView: View {
                     Button("Close", systemImage: "checkmark") {
                         dismiss()
                     }
+                    .buttonStyle(.glassProminent)
                 }
             }
-            .presentationDetents([.fraction(0.55), .fraction(0.8)])
+            .presentationDetents(sheetDetents)
             .navigationBarTitleDisplayMode(.inline)
             
         }
     }
-
+    
     @ViewBuilder
     private func destinationView(for option: String) -> some View {
         switch option {
@@ -92,6 +110,16 @@ struct UserProfileView: View {
             Text("\(option) selected")
         }
     }
+    
+    
+    private var region: GeographicalRegion {
+        return geographicalRegions.first(where: { $0.id == settings.geographicalRegion })!
+    }
+    
+    private var countryName: String {
+        return region.countries.first(where: { $0.id == settings.selectedCountry })?.name ?? "Unknown"
+    }
+    
 }
 
 #Preview {

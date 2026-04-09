@@ -33,8 +33,9 @@ struct ReportView: View {
     @State private var showMapPickerSheet: Bool
     
     @State private var locator: Locator
+    @Binding var showCancelButton: Bool
   
-    init(onCompletion: @escaping (String, AlertType) -> Void) {
+    init(onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
        
         self.issueType = .all
         self.severityLevel = .low
@@ -50,6 +51,7 @@ struct ReportView: View {
         self.showMapPickerSheet = false
         self.locator = .init(countryCode: "", country: "", region: "", city: "")
         self.onCompletion = onCompletion
+        self._showCancelButton = Binding<Bool>(get: { showCancelButton }, set: { _ in })
     }
     
     var onCompletion: (String, AlertType) -> Void
@@ -187,29 +189,31 @@ struct ReportView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     
-//                    ToolbarItem(placement: .cancellationAction) {
-//                        Button {
-//                            if isFormFilled {
-//                                showDiscardAlert = true
-//                            } else {
-//                                dismiss()
-//                            }
-//                        } label: {
-//                            Image(systemName: "xmark")
-//                        }
-//                        .accessibilityLabel("Close")
-//                        .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
-//                            
-//                            Button("Keep editing", role: .cancel) {
-//                                showDiscardAlert = false
-//                            }
-//                            Button("Discard changes", role: .destructive) {
-//                                dismiss()
-//                            }
-//                        } message: {
-//                            Text("You have unsaved information in this report.")
-//                        }
-//                    }
+                    if showCancelButton {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button {
+                                if isFormFilled {
+                                    showDiscardAlert = true
+                                } else {
+                                    dismiss()
+                                }
+                            } label: {
+                                Image(systemName: "xmark")
+                            }
+                            .accessibilityLabel("Close")
+                            .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
+                                
+                                Button("Keep editing", role: .cancel) {
+                                    showDiscardAlert = false
+                                }
+                                Button("Discard changes", role: .destructive) {
+                                    dismiss()
+                                }
+                            } message: {
+                                Text("You have unsaved information in this report.")
+                            }
+                        }
+                    }
                     
                     ToolbarItem(placement: .title) {
                         Text("Report a new issue")
@@ -229,7 +233,7 @@ struct ReportView: View {
                                         statusId: 1,
                                         issueTypeId: self.issueType.identifier,
                                         matterToSolveId: 1,
-                                        cellIndex: "",
+                                        cellIndex: "demo",
                                     ),
                                             locator: self.locator
                                     )
@@ -243,42 +247,6 @@ struct ReportView: View {
                                         }
                                     )
                                 }
-                                
-//                                do {
-//                                    try await withTimeout(after: .seconds(10)) {
-//                                        let reportId = await ReportRepository
-//                                            .create(report:
-//                                                        Report(
-//                                                            id: nil,
-//                                                            coordinate: ["13.7168",
-//                                                                         "-89.1834"],
-//                                                            address: "",
-//                                                            description: "",
-//                                                            severityId: 1,
-//                                                            statusId: 1,
-//                                                            issueTypeId: 1,
-//                                                            matterToSolveId: 1,
-//                                                            reportedAt: nil,
-//                                                            cellIndex: "",
-//                                                            createdAt: nil,
-//                                                            updatedAt: nil,
-//                                                            reportedBy: ""
-//                                                        )
-//                                            )
-//                                        
-//                                        if selectedImages.count > 0 {
-//                                            ImageEncoderService().prepareToSent(
-//                                                reportId: reportId,
-//                                                images: selectedImages,
-//                                                completion: { data in
-//                                                    print("completed")
-//                                                }
-//                                            )
-//                                        }
-//                                    }
-//                                } catch {
-//                                    
-//                                }
                                 
                                 await MainActor.run {
                                     if reportId != "-1" {
@@ -454,5 +422,5 @@ struct ImagePicker: UIViewControllerRepresentable {
 #Preview {
     ReportView(onCompletion: { data, type in
         
-    })
+    }, showCancelButton: true)
 }

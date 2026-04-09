@@ -8,40 +8,57 @@
 import SwiftUI
 
 struct MyFindingsView: View {
-   
+    @Environment(\.colorScheme) private var colorScheme
     @State private var selectedOption: String = "My Reports"
-    
     let options: [String] = ["My Reports", "My Petitions", "Signed Petitions"]
+    
     var body: some View {
         NavigationStack {
             VStack {
-                Picker("Options", selection: $selectedOption) {
-                    ForEach(options, id: \.self) { option in
-                        Text(option).tag(option)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.top, 32)
-                
-                ScrollView(.vertical) {
-                    switch selectedOption {
+                switch selectedOption {
                     case "My Reports":
                         MyReportsSubView(subViewName: selectedOption)
                     case "My Petitions":
                         MyPetitionsSubView(subViewName: selectedOption)
                     case "Signed Petitions":
                         SignedPetitionsSubView(subViewName: selectedOption)
+                        
                     default:
-                        MyReportsSubView(subViewName: selectedOption)
-                    }
+                        EmptyView()
                 }
             }
             .navigationTitle("My Findings")
-            .padding(.horizontal, 16)
+            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .safeAreaInset(edge: .top) {
+                VStack(spacing: 0) {
+                    Picker("Options", selection: $selectedOption) {
+                        ForEach(options, id: \.self) { option in
+                            Text(option).tag(option)
+                        }
+                    }
+                    .optionalGlassWithShape(colorScheme, shape: .capsule)
+                    .padding(.horizontal)
+                    .padding(.top, 10)
+                    .pickerStyle(.segmented)
+                    .controlSize(ControlSize.large)
+                    
+                }
+                .toolbar {
+                    ToolbarItem(placement: .automatic) {
+                        Button {
+                            // TODO: reload content on selected sub-wiew
+                        } label: {
+                            Image(systemName: "arrow.2.circlepath.circle")
+                        }
+                    }
+                }
+                .toolbarBackground(.hidden)
+        
+            }
         }
     }
 }
-
 #Preview {
     MyFindingsView()
 }

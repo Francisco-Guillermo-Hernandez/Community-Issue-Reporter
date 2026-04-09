@@ -23,4 +23,21 @@ extension View {
                 }
         }
     }
+    
+    @ViewBuilder
+    func optionalGlassWithShape(_ colorScheme: ColorScheme, shape: some Shape) -> some View {
+        let backgroundColor = colorScheme == .dark ? Color.black : Color.white
+        
+        if #available(iOS 26, *) {
+            
+            self
+                .glassEffect(.clear.tint(backgroundColor.opacity(0.75)).interactive(), in: shape)
+        } else {
+            self
+                .background {
+                    shape
+                        .fill(backgroundColor)
+                }
+        }
+    }
 }

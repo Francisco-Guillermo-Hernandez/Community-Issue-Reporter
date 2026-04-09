@@ -45,6 +45,7 @@ struct TextInput: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
             TextField(name, text: $value)
+                .modifier(ClearButtonModifier(text: $value))
                 .padding()
                 .overlay(
                         RoundedRectangle(cornerRadius: 10)

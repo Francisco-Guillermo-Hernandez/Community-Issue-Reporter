@@ -15,13 +15,15 @@ class LocatorDAO {
         dbManager = DatabaseManager()
     }
     
-    func findBy(cityName: String) -> Locator {
-        let query = "SELECT countryCode, country, region FROM ip_locations WHERE city = ? LIMIT 1"
+    func findBy(cityName: String, country: String) -> Locator {
+        let query = "SELECT countryCode, country, region FROM ip_locations WHERE city = ? and country = ? or countryCode = ? LIMIT 1"
         var statement: OpaquePointer? = nil
         var locator: Locator = Locator(id: "", countryCode: "", country: "", region: "", city: "")
         
         if sqlite3_prepare(dbManager.db, query, -1, &statement, nil) == SQLITE_OK {
             sqlite3_bind_text(statement, 1, (cityName as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(statement, 2, (country as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(statement, 3, (country as NSString).utf8String, -1, nil)
             
            if sqlite3_step(statement) == SQLITE_ROW {
 

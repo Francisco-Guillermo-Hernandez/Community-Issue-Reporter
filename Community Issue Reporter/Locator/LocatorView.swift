@@ -20,7 +20,7 @@ struct LocatorView: View {
     
     private func findByCity() {
         let dao = LocatorDAO()
-        let details = dao.findBy(cityName: "San Salvador")
+        let details = dao.findBy(cityName: "San Salvador", country: "El Salvador")
         print(details)
     }
 }

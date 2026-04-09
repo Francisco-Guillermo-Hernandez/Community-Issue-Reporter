@@ -84,8 +84,8 @@ struct CreateRequestPetitionView: View {
                 }
                 
                 Section {
-                    Stepper(value: $targetSignatures, in: minimunSignatures...1000, step: 5) {
-                        Text("\(targetSignatures)")
+                    Stepper(value: $targetSignatures, in: minimunSignatures...1000, step: 1) {
+                        AnimatedText(text: "\(targetSignatures)")
                     }
                     .onChange(of: targetSignatures) { oldValue, newValue in
                         if newValue > oldValue {
@@ -165,6 +165,16 @@ struct SelectedDocumentsBadgeView: View {
                 .offset(x: 10, y: -10)
                 .opacity(count > 0 ? 1 : 0)
             )
+    }
+}
+
+struct AnimatedText: View {
+    let text: String
+    
+    var body: some View {
+        Text(text)
+            .contentTransition(.numericText())
+            .animation(.default, value: text)
     }
 }
 

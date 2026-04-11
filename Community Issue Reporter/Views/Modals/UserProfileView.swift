@@ -14,6 +14,11 @@ struct UserProfileView: View {
     @State private var showSheet = false
     @State private var sheetDetents: Set<PresentationDetent> = [.fraction(0.55)]
     @State private var selectedOption: String = ""
+    @EnvironmentObject var appState: AuthViewModel
+    
+    init () {
+        
+    }
     
     let options: [String] = ["Settings", "Licenses"]
     
@@ -23,13 +28,25 @@ struct UserProfileView: View {
             VStack {
                 
                 VStack(spacing: 6) {
-                    Image("user_b")
-                        .resizable()
-                        .scaledToFill()
+                    if let url = UserRepository.getProfilePictureURL() {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            ProgressView()
+                        }
                         .frame(width: 100, height: 100)
                         .clipShape(Circle())
+                    } else {
+                        Image("user_b")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                    }
                     
-                    Text("Visitor")
+                    Text(UserRepository.getName())
                         .font(.title3)
                         .fontWeight(.semibold)
                     
@@ -65,7 +82,8 @@ struct UserProfileView: View {
                 VStack(spacing: 16) {
                     
                     Button(role: .destructive) {
-                        UserRepository.logout()
+                        appState.logout()
+                        dismiss()
                     } label: {
                         Text("Log Out")
                             .frame(maxWidth: .infinity)
@@ -117,7 +135,7 @@ struct UserProfileView: View {
     }
     
     private var countryName: String {
-        return region.countries.first(where: { $0.id == settings.selectedCountry })?.name ?? "Unknown"
+        return region.countries.first(where: { $0.id == settings.selectedCountry })?.name ?? "Earth"
     }
     
 }

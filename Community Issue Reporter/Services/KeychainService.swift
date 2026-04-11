@@ -19,7 +19,6 @@ class KeychainService {
         
         SecItemDelete(query as CFDictionary)
         let result = SecItemAdd(query as CFDictionary, nil)
-        print(result)
         return result == noErr
     }
     
@@ -41,6 +40,16 @@ class KeychainService {
             }
         }
         return nil
+    }
+    
+    static func deleteToken(key: String) -> Bool {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+        ]
+        
+        let result = SecItemDelete(query as CFDictionary)
+        return result == noErr
     }
 }
 

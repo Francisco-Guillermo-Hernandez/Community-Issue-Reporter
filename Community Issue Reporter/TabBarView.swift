@@ -11,13 +11,10 @@ import SwiftUI
 struct TabBarView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var searchText: String = ""
     @State private var selectedTab: Int = 1
-    @State private var oldSelectedTab: Int = 1
-    @State private var isPresented: Bool = false
-    @State private var message: String = ""
-    @State private var type: AlertType = .success
-    @State private var show = false
+    @State private var presentSheetOnDeepLink: Bool = false
+    @AppStorage("openReportFromShortcut") private var openReportFromShortcut = false
+    @State private var showShortcutReport: Bool = false
     
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -30,40 +27,43 @@ struct TabBarView: View {
                SignRequestsView()
             }
             
-            Tab("Add", systemImage: "plus", value: 3, role: .search) {}
+            Tab("My findings", systemImage: "bubble.left.and.exclamationmark.bubble.right.fill", value: 3) {
+                MyFindingsView()
+            }
+            
+            Tab("Add", systemImage: "plus", value: 4, role: .search) {
+                CreateReportView()
+            }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        .onChange(of: selectedTab) { _, newValue in
-            if newValue == 3 {
-                isPresented = true
-                selectedTab = oldSelectedTab
-            } else {
-                oldSelectedTab = newValue
+        
+        .onOpenURL { url in
+            if url.host == "reports" {
+                selectedTab = 1
+                presentSheetOnDeepLink.toggle()
             }
         }
-        .sheet(isPresented: $isPresented) {
-            ReportView(onCompletion: { incomingMessage, alertType in
-                message = incomingMessage
-                type = alertType
-                show = true
+        .onAppear {
+            if openReportFromShortcut {
+                openReportFromShortcut = false
+                showShortcutReport = true
+            }
+        }
+        .onChange(of: openReportFromShortcut) { _, newValue in
+            if newValue {
+                openReportFromShortcut = false
+                showShortcutReport = true
+            }
+        }
+        .sheet(isPresented: $presentSheetOnDeepLink) {
+            VStack {
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
-                    self.show = false
-                    self.isPresented = false
-                }
-            })
-        }
-        .overlay(alignment: .bottom) {
-            if show {
-                Group {
-                    if #available(iOS 26, *) {
-                        CustomAlert(message: message, type: type)
-                            .transition(.asymmetric(insertion: .identity, removal: .opacity))
-                            .optionalGlassEffect(colorScheme, cornerRadius: 16)
-                    }
-                }
-                .offset(x: 0, y: -62)
+                Text("Hello from sheet")
             }
+        }
+        .sheet(isPresented: $showShortcutReport) {
+            ReportView(onCompletion: { _, _ in
+            }, showCancelButton: true)
         }
         .sensoryFeedback(.selection, trigger: selectedTab)
         

@@ -21,7 +21,7 @@ struct PulseRingView: View {
              
                 ZStack {
                    ForEach(0..<3) { index in
-                       RingView(index: index)
+                       ringView(index: index)
                     }
                 }
             }
@@ -63,7 +63,7 @@ struct PulseRingView: View {
     }
     
     @ViewBuilder
-    private func RingView(index: Int) -> some View {
+    private func ringView(index: Int) -> some View {
         Circle()
             .fill(tint)
             .opacity(animate[index] ? 0 : 0.4)

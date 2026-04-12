@@ -12,7 +12,7 @@ struct ClearButtonModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .padding(.trailing, text.isEmpty ? 0 : 28)
+            .padding(.trailing, text.isEmpty ? 0 : 8)
             .overlay(alignment: .trailing) {
                 if !text.isEmpty {
                     Button {
@@ -22,7 +22,7 @@ struct ClearButtonModifier: ViewModifier {
                             .foregroundStyle(Color(.secondaryLabel))
                     }
                     .buttonStyle(.plain)
-                    .padding(.trailing, 8)
+//                    .padding(.trailing, 8)
                 }
             }
     }

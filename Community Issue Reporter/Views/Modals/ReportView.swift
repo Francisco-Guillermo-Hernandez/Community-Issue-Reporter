@@ -31,6 +31,7 @@ struct ReportView: View {
     @State private var previewImage: UIImage?
     @State private var isImagePreviewPresented: Bool
     @State private var showMapPickerSheet: Bool
+    @State private var title: String = ""
     
     @State private var locator: Locator
     @Binding var showCancelButton: Bool
@@ -66,7 +67,7 @@ struct ReportView: View {
         ZStack {
             NavigationStack {
                 Form {
-                    
+                    /// This section is dedicated to select a location on the map
                     Section("Location") {
                         MiniMapLocator(coordinate: $coordinate, onExpandMap: { coordinate in
                             self.coordinate = coordinate
@@ -74,6 +75,7 @@ struct ReportView: View {
                         })
                     }
                     
+                    /// This section is dedicated to select the evidence of the issue
                     Section("Photos") {
                         VStack {
                             HStack(spacing: 16) {
@@ -153,34 +155,71 @@ struct ReportView: View {
                         
 //                    }
                     
+                    ///
                     Section("Issue Details") {
                         
                         Picker("Issue type", selection: $issueType) {
                             ForEach(IssueTypes.allCases, id: \.self) { issue in
-                                HStack(spacing: 8) {
+                                HStack(spacing: 80) {
                                     Text(issue.title)
+                                    
+                                    Spacer()
                                     Image(systemName: issue.iconName)
+                                        
                                 }
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                                
                                 .tag(issue)
                             }
                         }
+                      
+
                         
                         Picker("Severity level", selection: $severityLevel) {
                             ForEach(Severity.allCases, id: \.self) { level in
                                 HStack(spacing: 8) {
-                                    Text(level.title).tag(level.title)
+                                   
                                     Image(systemName: level.iconName)
+                                        .padding(.trailing, 10)
+                                    Text(level.title)
                                 }
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .tag(level.title)
+//                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .tag(level)
                             }
                         }
+                       
                         
                     }
-                    Section("Description") {
-                        TextEditor(text: $descriptionText)
-                            .frame(minHeight: 60)
+                    .padding(.horizontal, 8)
+                    
+                    ///
+                    Section("Details") {
+                        
+
+                        VStack {
+                            TextInput(
+                                name: "Title",
+                                label: "Title of the issue",
+                                value: $title
+                            )
+                        
+                            TextInput(
+                                name: "Description",
+                                label: "Please describe the issue",
+                                axis: .vertical,
+                                value: $descriptionText,
+                                
+                            )
+                            
+                            TextInput(
+                                name: "Address",
+                                label: "Please describe the issue",
+                                axis: .vertical,
+                                value: $address,
+                                
+                            )
+                        }
+                        
                     }
                     
                    
@@ -225,17 +264,23 @@ struct ReportView: View {
                             
                             Task {
                                 let reportId = await ReportRepository
-                                    .create(report: Report(
-                                        coordinate: self.coordinate,
-                                        address: self.address,
-                                        description: self.descriptionText,
-                                        severityId: self.severityLevel.identifier,
-                                        statusId: 1,
-                                        issueTypeId: self.issueType.identifier,
-                                        matterToSolveId: 1,
-                                        cellIndex: "demo",
-                                    ),
-                                            locator: self.locator
+                                    .create(
+                                        report: Report(
+                                            coordinate: self.coordinate,
+                                            address: self.address,
+                                            title: "Demo Issue",
+                                            description: self.descriptionText,
+                                            severityId: self.severityLevel.identifier,
+                                            statusId: 1,
+                                            issueTypeId: self.issueType.identifier,
+                                            matterToSolveId: 1,
+                                            cellIndex: "demo",
+                                            olc: "demo",
+                                        ),
+                                        locator: self.locator,
+                                        onError: { error in
+                                            print("error: \(error)")
+                                        }
                                     )
                                 
                                 if selectedImages.count > 0 {
@@ -310,13 +355,14 @@ struct ReportView: View {
             }
         }
         .sheet(isPresented: $showMapPickerSheet)  {
-            MapPickerView(coordinate: $coordinate, onConfirm: { coordinate, locator, address in
+            MapPickerView(coordinate: $coordinate, onConfirm: { coordinate, locator in
                 self.coordinate = coordinate
                 self.locator = locator
-                self.address = address
+                self.address = self.locator.address
                 
                 print("coordinate \(self.coordinate.lat), \(self.coordinate.lng)")
                 print("locator \(self.locator)")
+                print("address \(self.address)")
                 self.showMapPickerSheet = false
             })
         }

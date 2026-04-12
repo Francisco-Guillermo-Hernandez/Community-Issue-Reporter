@@ -8,7 +8,7 @@
 import SwiftUI
 
 @ViewBuilder
-func CustomAlert(message: String, type: AlertType = .success) -> some View {    
+func customAlert(message: String, type: AlertType = .success) -> some View {    
     ZStack {
         HStack(spacing: 16) {
             Image(systemName: type.icon)

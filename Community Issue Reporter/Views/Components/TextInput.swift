@@ -32,6 +32,7 @@ struct TextInput: View {
     var label: String = "label"
     var validators: [Validator] = []
     var regex: String = "[a-zA-Z0-9, ]"
+    var axis: Axis = .horizontal
     
     @State private var message: String = ""
     @State private var isValid: Bool = false
@@ -42,9 +43,10 @@ struct TextInput: View {
         VStack(alignment: .leading) {
             Text(label)
                 .font(.subheadline)
+                .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
-            TextField(name, text: $value)
+            TextField(name, text: $value, axis: axis)
                 .modifier(ClearButtonModifier(text: $value))
                 .padding()
                 .overlay(

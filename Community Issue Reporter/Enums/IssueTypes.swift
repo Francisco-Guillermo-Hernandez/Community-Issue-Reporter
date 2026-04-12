@@ -8,7 +8,7 @@
 import Foundation
 
 enum IssueTypes: String, CaseIterable, Identifiable {
-    case all = ""
+    case all = "asterisk.circle"
     case road = "road.lanes"
     case publicSpace = "tree"
     case building = "building"

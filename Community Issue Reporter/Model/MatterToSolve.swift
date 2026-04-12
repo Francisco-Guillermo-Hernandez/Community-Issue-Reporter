@@ -7,9 +7,11 @@
 
 import Foundation
 
-struct MatterToSolve: Identifiable, Codable {
+struct MatterToSolve: Identifiable {
     var id: String
     var title: String
     var icon: String?
     var description: String
+    var issueType: IssueTypes
+    var severity: Severity
 }

@@ -12,12 +12,12 @@ let geographicalRegions: [GeographicalRegion] = [
         canada,
         unitedStates,
         mexico,
-        belize
     ]),
     
     GeographicalRegion(id: 2, name: "Central America", countries: [
         guatemala,
         elSalvador,
+        belize,
         honduras,
         nicaragua,
         costaRica,

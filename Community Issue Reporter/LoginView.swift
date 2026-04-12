@@ -52,9 +52,6 @@ struct LoginView: View {
                 return
             }
             
-            // If sign in succeeded, display the app's main content View.
-            print("ID Token: \(result.user.idToken?.tokenString ?? "")")
-            
             onTokenReceived(result.user.idToken?.tokenString ?? "")
             
         }

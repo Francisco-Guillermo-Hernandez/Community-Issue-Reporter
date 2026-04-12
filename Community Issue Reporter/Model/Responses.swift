@@ -11,3 +11,9 @@ import Foundation
 struct GenericResponse: Identifiable, Codable {
    var id: String
 }
+
+struct LoginWithOAuthProviderResponse: Decodable {
+    var code: String
+    var authToken: String
+    var authProvider: String
+}

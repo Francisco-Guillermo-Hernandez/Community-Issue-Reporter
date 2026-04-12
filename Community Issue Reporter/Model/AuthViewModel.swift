@@ -12,13 +12,31 @@ import GoogleSignIn
 class AuthViewModel: ObservableObject {
     @Published var user: GIDGoogleUser?
     @Published var isLoggedIn = false
+    @Published var isCheckingStatus = true
 
     func checkStatus() {
         GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
-            if let user = user {
-                self.user = user
-                self.isLoggedIn = true
+           DispatchQueue.main.async {
+               self.isCheckingStatus = false
+               if let user = user {
+                   self.user = user
+                   self.isLoggedIn = true
+               } else {
+                   self.user = nil
+               }
             }
         }
     }
+    
+    func logout() {
+        GIDSignIn.sharedInstance.signOut()
+        
+        DispatchQueue.main.async {
+            self.user = nil
+            self.isLoggedIn = false
+            
+            _ = KeychainService.deleteToken(key: "token")
+        }
+    }
+    
 }

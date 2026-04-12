@@ -14,7 +14,16 @@ class KeychainService {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
             kSecValueData as String: value.data(using: .utf8)!,
-            
+            kSecPrivateKeyAttrs as String: [
+                    kSecAttrIsPermanent as String: true,
+                    kSecAttrApplicationTag as String: "jwt-auth",
+                    kSecAttrAccessControl as String: SecAccessControlCreateWithFlags(
+                        nil,
+                        kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+                        .userPresence,
+                        nil
+                    )!
+                ]
         ]
         
         SecItemDelete(query as CFDictionary)

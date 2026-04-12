@@ -8,41 +8,51 @@
 import Foundation
 import CoreLocation
 
+typealias ErrorHandler = @Sendable (Error) -> Void
+
 struct ReportRepository {
-    static func list() async -> [IssueMarker] {
+    static func list(onError: ErrorHandler) async -> [IssueMarker] {
         do {
             let reports: [Report] = try await ReportsService().fetchReports()
 
             return reports.compactMap { report in
                 return IssueMarker(
-                    title: report.description,
-                    status: .inProgress,
-                    coordinate: CLLocationCoordinate2D(
+                    id: report.id!,
+                    title: report.title,
+                    description: report.description,
+                    status: report.statusId,
+                    coordinate:  CLLocationCoordinate2D(
                         latitude: report.coordinate.lat,
                         longitude: report.coordinate.lng
                     ),
-                    issueType: .road
+                    issueType: report.issueTypeId,
+                    severity: report.severityId,
+                    matterToSolve: report.matterToSolveId,
+                    address: report.address
                 )
             }
         } catch {
+            onError(error)
             return []
         }
     }
     
-    static func listReports() async -> [Report] {
+    static func listReports(onError: ErrorHandler) async -> [Report] {
         do {
             return try await ReportsService().fetchReports()
         } catch {
+            onError(error)
             return []
         }
     }
     
-    static func create(report: Report, locator: Locator) async  -> String {
+    static func create(report: Report, locator: Locator, onError: ErrorHandler) async  -> String {
         do {
             let response = try await ReportsService().createReport(
                 report: Report(
                     coordinate: report.coordinate,
                     address: report.address,
+                    title: "",
                     description: report.description,
                     severityId: report.severityId,
                     statusId: report.statusId,
@@ -58,7 +68,7 @@ struct ReportRepository {
             )
             return response.id
         } catch {
-            print(error)
+            onError(error)
             return "-1"
         }
     }

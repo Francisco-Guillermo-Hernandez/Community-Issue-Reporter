@@ -17,6 +17,7 @@ struct ServiceClient {
     private let baseURL: URL?
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let delimiter = "/"
 
     init(baseURL: URL? = development, session: URLSession = .shared) {
         self.baseURL = baseURL
@@ -25,7 +26,7 @@ struct ServiceClient {
     }
 
     func get<T: Decodable>(path: String, headers: Array<HTTPHeader> = []) async throws -> T {
-        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
         guard let baseURL else {
             throw ServiceError.baseURLMissing
         }
@@ -53,7 +54,7 @@ struct ServiceClient {
     }
     
     func post<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = []) async throws -> V {
-        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
         guard let baseURL else {
             throw ServiceError.baseURLMissing
         }
@@ -85,7 +86,7 @@ struct ServiceClient {
     }
     
     func put<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = []) async throws -> V {
-        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
         guard let baseURL else {
             throw ServiceError.baseURLMissing
         }
@@ -122,7 +123,7 @@ struct ServiceClient {
         headers: [HTTPHeader] = [],
         formFiles: [MultipartFormFile] = []
     ) async throws -> V {
-        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
         guard let baseURL else {
             throw ServiceError.baseURLMissing
         }

@@ -42,15 +42,15 @@ struct MiniMapLocator: View {
                 locationManager.requestAuthorization()
             }
             .onChange(of: locationManager.lastLocation) { _, newLocation in
-                guard let newLocation else { return }
-                /// Center at the user location
-                cameraPosition = .region(
-                    MKCoordinateRegion(
-                        center: newLocation.coordinate,
-                        span: span
-                    )
-                )
-                selectedCoordinate = newLocation.coordinate
+//                guard let newLocation else { return }
+//                /// Center at the user location
+//                cameraPosition = .region(
+//                    MKCoordinateRegion(
+//                        center: newLocation.coordinate,
+//                        span: span
+//                    )
+//                )
+//                selectedCoordinate = newLocation.coordinate
             }
             .frame(height: 250)
             .clipShape(RoundedRectangle(cornerRadius: 16))

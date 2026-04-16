@@ -26,6 +26,7 @@ struct SearchBar: View {
                     
                     TextField("Search...", text: $text)
                         .textInputAutocapitalization(.words)
+                        .modifier(ClearButtonModifier(text: $text, isPill: true))
                         .disableAutocorrection(true)
                         .padding(.vertical, 12)
                         .focused($isFocused)

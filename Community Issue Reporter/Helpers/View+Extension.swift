@@ -31,7 +31,7 @@ extension View {
         if #available(iOS 26, *) {
             
             self
-                .glassEffect(.clear.tint(backgroundColor.opacity(0.75)).interactive(), in: shape)
+                .glassEffect(.clear.tint(backgroundColor.opacity(0.45)).interactive(), in: shape)
         } else {
             self
                 .background {

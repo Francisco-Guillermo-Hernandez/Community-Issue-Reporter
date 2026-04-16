@@ -9,6 +9,8 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
+typealias OnConfirm = ((Coordinate, Locator) -> Void)?
+
 struct MapPickerView: View {
     @Binding var coordinate: Coordinate
     @Environment(\.dismiss) private var dismiss
@@ -28,9 +30,9 @@ struct MapPickerView: View {
     private let dao = LocatorDAO()
     private let span = MKCoordinateSpan(latitudeDelta: 0.00088, longitudeDelta: 0.00088)
     
-    var onConfirm: ((Coordinate, Locator, String) -> Void)?
+    var onConfirm: OnConfirm
     
-    init(coordinate: Binding<Coordinate>, onConfirm: ((Coordinate, Locator, String) -> Void)? = nil) {
+    init(coordinate: Binding<Coordinate>, onConfirm: OnConfirm = nil) {
         
         self.onConfirm = onConfirm
         self._coordinate = coordinate
@@ -109,8 +111,7 @@ struct MapPickerView: View {
                                 lat: selectedCoordinate.latitude,
                                 lng: selectedCoordinate.longitude
                             ),
-                            locator,
-                            address
+                            locator
                         )
                         dismiss()
                     } label: {
@@ -141,12 +142,15 @@ struct MapPickerView: View {
               let mapItems = try? await request.mapItems
               guard let mapItem = mapItems?.first else { return }
               
+              let address = mapItem.address?.fullAddress ??  mapItem.address?.shortAddress ?? "Unknown"
+              
               let country = mapItem.addressRepresentations?.region?.identifier
               ?? mapItem.addressRepresentations?.regionName
               ?? "-1"
               
               let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
-              locator = dao.findBy(cityName: cityName, country: country)
+              self.locator = dao.findBy(cityName: cityName, country: country)
+              self.locator = self.locator.withAddress(address)
           }
       }
     

@@ -284,12 +284,9 @@ struct ReportView: View {
                                     )
                                 
                                 if selectedImages.count > 0 {
-                                    ImageEncoderService().prepareToSent(
+                                    await ImageEncoderService().prepareAndSend(
                                         reportId: reportId,
-                                        images: selectedImages,
-                                        completion: { data in
-                                            print("completed")
-                                        }
+                                        images: selectedImages
                                     )
                                 }
                                 

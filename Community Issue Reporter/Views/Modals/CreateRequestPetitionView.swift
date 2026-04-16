@@ -103,14 +103,10 @@ struct CreateRequestPetitionView: View {
                 }
         
             }
-//            .scrollContentBackground(.hidden)
-//            .background(.ultraThinMaterial)
-            .onAppear {
-                Task {
-                    self.reports = await ReportRepository.listReports(onError: { error in
-                        print(error)
-                    })
-                }
+            .task {
+                self.reports = await ReportRepository.listReports(onError: { error in
+                    print(error)
+                })
             }
             .toolbar {
                 

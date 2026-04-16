@@ -14,4 +14,15 @@ struct MatterToSolve: Identifiable {
     var description: String
     var issueType: IssueTypes
     var severity: Severity
+    var image: String?
+    
+    init(id: String, title: String, icon: String? = nil, description: String, issueType: IssueTypes, severity: Severity, image: String? = nil) {
+        self.id = id
+        self.title = title
+        self.icon = icon
+        self.description = description
+        self.issueType = issueType
+        self.severity = severity
+        self.image = image
+    }
 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ClearButtonModifier: ViewModifier {
     @Binding var text: String
+    var isPill: Bool = false
     
     func body(content: Content) -> some View {
         content
@@ -22,7 +23,7 @@ struct ClearButtonModifier: ViewModifier {
                             .foregroundStyle(Color(.secondaryLabel))
                     }
                     .buttonStyle(.plain)
-//                    .padding(.trailing, 8)
+                    .padding(.trailing, isPill ? 16 : 0)
                 }
             }
     }

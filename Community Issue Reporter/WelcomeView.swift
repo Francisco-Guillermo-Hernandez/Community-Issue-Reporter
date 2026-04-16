@@ -10,6 +10,7 @@ import SwiftUI
 struct WelcomeView: View {
     @EnvironmentObject var appState: AuthViewModel
     @State private var isGuest: Bool = false
+    @State private var userOAuthState: UserOAuthResultState = .unowned
     
     var body: some View {
         ZStack {
@@ -26,7 +27,7 @@ struct WelcomeView: View {
                 }
             }
         }
-        .onAppear {
+        .task {
             self.appState.checkStatus()
         }
     }
@@ -38,19 +39,26 @@ struct WelcomeView: View {
             } else {
                 Task {
                     await UserRepository.login(token,
-                        onSuccess: {
+                        onSuccess: { state, resultToken in
+                        
+                            self.userOAuthState = state
                            
+                            if state == .firstLogin {
+                                print("Welcome")
+                            }
+                        
                             #if targetEnvironment(simulator)
                                /// todo
                             #else
-                               _ = KeychainService.save(key: "token", value: token)
+                               _ = KeychainService.save(key: "token", value: resultToken)
                             #endif
                         
-                            self.appState.checkStatus()
+                            self.appState.isLoggedIn.toggle()
                         },
                         onError: { error in
                             print(error)
-                        })
+                        }
+                    )
                 }
             }
         } else {

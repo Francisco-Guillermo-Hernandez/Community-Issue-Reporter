@@ -8,17 +8,12 @@
 import Foundation
 
 let matterToResolve: [MatterToSolve] = [
-    MatterToSolve(id: "1", title: "cut down trees", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "2", title: "Cut down old trees", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "3", title: "Potholes", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "4", title: "Water leakage", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "5", title: "Street sign", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "6", title: "Lamp", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "7", title: "Semaphore", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "8", title: "Lamp", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "9", title: "Semaphore", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "10", title: "New park", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "11", title: "Retaining berm", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "12", title: "Fallen trees", icon: "tree", description: "...", issueType: .building, severity: .low),
-    MatterToSolve(id: "13", title: "Flood", icon: "tree", description: "...", issueType: .building, severity: .low),
+    MatterToSolve(id: "1", title: "Potholes", description: "...", issueType: .building, severity: .low, image: "matt-hoffman-MQjJHTT-diQ-unsplash"),
+    MatterToSolve(id: "2", title: "Water leakage", description: "...", issueType: .building, severity: .high, image: "arun-prakash-p0_6IwEjK98-unsplash"),
+    MatterToSolve(id: "3", title: "Street sign", description: "...", issueType: .building, severity: .low, image: "zoshua-colah-1BEULYOAnio-unsplash"),
+    MatterToSolve(id: "4", title: "Trafic light", description: "...", issueType: .building, severity: .low, image: "eliobed-suarez-PN-YnI5stdQ-unsplash"),
+    MatterToSolve(id: "5", title: "Lamp", description: "...", issueType: .building, severity: .low, image: "mukesh-naik-PZK-dEVBF9g-unsplash"),
+    MatterToSolve(id: "6", title: "Fallen trees", description: "...", issueType: .building, severity: .medium, image: "john-cameron-EVhuJCqYLxM-unsplash"),
+    MatterToSolve(id: "7", title: "Flood", description: "...", issueType: .building, severity: .high, image: "phillip-flores-38wqGW802RM-unsplash"),
+    MatterToSolve(id: "8", title: "Waste Management", description: "...", issueType: .publicSpace, severity: .low, image: "pixel-shot-kxTwgF_uHow-unsplash")
 ]

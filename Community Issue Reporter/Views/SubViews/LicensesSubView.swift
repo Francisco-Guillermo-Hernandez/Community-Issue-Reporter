@@ -19,7 +19,7 @@ struct LicensesSubView: View {
     
     @State private var licenses: Array<License> = []
     @State private var expandedLicenseIDs: Set<String> = []
-    @State private var expandAll = false
+    @State private var expandAll = true
     
     private func loadTextResource(
         fileName: String,
@@ -35,6 +35,7 @@ struct LicensesSubView: View {
         }
         return (try? String(contentsOf: url, encoding: .utf8)) ?? "License text not available."
     }
+    
     var body: some View {
         NavigationStack {
             
@@ -67,9 +68,6 @@ struct LicensesSubView: View {
                     
                 }
                 .padding()
-                .onAppear() {
-                    
-                }
                 .task {
                     
                     let loadedLicenses = [
@@ -102,6 +100,11 @@ struct LicensesSubView: View {
                             fileName: "LICENSE",
                             fileExtension: "",
                             subdirectory: "Licenses/AppAuth"
+                        )),
+                        License(id: "7", library: "Photos from Unsplash", text: loadTextResource(
+                            fileName: "CREDITS",
+                            fileExtension: "",
+                            subdirectory: "Licenses/Unsplash"
                         )),
                     ]
                     

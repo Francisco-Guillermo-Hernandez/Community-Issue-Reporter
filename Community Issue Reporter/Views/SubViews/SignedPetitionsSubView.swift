@@ -11,7 +11,10 @@ struct SignedPetitionsSubView: View {
     var subViewName: String
     var body: some View {
         NavigationStack {
-            Text("Hello")
+            List {
+                
+
+            }
         }
     }
 }

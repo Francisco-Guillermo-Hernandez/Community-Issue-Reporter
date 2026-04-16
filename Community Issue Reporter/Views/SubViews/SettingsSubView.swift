@@ -11,14 +11,22 @@ struct SettingsSubView: View {
 
 
     @Environment(\.mySettings) private var settings
+    @Environment(\.dismiss) private var dismiss
+//    @Environment(\.locale) private var locale
 
     @State private var geographicalRegion: Int = 1
     @State private var selectedCountry: Int = 0
+    @State private var selectedCity: Int = 0
     @State private var enableBackgroundSync: Bool = true
     @State private var enableAnonymousTelemetry: Bool = false
     @State private var selectedLanguage: Int = 1
     @State private var enableAutomaticIdentification: Bool = true
 
+    @State private var countries: [Country] = []
+    @State private var regions: [Region] = []
+    @State private var cities: [City] = []
+    @State private var language: String = "en"
+    
     var subViewName: String
     var body: some View {
         NavigationStack {
@@ -36,16 +44,19 @@ struct SettingsSubView: View {
                             selectedCountry = 0
                         }
                         
+                        countries = getCountries(geographicalRegion: newValue)
                         settings.geographicalRegion = newValue
                     }
 
                     ///
                     Picker("Country", selection: $selectedCountry) {
-                        ForEach(getCountries(geographicalRegion: geographicalRegion), id: \.id) { item in
+                        ForEach(countries, id: \.id) { item in
                             Text(item.name).tag(item.id)
                         }
                     }
                     .onChange(of: selectedCountry) { _, newValue in
+                        
+                        regions = getRegion(countryId: newValue)
                         settings.selectedCountry = newValue
                     }
                 
@@ -63,20 +74,25 @@ struct SettingsSubView: View {
                         }
                     }
                     .onChange(of: selectedLanguage) { _, newValue in
+//                        self.language = langs[newValue].code
                         settings.selectedLanguage = newValue
                     }
+                    .environment(\.locale, .init(identifier: language ))
                     
                     Toggle("Background sync", isOn: $enableBackgroundSync)
+                        .disabled(true)
                         .onChange(of: enableBackgroundSync) { _, newValue in
                             settings.enableBackgroundSync = newValue
                         }
                     
                     Toggle("Anonymous telemetry", isOn: $enableAnonymousTelemetry)
+                        .disabled(true)
                         .onChange(of: enableAnonymousTelemetry) { _, newValue in
                             settings.enableAnonymousTelemetry = newValue
                         }
                     
                     Toggle("Automatic identification", isOn: $enableAutomaticIdentification)
+                        .disabled(true)
                         .onChange(of: enableAutomaticIdentification) { _, newValue in
                             settings.enableAutomaticIdentification = newValue
                         }
@@ -87,23 +103,40 @@ struct SettingsSubView: View {
                     Text("")
                 }
             }
+            .scrollDisabled(true)
+            .scrollContentBackground(.hidden)
             .listSectionSpacing(32)
+            .toolbarTitleDisplayMode(.inline)
+            .navigationTitle(subViewName)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "arrow.down.backward")
+                    }
+                }
+            }
             .onAppear {
                 geographicalRegion = settings.geographicalRegion
                 selectedCountry = settings.selectedCountry
+                selectedCity = settings.selectedCity
                 enableBackgroundSync = settings.enableBackgroundSync
                 enableAnonymousTelemetry = settings.enableAnonymousTelemetry
                 selectedLanguage = settings.selectedLanguage
                 enableAutomaticIdentification = settings.enableAutomaticIdentification
             }
         }
-        .navigationTitle(subViewName)
-        .toolbarTitleDisplayMode(.inline)
         .interactiveDismissDisabled(true)
+        
     }
     
     func getCountries(geographicalRegion: Int) -> [Country] {
         return geographicalRegions.first(where: { $0.id == geographicalRegion })?.countries ?? []
+    }
+    
+    func getRegion(countryId: Int) -> [Region] {
+        return countries.first(where: { $0.id == countryId })?.regions ?? []
     }
 }
 

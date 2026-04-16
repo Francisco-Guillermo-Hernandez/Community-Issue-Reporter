@@ -8,10 +8,13 @@
 import SwiftUI
 
 struct MyReportsSubView: View {
+    
     var subViewName: String
     var body: some View {
         NavigationStack {
-            Text("My reports")
+            List {
+               
+            }
         }
     }
 }

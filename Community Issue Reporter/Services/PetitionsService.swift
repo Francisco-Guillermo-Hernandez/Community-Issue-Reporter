@@ -15,25 +15,26 @@ struct PetitionsService {
     }
     
     func fetchPetitions() async throws -> [Petition] {
-        return try await self.client.get(path: "petitions")
+        return try await self.client.get(path: "petitions", withOAuth: true)
     }
     
     func fetchPetition(id: Int) async throws -> Petition {
-        return try await self.client.get(path: "petitions/\(id)")
+        return try await self.client.get(path: "petitions/\(id)", withOAuth: true)
     }
     
     func createPetition(petition: Petition) async throws -> GenericResponse {
-        return try await self.client.post(path: "petitions", body: petition)
+        return try await self.client.post(path: "petitions", body: petition, withOAuth: true)
     }
     
     func updatePetition(id: String, petition: Petition) async throws -> GenericResponse {
-        return try await self.client.put(path: "petitions/\(id)", body: petition)
+        return try await self.client.put(path: "petitions/\(id)", body: petition, withOAuth: true)
     }
     
     func signPetition(id: String) async throws -> GenericResponse {
         return try await self.client.patch(
             path: "petitions/\(id)/sign-petition",
-            body: [String: String]()
+            body: [String: String](),
+            withOAuth: true,
         )
     }
 }

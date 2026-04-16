@@ -10,31 +10,31 @@ import WebP
 import UIKit
 
 struct ImageEncoderService {
-
     
-    func prepareToSent(reportId: String, images: [UIImage], completion: @escaping (String) -> ()) {
-        Task.detached(priority: .background) {
-            do {
-                var webPData: [Data] = []
-                
+    func prepareAndSend(reportId: String, images: [UIImage]) async {
+        do {
+            let webPData = try await withThrowingTaskGroup(of: Data.self) { group in
                 for image in images {
-                    let encodedData = try autoreleasepool {
-                        return try WebPEncoder().encode(image, config: .preset(.picture, quality: 80))
+                    group.addTask(priority: .high) {
+                        
+                        try autoreleasepool {
+                            return try WebPEncoder().encode(image, config: .preset(.picture, quality: 80))
+                        }
                     }
-                    print("Processing image")
-                    
-                    webPData.append(encodedData)
                 }
                 
-                _ = try await ReportsService().attachPicture(reportId: reportId, imagesData: webPData)
-                
-                await MainActor.run {
-                    completion("completion")
+                var results: [Data] = []
+                for try await data in group {
+                    results.append(data)
                 }
-            } catch {
-                print(error)
+                return results
             }
+            
+            
+            // Upload the results
+            _ = try await ReportsService().attachPicture(reportId: reportId, imagesData: webPData)
+        } catch {
+            print(error)
         }
     }
-    
 }

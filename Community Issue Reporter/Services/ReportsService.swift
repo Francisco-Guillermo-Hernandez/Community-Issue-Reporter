@@ -15,15 +15,15 @@ struct ReportsService {
     }
 
     func fetchReports() async throws -> [Report] {
-        return try await client.get(path: "reports")
+        return try await client.get(path: "reports", withOAuth: true)
     }
 
     func fetchReport(reportId: String) async throws -> Report {
-        return try await client.get(path: "reports/\(reportId)")
+        return try await client.get(path: "reports/\(reportId)", withOAuth: true)
     }
     
     func createReport(report: Report, headers: Array<HTTPHeader>) async throws -> GenericResponse {
-        return try await client.post(path: "reports/create", body: report, headers: headers)
+        return try await client.post(path: "reports/create", body: report, headers: headers, withOAuth: true)
     }
     
     func attachPicture(reportId: String, imagesData: [Data]) async throws -> Array<GenericResponse> {
@@ -41,7 +41,8 @@ struct ReportsService {
             path: "reports/\(reportId)/attach-picture",
             body: [String: String](),
             headers: [],
-            formFiles: files
+            formFiles: files,
+            withOAuth: true,
         )
     }
 }

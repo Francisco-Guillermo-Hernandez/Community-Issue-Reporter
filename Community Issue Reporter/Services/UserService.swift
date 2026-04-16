@@ -8,11 +8,15 @@
 import Foundation
 
 struct UserService {
+    private let client: ServiceClient
     
-    func login() async throws  {
-        // TODO: implement logic to perform a login with an auth provider.
+    init(client: ServiceClient = ServiceClient(baseURL: authService)) {
+        self.client = client
     }
     
+    func login(payload: OAuthSignInPayload) async throws -> LoginWithOAuthProviderResponse {
+        return try await client.post(path: "auth/Google/tokenSignInOrLogin", body: payload)
+    }
     
     func logout() {
         // TODO: implement logic to perform a logout.

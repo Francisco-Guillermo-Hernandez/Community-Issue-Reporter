@@ -18,6 +18,11 @@ struct ServiceClient {
     private let session: URLSession
     private let decoder: JSONDecoder
     private let delimiter = "/"
+    
+    private var oAuthHeader: HTTPHeader {
+        let token = KeychainService.getToken()
+        return HTTPHeader(name: "Authorization", content: "Bearer \(token)")
+    }
 
     init(baseURL: URL? = development, session: URLSession = .shared) {
         self.baseURL = baseURL
@@ -25,7 +30,7 @@ struct ServiceClient {
         self.decoder = ServiceClient.makeJSONDecoder()
     }
 
-    func get<T: Decodable>(path: String, headers: Array<HTTPHeader> = []) async throws -> T {
+    func get<T: Decodable>(path: String, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> T {
         let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
         guard let baseURL else {
             throw ServiceError.baseURLMissing
@@ -40,6 +45,10 @@ struct ServiceClient {
                 request.setValue(header.content, forHTTPHeaderField: header.name)
             }
         }
+        
+        if withOAuth {
+            request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
+        }
 
         let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -53,7 +62,7 @@ struct ServiceClient {
         return try decoder.decode(T.self, from: data)
     }
     
-    func post<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = []) async throws -> V {
+    func post<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> V {
         let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
         guard let baseURL else {
             throw ServiceError.baseURLMissing
@@ -68,6 +77,10 @@ struct ServiceClient {
             for header in headers {
                 request.setValue(header.content, forHTTPHeaderField: header.name)
             }
+        }
+        
+        if withOAuth {
+            request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
         
         let encoder = JSONEncoder()
@@ -85,7 +98,12 @@ struct ServiceClient {
         return try decoder.decode(V.self, from: data)
     }
     
-    func put<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = []) async throws -> V {
+    func put<T: Encodable, V: Decodable>(
+        path: String,
+        body: T,
+        headers: Array<HTTPHeader> = [],
+        withOAuth: Bool = false
+    ) async throws -> V {
         let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
         guard let baseURL else {
             throw ServiceError.baseURLMissing
@@ -100,6 +118,10 @@ struct ServiceClient {
             for header in headers {
                 request.setValue(header.content, forHTTPHeaderField: header.name)
             }
+        }
+        
+        if withOAuth {
+            request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
         
         let encoder = JSONEncoder()
@@ -121,7 +143,8 @@ struct ServiceClient {
         path: String,
         body: T,
         headers: [HTTPHeader] = [],
-        formFiles: [MultipartFormFile] = []
+        formFiles: [MultipartFormFile] = [],
+        withOAuth: Bool = false
     ) async throws -> V {
         let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
         guard let baseURL else {
@@ -141,6 +164,10 @@ struct ServiceClient {
             request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
             let fields = try makeFormFields(from: body)
             request.httpBody = makeMultipartBody(fields: fields, files: formFiles, boundary: boundary)
+        }
+        
+        if withOAuth {
+            request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 
         if headers.count > 0 {

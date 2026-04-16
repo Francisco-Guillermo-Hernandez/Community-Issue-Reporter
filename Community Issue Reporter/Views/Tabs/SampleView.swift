@@ -30,34 +30,51 @@ struct SampleView: View {
             
             if !isSingleShape {
                 
-                //                        Image(systemName: "thermometer.sun.fill")
-                //                            .frame(width: 80.0, height: 80.0)
-                //                            .font(.system(size: 36))
-                //                            .glassEffect()
-                //                            .glassEffectID("thermometer", in: namespace)
-                //
-                //                        Image(systemName: "humidity.fill")
-                //                            .frame(width: 80.0, height: 80.0)
-                //                            .font(.system(size: 36))
-                //                            .glassEffect()
-                //                            .glassEffectID("humidity", in: namespace)
-                //
-                //                        Image(systemName: "wind")
-                //                            .frame(width: 80.0, height: 80.0)
-                //                            .font(.system(size: 36))
-                //                            .glassEffect()
-                //                            .glassEffectID("wind", in: namespace)
-                
-                
-                List {
-                    ForEach(1...3, id: \.self) { index in
-                        Text("\(index)")
-                            .glassEffect()
-                            .glassEffectID(String("text\(index)"), in: namespace)
-                    }
-                    .glassEffect()
-                    .glassEffectID("list", in: namespace)
+                VStack {
+                    Image(systemName: "thermometer.sun.fill")
+                        .frame(width: 80.0, height: 80.0)
+                        .font(.system(size: 36))
+                        .glassEffect()
+                        .glassEffectID("thermometer", in: namespace)
+
+                    Image(systemName: "humidity.fill")
+                        .frame(width: 80.0, height: 80.0)
+                        .font(.system(size: 36))
+                        .glassEffect()
+                        .glassEffectID("humidity", in: namespace)
+
+                    Image(systemName: "wind")
+                        .frame(width: 80.0, height: 80.0)
+                        .font(.system(size: 36))
+                        .glassEffect()
+                        .glassEffectID("wind", in: namespace)
                 }
+                
+                
+//                List {
+//                    ForEach(1...3, id: \.self) { index in
+//                        Text("\(index)")
+//                            .glassEffect()
+//                            .glassEffectID(String("text\(index)"), in: namespace)
+//                    }
+//                    .glassEffect()
+//                    .glassEffectID("list", in: namespace)
+//                }
+//                
+//                HStack {
+//                    Button { } label: { Image(systemName: "plus") }
+//                        .glassEffect()
+//                        .glassEffectID(String("texta"), in: namespace)
+//                    Button { } label: { Image(systemName: "minus") }
+//                        .glassEffect()
+//                        .glassEffectID(String("textb"), in: namespace)
+//                    Button { } label: { Image(systemName: "xmark")}
+//                        .glassEffect()
+//                        .glassEffectID(String("textv"), in: namespace)
+//            
+//                }
+//                .glassEffect()
+             //                    .glassEffectID("list", in: namespace)
             }
         }
     }

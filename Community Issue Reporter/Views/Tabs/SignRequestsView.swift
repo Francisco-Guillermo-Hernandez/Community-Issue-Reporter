@@ -26,7 +26,7 @@ struct SignRequestsView: View {
         NavigationStack {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 16) {
-                    HeaderView()
+                    headerView()
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Nearby Events")
                             .font(.title3)
@@ -90,10 +90,8 @@ struct SignRequestsView: View {
                 subtitle = nil
             }
         }
-        .onAppear {
-            Task {
-               petitions = await PetitionRepository.list()
-            }
+        .task {
+            petitions = await PetitionRepository.list()
         }
         .sheet(isPresented: $showCreateRequestView) {
             CreateRequestPetitionView()
@@ -105,7 +103,7 @@ struct SignRequestsView: View {
     
     /// Header View
     @ViewBuilder
-    func HeaderView() -> some View {
+    func headerView() -> some View {
         VStack(alignment: .leading, spacing: 15) {
             Text("Sign Request Petitions")
                 .font(.title.bold())

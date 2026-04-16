@@ -31,7 +31,7 @@ struct ReportsView: View {
     @FocusState private var isSearchFocused: Bool
     @FocusState private var isOverlaySearchFocused: Bool
     @State private var offsetY: CGFloat = 0
-    @State private var selectedPlaceID: UUID?
+    @State private var selectedPlaceID: String?
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismissSheet
     @Namespace private var animationID
@@ -58,17 +58,12 @@ struct ReportsView: View {
                     
                     ForEach(filteredIssues) { issue in
                         Annotation(issue.title, coordinate: issue.coordinate) {
-                            AnnotationView(issue)
+                            annotationView(issue)
                         }
                     }
                     
                     if let searchMarker {
-                        Annotation(searchMarker.title, coordinate: searchMarker.coordinate) {
-                            Image(systemName: "mappin.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(.red)
-                                .shadow(radius: 3)
-                        }
+                        Marker(searchMarker.title, coordinate: searchMarker.coordinate)
                     }
                 }
                 .contentMargins(.bottom, 90, for: .scrollContent)
@@ -107,7 +102,7 @@ struct ReportsView: View {
             searchCompleter.update(query: newValue, region: currentRegion(c: cameraPosition))
         }
         .onAppear {
-            locationManager.requestAuthorization()
+//            locationManager.requestAuthorization()
             
         }
         .onChange(of: locationManager.lastLocation) { _, newLocation in
@@ -125,52 +120,22 @@ struct ReportsView: View {
         }
         .sheet(item: $expandedItem) { issue in
             DetailView(issue: issue)
-            //                .navigationTransition(.zoom(sourceID: issue.id, in: animationID))
         }
         .overlay {
             /// customized overlay to show the list of places into a List
             if showSearchOverlay {
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .background(.background.opacity(0.25))
-                    .ignoresSafeArea()
-                    .overlay {
-                        VStack {
-                            SearchBar(
-                                text: $searchText,
-                                onSubmit: {
-                                    performSearch()
-                                    showSearchOverlay = false
-                                },
-                                onFocusChange: { isFocused in
-                                    showSearchOverlay = isFocused
-                                },
-                                onUserProfileTap: {},
-                                isFocused: $isOverlaySearchFocused
-                            )
-                            .padding(.leading, 16)
-                            .padding(.trailing, 16)
-                            .padding(.top, 10)
-                            
-                            SuggestionsResultList(searchText: $searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
-                                applySuggestion(suggestion)
-                            })
-                        }
-                        .onAppear {
-                            isOverlaySearchFocused = true
-                        }
-                    }
-                    .zIndex(10)
+                placesOverlay()
             }
             
         }
         .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
         .onAppear {
             showSearchOverlay = false
-            
-            Task {
-                issues = await ReportRepository.list()
-            }
+        }
+        .task {
+            issues = await ReportRepository.list(onError: { error in
+                print(error)
+            })
         }
     }
     
@@ -224,7 +189,18 @@ struct ReportsView: View {
         search.start { response, _ in
             guard let item = response?.mapItems.first else { return }
             let coordinate = item.location.coordinate
-            searchMarker = IssueMarker(title: item.name ?? String(localized: "Result"), status: .reported, coordinate: coordinate, issueType: .all)
+            let address = item.address?.fullAddress ??  item.address?.shortAddress ?? "Unknown"
+            searchMarker = IssueMarker(
+                id: UUID().uuidString, 
+                title: item.name ?? String(localized: "Result"),
+                description: "",
+                status: 1,
+                coordinate: coordinate,
+                issueType: 1,
+                severity: 1,
+                matterToSolve: 1, 
+                address: address
+            )
             cameraPosition = .region(
                 MKCoordinateRegion(
                     center: coordinate,
@@ -242,7 +218,18 @@ struct ReportsView: View {
         search.start { response, _ in
             guard let item = response?.mapItems.first else { return }
             let coordinate = item.location.coordinate
-            searchMarker = IssueMarker(title: item.name ?? String(localized: "Result"), status: .reported, coordinate: coordinate, issueType: .all)
+            let address = item.address?.fullAddress ??  item.address?.shortAddress ?? "Unknown"
+            searchMarker = IssueMarker(
+                id: UUID().uuidString, 
+                title: item.name ?? String(localized: "Result"),
+                description: "",
+                status: 1,
+                coordinate: coordinate, 
+                issueType: 1,
+                severity: 1,
+                matterToSolve: 1, 
+                address: address
+            )
             cameraPosition = .region(
                 MKCoordinateRegion(
                     center: coordinate,
@@ -273,6 +260,41 @@ struct ReportsView: View {
     }
     
     @ViewBuilder
+    private func placesOverlay() -> some View {
+        Rectangle()
+            .fill(.ultraThinMaterial)
+            .background(.background.opacity(0.25))
+            .ignoresSafeArea()
+            .overlay {
+                VStack {
+                    SearchBar(
+                        text: $searchText,
+                        onSubmit: {
+                            performSearch()
+                            showSearchOverlay = false
+                        },
+                        onFocusChange: { isFocused in
+                            showSearchOverlay = isFocused
+                        },
+                        onUserProfileTap: {},
+                        isFocused: $isOverlaySearchFocused
+                    )
+                    .padding(.leading, 16)
+                    .padding(.trailing, 16)
+                    .padding(.top, 10)
+                    
+                    SuggestionsResultList(searchText: $searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
+                        applySuggestion(suggestion)
+                    })
+                }
+                .onAppear {
+                    isOverlaySearchFocused = true
+                }
+            }
+            .zIndex(10)
+    }
+    
+    @ViewBuilder
     private func BottomFloatingToolBar() -> some View {
         VStack(spacing: 35) {
             Button {
@@ -295,9 +317,8 @@ struct ReportsView: View {
     
     
     @ViewBuilder
-    private func AnnotationView(_ issue: IssueMarker) -> some View {
+    private func annotationView(_ issue: IssueMarker) -> some View {
         let isSelected = issue.id == selectedPlaceID
-        
         
         Image(systemName: issue.issueType.iconName)
             .resizable()
@@ -327,14 +348,6 @@ struct ReportsView: View {
     }
 }
 
-struct IssueMarker: Identifiable {
-    let id = UUID()
-    let title: String
-    let status: IssueStatus
-    let coordinate: CLLocationCoordinate2D
-    let issueType: IssueTypes
-}
-
 private struct IssuePin: View {
     let status: IssueStatus
     
@@ -355,22 +368,9 @@ private struct StatusFilterRow: View {
         HStack {
             
             Group {
-                //                Picker(selection: $issueType) {
-                //                    ForEach(IssueTypes.allCases, id: \.self) { issueType in
-                //                        Text(issueType.title).tag(issueType)
-                //                    }
-                //                } label: {
-                //                    Image(systemName: "line.3.horizontal.decrease")
-                //                        .fontWeight(.semibold)
-                //                        .foregroundStyle(.primary)
-                //                        .transition(.blurReplace)
-                //                        .frame(width: 24, height: 24)
-                //                }
-                //                .pickerStyle(.menu)
-                //                .buttonStyle(.glass)
-                //                .buttonBorderShape(.circle)
                 
                 ScrollView(.horizontal, showsIndicators: false) {
+                    
                     HStack(spacing: 16) {
                         
                         ForEach(IssueStatus.allCases) { status in
@@ -410,7 +410,6 @@ private struct StatusFilterRow: View {
                     }
                 }
                 .scrollClipDisabled()
-                //                .frame(width: 300)
             }
         }
     }

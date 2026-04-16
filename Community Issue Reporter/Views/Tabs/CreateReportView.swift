@@ -13,6 +13,8 @@ struct CreateReportView: View {
     @State private var message: String = ""
     @State private var type: AlertType = .success
     @State private var show = false
+    @State private var issueType: IssueTypes = .all
+    @State private var severity: Severity = .all
     
     var body: some View {
         NavigationStack {
@@ -29,12 +31,30 @@ struct CreateReportView: View {
                 if show {
                     Group {
                         if #available(iOS 26, *) {
-                            CustomAlert(message: message, type: type)
+                            customAlert(message: message, type: type)
                                 .transition(.asymmetric(insertion: .identity, removal: .opacity))
                                 .optionalGlassEffect(colorScheme, cornerRadius: 16)
                         }
                     }
                     .offset(x: 0, y: -62)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Menu {
+                        Picker("Issue Type", selection: $issueType) {
+                            ForEach(IssueTypes.allCases, id: \.self) { issueType in
+                                Text(issueType.title).tag(issueType.title)
+                            }
+                        }
+                        Picker("Severity", selection: $severity) {
+                            ForEach(Severity.allCases, id: \.self) { severity in
+                                Text(severity.title).tag(severity.title)
+                            }
+                        }
+                    } label: {
+                        Label("Options", systemImage: "line.3.horizontal.decrease")
+                    }
                 }
             }
             .padding(.horizontal)
@@ -47,8 +67,6 @@ struct CreateReportView: View {
     }
     
     private var description: some View {
-        
-        
         ReportView(onCompletion: { incomingMessage, alertType in
             message = incomingMessage
             type = alertType
@@ -64,14 +82,27 @@ struct CreateReportView: View {
     private var filteredMatters: [MatterToSolve] {
         let trimmedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedQuery.isEmpty {
-            return matterToResolve
+            return filterByIssueType(matter: filterByStatus(matter: matterToResolve))
         }
+        
         return matterToResolve.filter { matter in
             matter.title.localizedCaseInsensitiveContains(trimmedQuery)
             || matter.description.localizedCaseInsensitiveContains(trimmedQuery)
+            
         }
     }
     
+    private func filterByStatus(matter: [MatterToSolve]) -> [MatterToSolve] {
+        return matter.filter { matter in
+            matter.severity == self.severity || self.severity == .all
+        }
+    }
+    
+    private func filterByIssueType(matter: [MatterToSolve]) -> [MatterToSolve] {
+        return matter.filter { matter in
+            matter.issueType == self.issueType || self.issueType == .all
+        }
+    }
     
     private static let gridColumns: [GridItem] = [
         GridItem(.flexible(), spacing: 16),
@@ -82,34 +113,40 @@ struct CreateReportView: View {
 struct CardView: View {
     var matter: MatterToSolve
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(cardColors[Self.colorIndex(for: matter.id)])
-                .frame(maxWidth: .infinity)
-                .aspectRatio(1.45, contentMode: .fit)
-                .shadow(color: Color.black.opacity(0.25), radius: 10, x: 0, y: 6)
-            
-            if let icon = matter.icon, !icon.isEmpty {
-                Image(systemName: icon)
-                    .font(.system(size: 28, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .padding(12)
+        VStack {
+            ZStack {
+                
+                if let icon = matter.icon, !icon.isEmpty {
+                    Image(systemName: icon)
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.9))
+                        .padding(12)
+                }
+                
+                if let image = matter.image, !image.isEmpty {
+                    Image(image)
+                        .resizable()
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .aspectRatio(4/3, contentMode: .fill)
+                        .clipped()
+                        .cornerRadius(16)
+                }
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Spacer()
+                    Text(matter.title)
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                        .fontWeight(.black)
+                        .lineLimit(2)
+                        .padding(12)
+                        .multilineTextAlignment(.leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .cardStyle(color: matter.severity.color)
             }
-            
-            VStack(alignment: .leading, spacing: 6) {
-                Spacer()
-                Text(matter.title)
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .lineLimit(2)
-                Text(matter.description)
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.85))
-                    .lineLimit(2)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
         }
+        
     }
     
     

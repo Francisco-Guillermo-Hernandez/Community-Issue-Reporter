@@ -42,17 +42,8 @@ struct MiniMapLocator: View {
                 locationManager.requestAuthorization()
             }
             .onChange(of: locationManager.lastLocation) { _, newLocation in
-//                guard let newLocation else { return }
-//                /// Center at the user location
-//                cameraPosition = .region(
-//                    MKCoordinateRegion(
-//                        center: newLocation.coordinate,
-//                        span: span
-//                    )
-//                )
-//                selectedCoordinate = newLocation.coordinate
             }
-            .frame(height: 250)
+            .aspectRatio(4/3, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .contentShape(RoundedRectangle(cornerRadius: 16))
             .onMapCameraChange { context in
@@ -94,7 +85,7 @@ struct MiniMapLocator: View {
                 Image(systemName: "location")
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
-                    .contentShape(Rectangle())
+                    .background(Color.black.opacity(0.001))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Locate")
@@ -111,16 +102,16 @@ struct MiniMapLocator: View {
                 Image(systemName: "arrow.up.left.and.arrow.down.right")
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
-                    .contentShape(Rectangle())
+                    .background(Color.black.opacity(0.001))
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Expand Map")
         }
         .foregroundStyle(Color.primary)
         .padding(10)
-        .optionalGlassEffect(colorScheme, cornerRadius: 16)
-        .padding(.trailing, 8)
-        .padding(.top, 8)
+        .optionalGlassWithShape(colorScheme, shape: .capsule)
+        .padding(.trailing, 16)
+        .padding(.top, 16)
         .frame(maxWidth: .infinity, maxHeight: 250, alignment: .topTrailing)
     }
     

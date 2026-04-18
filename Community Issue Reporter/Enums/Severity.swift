@@ -5,7 +5,7 @@
 //  Created by Francisco Hernandez on 21/2/26.
 //
 
-import Foundation
+import SwiftUI
 
 enum Severity: String, CaseIterable, Identifiable {
     case all = "asterisk.circle"
@@ -25,6 +25,15 @@ enum Severity: String, CaseIterable, Identifiable {
             return "Medium"
         case .high:
             return "High"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+            case .high: return .red
+            case .medium: return .orange
+            case .low: return .blue
+            case .all: return .primary
         }
     }
     

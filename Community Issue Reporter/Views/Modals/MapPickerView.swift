@@ -61,6 +61,7 @@ struct MapPickerView: View {
                     Map(position: $cameraPosition) {
                         UserAnnotation()
                     }
+                    .allowsHitTesting(true)
                     .onMapCameraChange { context in
                         selectedCoordinate = context.camera.centerCoordinate
                         handleMapMovement(center: context.camera.centerCoordinate)
@@ -87,9 +88,13 @@ struct MapPickerView: View {
                         .fill(.ultraThinMaterial)
                         .ignoresSafeArea(edges: .all)
                         .overlay {
-                            SuggestionsResultList(searchText: $searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
-                                applySuggestion(suggestion)
-                            })
+                            SuggestionsResultList(
+                                searchText: $searchText,
+                                searchCompleter: searchCompleter,
+                                applySuggestion: { suggestion in
+                                    applySuggestion(suggestion)
+                                }
+                            )
                         }
                 }
             }
@@ -124,6 +129,7 @@ struct MapPickerView: View {
         }
     }
     
+    ///
     private func applySuggestion(_ suggestion: SearchSuggestion) {
         searchText = suggestion.title
         performSearch(with: suggestion.completion)
@@ -132,6 +138,7 @@ struct MapPickerView: View {
         dismissSearch()
     }
    
+    ///
     private func handleMapMovement(center: CLLocationCoordinate2D) {
           let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
 
@@ -154,6 +161,7 @@ struct MapPickerView: View {
           }
       }
     
+    ///
     private var centerMarker: some View {
         Image(systemName: "dot.scope")
             .font(.system(size: 50, ))
@@ -167,9 +175,10 @@ struct MapPickerView: View {
             Button {
                 centerOnUser()
             } label: {
-                Image(systemName: "location.fill")
+                Image(systemName: "location")
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
+                    .background(Color.black.opacity(0.001))
             }
             .buttonStyle(.plain)
             .contentShape(Rectangle())
@@ -181,6 +190,7 @@ struct MapPickerView: View {
                 Image(systemName: "plus.magnifyingglass")
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
+                    .background(Color.black.opacity(0.001))
             }
             .buttonStyle(.plain)
             .contentShape(Rectangle())
@@ -193,13 +203,15 @@ struct MapPickerView: View {
                 Image(systemName: "minus.magnifyingglass")
                     .font(.system(size: 18, weight: .semibold))
                     .frame(width: 36, height: 36)
+                    .background(Color.black.opacity(0.001))
             }
+            .frame(width: 36, height: 36)
             .buttonStyle(.plain)
             .accessibilityLabel("Zoom out")
         }
         .foregroundStyle(Color.primary)
         .padding(10)
-        .optionalGlassEffect(colorScheme, cornerRadius: 16)
+        .optionalGlassWithShape(colorScheme, shape: .capsule)
         .padding(.trailing, 16)
         .padding(.top, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)

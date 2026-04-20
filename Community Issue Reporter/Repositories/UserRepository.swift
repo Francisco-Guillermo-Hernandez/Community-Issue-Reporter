@@ -18,18 +18,20 @@ enum UserOAuthResultState {
 
 struct UserRepository {
     
-    static func login(_ token: String,
-                      onSuccess: @escaping (UserOAuthResultState) -> Void,
-                      onError: @escaping (_ error: Error) -> Void) async -> Void {
+    static func login(
+        _ token: String,
+        onSuccess: @escaping (UserOAuthResultState, UserTokens) -> Void,
+        onError: @escaping (_ error: Error) -> Void
+    ) async -> Void {
         do {
             let result = try await UserService().login(payload: OAuthSignInPayload(token: token))
             
             if result.code == "TOKEN_GENERATED" {
-                onSuccess(.existing)
+                onSuccess(.existing, result.authToken)
             }
             
             if result.code == "USER_CREATED_WITH_TOKEN" {
-                onSuccess(.firstLogin)
+                onSuccess(.firstLogin, result.authToken)
             }
         } catch {
             onError(error)
@@ -37,10 +39,18 @@ struct UserRepository {
         }
     }
     
-//    static func logout(onComplete: @escaping () -> Void) -> Void {
-//        GIDSignIn.sharedInstance.signOut()
-//        onComplete()
-//    }
+    static func loginAsVisitor(
+        onSuccess: @escaping (UserOAuthResultState, UserTokens) -> Void,
+        onError: @escaping (_ error: Error) -> Void
+    ) async -> Void {
+        do {
+            let result = try await UserService().loginAsVisitor()
+            
+            onSuccess(.inexistent, result.authToken)
+        } catch {
+            onError(error)
+        }
+    }
     
     static func getProfilePictureURL() -> URL? {
         guard let user = GIDSignIn.sharedInstance.currentUser,

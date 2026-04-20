@@ -12,6 +12,7 @@ class KeychainService {
     static func save(key: String, value: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: bundleID,
             kSecAttrAccount as String: key,
             kSecValueData as String: value.data(using: .utf8)!,
         ]
@@ -24,6 +25,7 @@ class KeychainService {
     static func loadToken(key: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: bundleID, 
             kSecAttrAccount as String: key,
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
@@ -44,6 +46,7 @@ class KeychainService {
     static func deleteToken(key: String) -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: bundleID,
             kSecAttrAccount as String: key,
         ]
         
@@ -56,3 +59,8 @@ class KeychainService {
     }
 }
 
+extension KeychainService {
+    static var bundleID: String {
+        return Bundle.main.bundleIdentifier ?? "dev.FranciscoHernandez.default"
+    }
+}

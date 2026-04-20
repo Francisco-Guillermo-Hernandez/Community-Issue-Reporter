@@ -49,16 +49,26 @@ struct DetailView: View {
     @State private var showAlert: Bool = false
     @State private var message: String = ""
     @State private var type: AlertType = .success
+    @State private var paginatedResult: PaginatedResponse<Comment>
+    @State private var comments: [Comment] = []
     
     init(issue: IssueMarker) {
         self.issue = issue
         self.color = self.issue.status.color
+        self.comments = []
+        self.paginatedResult = PaginatedResponse<Comment>(
+            total: 0,
+            page: 0,
+            documentsPerPage: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+        )
     }
     
     
     fileprivate func openOnGoogleMaps() {
         let urlString = "comgooglemaps://?q=\(issue.coordinate.latitude),\(issue.coordinate.longitude)&zoom=14"
-        print(urlString)
         if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
@@ -182,49 +192,10 @@ struct DetailView: View {
                             .padding(.trailing, 16)
                             
                         } else {
-                            Image(photo.photo)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
+                           
+                            photoPreview(photo)
                                 .frame(width: 160, height: 160)
-                                .cornerRadius(16)
-                                .overlay {
-                                    ZStack(alignment: .bottomLeading) {
-                                        
-                                        RoundedRectangle(cornerRadius: 16)
-                                        
-                                            .fill(
-                                                LinearGradient(
-                                                    stops: [
-                                                        .init(color: .black.opacity(0.8), location: 0),
-                                                        .init(color: .black.opacity(0.4), location: 0.5),
-                                                        .init(color: .clear, location: 1)
-                                                    ],
-                                                    startPoint: .bottom,
-                                                    endPoint: .top
-                                                )
-                                            )
-                                        //                                                        .stroke(issue.status.color, lineWidth: 2)
-                                            .cornerRadius(16)
-                                        
-                                        
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(photo.user)
-                                                .font(.subheadline)
-                                                .fontWeight(.bold)
-                                                .foregroundColor(.white)
-                                            
-                                            Text(photo.published.formatted(date: .numeric, time: .omitted))
-                                                .font(.caption)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(.white.opacity(0.8))
-                                        }
-                                        .padding()
-                                    }
-                                }
-                            
                         }
-                        
-                        
                     }
                 }
             }
@@ -234,17 +205,14 @@ struct DetailView: View {
         }
     }
     
-    fileprivate func lastComments() -> Group<TupleView<(SectionHeader, LazyVStack<ForEach<Range<Int>, Int, TupleView<(CommentRow, CommentRow)>>>)>> {
-        return Group {
+    @ViewBuilder
+    func lastComments() -> some View {
+        Group {
             SectionHeader(title: "Last Comments")
             LazyVStack(spacing: 16) {
-                
-                ForEach(1..<5) { _ in
-                    CommentRow(name: "Ethan Carter", time: "2d", message: "This pothole is really dangerous! I almost lost control of my car last night...................... demo deo demo demo")
-                    
-                    CommentRow(name: "Ethan ", time: "1d", message: "This ")
+                ForEach(comments) { c in
+                    CommentRow(name: c.name ?? "Annonymous", time: "2d", message: c.message)
                 }
-                
             }
         }
     }
@@ -341,6 +309,18 @@ struct DetailView: View {
                     
                 }
             }
+            .task {
+                await CommentsRepository.list(
+                    issue.id,
+                    page: 1,
+                    onComplete: { result in
+                        self.paginatedResult = result
+                        self.comments.append(contentsOf: result.documents!)
+                    }, onError: { _ in
+                        
+                    }
+                )
+            }
             .safeAreaInset(edge: .bottom) {
                 customBottomToolbar(
                     commentAction: {
@@ -364,7 +344,7 @@ struct DetailView: View {
                 )
             }
             .sheet(isPresented: $commentButtonPressed) {
-                CommentsSectionView()
+                CommentsSectionView(issue: self.issue)
             }
             .sheet(isPresented: $showMoreEvidences) {
                 EvidencesView()

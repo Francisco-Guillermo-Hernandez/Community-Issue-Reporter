@@ -19,6 +19,16 @@ class Store {
         set { UserDefaults.standard.set(newValue, forKey: "selectedCountry") }
     }
     
+    var selectedState: Int {
+        get { UserDefaults.standard.integer(forKey: "selectedState") }
+        set { UserDefaults.standard.set(newValue, forKey: "selectedState") }
+    }
+    
+    var selectedCity: Int {
+        get { UserDefaults.standard.integer(forKey: "selectedCity") }
+        set { UserDefaults.standard.set(newValue, forKey: "selectedCity") }
+    }
+    
     var enableBackgroundSync: Bool {
         get { UserDefaults.standard.bool(forKey: "enableBackgroundSync") }
         set { UserDefaults.standard.set(newValue, forKey: "enableBackgroundSync") }
@@ -43,6 +53,8 @@ class Store {
         UserDefaults.standard.register(defaults: [
             "geographicalRegion": 1,
             "selectedCountry": 0,
+            "selectedState": 0,
+            "selectedCity": 0,
             "enableBackgroundSync": true,
             "enableAnonymousTelemetry": false,
             "selectedLanguage": 1,

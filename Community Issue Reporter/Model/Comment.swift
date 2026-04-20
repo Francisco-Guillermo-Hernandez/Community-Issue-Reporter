@@ -7,9 +7,32 @@
 
 import Foundation
 
-struct Comment: Codable, Identifiable {
+struct Comment: Identifiable, Codable {
     let id: String
-    let createdAt: Date
-    let name: String
+    let created_at: String?
+    let updated_at: String?
+    let name: String?
+    let report_id: String
+    let message: String
+    
+    init(
+        id: String,
+        created_at: String? = nil,
+        updated_at: String? = nil,
+        name: String? = nil,
+        report_id: String,
+        message: String
+    ) {
+        self.id = id
+        self.created_at = created_at
+        self.updated_at = updated_at
+        self.name = name
+        self.report_id = report_id
+        self.message = message
+    }
+}
+
+struct CommentRequest: Codable {
+    let reportId: String
     let message: String
 }

@@ -208,10 +208,10 @@ struct DetailView: View {
     @ViewBuilder
     func lastComments() -> some View {
         Group {
-            SectionHeader(title: "Last Comments")
+            SectionHeader(title: "Lastest Comments")
             LazyVStack(spacing: 16) {
                 ForEach(comments) { c in
-                    CommentRow(name: c.name ?? "Annonymous", time: "2d", message: c.message)
+                    CommentRow(name: c.name ?? "Annonymous", time: c.created_at!, message: c.message)
                 }
             }
         }
@@ -310,6 +310,7 @@ struct DetailView: View {
                 }
             }
             .task {
+                guard !Task.isCancelled else { return }
                 await CommentsRepository.list(
                     issue.id,
                     page: 1,
@@ -379,7 +380,7 @@ struct DetailView: View {
             
         }
         .toolbarTitleDisplayMode(.inlineLarge)
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.fraction(0.30), .medium, .large])
         .presentationDragIndicator(.visible)
     }
     
@@ -392,7 +393,6 @@ struct DetailView: View {
     
     private  let gridColumns: [GridItem] = [
         GridItem(.flexible(), spacing: 16),
-        
     ]
     
 }

@@ -25,11 +25,18 @@ struct CustomCalendar: UIViewRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UICalendarView, context: Context) -> CGSize? {
+        return uiView.systemLayoutSizeFitting(
+            CGSize(width: proposal.width ?? 300, height: UIView.layoutFittingCompressedSize.height)
+        )
+    }
 
     func makeUIView(context: Context) -> UICalendarView {
         let view = UICalendarView()
         view.calendar = calendar
         view.delegate = context.coordinator
+//        view.setContentHuggingPriority(.defaultHigh, for: .vertical)
+//        view.setContentCompressionResistancePriority(.required, for: .vertical)
 
         // Selection behavior
         let selection = UICalendarSelectionSingleDate(delegate: context.coordinator)
@@ -62,6 +69,13 @@ extension CustomCalendar {
             }
         }
 
+        func sizeThatFits(_ proposal: ProposedViewSize, uiView: UICalendarView, context: Context) -> CGSize? {
+            // Return the size the UIKit view actually wants to be
+            return uiView.systemLayoutSizeFitting(
+                CGSize(width: proposal.width ?? 300, height: UIView.layoutFittingCompressedSize.height)
+            )
+        }
+        
         // MARK: Dot / decoration per day
         func calendarView(
             _ calendarView: UICalendarView,
@@ -114,22 +128,28 @@ struct ExampleCustomCalendarView: View {
     
     @State private var selectedDate: Date = Date()
 
-    let activityMap: [String: DaySummary] = [:
-//        "2026-04-10": DaySummary(count: 1, ids: [
-//            BasicInfo(id: "12", reportsIds: ["id-1"], signatureIds: ["id-1"])
-//        ]),
-//        "2026-03-01": DaySummary(count: 1, ids: ["id-1"]),
-//        "2026-04-10": DaySummary(count: 1, ids: ["id-1"]),
-//        "2026-04-18": DaySummary(count: 3, ids: ["id-1", "id-2", "id-3"]),
-//        "2026-04-21": DaySummary(count: 5, ids: ["id-4", "id-5", "id-6", "id-7", "id-8"]),
-//        "2026-04-22": DaySummary(count: 1, ids: ["id-1"]),
-    ]
+    let activityMap: [String: DaySummary] = [:]
     var body: some View {
-        CustomCalendar(selectedDate: $selectedDate, activityMap: activityMap) { date in
-            print("Selected:", date)
+        
+        List {
+            Section {
+
+                CustomCalendar(selectedDate: $selectedDate, activityMap: activityMap) { date in
+                    print("Selected:", date)
+                }
+                .padding(40)
+                .frame(height: 420)
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 32)
+
+            }
         }
-        .frame(height: 400)
-        .padding()
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden) // important
+        .background(Color.theme.background) // your screen background
     }
 }
 

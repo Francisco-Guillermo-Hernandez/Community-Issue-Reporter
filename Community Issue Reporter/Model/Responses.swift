@@ -52,3 +52,21 @@ struct PaginatedResponse<T: Decodable>: Decodable {
         self.hasPrev = hasPrev
     }
 }
+
+
+struct BasicInfo: Identifiable, Decodable {
+    let id: String
+    let ids: [String]
+}
+
+struct DaySummary: Decodable {
+    let count: Int
+    let reports: [BasicInfo]
+    let signatures: [BasicInfo]
+}
+
+struct InsightsResponse: Decodable {
+    let activity_days: [String: DaySummary]
+    let total_reports: Int
+    let total_signatures: Int
+}

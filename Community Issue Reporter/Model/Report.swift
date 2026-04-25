@@ -58,3 +58,33 @@ struct Report: Identifiable, Codable {
             self.reportedBy = reportedBy
         }
 }
+
+extension Report {
+    var issueType: IssueTypes {
+        IssueTypes.allCases.first(where: { $0.identifier == self.issueTypeId }) ?? .all
+    }
+    
+    var severity: Severity {
+        Severity.allCases.first(where: { $0.identifier == self.severityId }) ?? .low
+    }
+
+    var status: IssueStatus {
+        IssueStatus.allCases.first(where: { $0.identifier == self.statusId }) ?? .reported
+    }
+    
+    var reportedDate: String {
+       if reportedAt == nil {
+            String(localized: "Not yet")
+       } else {
+           formatRelativeDate(from: self.reportedAt ?? Date())
+       }
+    }
+    
+    var createdDate: String {
+        formatRelativeDate(from: self.createdAt ?? Date())
+    }
+    
+    var updatedDate: String {
+        formatRelativeDate(from: self.updatedAt ?? Date())
+    }
+}

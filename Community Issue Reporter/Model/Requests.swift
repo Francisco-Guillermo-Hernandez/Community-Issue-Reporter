@@ -10,3 +10,13 @@ import Foundation
 struct OAuthSignInPayload: Encodable {
     let token: String
 }
+
+struct PaginatedRequestQueryParams: Encodable {
+    let page: Int?
+    let limit: Int?
+    
+    init(page: Int? = 1, limit: Int? = 3) {
+        self.page = page
+        self.limit = limit
+    }
+}

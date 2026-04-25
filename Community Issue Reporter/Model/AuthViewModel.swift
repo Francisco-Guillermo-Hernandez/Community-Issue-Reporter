@@ -35,7 +35,8 @@ class AuthViewModel: ObservableObject {
             self.user = nil
             self.isLoggedIn = false
             
-            _ = KeychainService.deleteToken(key: "token")
+            _ = KeychainService.deleteToken(key: .query)
+            _ = KeychainService.deleteToken(key: .mutation)
         }
     }
     

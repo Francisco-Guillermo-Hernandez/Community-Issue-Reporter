@@ -16,7 +16,20 @@ func parsePostgresDate(_ dateString: String) -> Date? {
 
 func formatRelativeDate(from date: Date) -> String {
     let formatter = RelativeDateTimeFormatter()
-    formatter.unitsStyle = .full // Options: .short, .abbreviated, .full
+    formatter.unitsStyle = .short // Options: .short, .abbreviated, .full
     
     return formatter.localizedString(for: date, relativeTo: Date())
+}
+
+func applyFormat(_ timestamp: String?) -> String {
+    if let timestamp {
+        var relativeTime: String {
+                guard let date = parsePostgresDate(timestamp) else { return "Invalid date" }
+                return formatRelativeDate(from: date)
+        }
+        
+        return relativeTime
+    }
+    
+    return "Never"
 }

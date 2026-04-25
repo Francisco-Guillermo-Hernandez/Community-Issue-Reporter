@@ -36,8 +36,11 @@ struct CustomCalendar: UIViewRepresentable {
         view.calendar = calendar
         view.delegate = context.coordinator
         view.tintColor = .orange
-//        view.setContentHuggingPriority(.defaultHigh, for: .vertical)
-//        view.setContentCompressionResistancePriority(.required, for: .vertical)
+        
+        // Disable years below 2026
+        if let startDate = calendar.date(from: DateComponents(year: 2026, month: 1, day: 1)) {
+            view.availableDateRange = DateInterval(start: startDate, end: .distantFuture)
+        }
 
         // Selection behavior
         let selection = UICalendarSelectionSingleDate(delegate: context.coordinator)

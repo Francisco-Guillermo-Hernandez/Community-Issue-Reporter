@@ -23,7 +23,8 @@ struct BasicMetadata {
     let deviceOrientation: DeviceOrientation
 }
 
-struct MediaResources {
+struct MediaResources: Identifiable {
+    let id = UUID()
     let type: MediaTypes
     let data: UIImage?
     let metadata: BasicMetadata
@@ -36,24 +37,22 @@ struct PhotoChooser: View {
     @State private var isCameraPresented: Bool
     @State private var cameraCompletion: (([MediaResources]) -> Void)?
     @State private var previewImage: UIImage?
+    @State private var previewID: UUID?
     @State private var isImagePreviewPresented: Bool
     @State var orientation = UIDevice.current.orientation
     
     var onSelect: ([MediaResources]) -> Void
     var onDelete: (Int) -> Void
     
-    init(onSelect:  @escaping ([MediaResources]) -> Void, onDelete: @escaping (Int) -> Void) {
+    init(onSelect: @escaping ([MediaResources]) -> Void, onDelete: @escaping (Int) -> Void) {
         self.onSelect = onSelect
         self.onDelete = onDelete
-        self.selectedPhotoItems = []
-        self.selectedImages = []
         self.isCameraPresented = false
         self.isImagePreviewPresented = false
+        self.previewID = nil
     }
     
     var body: some View {
-       
-        
         VStack {
             VStack {
                 HStack(spacing: 16) {
@@ -64,10 +63,8 @@ struct PhotoChooser: View {
                     } label: {
                         HStack {
                             Image(systemName: "camera")
-                                
                             Text("Take Photo")
                                 .font(.callout.bold())
-                               
                         }
                         .foregroundStyle(Color.theme.foreground)
                         .frame(maxWidth: .infinity)
@@ -76,17 +73,24 @@ struct PhotoChooser: View {
                             Capsule()
                                 .fill(Color.theme.muted)
                         )
-                            
                     }
                     .buttonStyle(.borderless)
                     
-                   
-                    
-                    PhotosPicker(selection: $selectedPhotoItems, maxSelectionCount: 6, matching: .images) {
-                    
+                    PhotosPicker(
+                        selection: $selectedPhotoItems,
+                        maxSelectionCount: 6,
+                        matching: .any(
+                            of: [
+                                .images, .panoramas,
+                                .videos,
+                                .not(.screenshots),
+                                .not(.screenRecordings),
+                                .not(.spatialMedia),
+                            ]
+                        )
+                    ) {
                         HStack {
                             Image(systemName: "photo.on.rectangle")
-                               
                             Text("Gallery")
                                 .font(.callout.bold())
                         }
@@ -107,33 +111,30 @@ struct PhotoChooser: View {
                 }
                 
                 Divider()
-                    .padding(.bottom, 8)
-                    .padding(.top, 8)
+                    .padding(.vertical, 8)
                 
                 ScrollView(.horizontal, showsIndicators: true) {
                     LazyHStack(spacing: .themeSpacing * 4) {
-                        ForEach(0..<selectedImages.count, id: \.self) { index in
+                        ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, resource in
                             ZStack(alignment: .topLeading) {
-//                                GeometryReader { proxy in
-                                Image(uiImage: selectedImages[index].data!)
+                                if let imageData = resource.data {
+                                    Image(uiImage: imageData)
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
                                         .frame(width: 80, height: 80)
-//                                        .frame(width: proxy.size.width / 4, height: proxy.size.height / 4)
                                         .clipped()
                                         .clipShape(RoundedRectangle(cornerRadius: 4))
                                         .contentShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                                         .onTapGesture {
-                                            showPreview(for: selectedImages[index].data!)
-                                            
+                                            showPreview(for: resource)
                                         }
                                         .onLongPressGesture(minimumDuration: 0.4) {
                                             triggerHaptic()
-                                            showPreview(for: selectedImages[index].data!)
+                                            showPreview(for: resource)
                                         }
-                                        .matchedTransitionSource(id: "transition:openPreview", in: nameSpace)
+                                        .matchedTransitionSource(id: resource.id, in: nameSpace)
                                         .sensoryFeedback(.impact(weight: .medium), trigger: isImagePreviewPresented)
-//                                }
+                                }
                                 
                                 Button {
                                     deleteImage(at: index)
@@ -153,22 +154,19 @@ struct PhotoChooser: View {
                 }
             }
             .sheet(isPresented: $isCameraPresented) {
-                ImagePicker(sourceType: .camera) { image in
-                    if let image {
-                        cameraCompletion?([image])
+                ImagePicker(sourceType: .camera) { resource in
+                    if let resource {
+                        cameraCompletion?([resource])
                     }
                     cameraCompletion = nil
                     isCameraPresented = false
                 }
             }
             .fullScreenCover(isPresented: $isImagePreviewPresented) {
-                
-                if isImagePreviewPresented, let previewImage {
+                if isImagePreviewPresented, let previewImage, let previewID {
                     ZStack {
-//                        BackgroundClearView()
                         Rectangle()
                             .opacity(0.001)
-//                            .fill(.clear)
                             .ignoresSafeArea()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .onTapGesture {
@@ -189,39 +187,16 @@ struct PhotoChooser: View {
                                 }
                         }
                     }
-                    .navigationTransition(.zoom(sourceID: "transition:openPreview", in: nameSpace))
-//                    .transition(.opacity)
-//                    .animation(.easeInOut(duration: 0.2), value: isImagePreviewPresented)
+                    .navigationTransition(.zoom(sourceID: previewID, in: nameSpace))
                 }
-               
             }
-            if let previewImage {}
         }
-    }
-    
-    
-    
-    private struct BackgroundClearView: UIViewRepresentable {
-        func makeUIView(context: Context) -> UIView {
-            let view = UIView()
-            DispatchQueue.main.async {
-                // Reach up the view hierarchy and clear the modal container’s background
-                view.superview?.superview?.backgroundColor = .clear
-            }
-            return view
-        }
-
-        func updateUIView(_ uiView: UIView, context: Context) {}
     }
     
     private func takePhotoUsingCamera(onComplete: @escaping ([MediaResources]) -> Void) {
-        isCameraPresented = true
-        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
-            return
-        }
-
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else { return }
         cameraCompletion = onComplete
-       
+        isCameraPresented = true
     }
     
     private func handleSelectedImages(_ images: [MediaResources]) {
@@ -230,21 +205,22 @@ struct PhotoChooser: View {
     }
 
     private func deleteImage(at index: Int) {
-        guard selectedImages.indices.contains(index) else {
-            return
-        }
-
+        guard selectedImages.indices.contains(index) else { return }
         selectedImages.remove(at: index)
+        onDelete(index)
     }
 
-    private func showPreview(for image: UIImage) {
-        previewImage = image
+    private func showPreview(for resource: MediaResources) {
+        guard let data = resource.data else { return }
+        previewImage = data
+        previewID = resource.id
         isImagePreviewPresented = true
     }
 
     private func dismissPreview() {
         isImagePreviewPresented = false
         previewImage = nil
+        previewID = nil
     }
 
     private func triggerHaptic() {
@@ -252,8 +228,6 @@ struct PhotoChooser: View {
         generator.prepare()
         generator.impactOccurred()
     }
-
-    
 
     private func loadSelectedImages(from items: [PhotosPickerItem], onComplete: @escaping ([MediaResources]) -> Void) {
         Task {
@@ -263,7 +237,7 @@ struct PhotoChooser: View {
             for item in items {
                 if let data = try? await item.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
-                    images.append(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isPortrait ? .portrait: .landscape )))
+                    images.append(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isPortrait ? .portrait : .landscape)))
                 }
             }
 
@@ -274,35 +248,16 @@ struct PhotoChooser: View {
     }
 }
 
-//
-private struct BackgroundClearView: UIViewRepresentable {
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        DispatchQueue.main.async {
-            // Reach up the view hierarchy and clear the modal container’s background
-            view.superview?.superview?.backgroundColor = .clear
-        }
-        return view
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {}
-}
-
 #Preview {
     PhotoChooser(
-        onSelect: { _ in
-            
-        },
-        onDelete: { _ in
-        
-        }
+        onSelect: { _ in },
+        onDelete: { _ in }
     )
 }
 
 struct ImagePicker: UIViewControllerRepresentable {
     let sourceType: UIImagePickerController.SourceType
     let onImagePicked: (MediaResources?) -> Void
-    
     
     func makeCoordinator() -> Coordinator {
         Coordinator(onImagePicked: onImagePicked)
@@ -317,13 +272,9 @@ struct ImagePicker: UIViewControllerRepresentable {
         return picker
     }
 
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
-        
-    }
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 
     final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-        @State var orientation = UIDevice.current.orientation
-        
         private let onImagePicked: (MediaResources?) -> Void
 
         init(onImagePicked: @escaping (MediaResources?) -> Void) {
@@ -336,7 +287,8 @@ struct ImagePicker: UIViewControllerRepresentable {
 
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             let image = info[.originalImage] as? UIImage
-            onImagePicked(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isLandscape ? .landscape: .portrait)))
+            let orientation = UIDevice.current.orientation
+            onImagePicked(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isLandscape ? .landscape : .portrait)))
         }
     }
 }

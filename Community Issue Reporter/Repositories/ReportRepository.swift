@@ -9,6 +9,7 @@ import Foundation
 import CoreLocation
 
 typealias ErrorHandler = @Sendable (Error) -> Void
+typealias Reports = PaginatedResponse<Report>
 
 struct ReportRepository {
     static func list(onError: ErrorHandler) async -> [IssueMarker] {
@@ -46,13 +47,38 @@ struct ReportRepository {
         }
     }
     
+    static func listByUser(page: Int, onComplete: @escaping (Reports) -> Void, onError: ErrorHandler) async {
+        do {
+            let result = try await ReportsService().fetchReportByUser(
+                    q: PaginatedRequestQueryParams(
+                        page: page,
+                        limit: 16
+                    )
+                )
+            onComplete(result)
+        } catch {
+            onError(error)
+        }
+    }
+    
+    static func delete(_ reportId: String, onComplete: @escaping (GenericResponse) -> Void, onError: ErrorHandler) async {
+        do {
+            
+           let result = try await ReportsService().deleteReport(by: reportId)
+            onComplete(result)
+            
+        } catch {
+            onError(error)
+        }
+    }
+    
     static func create(report: Report, locator: Locator, onError: ErrorHandler) async  -> String {
         do {
             let response = try await ReportsService().createReport(
                 report: Report(
                     coordinate: report.coordinate,
                     address: report.address,
-                    title: "",
+                    title: report.title,
                     description: report.description,
                     severityId: report.severityId,
                     statusId: report.statusId,

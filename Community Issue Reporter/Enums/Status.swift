@@ -20,17 +20,17 @@ enum IssueStatus: String, CaseIterable, Identifiable {
     
     var title: String {
         switch self {
-            case .reported: return "Reported"
-            case .confirmed: return "Confirmed"
-            case .inProgress: return "In Progress"
-            case .petitionToSign: return "Petition to Sign"
-            case .fixed: return "Fixed"
+            case .reported: return String(localized:"Reported")
+            case .confirmed: return String(localized: "Confirmed")
+            case .inProgress: return String(localized: "In Progress")
+            case .petitionToSign: return String(localized: "Petition to Sign")
+            case .fixed: return String(localized: "Fixed")
         }
     }
     
     var color: Color {
         switch self {
-            case .reported: return .red
+            case .reported: return .pink
             case .inProgress: return .orange
             case .fixed: return .blue
             case .petitionToSign: return .purple

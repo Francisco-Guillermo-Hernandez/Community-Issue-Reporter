@@ -22,7 +22,7 @@ enum Categories: String, CaseIterable, Codable {
     
     var title : String {
         switch self {
-            case .all: return "All"
+        case .all: return String(localized: "All")
             case .prevention: return "Prevention"
             case .corrective: return "Corrective"
             case .repair: return "Repair"

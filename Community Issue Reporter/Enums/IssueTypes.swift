@@ -5,7 +5,7 @@
 //  Created by Francisco Hernandez on 21/2/26.
 //
 
-import Foundation
+import SwiftUI
 
 enum IssueTypes: String, CaseIterable, Identifiable {
     case all = "asterisk.circle"
@@ -18,15 +18,15 @@ enum IssueTypes: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .all:
-            return "All"
+            return String(localized: "All")
         case .road:
-            return "Road"
+            return String(localized: "Road")
         case .publicSpace:
-            return "Public Space"
+            return String(localized: "Public Space")
         case .building:
-            return "Building"
+            return String(localized: "Building")
         case .other:
-            return "Other"
+            return String(localized: "Other")
         }
     }
     
@@ -42,6 +42,21 @@ enum IssueTypes: String, CaseIterable, Identifiable {
             return 4
         default:
             return 1
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .road:
+            return .red
+        case .publicSpace:
+            return .red
+        case .building:
+            return .red
+        case .other:
+            return .red
+        default:
+            return .primary
         }
     }
 

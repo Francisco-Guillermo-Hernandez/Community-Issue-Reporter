@@ -18,13 +18,13 @@ enum Severity: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .all:
-            return "All"
+            return String(localized:"All")
         case .low:
-            return "Low"
+            return String(localized: "Low")
         case .medium:
-            return "Medium"
+             return String(localized: "Medium")
         case .high:
-            return "High"
+             return String(localized:"High")
         }
     }
     

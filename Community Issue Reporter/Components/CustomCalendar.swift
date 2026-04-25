@@ -35,6 +35,7 @@ struct CustomCalendar: UIViewRepresentable {
         let view = UICalendarView()
         view.calendar = calendar
         view.delegate = context.coordinator
+        view.tintColor = .orange
 //        view.setContentHuggingPriority(.defaultHigh, for: .vertical)
 //        view.setContentCompressionResistancePriority(.required, for: .vertical)
 

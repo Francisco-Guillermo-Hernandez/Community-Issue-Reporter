@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct SearchBar: View {
-    
     @Binding var text: String
     let onSubmit: () -> Void
     let onFocusChange: (Bool) -> Void
     let onUserProfileTap: () -> Void
     @FocusState.Binding var isFocused: Bool
+    let profileNamespace: Namespace.ID
 
     var body: some View {
         
@@ -74,8 +74,9 @@ struct SearchBar: View {
                                 .frame(width: 48, height: 48)
                                 .foregroundStyle(.white)
                                 .background(.gray, in: .circle)
-                                .transition(.blurReplace)
+//                                .transition(.blurReplace)
                         }
+                        .matchedTransitionSource(id: "openProfile", in: profileNamespace)
                     }
                 }
             }

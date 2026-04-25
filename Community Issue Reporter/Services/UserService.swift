@@ -18,17 +18,7 @@ struct UserService {
         return try await client.post(path: "auth/Google/tokenSignInOrLogin", body: payload)
     }
     
-    func logout() {
-        // TODO: implement logic to perform a logout.
+    func loginAsVisitor() async throws -> LoginWithOAuthProviderResponse {
+        return try await client.post(path: "token/generate/for/visitors", body: [String: String]())
     }
-    
-    func isLoggedIn() -> Bool {
-        return false
-    }
-    
-    func getUser() -> String? {
-        return nil
-    }
-    
-    
 }

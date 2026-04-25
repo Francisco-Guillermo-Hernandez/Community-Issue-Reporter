@@ -15,7 +15,7 @@ struct PetitionsService {
     }
     
     func fetchPetitions() async throws -> [Petition] {
-        return try await self.client.get(path: "petitions", withOAuth: true)
+        return try await self.client.get(path: "petitions/", withOAuth: true)
     }
     
     func fetchPetition(id: Int) async throws -> Petition {
@@ -23,7 +23,7 @@ struct PetitionsService {
     }
     
     func createPetition(petition: Petition) async throws -> GenericResponse {
-        return try await self.client.post(path: "petitions", body: petition, withOAuth: true)
+        return try await self.client.post(path: "petitions/create", body: petition, withOAuth: true)
     }
     
     func updatePetition(id: String, petition: Petition) async throws -> GenericResponse {

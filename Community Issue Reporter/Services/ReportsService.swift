@@ -15,7 +15,7 @@ struct ReportsService {
     }
 
     func fetchReports() async throws -> [Report] {
-        return try await client.get(path: "reports", withOAuth: true)
+        return try await client.get(path: "reports/", withOAuth: true)
     }
 
     func fetchReport(reportId: String) async throws -> Report {
@@ -24,6 +24,10 @@ struct ReportsService {
     
     func createReport(report: Report, headers: Array<HTTPHeader>) async throws -> GenericResponse {
         return try await client.post(path: "reports/create", body: report, headers: headers, withOAuth: true)
+    }
+    
+    func deleteReport(by reportId: String) async throws -> GenericResponse {
+        return try await client.delete(path: "reports/\(reportId)", body: [String: String](), headers: [],  withOAuth: true)
     }
     
     func attachPicture(reportId: String, imagesData: [Data]) async throws -> Array<GenericResponse> {
@@ -44,5 +48,9 @@ struct ReportsService {
             formFiles: files,
             withOAuth: true,
         )
+    }
+    
+    func fetchReportByUser(q: PaginatedRequestQueryParams) async throws -> PaginatedResponse<Report> {
+        return try await client.get(path: "reports/byUser", query: q, withOAuth: true,)
     }
 }

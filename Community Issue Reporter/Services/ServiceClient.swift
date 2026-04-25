@@ -19,8 +19,8 @@ struct ServiceClient {
     private let decoder: JSONDecoder
     private let delimiter = "/"
     
-    private var oAuthHeader: HTTPHeader {
-        let token = KeychainService.getToken()
+    private func getOAuthHeader(t: TokenType) -> HTTPHeader {
+        let token = KeychainService.getToken(t)
         return HTTPHeader(name: "Authorization", content: "Bearer \(token)")
     }
 
@@ -30,13 +30,34 @@ struct ServiceClient {
         self.decoder = ServiceClient.makeJSONDecoder()
     }
 
-    func get<T: Decodable>(path: String, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> T {
-        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
+    fileprivate func queryBuilder<Q: Encodable>(_ query: Q?, _ url: inout URL) {
+        if let query = query, let dict = query.dictionary {
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            let queryItems = dict.compactMap { key, value -> URLQueryItem? in
+                return URLQueryItem(name: key, value: "\(value)")
+            }
+            components?.queryItems = queryItems
+            if let updatedURL = components?.url {
+                url = updatedURL
+            }
+        }
+    }
+    
+    func gets<T: Decodable, Q: Encodable>(
+        path: String,
+        query: Q? = nil,
+        headers: Array<HTTPHeader> = [],
+        withOAuth: Bool = false
+    ) async throws -> T {
+        let sanitizedPath = path.hasPrefix(delimiter) ? String(path.dropFirst()) : path
         guard let baseURL else {
             throw ServiceError.baseURLMissing
         }
 
-        let url = baseURL.appendingPathComponent(sanitizedPath)
+        var url = baseURL.appendingPathComponent(sanitizedPath)
+        
+        queryBuilder(query, &url)
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
@@ -47,6 +68,7 @@ struct ServiceClient {
         }
         
         if withOAuth {
+            let oAuthHeader = getOAuthHeader(t: .query)
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 
@@ -63,7 +85,7 @@ struct ServiceClient {
     }
     
     func post<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> V {
-        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
+        let sanitizedPath = path.hasPrefix(delimiter) ? String(path.dropFirst()) : path
         guard let baseURL else {
             throw ServiceError.baseURLMissing
         }
@@ -73,14 +95,56 @@ struct ServiceClient {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
+        if withOAuth {
+            let oAuthHeader = getOAuthHeader(t: .mutation)
+            request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
+        }
+
         if headers.count > 0 {
             for header in headers {
                 request.setValue(header.content, forHTTPHeaderField: header.name)
             }
         }
         
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(body)
+        
+        let (data, response) = try await session.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ServiceError.invalidResponse
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Error Response Body: \(jsonString)")
+            }
+            throw ServiceError.httpStatus(httpResponse.statusCode)
+        }
+        
+        return try decoder.decode(V.self, from: data)
+    }
+    
+    func delete<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> V {
+        let sanitizedPath = path.hasPrefix(delimiter) ? String(path.dropFirst()) : path
+        guard let baseURL else {
+            throw ServiceError.baseURLMissing
+        }
+        
+        let url = baseURL.appendingPathComponent(sanitizedPath)
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
         if withOAuth {
+            let oAuthHeader = getOAuthHeader(t: .mutation)
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
+        }
+
+        if headers.count > 0 {
+            for header in headers {
+                request.setValue(header.content, forHTTPHeaderField: header.name)
+            }
         }
         
         let encoder = JSONEncoder()
@@ -104,7 +168,7 @@ struct ServiceClient {
         headers: Array<HTTPHeader> = [],
         withOAuth: Bool = false
     ) async throws -> V {
-        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
+        let sanitizedPath = path.hasPrefix(delimiter) ? String(path.dropFirst()) : path
         guard let baseURL else {
             throw ServiceError.baseURLMissing
         }
@@ -114,14 +178,15 @@ struct ServiceClient {
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
+        if withOAuth {
+            let oAuthHeader = getOAuthHeader(t: .mutation)
+            request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
+        }
+
         if headers.count > 0 {
             for header in headers {
                 request.setValue(header.content, forHTTPHeaderField: header.name)
             }
-        }
-        
-        if withOAuth {
-            request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
         
         let encoder = JSONEncoder()
@@ -146,13 +211,11 @@ struct ServiceClient {
         formFiles: [MultipartFormFile] = [],
         withOAuth: Bool = false
     ) async throws -> V {
-        let sanitizedPath = path.trimmingCharacters(in: CharacterSet(charactersIn: delimiter))
+        let sanitizedPath = path.hasPrefix(delimiter) ? String(path.dropFirst()) : path
         guard let baseURL else {
             throw ServiceError.baseURLMissing
         }
 
-        print("Sanitized path: \(sanitizedPath)")
-        
         let url = baseURL.appendingPathComponent(sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
@@ -167,6 +230,7 @@ struct ServiceClient {
         }
         
         if withOAuth {
+            let oAuthHeader = getOAuthHeader(t: .mutation)
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 
@@ -263,6 +327,8 @@ struct ServiceClient {
     private static func makeJSONDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
         let formatter = ISO8601DateFormatter()
+//        decoder.keyDecodingStrategy = .convertFromSnakeCase
+
         
         formatter.formatOptions = [
             .withInternetDateTime,
@@ -281,6 +347,8 @@ struct ServiceClient {
         return decoder
     }
 }
+
+struct EmptyQuery: Encodable {}
 
 private extension Data {
     mutating func appendString(_ string: String) {
@@ -301,4 +369,32 @@ struct MultipartFormFile {
 struct HTTPHeader {
     var name: String
     var content: String
+}
+
+extension Encodable {
+    var dictionary: [String: Any]? {
+        guard let data = try? JSONEncoder().encode(self) else { return nil }
+        return (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)) as? [String: Any]
+    }
+}
+
+
+extension ServiceClient {
+    
+    func get<T: Decodable, Q: Encodable>(
+            path: String,
+            query: Q,
+            headers: [HTTPHeader] = [],
+            withOAuth: Bool = false
+        ) async throws -> T {
+           return try await gets(path: path, query: query, headers: headers, withOAuth: withOAuth)
+        }
+    
+    func get<T: Decodable>(
+            path: String,
+            headers: [HTTPHeader] = [],
+            withOAuth: Bool = false
+        ) async throws -> T {
+           return try await gets(path: path, query: nil as EmptyQuery?, headers: headers, withOAuth: withOAuth)
+        }
 }

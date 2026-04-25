@@ -131,13 +131,6 @@ struct LicensesSubView: View {
             .navigationTitle(subViewName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "arrow.down.backward")
-                    }
-                }
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button {

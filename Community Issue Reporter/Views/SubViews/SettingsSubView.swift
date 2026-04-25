@@ -103,8 +103,8 @@ struct SettingsSubView: View {
                     Text("")
                 }
             }
-            .scrollDisabled(true)
-            .scrollContentBackground(.hidden)
+//            .scrollDisabled(true)
+//            .scrollContentBackground(.hidden)
             .listSectionSpacing(32)
             .toolbarTitleDisplayMode(.inline)
             .navigationTitle(subViewName)

@@ -12,6 +12,8 @@ import SwiftUI
 internal import Combine
 
 struct ReportsView: View {
+    @Namespace private var profileNamespace
+    @Namespace private var searchPlacesNamespace
     @State private var cameraPosition: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 13.6929, longitude: -89.2182),
@@ -85,12 +87,15 @@ struct ReportsView: View {
                         showSearchOverlay = false
                     },
                     onFocusChange: { isFocused in
-                        showSearchOverlay = isFocused
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                showSearchOverlay = isFocused
+                            }
                     },
                     onUserProfileTap: {
                         showUserProfileOverlay.toggle()
                     },
-                    isFocused: $isSearchFocused
+                    isFocused: $isSearchFocused,
+                    profileNamespace: profileNamespace
                 )
                 
                 StatusFilterRow(selectedStatuses: $selectedStatuses)
@@ -117,6 +122,8 @@ struct ReportsView: View {
         }
         .sheet(isPresented: $showUserProfileOverlay) {
             UserProfileView()
+//                .navigationTransition(
+//                    .zoom(sourceID: "openProfile", in: profileNamespace))
         }
         .sheet(item: $expandedItem) { issue in
             DetailView(issue: issue)
@@ -124,7 +131,7 @@ struct ReportsView: View {
         .overlay {
             /// customized overlay to show the list of places into a List
             if showSearchOverlay {
-                placesOverlay()
+                placesOverlay(p: profileNamespace)
             }
             
         }
@@ -133,6 +140,7 @@ struct ReportsView: View {
             showSearchOverlay = false
         }
         .task {
+            guard !Task.isCancelled else { return }
             issues = await ReportRepository.list(onError: { error in
                 print(error)
             })
@@ -162,7 +170,7 @@ struct ReportsView: View {
         
         Task {
             
-            try? await Task.sleep(nanoseconds: 500_000_000)
+            try? await Task.sleep(for: .milliseconds(550))
             guard !Task.isCancelled else { return }
             
             guard let request = MKReverseGeocodingRequest(location: location) else { return }
@@ -260,7 +268,7 @@ struct ReportsView: View {
     }
     
     @ViewBuilder
-    private func placesOverlay() -> some View {
+    private func placesOverlay(p profileNamespace: Namespace.ID) -> some View {
         Rectangle()
             .fill(.ultraThinMaterial)
             .background(.background.opacity(0.25))
@@ -277,7 +285,8 @@ struct ReportsView: View {
                             showSearchOverlay = isFocused
                         },
                         onUserProfileTap: {},
-                        isFocused: $isOverlaySearchFocused
+                        isFocused: $isOverlaySearchFocused,
+                        profileNamespace: profileNamespace
                     )
                     .padding(.leading, 16)
                     .padding(.trailing, 16)
@@ -359,6 +368,7 @@ private struct IssuePin: View {
     }
 }
 
+// MARK - Custom badges to filter over the map
 private struct StatusFilterRow: View {
     @Binding var selectedStatuses: Set<IssueStatus>
     @State private var issueType: IssueTypes = .all

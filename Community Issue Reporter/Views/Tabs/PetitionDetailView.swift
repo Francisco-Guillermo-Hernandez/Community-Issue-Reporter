@@ -113,11 +113,11 @@ struct PetitionDetailView: View {
                     SectionHeader(title: "Comments")
                     VStack(spacing: 16) {
                        
-                        ForEach(1..<5) { _ in
-                            CommentRow(name: "Ethan Carter", time: "2d", message: "This pothole is really dangerous! I almost lost control of my car last night...................... demo deo demo demo")
-                            
-                            CommentRow(name: "Ethan ", time: "1d", message: "This ")
-                        }
+//                        ForEach(1..<5) { _ in
+//                            CommentRow(name: "Ethan Carter", time: "2d", message: "This pothole is really dangerous! I almost lost control of my car last night...................... demo deo demo demo")
+//                            
+//                            CommentRow(name: "Ethan ", time: "1d", message: "This ")
+//                        }
                         
                     }
                 }
@@ -176,7 +176,7 @@ struct SectionHeader: View {
 
 struct CommentRow: View {
     let name: String
-    let time: String
+    let time: Date
     let message: String
     
     var body: some View {
@@ -196,7 +196,7 @@ struct CommentRow: View {
                     Text(name)
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                    Text(time)
+                    Text(formatRelativeDate(from: time))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

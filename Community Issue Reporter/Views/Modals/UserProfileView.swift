@@ -7,12 +7,21 @@
 
 import SwiftUI
 
+struct ProfileOption: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let icon: String
+    let color: Color
+}
+
 struct UserProfileView: View {
+    @State private var path = NavigationPath()
     @State private var sheetSizePreference = "normal"
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.mySettings) private var settings
     @State private var showSheet = false
-    @State private var sheetDetents: Set<PresentationDetent> = [.fraction(0.55)]
+    @State private var sheetDetents: Set<PresentationDetent> = [.large]
     @State private var selectedOption: String = ""
     @EnvironmentObject var appState: AuthViewModel
     
@@ -20,14 +29,21 @@ struct UserProfileView: View {
         
     }
     
-    let options: [String] = ["Settings", "Licenses"]
+    let options: [ProfileOption] = [
+        ProfileOption(id: "op:reports", title: "My Reports", icon: "bubble.left.and.exclamationmark.bubble.right.fill", color: Color.blue),
+        ProfileOption(id: "op:comments", title: "My Comments", icon: "text.bubble.fill", color: Color.orange),
+        ProfileOption(id: "op:signPetitions", title: "My Sign petitions", icon: "signature", color: Color.purple),
+        ProfileOption(id: "op:licenses", title: "Licenses", icon: "text.page.fill", color: Color.green),
+        ProfileOption(id: "op:settings", title: "Settings", icon: "gear", color: Color.gray),
+        
+    ]
     
     var body: some View {
         NavigationStack {
             
-            VStack {
+            ScrollView(.vertical) {
                 
-                VStack(spacing: 6) {
+                VStack(spacing: 8) {
                     if let url = UserRepository.getProfilePictureURL() {
                         AsyncImage(url: url) { image in
                             image
@@ -57,58 +73,59 @@ struct UserProfileView: View {
                 
                 List(options, id: \.self) { option in
                     
-                    Button {
-                        selectedOption = option
-                        showSheet.toggle()
-                    } label: {
+                    NavigationLink(destination: destinationView(for: option)) {
                         HStack {
-                            Text(option)
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
+                            
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(option.color.slantedGradient)
+                                .frame(width: 48, height: 48)
+                                .overlay {
+                                    Image(systemName: option.icon)
+                                        .font(Font.system(size: 20, weight: .medium))
+                                        .foregroundStyle( Color.white)
+                                }
+                                
+                                .padding(.trailing, 8)
+                            
+                            
+                            Text(option.title)
+                                
+                           
+                           
                         }
-                        .contentShape(Rectangle())
+                        
                     }
-                    .buttonStyle(.plain)
-                    
-                    
                 }
+//                .listRowSeparator(.hidden)
+//                .listRowBackground(Color.clear)
+//                .listStyle(.plain)
+//                .listSectionSpacing(32)
+                .frame(height: 500)
                 .scrollContentBackground(.hidden)
                 .scrollDisabled(true)
-                .sheet(isPresented: $showSheet) {
-                    destinationView(for: selectedOption)
-                        .presentationDetents([.fraction(0.78)])
-                }
                 
-                VStack(spacing: 16) {
-                    
-                    Button(role: .destructive) {
-                        appState.logout()
-                        dismiss()
-                    } label: {
-                        Text("Log Out")
-                            .frame(maxWidth: .infinity)
-                            .fontWeight(.bold)
-                            .padding(8)
-                    }
-                    .buttonSizing(.flexible)
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.capsule)
-                    
+            }
+            .safeAreaInset(edge: .bottom) {
+                Button(role: .destructive) {
+                    appState.logout()
+                    dismiss()
+                } label: {
+                    Text("Log Out")
+                        .frame(maxWidth: .infinity)
+                        .fontWeight(.bold)
+                        .padding(8)
                 }
+                .buttonSizing(.flexible)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
                 .padding()
-                
+                .padding(.top, 0)
+               
             }
             .toolbar {
                 
                 ToolbarItem(placement: .title) {
                     Text("Profile")
-                }
-                
-                ToolbarItem(placement: .automatic) {
-                    Button("Close", systemImage: "checkmark") {
-                        dismiss()
-                    }
-                    .buttonStyle(.glassProminent)
                 }
             }
             .presentationDetents(sheetDetents)
@@ -118,14 +135,19 @@ struct UserProfileView: View {
     }
     
     @ViewBuilder
-    private func destinationView(for option: String) -> some View {
-        switch option {
-        case "Settings":
-            SettingsSubView(subViewName: option)
-        case "Licenses":
-            LicensesSubView(subViewName: option)
+    private func destinationView(for option: ProfileOption) -> some View {
+        
+        switch option.id {
+        case "op:settings":
+            SettingsSubView(subViewName: option.title)
+        case "op:licenses":
+            LicensesSubView(subViewName: option.title)
+        case "op:comments":
+            CommentsSubView(subViewName: option.title)
+        case "op:reports":
+            MyReportsSubView(subViewName: option.title)
         default:
-            Text("\(option) selected")
+            Text("\(option.id) selected")
         }
     }
     
@@ -142,4 +164,15 @@ struct UserProfileView: View {
 
 #Preview {
     UserProfileView()
+}
+
+
+extension Color {
+    var slantedGradient: LinearGradient {
+        LinearGradient(
+            colors: [self, self.opacity(0.8)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
 }

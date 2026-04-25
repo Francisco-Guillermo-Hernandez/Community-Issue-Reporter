@@ -143,7 +143,7 @@ struct MapPickerView: View {
           let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
 
           Task {
-              try? await Task.sleep(nanoseconds: 500_000_000)
+              try? await Task.sleep(for: .milliseconds(500))
               guard !Task.isCancelled else { return }
               guard let request = MKReverseGeocodingRequest(location: location) else { return }
               let mapItems = try? await request.mapItems

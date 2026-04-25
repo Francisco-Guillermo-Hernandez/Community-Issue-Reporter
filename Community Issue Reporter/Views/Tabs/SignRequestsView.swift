@@ -9,7 +9,8 @@ import SwiftUI
 
 
 struct SignRequestsView: View {
-    @State private var isPrimaryActionVisible: Bool = false
+    @Namespace private var namespace
+    @State private var isPrimaryActionVisible: Bool = true
     @State private var title: String?
     @State private var subtitle: String?
     @State private var activeSubtitleIndex: Int?
@@ -54,6 +55,8 @@ struct SignRequestsView: View {
                     Button("Add", systemImage: "plus") {
                         showCreateRequestView.toggle()
                     }
+                    .matchedTransitionSource(id: "openCreateRequest", in: namespace)
+
 
                     Menu {
                         
@@ -91,10 +94,13 @@ struct SignRequestsView: View {
             }
         }
         .task {
+            guard !Task.isCancelled else { return }
             petitions = await PetitionRepository.list()
         }
         .sheet(isPresented: $showCreateRequestView) {
             CreateRequestPetitionView()
+                .navigationTransition(
+                    .zoom(sourceID: "openCreateRequest", in: namespace))
         }
         .sensoryFeedback(.selection, trigger: subtitle != nil)
         

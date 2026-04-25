@@ -66,6 +66,7 @@ struct CreateReportView: View {
         
     }
     
+    /// Open report view with type of matter choosen
     private var description: some View {
         ReportView(onCompletion: { incomingMessage, alertType in
             message = incomingMessage

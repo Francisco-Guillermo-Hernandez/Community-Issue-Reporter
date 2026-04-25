@@ -25,8 +25,8 @@ struct customBottomToolbar: View {
             
             Button(action: performCommentActions) {
                 Image(systemName: "text.bubble")
-                    .font(Font.system(size: 17))
-                    .frame(width: 20, height: 20)
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(width: 36, height: 36)
                     .background(Color.black.opacity(0.001))
             }
             .accessibilityLabel("Comment")
@@ -36,8 +36,8 @@ struct customBottomToolbar: View {
             
             Button(action: performPhotoActions) {
                 Image(systemName: "photo.badge.plus")
-                    .font(Font.system(size: 17))
-                    .frame(width: 20, height: 20)
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(width: 36, height: 36)
                     .background(Color.black.opacity(0.001))
                     .symbolRenderingMode(pictureState ? .multicolor : .monochrome)
                 
@@ -49,8 +49,8 @@ struct customBottomToolbar: View {
             
             Button(action: performAffectedActions) {
                 Image(systemName: affectedState ? "person.fill.xmark" :  "person.fill.checkmark")
-                    .font(Font.system(size: 17))
-                    .frame(width: 20, height: 20)
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(width: 36, height: 36)
                     .background(Color.black.opacity(0.001))
                     .symbolRenderingMode(.palette )
                     .foregroundStyle(
@@ -70,8 +70,8 @@ struct customBottomToolbar: View {
             
             Button(action: performNotificationActions) {
                 Image(systemName: "bell.badge")
-                    .font(Font.system(size: 17))
-                    .frame(width: 20, height: 20)
+                    .font(.system(size: 18, weight: .semibold))
+                    .frame(width: 36, height: 36)
                     .background(Color.black.opacity(0.001))
                     .symbolRenderingMode(notificationState ? .multicolor : .monochrome)
                     .symbolEffect(

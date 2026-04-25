@@ -22,6 +22,7 @@ struct CommentsSectionView: View {
     @State private var canLoadMore: Bool = true
     @State private var isSubmitting: Bool = false
     @State private var paginatedResult: PaginatedResponse<Comment>
+    @State private var limit: Int = 16
     
     init(issue: IssueMarker) {
         self.issue = issue
@@ -40,32 +41,64 @@ struct CommentsSectionView: View {
         NavigationStack {
             ScrollView(.vertical) {
                 LazyVStack(spacing: 16) {
-                    ForEach(comments) { c in
-                        CommentRow(name: c.name!, time: "", message: c.message)
+                    if comments.isEmpty {
+                        ContentUnavailableView {
+                            Label("No comments yet.", systemImage: "bubble.left.and.text.bubble.right")
+                        } description: {
+                            Text("Please tell us how that problem affects you.")
+                        } actions: {
+                            
+                        }
+                        .containerRelativeFrame(.vertical)
+                    } else {
+                        ForEach(comments) { c in
+                            CommentRow(
+                                name: c.name!,
+                                time: c.created_at!,
+                                message: c.message
+                            )
+                            .task {
+                                if let lastComment = self.comments.last, c.id == lastComment.id {
+                                    await loadMoreComments()
+                                }
+                            }
+                        }
+                    }
+                    
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .padding()
                     }
                 }
                 .padding(.top, 16)
                 .padding(.horizontal, 16)
             }
             .task {
+                self.isLoading = true
+                guard !Task.isCancelled else { return }
                 await CommentsRepository.list(
                     issue.id,
                     page: currentPage,
-                    limit: 16,
+                    limit: self.limit,
                     onComplete: { result in
                         self.paginatedResult = result
                         self.comments.append(contentsOf: result.documents!)
-                    },
-                    onError: { _ in
                         
-                    }
+                        if result.hasNext {
+                            self.currentPage += 1
+                        }
+                    },
+                    onError: { _ in }
                 )
+                
+                self.isLoading = false
             }
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Comments")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", systemImage: "xmark") {
+                    Button(role: .close) {
                         dismiss()
                     }
                 }
@@ -132,11 +165,11 @@ struct CommentsSectionView: View {
     
     private func addComment() {
         if !commentInput.isEmpty {
-        
+            
             self.isSubmitting = true
             let comment = Comment(
                 id: UUID().uuidString,
-                created_at: "",
+                created_at: Date(),
                 name: "Anonymous",
                 report_id: issue.id,
                 message: commentInput,
@@ -144,10 +177,10 @@ struct CommentsSectionView: View {
             
             /// lest add the comment at the top
             comments.insert(comment, at: 0)
-
+            
             disableInput = true
             isTextFieldFocused = false
-              
+            
             Task {
                 
                 await CommentsRepository.post(
@@ -171,36 +204,40 @@ struct CommentsSectionView: View {
     
     
     func loadMoreComments() async {
-
-        guard !isLoading && canLoadMore else { return }
         
-        isLoading = true
+        guard !self.isLoading && self.canLoadMore else { return }
+        guard !Task.isCancelled else { return }
+        
+        self.isLoading = true
         
         await CommentsRepository.list(
             issue.id,
             page: self.currentPage,
+            limit: self.limit,
             onComplete: { result in
-                self.paginatedResult = result
+                let existingIds = Set(self.comments.map { $0.id })
+                guard let documents = result.documents else { return }
+                let uniqueNewComments = documents.filter { !existingIds.contains($0.id) }
+                
+                if !uniqueNewComments.isEmpty {
+                    self.comments.append(contentsOf: uniqueNewComments)
+                    self.canLoadMore = result.hasNext
+                    if self.canLoadMore { self.currentPage += 1 }
+                } else {
+                    self.canLoadMore = false
+                }
             },
-            onError: { _ in isLoading = false }
+            onError: { _ in self.isLoading = false }
         )
-       
-        if let newComments = self.paginatedResult.documents, !newComments.isEmpty {
-            self.comments.append(contentsOf: newComments)
-            self.currentPage += 1
-            self.canLoadMore = self.paginatedResult.hasNext
-        } else {
-            self.canLoadMore = false
-        }
         
         isLoading = false
     }
-
+    
 }
 
 #Preview {
     
-
+    
     let coordinate = CLLocationCoordinate2D(
         latitude: 37.7749,
         longitude: -122.4194

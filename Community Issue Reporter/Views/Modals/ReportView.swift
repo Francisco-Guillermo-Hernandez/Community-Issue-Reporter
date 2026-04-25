@@ -5,7 +5,6 @@
 //  Created by Francisco Hernandez on 20/2/26.
 //
 
-import PhotosUI
 import SwiftUI
 import UIKit
 import MapKit
@@ -24,15 +23,9 @@ struct ReportView: View {
     @State private var descriptionText: String
     @State private var showDiscardAlert: Bool
     @State private var isSubmitting: Bool
-    @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var selectedImages: [UIImage] = []
-    @State private var isCameraPresented: Bool
-    @State private var cameraCompletion: (([UIImage]) -> Void)?
-    @State private var previewImage: UIImage?
-    @State private var isImagePreviewPresented: Bool
     @State private var showMapPickerSheet: Bool
     @State private var title: String = ""
-    
     @State private var locator: Locator
     @Binding var showCancelButton: Bool
   
@@ -45,10 +38,7 @@ struct ReportView: View {
         self.descriptionText = ""
         self.showDiscardAlert = false
         self.isSubmitting = false
-        self.selectedPhotoItems = []
         self.selectedImages = []
-        self.isCameraPresented = false
-        self.isImagePreviewPresented = false
         self.showMapPickerSheet = false
         self.locator = .init(countryCode: "", country: "", region: "", city: "")
         self.onCompletion = onCompletion
@@ -77,83 +67,15 @@ struct ReportView: View {
                     
                     /// This section is dedicated to select the evidence of the issue
                     Section("Photos") {
-                        VStack {
-                            HStack(spacing: 16) {
-                                Button {
-                                    takePhotoUsingCamera { images in
-                                        handleSelectedImages(images)
-                                    }
-                                } label: {
-                                    Label("Camera", systemImage: "camera")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(.bordered)
-                                .tint(.secondary)
-                                
-                                PhotosPicker(selection: $selectedPhotoItems, maxSelectionCount: 6, matching: .images) {
-                                    Label("Gallery", systemImage: "photo.on.rectangle")
-                                        .frame(maxWidth: .infinity)
-                                }
-                                .buttonStyle(.bordered)
-                                .tint(.secondary)
-                                .onChange(of: selectedPhotoItems) { _, newItems in
-                                    loadSelectedImages(from: newItems) { images in
-                                        handleSelectedImages(images)
-                                    }
-                                }
+                        PhotoChooser(
+                            onSelect: { images in
+                                self.selectedImages.append(contentsOf: images)
+                            },
+                            onDelete: { indexSet in
+                                self.selectedImages.remove(at: indexSet)
                             }
-                            
-                            Divider()
-                                .padding(.bottom, 8)
-                                .padding(.top, 8)
-                            
-                            ScrollView(.horizontal, showsIndicators: true) {
-                                LazyHStack(spacing: 12) {
-                                    ForEach(0..<selectedImages.count, id: \.self) { index in
-                                        ZStack(alignment: .topLeading) {
-                                            Image(uiImage: selectedImages[index])
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 80, height: 80)
-                                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                                .contentShape(RoundedRectangle(cornerRadius: 8))
-                                                .onTapGesture {
-                                                    showPreview(for: selectedImages[index])
-                                                }
-                                                .onLongPressGesture(minimumDuration: 0.4) {
-                                                    triggerHaptic()
-                                                    showPreview(for: selectedImages[index])
-                                                }
-                                            
-                                            Button {
-                                                deleteImage(at: index)
-                                            } label: {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .symbolRenderingMode(.multicolor)
-                                                    .font(Font.headline.bold())
-                                            }
-                                            .padding(4)
-                                        }
-                                    }
-                                }
-                                .padding(.vertical, 4)
-                            }
-                        }
-                        
+                        )
                     }
-                        
-//                        Button {
-//                            showMapPickerSheet.toggle()
-//                        } label: {
-//                            Text("Locate on map")
-//                        }
-                        
-//                        TextField("Address", text: $address)
-                        
-//                        TextInput(name: "Address", label: "", value: $address)
-//                            .disabled(true)
-                        
-//                    }
                     
                     ///
                     Section("Issue Details") {
@@ -183,12 +105,10 @@ struct ReportView: View {
                                     Text(level.title)
                                 }
                                 .tag(level.title)
-//                                .frame(maxWidth: .infinity, alignment: .leading)
                                 .tag(level)
                             }
                         }
                        
-                        
                     }
                     .padding(.horizontal, 8)
                     
@@ -219,7 +139,6 @@ struct ReportView: View {
                                 
                             )
                         }
-                        
                     }
                     
                    
@@ -230,14 +149,12 @@ struct ReportView: View {
                     
                     if showCancelButton {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button {
+                            Button(role: .close) {
                                 if isFormFilled {
                                     showDiscardAlert = true
                                 } else {
                                     dismiss()
                                 }
-                            } label: {
-                                Image(systemName: "xmark")
                             }
                             .accessibilityLabel("Close")
                             .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
@@ -268,7 +185,7 @@ struct ReportView: View {
                                         report: Report(
                                             coordinate: self.coordinate,
                                             address: self.address,
-                                            title: "Demo Issue",
+                                            title: self.title,
                                             description: self.descriptionText,
                                             severityId: self.severityLevel.identifier,
                                             statusId: 1,
@@ -284,6 +201,7 @@ struct ReportView: View {
                                     )
                                 
                                 if selectedImages.count > 0 {
+                                    print("there are images")
                                     await ImageEncoderService().prepareAndSend(
                                         reportId: reportId,
                                         images: selectedImages
@@ -312,43 +230,6 @@ struct ReportView: View {
                     }
                 }
                 .interactiveDismissDisabled(isFormFilled)
-                .sheet(isPresented: $isCameraPresented) {
-                    ImagePicker(sourceType: .camera) { image in
-                        if let image {
-                            cameraCompletion?([image])
-                        }
-                        cameraCompletion = nil
-                        isCameraPresented = false
-                    }
-                }
-            }
-            
-            if isImagePreviewPresented, let previewImage {
-                ZStack {
-                    Rectangle()
-                        .opacity(0.1)
-                        .ignoresSafeArea()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onTapGesture {
-                            dismissPreview()
-                        }
-                    
-                    GeometryReader { proxy in
-                        Image(uiImage: previewImage)
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 32))
-                            .shadow(radius: 16)
-                            .contentShape(RoundedRectangle(cornerRadius: 32))
-                            .frame(width: proxy.size.width - 32, height: proxy.size.height / 2)
-                            .position(x: proxy.size.width / 2 , y: proxy.size.height / 2)
-                            .onTapGesture {
-                                dismissPreview()
-                            }
-                    }
-                }
-                .transition(.opacity)
-                .animation(.easeInOut(duration: 0.2), value: isImagePreviewPresented)
             }
         }
         .sheet(isPresented: $showMapPickerSheet)  {
@@ -365,64 +246,7 @@ struct ReportView: View {
         }
     }
 
-    private func handleSelectedImages(_ images: [UIImage]) {
-        selectedImages = images
-        // TODO: Send `images` to the upload service.
-    }
-
-    private func deleteImage(at index: Int) {
-        guard selectedImages.indices.contains(index) else {
-            return
-        }
-
-        selectedImages.remove(at: index)
-    }
-
-    private func showPreview(for image: UIImage) {
-        previewImage = image
-        isImagePreviewPresented = true
-    }
-
-    private func dismissPreview() {
-        isImagePreviewPresented = false
-        previewImage = nil
-    }
-
-    private func triggerHaptic() {
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.prepare()
-        generator.impactOccurred()
-    }
-
-    private func takePhotoUsingCamera(onComplete: @escaping ([UIImage]) -> Void) {
-        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
-            return
-        }
-
-        cameraCompletion = onComplete
-        isCameraPresented = true
-    }
-
-    private func loadSelectedImages(
-        from items: [PhotosPickerItem],
-        onComplete: @escaping ([UIImage]
-    ) -> Void) {
-        Task {
-            var images: [UIImage] = []
-            images.reserveCapacity(items.count)
-
-            for item in items {
-                if let data = try? await item.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    images.append(image)
-                }
-            }
-
-            await MainActor.run {
-                onComplete(images)
-            }
-        }
-    }
+   
 }
 
 struct ImagePicker: UIViewControllerRepresentable {

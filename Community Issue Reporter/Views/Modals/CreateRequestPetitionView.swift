@@ -104,6 +104,7 @@ struct CreateRequestPetitionView: View {
         
             }
             .task {
+                guard !Task.isCancelled else { return }
                 self.reports = await ReportRepository.listReports(onError: { error in
                     print(error)
                 })
@@ -111,10 +112,8 @@ struct CreateRequestPetitionView: View {
             .toolbar {
                 
                 ToolbarItem(placement: .cancellationAction) {
-                    Button {
+                    Button(role: .close) {
                         dismiss()
-                    } label: {
-                        Label("Cancel", systemImage: "xmark")
                     }
                 }
                 
@@ -123,7 +122,7 @@ struct CreateRequestPetitionView: View {
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button {
+                    Button(role: .confirm) {
                         isSubmitting.toggle()
                         
                         Task {

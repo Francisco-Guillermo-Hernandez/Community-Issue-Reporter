@@ -27,7 +27,7 @@ struct TabBarView: View {
                SignRequestsView()
             }
             
-            Tab("My findings", systemImage: "bubble.left.and.exclamationmark.bubble.right.fill", value: 3) {
+            Tab("Insights", systemImage: "sparkles", value: 3) {
                 MyFindingsView()
             }
             

@@ -23,7 +23,7 @@ struct ReportView: View {
     @State private var descriptionText: String
     @State private var showDiscardAlert: Bool
     @State private var isSubmitting: Bool
-    @State private var selectedImages: [UIImage] = []
+    @State private var selectedImages: [MediaResources] = []
     @State private var showMapPickerSheet: Bool
     @State private var title: String = ""
     @State private var locator: Locator
@@ -54,183 +54,183 @@ struct ReportView: View {
     }
 
     var body: some View {
-        ZStack {
-            NavigationStack {
-                Form {
-                    /// This section is dedicated to select a location on the map
-                    Section("Location") {
-                        MiniMapLocator(coordinate: $coordinate, onExpandMap: { coordinate in
-                            self.coordinate = coordinate
-                            showMapPickerSheet.toggle()
-                        })
-                    }
-                    
-                    /// This section is dedicated to select the evidence of the issue
+        NavigationStack {
+            Form {
+                /// This section is dedicated to select a location on the map
+                Section("Location") {
+                    MiniMapLocator(coordinate: $coordinate, onExpandMap: { coordinate in
+                        self.coordinate = coordinate
+                        showMapPickerSheet.toggle()
+                    })
+                }
+                
+                /// This section is dedicated to select the evidence of the issue
                     Section("Photos") {
-                        PhotoChooser(
-                            onSelect: { images in
-                                self.selectedImages.append(contentsOf: images)
-                            },
-                            onDelete: { indexSet in
-                                self.selectedImages.remove(at: indexSet)
-                            }
-                        )
+                    PhotoChooser(
+                        onSelect: { images in
+                            print("Selected images: \(images.count)")
+                            self.selectedImages.append(contentsOf: images)
+                        },
+                        onDelete: { indexSet in
+                            self.selectedImages.remove(at: indexSet)
+                        }
+                    )
+                
                     }
+                
+                ///
+                Section("Issue Details") {
                     
-                    ///
-                    Section("Issue Details") {
-                        
-                        Picker("Issue type", selection: $issueType) {
-                            ForEach(IssueTypes.allCases, id: \.self) { issue in
-                                HStack(spacing: 80) {
-                                    Text(issue.title)
+                    Picker("Issue type", selection: $issueType) {
+                        ForEach(IssueTypes.allCases, id: \.self) { issue in
+                            HStack(spacing: 80) {
+                                Text(issue.title)
+                                
+                                Spacer()
+                                Image(systemName: issue.iconName)
                                     
-                                    Spacer()
-                                    Image(systemName: issue.iconName)
-                                        
-                                }
-                                
-                                .tag(issue)
                             }
-                        }
-                      
-
-                        
-                        Picker("Severity level", selection: $severityLevel) {
-                            ForEach(Severity.allCases, id: \.self) { level in
-                                HStack(spacing: 8) {
-                                   
-                                    Image(systemName: level.iconName)
-                                        .padding(.trailing, 10)
-                                    Text(level.title)
-                                }
-                                .tag(level.title)
-                                .tag(level)
-                            }
-                        }
-                       
-                    }
-                    .padding(.horizontal, 8)
-                    
-                    ///
-                    Section("Details") {
-                        
-
-                        VStack {
-                            TextInput(
-                                name: "Title",
-                                label: "Title of the issue",
-                                value: $title
-                            )
-                        
-                            TextInput(
-                                name: "Description",
-                                label: "Please describe the issue",
-                                axis: .vertical,
-                                value: $descriptionText,
-                                
-                            )
                             
-                            TextInput(
-                                name: "Address",
-                                label: "Please describe the issue",
-                                axis: .vertical,
-                                value: $address,
-                                
-                            )
+                            .tag(issue)
                         }
                     }
+                  
+
                     
+                    Picker("Severity level", selection: $severityLevel) {
+                        ForEach(Severity.allCases, id: \.self) { level in
+                            HStack(spacing: 8) {
+                               
+                                Image(systemName: level.iconName)
+                                    .padding(.trailing, 10)
+                                Text(level.title)
+                            }
+                            .tag(level.title)
+                            .tag(level)
+                        }
+                    }
                    
                 }
-                .navigationTitle("Report")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
+                .padding(.horizontal, 8)
+                
+                ///
+                Section("Details") {
                     
-                    if showCancelButton {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button(role: .close) {
-                                if isFormFilled {
-                                    showDiscardAlert = true
-                                } else {
-                                    dismiss()
-                                }
-                            }
-                            .accessibilityLabel("Close")
-                            .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
-                                
-                                Button("Keep editing", role: .cancel) {
-                                    showDiscardAlert = false
-                                }
-                                Button("Discard changes", role: .destructive) {
-                                    dismiss()
-                                }
-                            } message: {
-                                Text("You have unsaved information in this report.")
-                            }
-                        }
-                    }
+
+                    VStack {
+                        TextInput(
+                            name: "Title",
+                            label: "Title of the issue",
+                            value: $title
+                        )
                     
-                    ToolbarItem(placement: .title) {
-                        Text("Report a new issue")
-                    }
-                    
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button {
-                            isSubmitting = true
+                        TextInput(
+                            name: "Description",
+                            label: "Please describe the issue",
+                            axis: .vertical,
+                            value: $descriptionText,
                             
-                            Task {
-                                let reportId = await ReportRepository
-                                    .create(
-                                        report: Report(
-                                            coordinate: self.coordinate,
-                                            address: self.address,
-                                            title: self.title,
-                                            description: self.descriptionText,
-                                            severityId: self.severityLevel.identifier,
-                                            statusId: 1,
-                                            issueTypeId: self.issueType.identifier,
-                                            matterToSolveId: 1,
-                                            cellIndex: "demo",
-                                            olc: "demo",
-                                        ),
-                                        locator: self.locator,
-                                        onError: { error in
-                                            print("error: \(error)")
-                                        }
-                                    )
-                                
-                                if selectedImages.count > 0 {
-                                    print("there are images")
-                                    await ImageEncoderService().prepareAndSend(
-                                        reportId: reportId,
-                                        images: selectedImages
-                                    )
-                                }
-                                
-                                await MainActor.run {
-                                    if reportId != "-1" {
-                                        dismiss()
-                                        onCompletion("Report submitted successfully.", .success)
-                                    } else {
-                                        dismiss()
-                                        onCompletion("Error submitting report.", .error)
-                                    }
-                                }
-                            }
-                        } label: {
-                            if isSubmitting {
-                                ProgressView()
-                                    .progressViewStyle(.circular)
-                            } else {
-                                Label("Submit", systemImage: "checkmark")
-                            }
-                        }
-                        .disabled(isSubmitting)
+                        )
+                        
+                        TextInput(
+                            name: "Address",
+                            label: "Please describe the issue",
+                            axis: .vertical,
+                            value: $address,
+                            
+                        )
                     }
                 }
-                .interactiveDismissDisabled(isFormFilled)
+                
+               
             }
+            .navigationTitle("Report")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                
+                if showCancelButton {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(role: .close) {
+                            if isFormFilled {
+                                showDiscardAlert = true
+                            } else {
+                                dismiss()
+                            }
+                        }
+                        .accessibilityLabel("Close")
+                        .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
+                            
+                            Button("Keep editing", role: .cancel) {
+                                showDiscardAlert = false
+                            }
+                            Button("Discard changes", role: .destructive) {
+                                dismiss()
+                            }
+                        } message: {
+                            Text("You have unsaved information in this report.")
+                        }
+                    }
+                }
+                
+                ToolbarItem(placement: .title) {
+                    Text("Report a new issue")
+                }
+                
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        isSubmitting = true
+                        
+                        Task {
+                            let reportId = await ReportRepository
+                                .create(
+                                    report: Report(
+                                        coordinate: self.coordinate,
+                                        address: self.address,
+                                        title: self.title,
+                                        description: self.descriptionText,
+                                        severityId: self.severityLevel.identifier,
+                                        statusId: 1,
+                                        issueTypeId: self.issueType.identifier,
+                                        matterToSolveId: 1,
+                                        cellIndex: "demo",
+                                        olc: "demo",
+                                    ),
+                                    locator: self.locator,
+                                    onError: { error in
+                                        print("error: \(error)")
+                                    }
+                                )
+                            
+                            if selectedImages.count > 0 {
+                                print("there are images")
+                                await ImageEncoderService().prepareAndSend(
+                                    reportId: reportId,
+                                    images: selectedImages
+                                )
+                            }
+                            
+                            await MainActor.run {
+                                if reportId != "-1" {
+                                    dismiss()
+                                    onCompletion("Report submitted successfully.", .success)
+                                } else {
+                                    dismiss()
+                                    onCompletion("Error submitting report.", .error)
+                                }
+                            }
+                        }
+                    } label: {
+                        if isSubmitting {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                        } else {
+                            Label("Submit", systemImage: "checkmark")
+                        }
+                    }
+                    .disabled(isSubmitting)
+                }
+            }
+            .interactiveDismissDisabled(isFormFilled)
         }
         .sheet(isPresented: $showMapPickerSheet)  {
             MapPickerView(coordinate: $coordinate, onConfirm: { coordinate, locator in
@@ -249,42 +249,7 @@ struct ReportView: View {
    
 }
 
-struct ImagePicker: UIViewControllerRepresentable {
-    let sourceType: UIImagePickerController.SourceType
-    let onImagePicked: (UIImage?) -> Void
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onImagePicked: onImagePicked)
-    }
-
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.sourceType = sourceType
-        picker.allowsEditing = false
-        picker.delegate = context.coordinator
-        return picker
-    }
-
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
-    }
-
-    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-        private let onImagePicked: (UIImage?) -> Void
-
-        init(onImagePicked: @escaping (UIImage?) -> Void) {
-            self.onImagePicked = onImagePicked
-        }
-
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            onImagePicked(nil)
-        }
-
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            let image = info[.originalImage] as? UIImage
-            onImagePicked(image)
-        }
-    }
-}
 
 #Preview {
     ReportView(onCompletion: { data, type in

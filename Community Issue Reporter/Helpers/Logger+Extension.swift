@@ -6,6 +6,7 @@
 //
 
 import OSLog
+import Foundation
 
 extension Logger {
     private static var subsystem = Bundle.main.bundleIdentifier!
@@ -13,9 +14,47 @@ extension Logger {
     static let statistics = Logger(subsystem: subsystem, category: "statistics")
 }
 
+// MARK: -
+protocol DataLogger {
+    associatedtype T
+    func log(data: T)
+}
 
-class L {
-    func Notice() -> Void {
-        Logger.viewCycle.notice("")
+var disableLogs: Bool = false
+
+struct LogDetail {
+    var viewName: String
+    var methodName: String?
+    var data: String?
+    
+    init(viewName: String, methodName: String? = nil, data: String? = nil) {
+        self.viewName = viewName
+        self.methodName = methodName
+        self.data = data
     }
 }
+
+struct JSONLogger<T: Encodable>: DataLogger {
+    func log(data: T) {
+        if let encoded = try? JSONEncoder().encode(data),
+           let jsonString = String(data: encoded, encoding: .utf8) {
+            print("JSON LOG: \(jsonString)")
+        }
+    }
+}
+
+
+struct StringLogger: DataLogger {
+    typealias T = String
+    
+    func log(data: String) {
+        print("LOG: \(data)")
+    }
+}
+
+
+// MARK: -
+
+//struct L {
+//    static func info()
+//}

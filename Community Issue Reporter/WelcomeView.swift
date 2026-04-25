@@ -35,7 +35,17 @@ struct WelcomeView: View {
     private func handleLogin(token: String) {
         if !token.isEmpty {
             if token == "guest" {
-                self.isGuest.toggle()
+                Task {
+                    await UserRepository.loginAsVisitor(
+                        onSuccess: { state, token in
+                            self.userOAuthState = state
+                            saveTokens(u: token)
+                            self.isGuest.toggle()
+                        }, onError: { error in
+                            print(error)
+                        }
+                    )
+                }
             } else {
                 Task {
                     await UserRepository.login(token,
@@ -47,12 +57,7 @@ struct WelcomeView: View {
                                 print("Welcome")
                             }
                         
-                            #if targetEnvironment(simulator)
-                               /// todo
-                            #else
-                               _ = KeychainService.save(key: "token", value: resultToken)
-                            #endif
-                        
+                            self.saveTokens(u: resultToken)
                             self.appState.isLoggedIn.toggle()
                         },
                         onError: { error in
@@ -64,6 +69,11 @@ struct WelcomeView: View {
         } else {
             /// TODO: show error
         }
+    }
+    
+    private func saveTokens(u: UserTokens) {
+        _ = KeychainService.save(key: .query, value: u.queryActionsToken)
+        _ = KeychainService.save(key: .mutation, value: u.mutationActionsToken)
     }
         
 }

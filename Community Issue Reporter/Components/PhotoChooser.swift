@@ -8,18 +8,41 @@
 import SwiftUI
 import PhotosUI
 
+enum MediaTypes: String {
+    case photo
+    case image
+    case video
+}
+
+enum DeviceOrientation: String {
+    case landscape
+    case portrait
+}
+
+struct BasicMetadata {
+    let deviceOrientation: DeviceOrientation
+}
+
+struct MediaResources {
+    let type: MediaTypes
+    let data: UIImage?
+    let metadata: BasicMetadata
+}
+
 struct PhotoChooser: View {
+    @Namespace private var nameSpace
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
-    @State private var selectedImages: [UIImage] = []
+    @State private var selectedImages: [MediaResources] = []
     @State private var isCameraPresented: Bool
-    @State private var cameraCompletion: (([UIImage]) -> Void)?
+    @State private var cameraCompletion: (([MediaResources]) -> Void)?
     @State private var previewImage: UIImage?
     @State private var isImagePreviewPresented: Bool
+    @State var orientation = UIDevice.current.orientation
     
-    var onSelect: ([UIImage]) -> Void
+    var onSelect: ([MediaResources]) -> Void
     var onDelete: (Int) -> Void
     
-    init(onSelect:  @escaping ([UIImage]) -> Void, onDelete: @escaping (Int) -> Void) {
+    init(onSelect:  @escaping ([MediaResources]) -> Void, onDelete: @escaping (Int) -> Void) {
         self.onSelect = onSelect
         self.onDelete = onDelete
         self.selectedPhotoItems = []
@@ -31,7 +54,7 @@ struct PhotoChooser: View {
     var body: some View {
        
         
-        Group {
+        VStack {
             VStack {
                 HStack(spacing: 16) {
                     Button {
@@ -39,18 +62,43 @@ struct PhotoChooser: View {
                             handleSelectedImages(images)
                         }
                     } label: {
-                        Label("Camera", systemImage: "camera")
-                            .frame(maxWidth: .infinity)
+                        HStack {
+                            Image(systemName: "camera")
+                                
+                            Text("Take Photo")
+                                .font(.callout.bold())
+                               
+                        }
+                        .foregroundStyle(Color.theme.foreground)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            Capsule()
+                                .fill(Color.theme.muted)
+                        )
+                            
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.secondary)
+                    .buttonStyle(.borderless)
+                    
+                   
                     
                     PhotosPicker(selection: $selectedPhotoItems, maxSelectionCount: 6, matching: .images) {
-                        Label("Gallery", systemImage: "photo.on.rectangle")
-                            .frame(maxWidth: .infinity)
+                    
+                        HStack {
+                            Image(systemName: "photo.on.rectangle")
+                               
+                            Text("Gallery")
+                                .font(.callout.bold())
+                        }
+                        .foregroundStyle(Color.theme.foreground)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            Capsule()
+                                .fill(Color.theme.muted)
+                        )
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.secondary)
+                    .buttonStyle(.borderless)
                     .onChange(of: selectedPhotoItems) { _, newItems in
                         loadSelectedImages(from: newItems) { images in
                             handleSelectedImages(images)
@@ -63,22 +111,29 @@ struct PhotoChooser: View {
                     .padding(.top, 8)
                 
                 ScrollView(.horizontal, showsIndicators: true) {
-                    LazyHStack(spacing: 12) {
+                    LazyHStack(spacing: .themeSpacing * 4) {
                         ForEach(0..<selectedImages.count, id: \.self) { index in
                             ZStack(alignment: .topLeading) {
-                                Image(uiImage: selectedImages[index])
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 80, height: 80)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    .contentShape(RoundedRectangle(cornerRadius: 8))
-                                    .onTapGesture {
-                                        showPreview(for: selectedImages[index])
-                                    }
-                                    .onLongPressGesture(minimumDuration: 0.4) {
-                                        triggerHaptic()
-                                        showPreview(for: selectedImages[index])
-                                    }
+//                                GeometryReader { proxy in
+                                Image(uiImage: selectedImages[index].data!)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 80, height: 80)
+//                                        .frame(width: proxy.size.width / 4, height: proxy.size.height / 4)
+                                        .clipped()
+                                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                                        .contentShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                                        .onTapGesture {
+                                            showPreview(for: selectedImages[index].data!)
+                                            
+                                        }
+                                        .onLongPressGesture(minimumDuration: 0.4) {
+                                            triggerHaptic()
+                                            showPreview(for: selectedImages[index].data!)
+                                        }
+                                        .matchedTransitionSource(id: "transition:openPreview", in: nameSpace)
+                                        .sensoryFeedback(.impact(weight: .medium), trigger: isImagePreviewPresented)
+//                                }
                                 
                                 Button {
                                     deleteImage(at: index)
@@ -87,11 +142,14 @@ struct PhotoChooser: View {
                                         .symbolRenderingMode(.multicolor)
                                         .font(Font.headline.bold())
                                 }
+                                .offset(x: -16, y: -16)
                                 .padding(4)
                             }
+                            .aspectRatio(3/2, contentMode: .fill)
                         }
                     }
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 16)
                 }
             }
             .sheet(isPresented: $isCameraPresented) {
@@ -105,11 +163,11 @@ struct PhotoChooser: View {
             }
             .fullScreenCover(isPresented: $isImagePreviewPresented) {
                 
-                if let previewImage {
+                if isImagePreviewPresented, let previewImage {
                     ZStack {
-                        BackgroundClearView()
+//                        BackgroundClearView()
                         Rectangle()
-                            .opacity(0.3)
+                            .opacity(0.001)
 //                            .fill(.clear)
                             .ignoresSafeArea()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -131,39 +189,13 @@ struct PhotoChooser: View {
                                 }
                         }
                     }
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: isImagePreviewPresented)
+                    .navigationTransition(.zoom(sourceID: "transition:openPreview", in: nameSpace))
+//                    .transition(.opacity)
+//                    .animation(.easeInOut(duration: 0.2), value: isImagePreviewPresented)
                 }
                
             }
-            if isImagePreviewPresented, let previewImage {
-                ZStack {
-//                    BackgroundClearView()
-                    Rectangle()
-                        .opacity(0)
-                        .ignoresSafeArea()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onTapGesture {
-                            dismissPreview()
-                        }
-                    
-                    GeometryReader { proxy in
-                        Image(uiImage: previewImage)
-                            .resizable()
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 32))
-                            .shadow(radius: 16)
-                            .contentShape(RoundedRectangle(cornerRadius: 32))
-                            .frame(width: proxy.size.width - 32, height: proxy.size.height / 2)
-                            .position(x: proxy.size.width / 2 , y: proxy.size.height / 2)
-                            .onTapGesture {
-                                dismissPreview()
-                            }
-                    }
-                }
-                .transition(.opacity)
-                .animation(.easeInOut(duration: 0.2), value: isImagePreviewPresented)
-            }
+            if let previewImage {}
         }
     }
     
@@ -182,18 +214,19 @@ struct PhotoChooser: View {
         func updateUIView(_ uiView: UIView, context: Context) {}
     }
     
-    private func takePhotoUsingCamera(onComplete: @escaping ([UIImage]) -> Void) {
+    private func takePhotoUsingCamera(onComplete: @escaping ([MediaResources]) -> Void) {
+        isCameraPresented = true
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             return
         }
 
         cameraCompletion = onComplete
-        isCameraPresented = true
+       
     }
     
-    private func handleSelectedImages(_ images: [UIImage]) {
+    private func handleSelectedImages(_ images: [MediaResources]) {
         selectedImages = images
-        // TODO: Send `images` to the upload service.
+        onSelect(selectedImages)
     }
 
     private func deleteImage(at index: Int) {
@@ -222,18 +255,15 @@ struct PhotoChooser: View {
 
     
 
-    private func loadSelectedImages(
-        from items: [PhotosPickerItem],
-        onComplete: @escaping ([UIImage]
-    ) -> Void) {
+    private func loadSelectedImages(from items: [PhotosPickerItem], onComplete: @escaping ([MediaResources]) -> Void) {
         Task {
-            var images: [UIImage] = []
+            var images: [MediaResources] = []
             images.reserveCapacity(items.count)
 
             for item in items {
                 if let data = try? await item.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
-                    images.append(image)
+                    images.append(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isPortrait ? .portrait: .landscape )))
                 }
             }
 
@@ -244,7 +274,7 @@ struct PhotoChooser: View {
     }
 }
 
-
+//
 private struct BackgroundClearView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
@@ -267,4 +297,46 @@ private struct BackgroundClearView: UIViewRepresentable {
         
         }
     )
+}
+
+struct ImagePicker: UIViewControllerRepresentable {
+    let sourceType: UIImagePickerController.SourceType
+    let onImagePicked: (MediaResources?) -> Void
+    
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImagePicked: onImagePicked)
+    }
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
+        picker.allowsEditing = true
+        picker.delegate = context.coordinator
+        picker.modalPresentationStyle = .fullScreen
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
+        
+    }
+
+    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+        @State var orientation = UIDevice.current.orientation
+        
+        private let onImagePicked: (MediaResources?) -> Void
+
+        init(onImagePicked: @escaping (MediaResources?) -> Void) {
+            self.onImagePicked = onImagePicked
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            onImagePicked(nil)
+        }
+
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            let image = info[.originalImage] as? UIImage
+            onImagePicked(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isLandscape ? .landscape: .portrait)))
+        }
+    }
 }

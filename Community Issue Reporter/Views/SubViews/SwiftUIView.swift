@@ -6,19 +6,22 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct SwiftUIView: View {
-    @State private var date = Date()
-    var body: some View {
-        List {
-            DatePicker(
-                    "Start Date",
-                    selection: $date,
-                    displayedComponents: [.date]
-                )
-                .datePickerStyle(.graphical)
+    @State var selectedItems: [PhotosPickerItem] = []
+
+
+    
+
+        var body: some View {
+            VStack {
+                PhotosPicker(selection: $selectedItems,
+                             matching: .any(of: [.images, .not(.screenshots)])) {
+                    Text("Select Photos")
+                }
+            }
         }
-    }
 }
 
 #Preview {

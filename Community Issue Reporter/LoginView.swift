@@ -53,7 +53,6 @@ struct LoginView: View {
             }
             
             onTokenReceived(result.user.idToken?.tokenString ?? "")
-            
         }
     }
 }

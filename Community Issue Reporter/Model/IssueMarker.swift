@@ -16,7 +16,7 @@ struct IssueMarker: Identifiable {
     let coordinate: CLLocationCoordinate2D
     let issueType: IssueTypes
     let severity: Severity
-    let matterToSolve: String
+    let matterToSolve: MatterToSolve
     let address: String
     
     init(id: String,
@@ -26,7 +26,7 @@ struct IssueMarker: Identifiable {
          coordinate: CLLocationCoordinate2D,
          issueType: Int,
          severity: Int,
-         matterToSolve: Int,
+         matterToSolveId: String,
          address: String) {
         
         self.id = id
@@ -36,7 +36,8 @@ struct IssueMarker: Identifiable {
         self.coordinate = coordinate
         self.issueType = IssueTypes.allCases[issueType]
         self.severity = Severity.allCases[severity]
-        self.matterToSolve = ""
+        self.matterToSolve = mattersToResolve.first(where: { $0.id == matterToSolveId }) ?? mattersToResolve[0]
         self.address = address
     }
 }
+

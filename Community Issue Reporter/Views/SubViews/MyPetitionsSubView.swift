@@ -10,25 +10,23 @@ import SwiftUI
 struct MyPetitionsSubView: View {
     var subViewName: String
     var body: some View {
-        NavigationStack {
-            List {
-                Text("Sample Petition 1").cellStyle()
-                               Text("Sample Petition 2").cellStyle()
-                               Text("Sample Petition 3").cellStyle()
-                               Text("Sample Petition 4").cellStyle()
-            }
-            
-            .listStyle(.plain)
-//            .background(Color.theme.background)
-            .scrollContentBackground(.hidden)
-            
-            .navigationTitle(subViewName)
-            .toolbarTitleDisplayMode(.inlineLarge)
-           
-            .scrollContentBackground(.hidden)
-            .themeGradientBackground()
-            .tint(Color.theme.primary)
+        List {
+            Text("Sample Petition 1").cellStyle()
+                           Text("Sample Petition 2").cellStyle()
+                           Text("Sample Petition 3").cellStyle()
+                           Text("Sample Petition 4").cellStyle()
         }
+        
+        .listStyle(.plain)
+//            .background(Color.theme.background)
+//        .scrollContentBackground(.hidden)
+        
+        .navigationTitle(subViewName)
+//        .toolbarTitleDisplayMode(.inlineLarge)
+       
+        .scrollContentBackground(.hidden)
+        .themeGradientBackground()
+        .tint(Color.theme.primary)
         .foregroundColor(Color(hex: "ec9458"))
     }
 }

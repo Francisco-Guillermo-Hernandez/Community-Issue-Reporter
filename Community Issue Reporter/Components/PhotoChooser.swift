@@ -104,8 +104,10 @@ struct PhotoChooser: View {
                     }
                     .buttonStyle(.borderless)
                     .onChange(of: selectedPhotoItems) { _, newItems in
+                        guard !newItems.isEmpty else { return }
                         loadSelectedImages(from: newItems) { images in
                             handleSelectedImages(images)
+                            selectedPhotoItems = []
                         }
                     }
                 }
@@ -200,7 +202,7 @@ struct PhotoChooser: View {
     }
     
     private func handleSelectedImages(_ images: [MediaResources]) {
-        selectedImages = images
+        selectedImages.append(contentsOf: images)
         onSelect(selectedImages)
     }
 
@@ -266,7 +268,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.sourceType = sourceType
-        picker.allowsEditing = true
+        picker.allowsEditing = false
         picker.delegate = context.coordinator
         picker.modalPresentationStyle = .fullScreen
         return picker

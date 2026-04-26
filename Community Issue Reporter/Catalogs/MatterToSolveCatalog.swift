@@ -7,9 +7,9 @@
 
 import Foundation
 
-let matterToResolve: [MatterToSolve] = [
+let mattersToResolve: [MatterToSolve] = [
     MatterToSolve(
-        id: "1",
+        id: "matter:potholes",
         title: String(
             localized: "Potholes"
         ),
@@ -21,7 +21,7 @@ let matterToResolve: [MatterToSolve] = [
         image: "matt-hoffman-MQjJHTT-diQ-unsplash"
     ),
     MatterToSolve(
-        id: "2",
+        id: "matter:water-leakage",
         title: String(
             localized: "Water leakage"
         ),
@@ -33,7 +33,7 @@ let matterToResolve: [MatterToSolve] = [
         image: "arun-prakash-p0_6IwEjK98-unsplash"
     ),
     MatterToSolve(
-        id: "3",
+        id: "matter:street-sign",
         title: String(
             localized: "Street sign"
         ),
@@ -45,7 +45,7 @@ let matterToResolve: [MatterToSolve] = [
         image: "zoshua-colah-1BEULYOAnio-unsplash"
     ),
     MatterToSolve(
-        id: "4",
+        id: "matter:trafic-light",
         title: String(
             localized: "Trafic light"
         ),
@@ -57,7 +57,7 @@ let matterToResolve: [MatterToSolve] = [
         image: "eliobed-suarez-PN-YnI5stdQ-unsplash"
     ),
     MatterToSolve(
-        id: "5",
+        id: "matter:lamp",
         title: String(
             localized: "Lamp"
         ),
@@ -69,7 +69,7 @@ let matterToResolve: [MatterToSolve] = [
         image: "mukesh-naik-PZK-dEVBF9g-unsplash"
     ),
     MatterToSolve(
-        id: "6",
+        id: "matter:fallen-trees",
         title: String(
             localized: "Fallen trees"
         ),
@@ -81,7 +81,7 @@ let matterToResolve: [MatterToSolve] = [
         image: "john-cameron-EVhuJCqYLxM-unsplash"
     ),
     MatterToSolve(
-        id: "7",
+        id: "matter:flood",
         title: String(
             localized: "Flood"
         ),
@@ -93,7 +93,7 @@ let matterToResolve: [MatterToSolve] = [
         image: "phillip-flores-38wqGW802RM-unsplash"
     ),
     MatterToSolve(
-        id: "8",
+        id: "matter:waste-management",
         title: String(
             localized: "Waste Management"
         ),

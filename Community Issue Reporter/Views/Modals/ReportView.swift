@@ -16,6 +16,7 @@ struct Option: Hashable {
 
 struct ReportView: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var model: ReportDataModel
     @State private var issueType: IssueTypes
     @State private var severityLevel: Severity
     @State private var address: String
@@ -29,8 +30,8 @@ struct ReportView: View {
     @State private var locator: Locator
     @Binding var showCancelButton: Bool
   
-    init(onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
-       
+    init(model: ReportDataModel, onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
+        self.model = model
         self.issueType = .all
         self.severityLevel = .low
         self.address = ""
@@ -69,10 +70,10 @@ struct ReportView: View {
                     PhotoChooser(
                         onSelect: { images in
                             print("Selected images: \(images.count)")
-                            self.selectedImages.append(contentsOf: images)
+                            self.selectedImages = images
                         },
-                        onDelete: { indexSet in
-                            self.selectedImages.remove(at: indexSet)
+                        onDelete: { index in
+                            self.selectedImages.remove(at: index)
                         }
                     )
                 
@@ -81,7 +82,7 @@ struct ReportView: View {
                 ///
                 Section("Issue Details") {
                     
-                    Picker("Issue type", selection: $issueType) {
+                    Picker("Issue type", selection: $model.report.issueTypeId) {
                         ForEach(IssueTypes.allCases, id: \.self) { issue in
                             HStack(spacing: 80) {
                                 Text(issue.title)
@@ -97,7 +98,7 @@ struct ReportView: View {
                   
 
                     
-                    Picker("Severity level", selection: $severityLevel) {
+                    Picker("Severity level", selection: $model.report.severityId) {
                         ForEach(Severity.allCases, id: \.self) { level in
                             HStack(spacing: 8) {
                                
@@ -120,21 +121,21 @@ struct ReportView: View {
                     VStack {
                         TextInput(
                             name: "Title",
-                            label: "Title of the issue",
-                            value: $title
+                            label: String(localized: "Title of the issue", comment: "ReportView: Title of the issue"),
+                            value: $model.report.title,
                         )
                     
                         TextInput(
                             name: "Description",
-                            label: "Please describe the issue",
+                            label: String(localized: "Please describe the issue", comment: "ReportView: Please describe the issue"),
                             axis: .vertical,
-                            value: $descriptionText,
+                            value: $model.report.description,
                             
                         )
                         
                         TextInput(
                             name: "Address",
-                            label: "Please describe the issue",
+                            label: String(localized: "Please tell us where is the issue", comment: "ReportView: Please tell us where is the issue"),
                             axis: .vertical,
                             value: $address,
                             
@@ -191,7 +192,7 @@ struct ReportView: View {
                                         severityId: self.severityLevel.identifier,
                                         statusId: 1,
                                         issueTypeId: self.issueType.identifier,
-                                        matterToSolveId: 1,
+                                        matterToSolveId: "",
                                         cellIndex: "demo",
                                         olc: "demo",
                                     ),
@@ -252,7 +253,9 @@ struct ReportView: View {
 
 
 #Preview {
-    ReportView(onCompletion: { data, type in
+    var model: ReportDataModel = ReportDataModel()
+    model.setMatterToSolve(mattersToResolve.first!)
+    return ReportView(model: model, onCompletion: { data, type in
         
     }, showCancelButton: true)
 }

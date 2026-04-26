@@ -46,18 +46,17 @@ struct ReportCellView: View {
                         .lineLimit(2)
                         .foregroundColor(.secondary)
                         .padding(.bottom, .themeSpacing)
-                    
+                    // detail of the dates
                     HStack {
                         genericDatePresenter("Created", when: report.createdDate)
                         genericDatePresenter("Updated", when: report.updatedDate)
                         genericDatePresenter("Reported", when: report.reportedDate)
-                        
                     }
                     .padding(.horizontal)
                     .padding(.top, .themeSpacing)
                     .padding(.bottom, .themeSpacing)
                     
-                    HStack(spacing: 8) {
+                    HStack(spacing: .themeSpacing * 2) {
                         CustomBadgeView(badge: .init(color: report.severity.color, title: report.severity.title, icon: report.severity.iconName))
                             .opacity(0.77)
                         CustomBadgeView(badge: .init(color: report.status.color, title: report.status.title, icon: report.status.iconName))
@@ -90,96 +89,106 @@ struct MyReportsSubView: View {
     @State private var showDeleteAlert: Bool = false
     @State private var elementToDelete: IndexSet = []
     @State private var reportToDelete: Report? = nil
+    @State private var model: ReportDataModel = .init()
     
     var subViewName: String
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(reports, id: \.id) { report in
-                    ZStack {
-                        NavigationLink(destination: ReportDetailView(report: report)) {
-                            EmptyView().frame(width: 0, height: 0)
-                        }
-                        .opacity(0)
-                        .frame(width: 0, height: 0)
-                        
-                        ReportCellView(report: report)
-                            .cellStyle()
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                HStack {
-                                    Button(role: .destructive) {
-                                        reportToDelete = report
-                                        showDeleteAlert.toggle()
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                    .tint(.theme.destructive)
-                                    
-                                    Button {
-                                        
-                                    } label: {
-                                        Label("Modify", systemImage: "pencil")
-                                    }
-                                    .tint(.theme.secondary)
+        List {
+            ForEach(reports, id: \.id) { report in
+                ZStack {
+                    NavigationLink(destination: self.report(report: report)) {
+                        EmptyView().frame(width: 0, height: 0)
+                    }
+                    .opacity(0)
+                    .frame(width: 0, height: 0)
+                    
+                    ReportCellView(report: report)
+                        .cellStyle()
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            HStack {
+                                Button(role: .destructive) {
+                                    reportToDelete = report
+                                    showDeleteAlert.toggle()
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
+                                .tint(.theme.destructive)
+                                
+                                Button {
+                                    
+                                } label: {
+                                    Label("Modify", systemImage: "pencil")
+                                }
+                                .tint(.theme.secondary)
                             }
-                    }
-                    .listRowInsets(
-                        EdgeInsets(
-                            top: .themeSpacing * 2,
-                            leading: .themeSpacing * 4,
-                            bottom: .themeSpacing * 2,
-                            trailing: .themeSpacing * 4
-                        )
-                    )
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                        }
                 }
-            }
-            .listStyle(.plain)
-       
-            .background(Color.theme.background)
-            .scrollContentBackground(.hidden)
-            .alert("Delete report", isPresented: $showDeleteAlert) {
-                Button("Delete", role: .destructive) {
-                    delete(report: reportToDelete)
-                               }
-                               Button("Cancel", role: .cancel) {
-                                   self.reportToDelete = nil
-                               }
-            } message: {
-                Text("Are you sure you want to delete ? This action cannot be undone.")
-            }
-            .toolbar {
-            }
-            .task {
-                guard !Task.isCancelled else { return }
-                await ReportRepository.listByUser(
-                    page: 1,
-                    onComplete: { result in
-                        
-                                                guard let reports = result.documents else { return }
-                        
-                                                self.reports.append(contentsOf: reports)
-                    },
-                    onError: { error in
-                        print(error)
-                    }
+                .listRowInsets(
+                    EdgeInsets(
+                        top: .themeSpacing * 2,
+                        leading: .themeSpacing * 4,
+                        bottom: .themeSpacing * 2,
+                        trailing: .themeSpacing * 4
+                    )
                 )
-                
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
-           
-            .navigationTitle(subViewName)
         }
+        .listStyle(.plain)
         .background(Color.theme.background)
+        .scrollContentBackground(.hidden)
+        .alert("Delete report", isPresented: $showDeleteAlert) {
+            Button("Delete", role: .destructive) {
+                delete(report: reportToDelete)
+            }
+            Button("Cancel", role: .cancel) {
+                self.reportToDelete = nil
+            }
+        } message: {
+            Text("Are you sure you want to delete ? This action cannot be undone.")
+        }
+        .toolbar {
+            
+        }
+        .task {
+            guard !Task.isCancelled else { return }
+            await ReportRepository.listByUser(
+                page: 1,
+                onComplete: { result in
+                    
+                    guard let reports = result.documents else { return }
+                    
+                    self.reports.append(contentsOf: reports)
+                },
+                onError: { error in
+                    print(error)
+                }
+            )
+            
+        }
+        
+        .navigationTitle(subViewName)
+    }
+    
+
+    @ViewBuilder
+    private func report(report: Report) -> some View {
+        ReportView(model: model, onCompletion: { _, _ in
+   
+        })
+        .onAppear {
+            model.prepareForModification(report)
+        
+        }
     }
     
     private func confirmDeletion(of id: String) {
-            withAnimation {
-                reports.removeAll { $0.id == id }
-            }
-            reportToDelete = nil
+        withAnimation {
+            reports.removeAll { $0.id == id }
         }
+        reportToDelete = nil
+    }
     
     private func delete(report id: Report? = nil) {
         Task {
@@ -208,7 +217,7 @@ struct MyReportsSubView: View {
             severityId: 1,
             statusId: 1,
             issueTypeId: 3,
-            matterToSolveId: 1,
+            matterToSolveId: "",
             cellIndex: "",
             createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
             updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
@@ -221,7 +230,7 @@ struct MyReportsSubView: View {
             severityId: 1,
             statusId: 1,
             issueTypeId: 3,
-            matterToSolveId: 1,
+            matterToSolveId: "",
             cellIndex: "",
             createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
             updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
@@ -234,7 +243,7 @@ struct MyReportsSubView: View {
             severityId: 1,
             statusId: 1,
             issueTypeId: 3,
-            matterToSolveId: 1,
+            matterToSolveId: "",
             cellIndex: "",
             createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
             updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
@@ -247,12 +256,14 @@ struct MyReportsSubView: View {
             severityId: 1,
             statusId: 1,
             issueTypeId: 3,
-            matterToSolveId: 1,
+            matterToSolveId: "",
             cellIndex: "",
             createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
             updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
         )
     ]
-    MyReportsSubView(subViewName: "My Reports")
+    NavigationStack {
+        MyReportsSubView(subViewName: "My Reports")
+    }
 }
 

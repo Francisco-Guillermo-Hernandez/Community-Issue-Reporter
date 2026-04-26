@@ -39,36 +39,41 @@ struct CameraView: View {
             
             VStack {
                 
-               if !isCameraAuthorized() {
-                   
-                   ContentUnavailableView {
-                       Label("You haven't authorized  to use the camera", systemImage: "lock.trianglebadge.exclamationmark.fill")
-                           .symbolRenderingMode(.palette)
-                           .foregroundStyle(
-                                Color.theme.foreground.opacity(0.7),
-                                Color.theme.primary,
-                                Color.theme.foreground.opacity(0.7)
-                           )
-                   } description: {
-                       Text("Change these settings in Settings.")
-                           .foregroundStyle(Color.theme.primary)
-                   } actions: {
-                      
-                       ThemedButton(message: "Open Settings", action: openSettings, type: .primary)
-                   }
-                   .background(Color.theme.background)
-                   
-                } else {
-                    ViewFinderView(image: $model.viewfinderImage)
-                        
-                        .fullScreenCover(isPresented: $model.camera.photosViewVisible) {
-                            PhotosTabView(
-                                normalPhoto: model.camera.normalPhoto,
-                                constantColorImage: model.camera.constantColorPhoto,
-                            )
-                        }
-                }
+                Image("pothole")
+                    .resizable()
+                    .scaledToFit()
+//               if !isCameraAuthorized() {
+//                   
+//                   ContentUnavailableView {
+//                       Label("You haven't authorized  to use the camera", systemImage: "lock.trianglebadge.exclamationmark.fill")
+//                           .symbolRenderingMode(.palette)
+//                           .foregroundStyle(
+//                                Color.theme.foreground.opacity(0.7),
+//                                Color.theme.primary,
+//                                Color.theme.foreground.opacity(0.7)
+//                           )
+//                   } description: {
+//                       Text("Change these settings in Settings.")
+//                           .foregroundStyle(Color.theme.primary)
+//                   } actions: {
+//                      
+//                       ThemedButton(message: "Open Settings", action: openSettings, type: .primary)
+//                   }
+//                   .background(Color.theme.background)
+//                   
+//                } else {
+//                    ViewFinderView(image: $model.viewfinderImage)
+//                        
+//                        .fullScreenCover(isPresented: $model.camera.photosViewVisible) {
+//                            PhotosTabView(
+//                                normalPhoto: model.camera.normalPhoto,
+//                                constantColorImage: model.camera.constantColorPhoto,
+//                            )
+//                        }
+//                }
             }
+            
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.black)
            
             .foregroundStyle(Color.black)
@@ -80,46 +85,39 @@ struct CameraView: View {
                     Task { await model.camera.checkCameraAuthorization() }
                 }
             }
+            .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
+                orientation = UIDevice.current.orientation
+            }
+            .onAppear {
+                orientation = UIDevice.current.orientation
+            }
             .navigationTitle("Camera")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarHidden(true)
             .ignoresSafeArea()
             .statusBar(hidden: true)
         }
-        // .trailing when is landscapeRight
-        // .leading when is landscapeLeft
-        // .bottom unknown or when is .portrait
-        .safeAreaInset(edge: moveShutterButton(), spacing: 0) {
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             if isCameraAuthorized() {
-               
                 bottomBarView
             }
         }
     }
-    
+     
 
     var bottomBarView: some View {
         VStack {
             
             ShutterButton(action: takePhoto)
-            //when is  portrait,
                 .padding(.top, 24)
-                .frame(maxWidth: .infinity)
             
-                // when is landscapeLeft, landscapeRight
-//                .padding(.trailing, 24)
-//                .frame(maxHeight: .infinity)
-            
-            Picker("Issue Type", selection: $selection ) {
-                ForEach(CameraActions.allCases, id: \.id) { action in
-                    Text(action.description).tag(action)
-                }
-            }.pickerStyle(.segmented)
-                .padding(.horizontal, 48)
-                .padding(.top, 16)
+//            CustomSegmentedControl()
+
         }
+        .frame(maxWidth: .infinity)
         .disabled(!model.camera.shutterButtonAvailable)
-        .background(.black)
+        .background(Color.init(hex: "1a181b"))
+
     }
     
     private func takePhoto() {
@@ -127,11 +125,6 @@ struct CameraView: View {
         model.camera.fallBackPhotoDeliveryEnabled = true
         model.camera.flashEnabled = false
         model.camera.takePhoto()
-    }
-    
-    private func moveShutterButton() -> VerticalEdge {
-//        orientation == .portrait ?
-        return .bottom
     }
 }
 
@@ -142,7 +135,7 @@ func openSettings() {
 }
 
 func isCameraAuthorized() -> Bool {
-    return AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+    return true// AVCaptureDevice.authorizationStatus(for: .video) == .authorized
 }
 
 struct ShutterButton: View {
@@ -164,13 +157,13 @@ struct ShutterButton: View {
                 ZStack {
                     Circle()
                         .strokeBorder(
-                            Color.theme.primary.mix(with: .black, by: 0.4),
+                            Color.white,
                             lineWidth: !isEnabled ? 3 : 1
                         )
                         .frame(width: !isEnabled ? 65 : 62, height: !isEnabled ? 65 : 62)
                         .animation(.interpolatingSpring(mass: 2.0, stiffness: 100.0, damping: 10, initialVelocity: 0), value: !isEnabled)
                     Circle()
-                        .fill(Color.theme.primary)
+                        .fill(Color.white)
                         .frame(width: !isEnabled ? 55 : 50, height: !isEnabled ? 55 : 50)
                         .animation(.interpolatingSpring(mass: 2.0, stiffness: 100.0, damping: 10, initialVelocity: 0), value: !isEnabled)
                 }

@@ -28,7 +28,7 @@ struct ReportRepository {
                     ),
                     issueType: report.issueTypeId,
                     severity: report.severityId,
-                    matterToSolve: report.matterToSolveId,
+                    matterToSolveId: report.matterToSolveId,
                     address: report.address
                 )
             }

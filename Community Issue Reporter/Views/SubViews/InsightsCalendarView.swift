@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct InsightsCalendarView: View {
-    @State private var path = NavigationPath()
+    @Binding var path: NavigationPath
     @State private var selectedDate: Date = .init()
     @State private var selectedDaySummary: DaySummary? = nil
     @State private var showDetails: Bool = true
@@ -22,27 +22,22 @@ struct InsightsCalendarView: View {
     }
     
     var body: some View {
-        NavigationStack(path: $path) {
-            ScrollView {
-                VStack {
-                    CustomCalendar(selectedDate: $selectedDate, activityMap: activityData) { date in
-                        selectionHandler(date)
-                    }
-                }
-
-                .navigationDestination(for: String.self) { value in
-                    if value == "NoActivityView" {
-                        SimpleView(title: value)
-                    } else {
-                        
-                        SimpleView(
-                            title: "ActivityListView",
-                            selectedDay: activityData[value]
-                        )
-                    }
-                }
+        VStack {
+            CustomCalendar(selectedDate: $selectedDate, activityMap: activityData) { date in
+                selectionHandler(date)
             }
-            
+            .frame(height: 400)
+        }
+        .navigationDestination(for: String.self) { value in
+            if value == "NoActivityView" {
+                SimpleView(title: value)
+            } else {
+                
+                SimpleView(
+                    title: "ActivityListView",
+                    selectedDay: activityData[value]
+                )
+            }
         }
     }
     
@@ -157,14 +152,16 @@ struct MockData {
 
 
 #Preview("Insights Dashboard - Data") {
-    NavigationStack {
-        InsightsCalendarView(activityData: MockData.activityMap)
+    @Previewable @State var path = NavigationPath()
+    NavigationStack(path: $path) {
+        InsightsCalendarView(path: $path, activityData: MockData.activityMap)
     }
 }
 
 #Preview("Insights Dashboard - Empty") {
-    NavigationStack {
-        InsightsCalendarView(activityData: [:])
+    @Previewable @State var path = NavigationPath()
+    NavigationStack(path: $path) {
+        InsightsCalendarView(path: $path, activityData: [:])
     }
 }
 

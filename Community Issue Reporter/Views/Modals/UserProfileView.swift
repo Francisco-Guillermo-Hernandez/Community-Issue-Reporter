@@ -124,6 +124,10 @@ struct UserProfileView: View {
             }
             .toolbar {
                 
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(role: .close) { dismiss() }
+                }
+                
                 ToolbarItem(placement: .title) {
                     Text("Profile")
                 }

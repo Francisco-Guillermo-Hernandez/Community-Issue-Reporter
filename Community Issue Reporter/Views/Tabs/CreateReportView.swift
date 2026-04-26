@@ -15,13 +15,14 @@ struct CreateReportView: View {
     @State private var show = false
     @State private var issueType: IssueTypes = .all
     @State private var severity: Severity = .all
+    @State private var model = ReportDataModel()
     
     var body: some View {
         NavigationStack {
             ScrollView(.vertical) {
-                LazyVGrid(columns: Self.gridColumns, spacing: 16) {
+                LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 3) {
                     ForEach(filteredMatters, id: \.id) { matter in
-                        NavigationLink(destination: self.description) {
+                        NavigationLink(destination: report(matter: matter)) {
                             CardView(matter: matter)
                         }
                     }
@@ -66,9 +67,10 @@ struct CreateReportView: View {
         
     }
     
-    /// Open report view with type of matter choosen
-    private var description: some View {
-        ReportView(onCompletion: { incomingMessage, alertType in
+    /// Open report view with type of matter chosen
+    @ViewBuilder
+    private func report(matter: MatterToSolve) -> some View {
+        ReportView(model: model, onCompletion: { incomingMessage, alertType in
             message = incomingMessage
             type = alertType
             show = true
@@ -78,15 +80,18 @@ struct CreateReportView: View {
                 
             }
         })
+        .onAppear {
+            model.setMatterToSolve(matter)
+        }
     }
     
     private var filteredMatters: [MatterToSolve] {
         let trimmedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedQuery.isEmpty {
-            return filterByIssueType(matter: filterByStatus(matter: matterToResolve))
+            return filterByIssueType(matter: filterByStatus(matter: mattersToResolve))
         }
         
-        return matterToResolve.filter { matter in
+        return mattersToResolve.filter { matter in
             matter.title.localizedCaseInsensitiveContains(trimmedQuery)
             || matter.description.localizedCaseInsensitiveContains(trimmedQuery)
             
@@ -106,11 +111,12 @@ struct CreateReportView: View {
     }
     
     private static let gridColumns: [GridItem] = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
+        GridItem(.flexible(), spacing: .themeSpacing * 3),
+        GridItem(.flexible(), spacing: .themeSpacing * 3)
     ]
 }
 
+// MARK: - CardView for the grid
 struct CardView: View {
     var matter: MatterToSolve
     var body: some View {
@@ -130,17 +136,18 @@ struct CardView: View {
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .aspectRatio(4/3, contentMode: .fill)
                         .clipped()
-                        .cornerRadius(16)
+                        .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+                        .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
                 }
                 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: .themeSpacing * 1.5) {
                     Spacer()
                     Text(matter.title)
                         .font(.title3)
                         .foregroundStyle(.white)
                         .fontWeight(.black)
                         .lineLimit(2)
-                        .padding(12)
+                        .padding(.themePadding)
                         .multilineTextAlignment(.leading)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

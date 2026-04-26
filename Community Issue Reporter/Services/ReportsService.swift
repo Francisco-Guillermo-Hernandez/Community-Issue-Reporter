@@ -53,4 +53,8 @@ struct ReportsService {
     func fetchReportByUser(q: PaginatedRequestQueryParams) async throws -> PaginatedResponse<Report> {
         return try await client.get(path: "reports/byUser", query: q, withOAuth: true,)
     }
+    
+    func updateReport(reportId: String, report: Report, headers: Array<HTTPHeader>) async throws -> GenericResponse {
+        return try await client.patch(path: "reports/\(reportId)", body: report, headers: headers, withOAuth: true)
+    }
 }

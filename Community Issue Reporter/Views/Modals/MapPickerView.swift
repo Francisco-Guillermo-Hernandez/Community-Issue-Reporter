@@ -40,7 +40,7 @@ struct MapPickerView: View {
         self.searchText = ""
         self.address = ""
         self.hasCenteredOnUser = false
-        self.locator = Locator(countryCode: "", country: "", region: "", city: "")
+        self.locator = Locator(countryCode: "", country: "", region: "", city: "", address: "")
         self.cameraPosition = .region(
             MKCoordinateRegion(
                 center: getLocation(coordinate),
@@ -157,7 +157,7 @@ struct MapPickerView: View {
               
               let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
               self.locator = dao.findBy(cityName: cityName, country: country)
-              self.locator = self.locator.withAddress(address)
+              self.locator.address = address
           }
       }
     

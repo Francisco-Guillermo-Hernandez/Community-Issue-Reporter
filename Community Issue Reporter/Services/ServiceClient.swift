@@ -198,6 +198,9 @@ struct ServiceClient {
         }
         
         guard (200...299).contains(httpResponse.statusCode) else {
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Error Response Body: \(jsonString)")
+            }
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
         
@@ -251,6 +254,9 @@ struct ServiceClient {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Error Response Body: \(jsonString)")
+            }
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
 

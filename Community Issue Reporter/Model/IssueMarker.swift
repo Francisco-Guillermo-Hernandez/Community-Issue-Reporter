@@ -26,7 +26,7 @@ struct IssueMarker: Identifiable {
          coordinate: CLLocationCoordinate2D,
          issueType: Int,
          severity: Int,
-         matterToSolveId: String,
+         matterToSolveId: Int,
          address: String) {
         
         self.id = id

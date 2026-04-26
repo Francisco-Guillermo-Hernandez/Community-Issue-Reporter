@@ -75,17 +75,7 @@ struct ReportRepository {
     static func create(report: Report, locator: Locator, onError: ErrorHandler) async  -> String {
         do {
             let response = try await ReportsService().createReport(
-                report: Report(
-                    coordinate: report.coordinate,
-                    address: report.address,
-                    title: report.title,
-                    description: report.description,
-                    severityId: report.severityId,
-                    statusId: report.statusId,
-                    issueTypeId: report.issueTypeId,
-                    matterToSolveId: report.matterToSolveId,
-                    cellIndex: report.cellIndex,
-                ),
+                report: report,
                 headers: [
                     HTTPHeader(name: "Country", content: locator.country),
                     HTTPHeader(name: "Region", content: locator.region),
@@ -98,4 +88,31 @@ struct ReportRepository {
             return "-1"
         }
     }
+    
+    static func update(report: Report,locator: Locator, onComplete: @escaping (GenericResponse) -> Void, onError: ErrorHandler) async {
+        do {
+            
+            guard let id = report.id as String? else {
+                onError(CustomError.missingId)
+                return
+            }
+            
+            if report.reportState == .modifying {
+                let response = try await ReportsService().updateReport(reportId: id, report: report, headers: [])
+                onComplete(response)
+            } else {
+                onError(CustomError.missingId)
+            }
+            
+        } catch {
+            onError(error)
+            
+        }
+    }
+}
+
+
+enum CustomError: Error {
+    case missingId
+    case invalidState
 }

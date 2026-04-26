@@ -17,31 +17,20 @@ struct Option: Hashable {
 struct ReportView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var model: ReportDataModel
-    @State private var issueType: IssueTypes
-    @State private var severityLevel: Severity
-    @State private var address: String
     @State private var coordinate: Coordinate
-    @State private var descriptionText: String
     @State private var showDiscardAlert: Bool
     @State private var isSubmitting: Bool
     @State private var selectedImages: [MediaResources] = []
     @State private var showMapPickerSheet: Bool
-    @State private var title: String = ""
-    @State private var locator: Locator
     @Binding var showCancelButton: Bool
   
     init(model: ReportDataModel, onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
         self.model = model
-        self.issueType = .all
-        self.severityLevel = .low
-        self.address = ""
         self.coordinate = .init(lat: 13.6929, lng: -89.2182)
-        self.descriptionText = ""
         self.showDiscardAlert = false
         self.isSubmitting = false
         self.selectedImages = []
         self.showMapPickerSheet = false
-        self.locator = .init(countryCode: "", country: "", region: "", city: "")
         self.onCompletion = onCompletion
         self._showCancelButton = Binding<Bool>(get: { showCancelButton }, set: { _ in })
     }
@@ -49,9 +38,10 @@ struct ReportView: View {
     var onCompletion: (String, AlertType) -> Void
     
     private var isFormFilled: Bool {
-        !address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        || !descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        || !selectedImages.isEmpty
+//        !address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+//        || !descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+//        || !selectedImages.isEmpty
+        return true
     }
 
     var body: some View {
@@ -59,7 +49,7 @@ struct ReportView: View {
             Form {
                 /// This section is dedicated to select a location on the map
                 Section("Location") {
-                    MiniMapLocator(coordinate: $coordinate, onExpandMap: { coordinate in
+                    MiniMapLocator(coordinate: $model.report.coordinate, onExpandMap: { coordinate in
                         self.coordinate = coordinate
                         showMapPickerSheet.toggle()
                     })
@@ -82,7 +72,7 @@ struct ReportView: View {
                 ///
                 Section("Issue Details") {
                     
-                    Picker("Issue type", selection: $model.report.issueTypeId) {
+                    Picker("Issue type", selection: $model.report.issueType) {
                         ForEach(IssueTypes.allCases, id: \.self) { issue in
                             HStack(spacing: 80) {
                                 Text(issue.title)
@@ -91,22 +81,20 @@ struct ReportView: View {
                                 Image(systemName: issue.iconName)
                                     
                             }
-                            
                             .tag(issue)
                         }
                     }
                   
 
                     
-                    Picker("Severity level", selection: $model.report.severityId) {
+                    Picker("Severity level", selection: $model.report.severity) {
                         ForEach(Severity.allCases, id: \.self) { level in
                             HStack(spacing: 8) {
                                
-                                Image(systemName: level.iconName)
+                                Image(systemName: level.iconName)	
                                     .padding(.trailing, 10)
                                 Text(level.title)
                             }
-                            .tag(level.title)
                             .tag(level)
                         }
                     }
@@ -137,7 +125,7 @@ struct ReportView: View {
                             name: "Address",
                             label: String(localized: "Please tell us where is the issue", comment: "ReportView: Please tell us where is the issue"),
                             axis: .vertical,
-                            value: $address,
+                            value: $model.report.address,
                             
                         )
                     }
@@ -180,46 +168,8 @@ struct ReportView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         isSubmitting = true
-                        
-                        Task {
-                            let reportId = await ReportRepository
-                                .create(
-                                    report: Report(
-                                        coordinate: self.coordinate,
-                                        address: self.address,
-                                        title: self.title,
-                                        description: self.descriptionText,
-                                        severityId: self.severityLevel.identifier,
-                                        statusId: 1,
-                                        issueTypeId: self.issueType.identifier,
-                                        matterToSolveId: "",
-                                        cellIndex: "demo",
-                                        olc: "demo",
-                                    ),
-                                    locator: self.locator,
-                                    onError: { error in
-                                        print("error: \(error)")
-                                    }
-                                )
-                            
-                            if selectedImages.count > 0 {
-                                print("there are images")
-                                await ImageEncoderService().prepareAndSend(
-                                    reportId: reportId,
-                                    images: selectedImages
-                                )
-                            }
-                            
-                            await MainActor.run {
-                                if reportId != "-1" {
-                                    dismiss()
-                                    onCompletion("Report submitted successfully.", .success)
-                                } else {
-                                    dismiss()
-                                    onCompletion("Error submitting report.", .error)
-                                }
-                            }
-                        }
+                        performActions()
+                       
                     } label: {
                         if isSubmitting {
                             ProgressView()
@@ -235,18 +185,68 @@ struct ReportView: View {
         }
         .sheet(isPresented: $showMapPickerSheet)  {
             MapPickerView(coordinate: $coordinate, onConfirm: { coordinate, locator in
-                self.coordinate = coordinate
-                self.locator = locator
-                self.address = self.locator.address
+             
                 
-                print("coordinate \(self.coordinate.lat), \(self.coordinate.lng)")
-                print("locator \(self.locator)")
-                print("address \(self.address)")
+                model.updateCoordinate(coordinate)
+                model.updateLocator(locator)
                 self.showMapPickerSheet = false
+                
+               
             })
         }
     }
 
+    private func performActions() -> Void {
+        Task {
+            
+        
+            if model.report.reportState == .inProgress || model.report.reportState == .new {
+                model.report.id = await ReportRepository
+                    .create(
+                        report: model.report,
+                        locator: model.locator,
+                        onError: { error in
+                            print("error: \(error)")
+                        }
+                    )
+            }
+            
+            dump(model)
+            
+            if model.report.reportState == .modifying {
+                await ReportRepository
+                    .update(
+                        report: model.report,
+                        locator: model.locator,
+                        onComplete: { result in
+                          print(result)
+                        },
+                        onError: { error in
+                            print("error: \(error)")
+                        }
+                    )
+            }
+            
+            
+            if selectedImages.count > 0 {
+               
+                await ImageEncoderService().prepareAndSend(
+                    reportId: model.report.id!,
+                    images: selectedImages
+                )
+            }
+            
+            await MainActor.run {
+                if model.report.id != "-1" {
+                    dismiss()
+                    onCompletion("Report submitted successfully.", .success)
+                } else {
+                    dismiss()
+                    onCompletion("Error submitting report.", .error)
+                }
+            }
+        }
+    }
    
 }
 

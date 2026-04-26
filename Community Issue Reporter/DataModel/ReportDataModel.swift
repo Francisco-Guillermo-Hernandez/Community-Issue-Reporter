@@ -12,6 +12,7 @@ import SwiftUI
 final class ReportDataModel {
     
     var report: Report
+    var locator: Locator
     init() {
         self.report = Report(
             coordinate: Coordinate(lat: 0.0, lng: 0.0),
@@ -21,12 +22,14 @@ final class ReportDataModel {
             severityId: 1,
             statusId: 1,
             issueTypeId: 1,
-            matterToSolveId: "",
+            matterToSolveId: 1,
             cellIndex: "",
             createdAt: Date(),
             updatedAt: Date(),
             reportState: .new,
         )
+        
+        self.locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")
     }
     
     func setMatterToSolve(_ matter: MatterToSolve) {
@@ -39,6 +42,11 @@ final class ReportDataModel {
     
     func updateCoordinate(_ coordinate: Coordinate) {
         report.coordinate = coordinate
+    }
+    
+    func updateLocator(_ locator: Locator) {
+        self.locator = locator
+        self.report.address = locator.address
     }
     
     func prepareForModification(_ report: Report) {

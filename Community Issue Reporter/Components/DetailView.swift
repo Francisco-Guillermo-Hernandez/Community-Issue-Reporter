@@ -397,7 +397,7 @@ struct DetailView: View {
     
 }
 
-func getMatterToSolve(id: String) -> String {
+func getMatterToSolve(id: Int) -> String {
     return mattersToResolve.first(where: { $0.id == id })?.title ?? ""
 }
 
@@ -415,7 +415,7 @@ func getMatterToSolve(id: String) -> String {
         coordinate: coordinate,
         issueType: 1,
         severity: 2,
-        matterToSolveId: "",
+        matterToSolveId: 1,
         address: "lorem ipsum dolor sit amet consectetur adipiscing elit."
     )
     

@@ -20,7 +20,7 @@ enum ReportStates: String, Codable {
 
 
 struct Report: Identifiable, Codable {
-    let id: String?
+    var id: String?
     var coordinate: Coordinate
     var address: String
     var title: String
@@ -28,7 +28,7 @@ struct Report: Identifiable, Codable {
     var severityId: Int
     var statusId: Int
     var issueTypeId: Int
-    var matterToSolveId: String
+    var matterToSolveId: Int
     var reportedAt: Date?
     var cellIndex: String
     var createdAt: Date?
@@ -47,7 +47,7 @@ struct Report: Identifiable, Codable {
             severityId: Int,
             statusId: Int,
             issueTypeId: Int,
-            matterToSolveId: String,
+            matterToSolveId: Int,
             reportedAt: Date? = nil,
             cellIndex: String,
             olc: String? = nil,
@@ -82,15 +82,34 @@ struct Report: Identifiable, Codable {
 // MARK: - Extension to use related values of the enums
 extension Report {
     var issueType: IssueTypes {
-        IssueTypes.allCases.first(where: { $0.identifier == self.issueTypeId }) ?? .all
+        get {
+            IssueTypes.allCases.first(where: { $0.identifier == self.issueTypeId }) ?? .all
+        }
+        
+        set {
+            self.issueTypeId = newValue.identifier
+        }
     }
     
+    
     var severity: Severity {
-        Severity.allCases.first(where: { $0.identifier == self.severityId }) ?? .low
-    }
+          get {
+              Severity.allCases.first(where: { $0.identifier == self.severityId }) ?? .low
+          }
+          set {
+              // When the picker updates 'severity', we update the underlying 'severityId'
+              self.severityId = newValue.identifier
+          }
+      }
 
     var status: IssueStatus {
-        IssueStatus.allCases.first(where: { $0.identifier == self.statusId }) ?? .reported
+        get {
+            IssueStatus.allCases.first(where: { $0.identifier == self.statusId }) ?? .reported
+        }
+        
+        set {
+            self.statusId = newValue.identifier
+        }
     }
     
     var reportedDate: String {

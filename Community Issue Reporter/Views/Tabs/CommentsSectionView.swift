@@ -251,7 +251,7 @@ struct CommentsSectionView: View {
         coordinate: coordinate,
         issueType: 1,
         severity: 2,
-        matterToSolveId: "",
+        matterToSolveId: 1,
         address: "lorem ipsum dolor sit amet consectetur adipiscing elit."
     )
     

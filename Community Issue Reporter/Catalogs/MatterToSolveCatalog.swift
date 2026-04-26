@@ -9,7 +9,7 @@ import Foundation
 
 let mattersToResolve: [MatterToSolve] = [
     MatterToSolve(
-        id: "matter:potholes",
+        id: 1,
         title: String(
             localized: "Potholes"
         ),
@@ -18,10 +18,11 @@ let mattersToResolve: [MatterToSolve] = [
         ),
         issueType: .building,
         severity: .low,
-        image: "matt-hoffman-MQjJHTT-diQ-unsplash"
+        image: "matt-hoffman-MQjJHTT-diQ-unsplash",
+        suggestions: ["pothole filling", "pothole repair", "pothole sealing", "pothole excavation", "pothole removal"]
     ),
     MatterToSolve(
-        id: "matter:water-leakage",
+        id: 2,
         title: String(
             localized: "Water leakage"
         ),
@@ -30,10 +31,11 @@ let mattersToResolve: [MatterToSolve] = [
         ),
         issueType: .building,
         severity: .high,
-        image: "arun-prakash-p0_6IwEjK98-unsplash"
+        image: "arun-prakash-p0_6IwEjK98-unsplash",
+        suggestions: ["water leak repair", "water leak sealing"]
     ),
     MatterToSolve(
-        id: "matter:street-sign",
+        id: 3,
         title: String(
             localized: "Street sign"
         ),
@@ -42,34 +44,37 @@ let mattersToResolve: [MatterToSolve] = [
         ),
         issueType: .building,
         severity: .low,
-        image: "zoshua-colah-1BEULYOAnio-unsplash"
+        image: "zoshua-colah-1BEULYOAnio-unsplash",
+        suggestions: ["place a street sign", "change a damaged street sign"]
     ),
     MatterToSolve(
-        id: "matter:trafic-light",
+        id: 4,
         title: String(
             localized: "Trafic light"
         ),
         description: String(
-            localized: "damaged trafic lights, trafic lights that don't work well"
+            localized: "damaged traffic lights, traffic lights that don't work well"
         ),
         issueType: .building,
         severity: .low,
-        image: "eliobed-suarez-PN-YnI5stdQ-unsplash"
+        image: "eliobed-suarez-PN-YnI5stdQ-unsplash",
+        suggestions: ["replace a damaged traffic light", "place a new traffic light"]
     ),
     MatterToSolve(
-        id: "matter:lamp",
+        id: 5,
         title: String(
             localized: "Lamp"
         ),
         description: String(
-            localized: "Burned lamps, missing or request to install or raplace"
+            localized: "Burned lamps, missing or request to install or replace"
         ),
         issueType: .building,
         severity: .low,
-        image: "mukesh-naik-PZK-dEVBF9g-unsplash"
+        image: "mukesh-naik-PZK-dEVBF9g-unsplash",
+        suggestions: ["place a new lamp", "replace a damaged lamp", "repair a burned lamp"]
     ),
     MatterToSolve(
-        id: "matter:fallen-trees",
+        id: 6,
         title: String(
             localized: "Fallen trees"
         ),
@@ -78,10 +83,11 @@ let mattersToResolve: [MatterToSolve] = [
         ),
         issueType: .building,
         severity: .medium,
-        image: "john-cameron-EVhuJCqYLxM-unsplash"
+        image: "john-cameron-EVhuJCqYLxM-unsplash",
+        suggestions: ["tree trimming", "tree planting", "tree removal"]
     ),
     MatterToSolve(
-        id: "matter:flood",
+        id: 7,
         title: String(
             localized: "Flood"
         ),
@@ -90,10 +96,11 @@ let mattersToResolve: [MatterToSolve] = [
         ),
         issueType: .building,
         severity: .high,
-        image: "phillip-flores-38wqGW802RM-unsplash"
+        image: "phillip-flores-38wqGW802RM-unsplash",
+        suggestions: ["retaing flood prone areas", "repair flood damaged structures"]
     ),
     MatterToSolve(
-        id: "matter:waste-management",
+        id: 8,
         title: String(
             localized: "Waste Management"
         ),
@@ -102,6 +109,7 @@ let mattersToResolve: [MatterToSolve] = [
         ),
         issueType: .publicSpace,
         severity: .low,
-        image: "pixel-shot-kxTwgF_uHow-unsplash"
+        image: "pixel-shot-kxTwgF_uHow-unsplash",
+        suggestions: ["improve waste collection systems", "increase recycling programs", "promote waste reduction", "organize community clean-ups", "implement recycling incentives", "encourage composting", "provide information on recycling and waste reduction", "request for volunteers to assist with waste management tasks"]
     )
 ]

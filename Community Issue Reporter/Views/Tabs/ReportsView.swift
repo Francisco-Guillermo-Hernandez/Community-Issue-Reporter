@@ -206,7 +206,7 @@ struct ReportsView: View {
                 coordinate: coordinate,
                 issueType: 1,
                 severity: 1,
-                matterToSolveId: "matter:potholes",
+                matterToSolveId: 1,
                 address: address
             )
             cameraPosition = .region(
@@ -235,7 +235,7 @@ struct ReportsView: View {
                 coordinate: coordinate, 
                 issueType: 1,
                 severity: 1,
-                matterToSolveId: "matter:potholes", 
+                matterToSolveId: 1,
                 address: address
             )
             cameraPosition = .region(

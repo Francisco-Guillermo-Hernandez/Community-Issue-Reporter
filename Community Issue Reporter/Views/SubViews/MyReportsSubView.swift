@@ -90,6 +90,7 @@ struct MyReportsSubView: View {
     @State private var elementToDelete: IndexSet = []
     @State private var reportToDelete: Report? = nil
     @State private var model: ReportDataModel = .init()
+    @State private var refreshID = UUID()
     
     var subViewName: String
     var body: some View {
@@ -151,35 +152,35 @@ struct MyReportsSubView: View {
         .toolbar {
             
         }
-        .task {
-            guard !Task.isCancelled else { return }
-            await ReportRepository.listByUser(
-                page: 1,
-                onComplete: { result in
-                    
-                    guard let reports = result.documents else { return }
-                    
-                    self.reports.append(contentsOf: reports)
-                },
-                onError: { error in
-                    print(error)
-                }
-            )
-            
+        .task(id: refreshID) {
+            await fetchReports()
         }
-        
+        .onAppear {
+            refreshID = UUID()
+        }
         .navigationTitle(subViewName)
     }
     
+    private func fetchReports() async {
+        await ReportRepository.listByUser(
+            page: 1,
+            onComplete: { result in
+                guard let reports = result.documents else { return }
+                self.reports = reports
+            },
+            onError: { error in
+                print(error)
+            }
+        )
+    }
 
     @ViewBuilder
     private func report(report: Report) -> some View {
         ReportView(model: model, onCompletion: { _, _ in
-   
+            refreshID = UUID()
         })
         .onAppear {
             model.prepareForModification(report)
-        
         }
     }
     

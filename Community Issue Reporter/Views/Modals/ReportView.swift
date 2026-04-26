@@ -17,7 +17,6 @@ struct Option: Hashable {
 struct ReportView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var model: ReportDataModel
-    @State private var coordinate: Coordinate
     @State private var showDiscardAlert: Bool
     @State private var isSubmitting: Bool
     @State private var selectedImages: [MediaResources] = []
@@ -26,7 +25,7 @@ struct ReportView: View {
   
     init(model: ReportDataModel, onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
         self.model = model
-        self.coordinate = .init(lat: 13.6929, lng: -89.2182)
+        
         self.showDiscardAlert = false
         self.isSubmitting = false
         self.selectedImages = []
@@ -49,8 +48,8 @@ struct ReportView: View {
             Form {
                 /// This section is dedicated to select a location on the map
                 Section("Location") {
-                    MiniMapLocator(coordinate: $model.report.coordinate, onExpandMap: { coordinate in
-                        self.coordinate = coordinate
+                    MiniMapLocator(coordinate: $model.report.coordinate, onExpandMap: { _ in
+                       
                         showMapPickerSheet.toggle()
                     })
                 }
@@ -184,7 +183,7 @@ struct ReportView: View {
             .interactiveDismissDisabled(isFormFilled)
         }
         .sheet(isPresented: $showMapPickerSheet)  {
-            MapPickerView(coordinate: $coordinate, onConfirm: { coordinate, locator in
+            MapPickerView(coordinate: $model.report.coordinate, onConfirm: { coordinate, locator in
              
                 
                 model.updateCoordinate(coordinate)

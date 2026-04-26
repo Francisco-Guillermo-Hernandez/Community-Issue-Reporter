@@ -10,6 +10,19 @@ import Foundation
 struct City: Identifiable, Codable {
     let id: Int
     let name: String
+    let legalName: String
+    let isCapital: Bool
+    let coordinates: Coordinate
+    let metadata: [String: String]?
+    
+    init(id: Int, name: String, legalName: String, isCapital: Bool = false, coordinates: Coordinate, metadata: [String: String]? = nil) {
+        self.id = id
+        self.name = name
+        self.legalName = legalName
+        self.isCapital = isCapital
+        self.coordinates = coordinates
+        self.metadata = metadata
+    }
 }
 
 struct Region: Identifiable, Codable {
@@ -21,7 +34,15 @@ struct Region: Identifiable, Codable {
 struct Country: Identifiable, Codable {
     let id: Int
     let name: String
+    let legalName: String?
     let regions: [Region]
+    
+    init(id: Int, name: String, legalName: String? = nil, regions: [Region]) {
+        self.id = id
+        self.name = name
+        self.legalName = legalName
+        self.regions = []
+    }
 }
 
 struct GeographicalRegion: Identifiable, Codable {

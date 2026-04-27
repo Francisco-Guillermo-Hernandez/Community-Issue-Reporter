@@ -10,6 +10,7 @@ import SwiftUI
 
 struct TabBarView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.mySettings) var settings
     @State private var model: ReportDataModel = .init()
     @State private var selectedTab: Int = 1
     @State private var presentSheetOnDeepLink: Bool = false
@@ -67,6 +68,7 @@ struct TabBarView: View {
             }, showCancelButton: true)
             .onAppear {
                 model.setMatterToSolve(mattersToResolve.first!)
+//                model.configure(with: settings)
             }
         }
         .sensoryFeedback(.selection, trigger: selectedTab)

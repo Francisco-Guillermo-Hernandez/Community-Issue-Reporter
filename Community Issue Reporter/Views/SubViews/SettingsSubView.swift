@@ -12,7 +12,6 @@ struct SettingsSubView: View {
 
     @Environment(\.mySettings) private var settings
     @Environment(\.dismiss) private var dismiss
-//    @Environment(\.locale) private var locale
 
     @State private var geographicalRegion: Int = 1
     @State private var selectedCountry: Int = 0
@@ -26,6 +25,7 @@ struct SettingsSubView: View {
     @State private var regions: [Region] = []
     @State private var cities: [City] = []
     @State private var language: String = "en"
+    @State private var enableNotifications: Bool = false
     
     var subViewName: String
     var body: some View {
@@ -97,26 +97,22 @@ struct SettingsSubView: View {
                             settings.enableAutomaticIdentification = newValue
                         }
                     
+                    Toggle("Notifications", isOn: $enableNotifications)
+                        .onChange(of: enableNotifications) { _, newValue in
+                            
+                        }
+                    
                 } header: {
                     Text("App settings")
                 } footer: {
                     Text("")
                 }
             }
-//            .scrollDisabled(true)
+            .scrollDisabled(true)
 //            .scrollContentBackground(.hidden)
             .listSectionSpacing(32)
             .toolbarTitleDisplayMode(.inline)
             .navigationTitle(subViewName)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "arrow.down.backward")
-                    }
-                }
-            }
             .onAppear {
                 geographicalRegion = settings.geographicalRegion
                 selectedCountry = settings.selectedCountry
@@ -125,6 +121,9 @@ struct SettingsSubView: View {
                 enableAnonymousTelemetry = settings.enableAnonymousTelemetry
                 selectedLanguage = settings.selectedLanguage
                 enableAutomaticIdentification = settings.enableAutomaticIdentification
+                enableNotifications = settings.enableNotifications
+                
+                countries = getCountries(geographicalRegion: geographicalRegion)
             }
         }
         .interactiveDismissDisabled(true)

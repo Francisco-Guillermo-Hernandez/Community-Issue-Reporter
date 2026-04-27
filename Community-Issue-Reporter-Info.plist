@@ -13,6 +13,34 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>dev.FranciscoHernandez.Comunity-Issues</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>issuereporter</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.214707515100-splld498s00pgil10kr4n52piqgltblf</string>
+			</array>
+		</dict>
+	</array>
+	<key>GIDClientID</key>
+	<string>214707515100-splld498s00pgil10kr4n52piqgltblf.apps.googleusercontent.com</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlechromes</string>
+		<string>comgooglemaps</string>
+	</array>
 	<key>MKDirectionsApplicationSupportedModes</key>
 	<array>
 		<string>MKDirectionsModeBus</string>

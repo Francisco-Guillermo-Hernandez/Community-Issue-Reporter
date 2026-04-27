@@ -21,7 +21,6 @@ struct UserProfileView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.mySettings) private var settings
     @State private var showSheet = false
-    @State private var sheetDetents: Set<PresentationDetent> = [.large]
     @State private var selectedOption: String = ""
     @EnvironmentObject var appState: AuthViewModel
     
@@ -76,12 +75,12 @@ struct UserProfileView: View {
                     NavigationLink(destination: destinationView(for: option)) {
                         HStack {
                             
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
                                 .fill(option.color.slantedGradient)
-                                .frame(width: 48, height: 48)
+                                .frame(width: 36, height: 36)
                                 .overlay {
                                     Image(systemName: option.icon)
-                                        .font(Font.system(size: 20, weight: .medium))
+                                        .font(Font.system(size: 17, weight: .medium))
                                         .foregroundStyle( Color.white)
                                 }
                                 
@@ -123,7 +122,6 @@ struct UserProfileView: View {
                
             }
             .toolbar {
-                
                 ToolbarItem(placement: .topBarLeading) {
                     Button(role: .close) { dismiss() }
                 }
@@ -132,7 +130,6 @@ struct UserProfileView: View {
                     Text("Profile")
                 }
             }
-            .presentationDetents(sheetDetents)
             .navigationBarTitleDisplayMode(.inline)
             
         }

@@ -58,7 +58,7 @@ struct CommentsSubView: View {
             }
             .task {
                 guard !Task.isCancelled else { return }
-                await CommentsRepository.listByUser(
+                await CommentsRepository.shared.listByUser(
                     page: 1,
                     onComplete: { result in
                         self.comments.append(contentsOf: result.documents!)

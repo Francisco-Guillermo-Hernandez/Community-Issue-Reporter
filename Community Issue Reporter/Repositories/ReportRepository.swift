@@ -11,10 +11,16 @@ import CoreLocation
 typealias ErrorHandler = @Sendable (Error) -> Void
 typealias Reports = PaginatedResponse<Report>
 
-struct ReportRepository {
-    static func list(onError: ErrorHandler) async -> [IssueMarker] {
+final class ReportRepository {
+    static let shared = ReportRepository()
+    private let reportsService: ReportsService
+    private init() {
+        reportsService = ReportsService()
+    }
+    
+    func list(onError: ErrorHandler) async -> [IssueMarker] {
         do {
-            let reports: [Report] = try await ReportsService().fetchReports()
+            let reports: [Report] = try await self.reportsService.fetchReports()
 
             return reports.compactMap { report in
                 return IssueMarker(
@@ -38,18 +44,18 @@ struct ReportRepository {
         }
     }
     
-    static func listReports(onError: ErrorHandler) async -> [Report] {
+    func listReports(onError: ErrorHandler) async -> [Report] {
         do {
-            return try await ReportsService().fetchReports()
+            return try await self.reportsService.fetchReports()
         } catch {
             onError(error)
             return []
         }
     }
     
-    static func listByUser(page: Int, onComplete: @escaping (Reports) -> Void, onError: ErrorHandler) async {
+    func listByUser(page: Int, onComplete: @escaping (Reports) -> Void, onError: ErrorHandler) async {
         do {
-            let result = try await ReportsService().fetchReportByUser(
+            let result = try await self.reportsService.fetchReportByUser(
                     q: PaginatedRequestQueryParams(
                         page: page,
                         limit: 16
@@ -61,10 +67,10 @@ struct ReportRepository {
         }
     }
     
-    static func delete(_ reportId: String, onComplete: @escaping (GenericResponse) -> Void, onError: ErrorHandler) async {
+    func delete(_ reportId: String, onComplete: @escaping (GenericResponse) -> Void, onError: ErrorHandler) async {
         do {
             
-           let result = try await ReportsService().deleteReport(by: reportId)
+            let result = try await self.reportsService.deleteReport(by: reportId)
             onComplete(result)
             
         } catch {
@@ -72,9 +78,9 @@ struct ReportRepository {
         }
     }
     
-    static func create(report: Report, locator: Locator, onError: ErrorHandler) async  -> String {
+    func create(report: Report, locator: Locator, onError: ErrorHandler) async  -> String {
         do {
-            let response = try await ReportsService().createReport(
+            let response = try await self.reportsService.createReport(
                 report: report,
                 headers: [
                     HTTPHeader(name: "Country", content: locator.country),
@@ -89,7 +95,7 @@ struct ReportRepository {
         }
     }
     
-    static func update(report: Report,locator: Locator, onComplete: @escaping (GenericResponse) -> Void, onError: ErrorHandler) async {
+    func update(report: Report,locator: Locator, onComplete: @escaping (GenericResponse) -> Void, onError: ErrorHandler) async {
         do {
             
             guard let id = report.id as String? else {
@@ -98,7 +104,7 @@ struct ReportRepository {
             }
             
             if report.reportState == .modifying {
-                let response = try await ReportsService().updateReport(reportId: id, report: report, headers: [])
+                let response = try await self.reportsService.updateReport(reportId: id, report: report, headers: [])
                 onComplete(response)
             } else {
                 onError(CustomError.missingId)

@@ -162,7 +162,7 @@ struct MyReportsSubView: View {
     }
     
     private func fetchReports() async {
-        await ReportRepository.listByUser(
+        await ReportRepository.shared.listByUser(
             page: 1,
             onComplete: { result in
                 guard let reports = result.documents else { return }
@@ -194,7 +194,7 @@ struct MyReportsSubView: View {
     private func delete(report id: Report? = nil) {
         Task {
             guard let id = id?.id else { return }
-            await ReportRepository.delete(
+            await ReportRepository.shared.delete(
                 id,
                 onComplete: { result in
                     print(result)

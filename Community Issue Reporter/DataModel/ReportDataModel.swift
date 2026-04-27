@@ -10,12 +10,32 @@ import SwiftUI
 
 @Observable
 final class ReportDataModel {
+   
     
+    
+    
+   
     var report: Report
     var locator: Locator
+    private let settings = SettingsStore.shared
+    
     init() {
+        self.locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")
+        
+        var coordinate = Coordinate(lat: 0.0, lng: 0.0)
+        if let country = settings.country {
+            
+            
+//            if let region = country.regions[0] {
+//                if let city = region.cities[0] {
+//                    coordinate = Coordinate(lat: city.coordinates.lat, lng: city.coordinates.lng )
+//                }
+//            }
+           
+        }
+        
         self.report = Report(
-            coordinate: Coordinate(lat: 0.0, lng: 0.0),
+            coordinate: .init(lat: 13.68935, lng: -89.18718),
             address: "",
             title: "",
             description: "",
@@ -29,7 +49,9 @@ final class ReportDataModel {
             reportState: .new,
         )
         
-        self.locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")
+        
+        print("selected country")
+        print(settings.country?.name ?? "no country")
     }
     
     func setMatterToSolve(_ matter: MatterToSolve) {

@@ -8,7 +8,10 @@
 import SwiftUI
 
 @Observable
-class Store {
+final class SettingsStore {
+    
+    static let shared = SettingsStore()
+
     var geographicalRegion: Int {
         get { UserDefaults.standard.integer(forKey: "geographicalRegion") }
         set { UserDefaults.standard.set(newValue, forKey: "geographicalRegion") }
@@ -49,26 +52,40 @@ class Store {
         set { UserDefaults.standard.set(newValue, forKey: "enableAutomaticIdentification") }
     }
     
+    var enableNotifications: Bool {
+        get { UserDefaults.standard.bool(forKey: "enableNotifications") }
+        set { UserDefaults.standard.set(newValue, forKey: "enableNotifications") }
+    }
+    
     init () {
         UserDefaults.standard.register(defaults: [
-            "geographicalRegion": 1,
-            "selectedCountry": 0,
+            "geographicalRegion": 2,
+            "selectedCountry": 2,
             "selectedState": 0,
             "selectedCity": 0,
             "enableBackgroundSync": true,
             "enableAnonymousTelemetry": false,
             "selectedLanguage": 1,
-            "enableAutomaticIdentification": false
+            "enableAutomaticIdentification": false,
+            "enableNotifications": false,
         ])
+    }
+    
+    var region: GeographicalRegion {
+        return geographicalRegions.first(where: { $0.id == geographicalRegion })!
+    }
+    
+    var country: Country? {
+        return region.countries.first(where: { $0.id == selectedCountry })
     }
 }
 
 struct StoreKey: EnvironmentKey {
-    static var defaultValue = Store()
+    static var defaultValue = SettingsStore()
 }
 
 extension EnvironmentValues {
-    var mySettings: Store {
+    var mySettings: SettingsStore {
         get { self[StoreKey.self] }
         set { self[StoreKey.self] = newValue }
     }

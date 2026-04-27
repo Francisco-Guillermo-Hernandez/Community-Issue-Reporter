@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		562A43932F4BC24F00F6C512 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 562A43922F4BC24F00F6C512 /* Media.xcassets */; };
 		5695C3F82F4D571000755B0E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */; };
+		569E2F452F739EB200B8C9DE /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 569E2F442F739EB200B8C9DE /* GoogleSignIn */; };
+		569E2F472F739EB200B8C9DE /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 569E2F462F739EB200B8C9DE /* GoogleSignInSwift */; };
+		56D5D99D2F65284500183FCE /* WebP in Frameworks */ = {isa = PBXBuildFile; productRef = 56D5D99C2F65284500183FCE /* WebP */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,7 +31,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		562A43922F4BC24F00F6C512 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		56E42B502F46BC8C00AC84C7 /* Community Issue Reporter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Community Issue Reporter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56E42B5D2F46BC8D00AC84C7 /* Community Issue ReporterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Community Issue ReporterTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -39,6 +40,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		56E42B522F46BC8C00AC84C7 /* Community Issue Reporter */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFolders = (
+				Licenses,
+			);
 			path = "Community Issue Reporter";
 			sourceTree = "<group>";
 		};
@@ -59,6 +63,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				569E2F472F739EB200B8C9DE /* GoogleSignInSwift in Frameworks */,
+				56D5D99D2F65284500183FCE /* WebP in Frameworks */,
+				569E2F452F739EB200B8C9DE /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,7 +90,6 @@
 			isa = PBXGroup;
 			children = (
 				5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */,
-				562A43922F4BC24F00F6C512 /* Media.xcassets */,
 				56E42B522F46BC8C00AC84C7 /* Community Issue Reporter */,
 				56E42B602F46BC8D00AC84C7 /* Community Issue ReporterTests */,
 				56E42B6A2F46BC8D00AC84C7 /* Community Issue ReporterUITests */,
@@ -121,6 +127,9 @@
 			);
 			name = "Community Issue Reporter";
 			packageProductDependencies = (
+				56D5D99C2F65284500183FCE /* WebP */,
+				569E2F442F739EB200B8C9DE /* GoogleSignIn */,
+				569E2F462F739EB200B8C9DE /* GoogleSignInSwift */,
 			);
 			productName = "Community Issue Reporter";
 			productReference = 56E42B502F46BC8C00AC84C7 /* Community Issue Reporter.app */;
@@ -179,6 +188,9 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
+				KnownAssetTags = (
+					New,
+				);
 				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
@@ -201,9 +213,17 @@
 			knownRegions = (
 				en,
 				Base,
+				"es-419",
+				"pt-BR",
+				fr,
+				de,
 			);
 			mainGroup = 56E42B472F46BC8C00AC84C7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				56D5D99B2F65284500183FCE /* XCRemoteSwiftPackageReference "Swift-WebP" */,
+				569E2F432F739EB200B8C9DE /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56E42B512F46BC8C00AC84C7 /* Products */;
 			projectDirPath = "";
@@ -222,7 +242,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5695C3F82F4D571000755B0E /* PrivacyInfo.xcprivacy in Resources */,
-				562A43932F4BC24F00F6C512 /* Media.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,6 +359,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -397,6 +417,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -404,14 +425,16 @@
 		56E42B722F46BC8D00AC84C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Reportamelo;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T29BNUA7T2;
+				DEVELOPMENT_TEAM = B83C7CWWHT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Community-Issue-Reporter-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Repórtamelo";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				INFOPLIST_KEY_NSCameraUsageDescription = "I need this permission because you can attach photos to a report";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "I need this permission because of the location";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "I need this permission because you can attach stored pictures from your library as evidences of the issues. ";
@@ -427,7 +450,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.DynamicSheetWithHeight.Comunity-Issues";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.Comunity-Issues";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -442,14 +465,16 @@
 		56E42B732F46BC8D00AC84C7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Reportamelo;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T29BNUA7T2;
+				DEVELOPMENT_TEAM = B83C7CWWHT;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Community-Issue-Reporter-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Repórtamelo";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				INFOPLIST_KEY_NSCameraUsageDescription = "I need this permission because you can attach photos to a report";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "I need this permission because of the location";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "I need this permission because you can attach stored pictures from your library as evidences of the issues. ";
@@ -465,7 +490,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.DynamicSheetWithHeight.Comunity-Issues";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.Comunity-Issues";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -601,6 +626,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		569E2F432F739EB200B8C9DE /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
+		56D5D99B2F65284500183FCE /* XCRemoteSwiftPackageReference "Swift-WebP" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ainame/Swift-WebP";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		569E2F442F739EB200B8C9DE /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 569E2F432F739EB200B8C9DE /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		569E2F462F739EB200B8C9DE /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 569E2F432F739EB200B8C9DE /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		56D5D99C2F65284500183FCE /* WebP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56D5D99B2F65284500183FCE /* XCRemoteSwiftPackageReference "Swift-WebP" */;
+			productName = WebP;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 56E42B482F46BC8C00AC84C7 /* Project object */;
 }

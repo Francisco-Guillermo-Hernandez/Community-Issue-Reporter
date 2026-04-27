@@ -104,8 +104,9 @@ struct CreateRequestPetitionView: View {
         
             }
             .task {
+                // Let's cancel the task if the user change the view
                 guard !Task.isCancelled else { return }
-                self.reports = await ReportRepository.listReports(onError: { error in
+                self.reports = await ReportRepository.shared.listReports(onError: { error in
                     print(error)
                 })
             }

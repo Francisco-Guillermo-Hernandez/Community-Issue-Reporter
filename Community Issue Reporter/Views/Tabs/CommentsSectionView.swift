@@ -77,7 +77,7 @@ struct CommentsSectionView: View {
             .task {
                 self.isLoading = true
                 guard !Task.isCancelled else { return }
-                await CommentsRepository.list(
+                await CommentsRepository.shared.list(
                     issue.id,
                     page: currentPage,
                     limit: self.limit,
@@ -183,7 +183,7 @@ struct CommentsSectionView: View {
             
             Task {
                 
-                await CommentsRepository.post(
+                await CommentsRepository.shared.post(
                     reportId: issue.id,
                     message: self.commentInput,
                     onComplete: {
@@ -210,7 +210,7 @@ struct CommentsSectionView: View {
         
         self.isLoading = true
         
-        await CommentsRepository.list(
+        await CommentsRepository.shared.list(
             issue.id,
             page: self.currentPage,
             limit: self.limit,

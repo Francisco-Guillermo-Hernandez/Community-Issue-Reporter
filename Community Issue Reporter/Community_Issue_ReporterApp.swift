@@ -14,7 +14,7 @@ import WidgetKit
 struct Community_Issue_ReporterApp: App {
     
     @StateObject private var authViewModel = AuthViewModel()
-    @State private var store = Store()
+    @State private var store = SettingsStore()
     @AppStorage("selectedLanguage") private var languageCode = "es-419"
     
     init() {

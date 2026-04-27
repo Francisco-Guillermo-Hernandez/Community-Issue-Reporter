@@ -201,6 +201,7 @@ struct ReportView: View {
         
             if model.report.reportState == .inProgress || model.report.reportState == .new {
                 model.report.id = await ReportRepository
+                    .shared
                     .create(
                         report: model.report,
                         locator: model.locator,
@@ -214,6 +215,7 @@ struct ReportView: View {
             
             if model.report.reportState == .modifying {
                 await ReportRepository
+                    .shared
                     .update(
                         report: model.report,
                         locator: model.locator,

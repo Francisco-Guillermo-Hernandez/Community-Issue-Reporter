@@ -140,8 +140,9 @@ struct ReportsView: View {
             showSearchOverlay = false
         }
         .task {
+            // Let's cancel the task if the user change the View or tab
             guard !Task.isCancelled else { return }
-            issues = await ReportRepository.list(onError: { error in
+            issues = await ReportRepository.shared.list(onError: { error in
                 print(error)
             })
         }

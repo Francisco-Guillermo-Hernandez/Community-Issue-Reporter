@@ -311,7 +311,7 @@ struct DetailView: View {
             }
             .task {
                 guard !Task.isCancelled else { return }
-                await CommentsRepository.list(
+                await CommentsRepository.shared.list(
                     issue.id,
                     page: 1,
                     onComplete: { result in

@@ -29,6 +29,14 @@ struct Region: Identifiable, Codable {
     let id: Int
     let name: String
     let cities: [City]
+    let hasTheCapital: Bool?
+    
+    init(id: Int, name: String, cities: [City], hasTheCapital: Bool? = false) {
+        self.id = id
+        self.name = name
+        self.cities = cities
+        self.hasTheCapital = hasTheCapital
+    }
 }
 
 struct Country: Identifiable, Codable {

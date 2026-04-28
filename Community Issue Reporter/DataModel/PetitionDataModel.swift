@@ -14,8 +14,20 @@ final class PetitionDataModel {
     static let shared = PetitionDataModel()
 
     var petition: Petition
-    private init () {
-        self.petition = .init(id: "", title: "", description: "", targetSignatures: 0, currentSignatures: 0, categoryId: 1, statusId: 1, reportedBy: UUID(), disabled: false, createdAt: Date(), updatedAt: Date())
+    private init() {
+        self.petition = .init(
+            id: "",
+            title: "",
+            description: "",
+            targetSignatures: 0,
+            currentSignatures: 0,
+            categoryId: 1,
+            statusId: 1,
+            reportedBy: UUID(),
+            disabled: false,
+            createdAt: Date(),
+            updatedAt: Date()
+        )
     }
     
     func update(_ petition: Petition) {

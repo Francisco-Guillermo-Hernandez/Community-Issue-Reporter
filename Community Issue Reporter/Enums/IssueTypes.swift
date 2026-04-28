@@ -32,6 +32,8 @@ enum IssueTypes: String, CaseIterable, Identifiable {
     
     var identifier: Int {
         switch self {
+        case .all:
+            return 0
         case .road:
             return 1
         case .publicSpace:
@@ -40,8 +42,6 @@ enum IssueTypes: String, CaseIterable, Identifiable {
             return 3
         case .other:
             return 4
-        default:
-            return 1
         }
     }
     

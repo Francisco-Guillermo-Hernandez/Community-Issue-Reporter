@@ -10,6 +10,7 @@ import SwiftUI
 
 struct SignRequestsView: View {
     @Namespace private var namespace
+    @State private var model = PetitionDataModel.shared
     @State private var isPrimaryActionVisible: Bool = true
     @State private var title: String?
     @State private var subtitle: String?
@@ -22,6 +23,67 @@ struct SignRequestsView: View {
     @State private var selectedItem: Int?
     @State private var petitions: [Petition] = []
     @State private var showCreateRequestView: Bool = false
+    @State private var currentPage: Int = 1
+    @State private var isLoading: Bool = false
+    @State private var canLoadMore: Bool = true
+    private let pageLimit: Int = 16
+    
+    
+    @Sendable
+    func fetchPetitions(reset: Bool = false) async {
+        if reset {
+            currentPage = 1
+            canLoadMore = true
+        }
+        
+        guard !isLoading && (canLoadMore || reset) else { return }
+        
+        isLoading = true
+        
+        let query = PaginatedRequestQueryParams(
+            page: currentPage,
+            limit: 10,
+            issueTypeId: issueType == .all ? nil : issueType.identifier,
+            severityId: severity == .all ? nil : severity.identifier,
+            ordering: orderFilter
+        )
+        
+        // In a real app, this locator might come from a location service
+        let locator = Locator(countryCode: "ES", country: "Spain", region: "Andalusia", city: "Seville", address: "Calle Falsa 123")
+        
+        await PetitionRepository.share.list(
+            q: query,
+            locator: locator,
+            onComplete: { result in
+                guard let documents = result.documents else { 
+                    canLoadMore = false
+                    return 
+                }
+                
+                if reset {
+                    self.petitions = documents
+                } else {
+                    let existingIds = Set(self.petitions.compactMap { $0.id })
+                    let uniqueNewPetitions = documents.filter { doc in
+                        guard let id = doc.id else { return true }
+                        return !existingIds.contains(id)
+                    }
+                    self.petitions.append(contentsOf: uniqueNewPetitions)
+                }
+                
+                self.canLoadMore = result.hasNext && self.currentPage < self.pageLimit
+                if self.canLoadMore {
+                    self.currentPage += 1
+                }
+                
+            }, onError: { error in
+                print(error)
+                canLoadMore = false
+            }
+        )
+        
+        isLoading = false
+    }
     
     var body: some View {
         NavigationStack {
@@ -33,30 +95,30 @@ struct SignRequestsView: View {
                             .font(.title3)
                             .fontWeight(.semibold)
                         
-                        ForEach(petitions.indices, id: \.self) { index in
-                            EventsOnDay(petition: petitions[index], selectedIndex: index)
+                        ForEach(petitions) { petition in
+                            EventsOnDay(petition: petition, selectedIndex: petitions.firstIndex(where: { $0.id == petition.id }) ?? 0)
+                                .task {
+                                    if petition.id == petitions.last?.id {
+                                        await fetchPetitions()
+                                    }
+                                }
+                        }
+                        
+                        if isLoading {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                Spacer()
+                            }
+                            .padding()
                         }
                     }
-                    .padding(.bottom, 500)
                 }
                 .padding(15)
             }
             .refreshable {
-                Task {
-                    let query = PaginatedRequestQueryParams(page: 1, limit: 10, ordering: .ascending)
-                    let locator = Locator(countryCode: "ES", country: "Spain", region: "Andalusia", city: "Seville", address: "Calle Falsa 123")
-                    
-                    await PetitionRepository.share.list(
-                        q: query,
-                        locator: locator,
-                        onComplete: { result in
-                            guard let documents = result.documents else { return }
-                            petitions.append(contentsOf: documents)
-                        }, onError: { error in
-                            print(error)
-                        }
-                    )
-                }
+                await fetchPetitions(reset: true)
             }
             .customToolBar(isPrimaryActionVisible: isPrimaryActionVisible, title: title, subtitle: subtitle) {
 
@@ -73,20 +135,20 @@ struct SignRequestsView: View {
                     Menu {
                         
                         Picker("Issue Type", selection: $issueType) {
-                            ForEach(IssueTypes.allCases, id: \.self) { issueType in
-                                Text(issueType.title).tag(issueType.title)
+                            ForEach(IssueTypes.allCases, id: \.self) { type in
+                                Text(type.title).tag(type)
                             }
                         }
                         
                         Picker("Severity", selection: $severity) {
-                            ForEach(Severity.allCases, id: \.self) { severity in
-                                Text(severity.title).tag(severity.title)
+                            ForEach(Severity.allCases, id: \.self) { level in
+                                Text(level.title).tag(level)
                             }
                         }
                             
-                        Picker("OrderFilter", selection: $orderFilter) {
+                        Picker("Order Filter", selection: $orderFilter) {
                             ForEach(OrderFilter.allCases, id: \.self) { filter in
-                                Text(filter.rawValue.capitalized).tag(filter.rawValue)
+                                Text(filter.title).tag(filter)
                             }
                         }
                        
@@ -107,24 +169,19 @@ struct SignRequestsView: View {
         }
         .task {
             guard !Task.isCancelled else { return }
-            
-            let query = PaginatedRequestQueryParams(page: 1, limit: 16, ordering: .ascending)
-            let locator = Locator(countryCode: "ES", country: "Spain", region: "Andalusia", city: "Seville", address: "Calle Falsa 123")
-            
-            
-            await PetitionRepository.share.list(
-                q: query,
-                locator: locator,
-                onComplete: { result in
-                    guard let documents = result.documents else { return }
-                    petitions.append(contentsOf: documents)
-                }, onError: { error in
-                    print(error)
-                }
-            )
+            await fetchPetitions()
+        }
+        .onChange(of: issueType) {
+            Task { await fetchPetitions(reset: true) }
+        }
+        .onChange(of: severity) {
+            Task { await fetchPetitions(reset: true) }
+        }
+        .onChange(of: orderFilter) {
+            Task { await fetchPetitions(reset: true) }
         }
         .sheet(isPresented: $showCreateRequestView) {
-            CreateRequestPetitionView()
+            CreateRequestPetitionView(model: $model)
                 .navigationTransition(
                     .zoom(sourceID: "openCreateRequest", in: namespace))
         }

@@ -8,17 +8,18 @@
 import Foundation
 import SQLite3
 
-class LocatorDAO {
+final class LocatorDAO {
     
-    let dbManager: DatabaseManager
-    init() {
+    static let shared = LocatorDAO()
+    private let dbManager: DatabaseManager
+    private init() {
         dbManager = DatabaseManager()
     }
     
     func findBy(cityName: String, country: String) -> Locator {
         let query = "SELECT countryCode, country, region FROM ip_locations WHERE city = ? and country = ? or countryCode = ? LIMIT 1"
         var statement: OpaquePointer? = nil
-        var locator: Locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")
+        var locator: Locator = .init(id: "", countryCode: "", country: "", region: "", city: "", address: "")
         
         if sqlite3_prepare(dbManager.db, query, -1, &statement, nil) == SQLITE_OK {
             sqlite3_bind_text(statement, 1, (cityName as NSString).utf8String, -1, nil)

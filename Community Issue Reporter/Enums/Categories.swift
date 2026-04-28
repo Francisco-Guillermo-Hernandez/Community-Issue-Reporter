@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Categories: String, CaseIterable, Codable {
+enum Categories: String, CaseIterable, Codable, Equatable {
     case all
     case prevention
     case corrective
@@ -18,7 +18,7 @@ enum Categories: String, CaseIterable, Codable {
     case inspection
     case emergency
     
-    var id: String { return rawValue }
+    var id: String { self.rawValue }
     
     var title : String {
         switch self {

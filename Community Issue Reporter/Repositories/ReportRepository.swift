@@ -80,6 +80,9 @@ final class ReportRepository {
     
     func create(report: Report, locator: Locator, onError: ErrorHandler) async  -> String {
         do {
+            
+            print("locator")
+            dump(locator)
             let response = try await self.reportsService.createReport(
                 report: report,
                 headers: [

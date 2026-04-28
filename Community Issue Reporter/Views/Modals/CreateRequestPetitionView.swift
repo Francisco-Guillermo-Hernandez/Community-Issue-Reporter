@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CreateRequestPetitionView: View {
     
+    @Binding var model: PetitionDataModel
     @State var isSubmitting: Bool = false
     @State var title: String = ""
     @State var description: String = ""
@@ -21,6 +22,11 @@ struct CreateRequestPetitionView: View {
     @State var reports: [Report] = []
     @Environment(\.dismiss) private var dismiss
     
+    
+    init(model: Binding<PetitionDataModel>) {
+        self._model = model
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -31,18 +37,18 @@ struct CreateRequestPetitionView: View {
                             name: "Title",
                             label: "Please enter a title",
                             validators: titleValidator,
-                            value: $title
+                            value: $model.petition.title
                        )
                     
                        TextInput(
                             name: "Description",
                             label: "Please enter a description",
                             validators: descriptionValidator,
-                            value: $description
+                            value: $model.petition.description
                        )
                     }
                     
-                    Picker("Category", selection: $category ) {
+                    Picker("Category", selection: $model.petition.category) {
                         ForEach(Categories.allCases, id: \.self) {
                             if $0 == .all {
                                 Text("Select a category").tag(0)
@@ -53,12 +59,12 @@ struct CreateRequestPetitionView: View {
                             }
                         }
                     }
-                    .onChange(of: category) {  oldValue, newValue in
-                       if oldValue != newValue {
-                           let signatures = newValue.minimunAmountOfSignatures
+                    .onChange(of: $model.petition.category) {  newValue in
+                      
+                        let signatures = newValue.minimunAmountOfSignatures
                            self.minimunSignatures = signatures
                            self.targetSignatures = signatures
-                        }
+                        
                     }
                 } header: {
                     Text("Details of the request")
@@ -127,7 +133,18 @@ struct CreateRequestPetitionView: View {
                         isSubmitting.toggle()
                         
                         Task {
-                            try? await Task.sleep(nanoseconds: 1_000_000_000)
+                            PetitionRepository.share.create(
+                                model.petition,
+                                onComplete: { result in
+                                
+                                    print(result)
+                                },
+                                onError: { error in
+                                    print(error)
+                                    
+                                })
+                                
+                            
                             
                             isSubmitting.toggle()
                         }

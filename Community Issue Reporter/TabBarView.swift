@@ -11,7 +11,7 @@ import SwiftUI
 struct TabBarView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.mySettings) var settings
-    @State private var model: ReportDataModel = .init()
+    @State private var model = ReportDataModel.shared
     @State private var selectedTab: Int = 1
     @State private var presentSheetOnDeepLink: Bool = false
     @AppStorage("openReportFromShortcut") private var openReportFromShortcut = false

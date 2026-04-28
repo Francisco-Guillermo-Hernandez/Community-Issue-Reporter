@@ -11,15 +11,12 @@ import SwiftUI
 @Observable
 final class ReportDataModel {
    
-    
-    
-    
-   
+    static let shared = ReportDataModel()
     var report: Report
     var locator: Locator
     private let settings = SettingsStore.shared
     
-    init() {
+    private init() {
         self.locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")
         
         var coordinate = Coordinate(lat: 0.0, lng: 0.0)
@@ -35,7 +32,7 @@ final class ReportDataModel {
         }
         
         self.report = Report(
-            coordinate: .init(lat: 13.68935, lng: -89.18718),
+            coordinate: .init(lat: 14.493928750122384, lng:-88.9194851492362), //.init(lat: 13.68935, lng: -89.18718),
             address: "",
             title: "",
             description: "",
@@ -66,13 +63,30 @@ final class ReportDataModel {
         report.coordinate = coordinate
     }
     
-    func updateLocator(_ locator: Locator) {
+    func updateLocator(with locator: Locator) {
         self.locator = locator
-        self.report.address = locator.address
+        self.report.address = self.locator.address
     }
     
     func prepareForModification(_ report: Report) {
         self.report = report
         self.report.reportState = .modifying
+    }
+    
+    func clear() {
+        self.report = Report(
+            coordinate: .init(lat: 13.68935, lng: -89.18718),
+            address: "",
+            title: "",
+            description: "",
+            severityId: 1,
+            statusId: 1,
+            issueTypeId: 1,
+            matterToSolveId: 1,
+            cellIndex: "",
+            createdAt: Date(),
+            updatedAt: Date(),
+            reportState: .new,
+        )
     }
 }

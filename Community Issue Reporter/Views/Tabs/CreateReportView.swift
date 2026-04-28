@@ -15,7 +15,7 @@ struct CreateReportView: View {
     @State private var show = false
     @State private var issueType: IssueTypes = .all
     @State private var severity: Severity = .all
-    @State private var model = ReportDataModel()
+    @State private var model = ReportDataModel.shared
     
     var body: some View {
         NavigationStack {

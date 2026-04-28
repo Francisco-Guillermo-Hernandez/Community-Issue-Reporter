@@ -28,11 +28,11 @@ struct CommentsService {
     
     /// list all the comments that the user has post
     func listByUser(q: PaginatedRequestQueryParams) async throws -> PaginatedResponse<Comment> {
-        return try await client.get(path: "comments/user", query: q, withOAuth: true)
+        return try await client.get(path: "comments/user", query: q, headers: [], withOAuth: true)
     }
     
     /// Comments by report
     func list(reportId: String, q: PaginatedRequestQueryParams) async throws -> PaginatedResponse<Comment> {
-        return try await client.get(path: "comments/report/\(reportId)", query: q, withOAuth: true)
+        return try await client.get(path: "comments/report/\(reportId)", query: q, headers: [], withOAuth: true)
     }
 }

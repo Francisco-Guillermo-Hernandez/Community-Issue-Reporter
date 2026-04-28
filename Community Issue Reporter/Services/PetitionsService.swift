@@ -14,8 +14,8 @@ struct PetitionsService {
         self.client = client
     }
     
-    func fetchPetitions() async throws -> [Petition] {
-        return try await self.client.get(path: "petitions/", withOAuth: true)
+    func fetchPetitions(_ q: PaginatedRequestQueryParams, _ l: LocatorHeaders) async throws -> PaginatedResponse<Petition> {
+        return try await self.client.get(path: "petitions/", headers: l.headers, withOAuth: true)
     }
     
     func fetchPetition(id: Int) async throws -> Petition {
@@ -30,11 +30,19 @@ struct PetitionsService {
         return try await self.client.put(path: "petitions/\(id)", body: petition, withOAuth: true)
     }
     
+    func fetchPetitionsByUser(_ q: PaginatedRequestQueryParams) async throws -> PaginatedResponse<Petition> {
+        return try await self.client.get(path: "petitions/byUser", withOAuth: true)
+    }
+    
     func signPetition(id: String) async throws -> GenericResponse {
         return try await self.client.patch(
             path: "petitions/\(id)/sign-petition",
             body: [String: String](),
             withOAuth: true,
         )
+    }
+    
+    func deletePetition(id: String) async throws -> GenericResponse {
+        return try await self.client.delete(path: "petitions/\(id)", body: [String: String](), withOAuth: true)
     }
 }

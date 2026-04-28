@@ -31,7 +31,7 @@ struct TextInput: View {
     var name: String = "placeholder"
     var label: String = "label"
     var validators: [Validator] = []
-    var regex: String = "[a-zA-Z0-9, ]"
+    var regex: String = "[a-zA-Z0-9,\\u00C0-\\u00FF ]"
     var axis: Axis = .horizontal
     
     @State private var message: String = ""

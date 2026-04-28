@@ -89,7 +89,7 @@ struct MyReportsSubView: View {
     @State private var showDeleteAlert: Bool = false
     @State private var elementToDelete: IndexSet = []
     @State private var reportToDelete: Report? = nil
-    @State private var model: ReportDataModel = .init()
+    @State private var model: ReportDataModel = ReportDataModel.shared
     @State private var refreshID = UUID()
     
     var subViewName: String

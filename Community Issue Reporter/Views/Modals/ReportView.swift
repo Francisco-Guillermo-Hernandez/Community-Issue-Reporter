@@ -22,7 +22,7 @@ struct ReportView: View {
     @State private var selectedImages: [MediaResources] = []
     @State private var showMapPickerSheet: Bool
     @Binding var showCancelButton: Bool
-  
+    
     init(model: ReportDataModel, onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
         self.model = model
         
@@ -37,25 +37,28 @@ struct ReportView: View {
     var onCompletion: (String, AlertType) -> Void
     
     private var isFormFilled: Bool {
-//        !address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-//        || !descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-//        || !selectedImages.isEmpty
+        //        !address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        //        || !descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        //        || !selectedImages.isEmpty
         return true
     }
-
+    
     var body: some View {
         NavigationStack {
             Form {
                 /// This section is dedicated to select a location on the map
                 Section("Location") {
-                    MiniMapLocator(coordinate: $model.report.coordinate, onExpandMap: { _ in
-                       
-                        showMapPickerSheet.toggle()
-                    })
+                    MiniMapLocator(
+                        coordinate: $model.report.coordinate,
+                        locator: $model.locator,
+                        onExpandMap: { _ in
+                            showMapPickerSheet.toggle()
+                        }
+                    )
                 }
                 
                 /// This section is dedicated to select the evidence of the issue
-                    Section("Photos") {
+                Section("Photos") {
                     PhotoChooser(
                         onSelect: { images in
                             print("Selected images: \(images.count)")
@@ -65,8 +68,8 @@ struct ReportView: View {
                             self.selectedImages.remove(at: index)
                         }
                     )
-                
-                    }
+                    
+                }
                 
                 ///
                 Section("Issue Details") {
@@ -78,40 +81,40 @@ struct ReportView: View {
                                 
                                 Spacer()
                                 Image(systemName: issue.iconName)
-                                    
+                                
                             }
                             .tag(issue)
                         }
                     }
-                  
-
+                    
+                    
                     
                     Picker("Severity level", selection: $model.report.severity) {
                         ForEach(Severity.allCases, id: \.self) { level in
                             HStack(spacing: 8) {
-                               
-                                Image(systemName: level.iconName)	
+                                
+                                Image(systemName: level.iconName)
                                     .padding(.trailing, 10)
                                 Text(level.title)
                             }
                             .tag(level)
                         }
                     }
-                   
+                    
                 }
                 .padding(.horizontal, 8)
                 
                 ///
                 Section("Details") {
                     
-
+                    
                     VStack {
                         TextInput(
                             name: "Title",
                             label: String(localized: "Title of the issue", comment: "ReportView: Title of the issue"),
                             value: $model.report.title,
                         )
-                    
+                        
                         TextInput(
                             name: "Description",
                             label: String(localized: "Please describe the issue", comment: "ReportView: Please describe the issue"),
@@ -130,7 +133,7 @@ struct ReportView: View {
                     }
                 }
                 
-               
+                
             }
             .navigationTitle("Report")
             .navigationBarTitleDisplayMode(.inline)
@@ -168,7 +171,7 @@ struct ReportView: View {
                     Button {
                         isSubmitting = true
                         performActions()
-                       
+                        
                     } label: {
                         if isSubmitting {
                             ProgressView()
@@ -183,22 +186,24 @@ struct ReportView: View {
             .interactiveDismissDisabled(isFormFilled)
         }
         .sheet(isPresented: $showMapPickerSheet)  {
-            MapPickerView(coordinate: $model.report.coordinate, onConfirm: { coordinate, locator in
-             
-                
-                model.updateCoordinate(coordinate)
-                model.updateLocator(locator)
-                self.showMapPickerSheet = false
-                
-               
-            })
+            MapPickerView(
+                coordinate: $model.report.coordinate,
+                locator: $model.locator,
+                onConfirm: { coordinate, locator in
+                    model.updateCoordinate(coordinate)
+                    model.updateLocator(with: locator)
+                    self.showMapPickerSheet = false
+                }
+            )
         }
     }
-
+    
     private func performActions() -> Void {
         Task {
             
-        
+            dump(model.locator)
+            
+            //
             if model.report.reportState == .inProgress || model.report.reportState == .new {
                 model.report.id = await ReportRepository
                     .shared
@@ -211,8 +216,7 @@ struct ReportView: View {
                     )
             }
             
-            dump(model)
-            
+            // update when a user is modifying the report
             if model.report.reportState == .modifying {
                 await ReportRepository
                     .shared
@@ -220,7 +224,7 @@ struct ReportView: View {
                         report: model.report,
                         locator: model.locator,
                         onComplete: { result in
-                          print(result)
+                            print(result)
                         },
                         onError: { error in
                             print("error: \(error)")
@@ -229,8 +233,9 @@ struct ReportView: View {
             }
             
             
+            //
             if selectedImages.count > 0 {
-               
+                
                 await ImageEncoderService().prepareAndSend(
                     reportId: model.report.id!,
                     images: selectedImages
@@ -248,13 +253,13 @@ struct ReportView: View {
             }
         }
     }
-   
+    
 }
 
 
 
 #Preview {
-    var model: ReportDataModel = ReportDataModel()
+    var model: ReportDataModel = ReportDataModel.shared
     model.setMatterToSolve(mattersToResolve.first!)
     return ReportView(model: model, onCompletion: { data, type in
         

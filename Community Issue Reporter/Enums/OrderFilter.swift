@@ -8,8 +8,26 @@
 import Foundation
 
 enum OrderFilter: String, CaseIterable, Identifiable {
-    case ascending = "Ascending"
-    case descending = "Descending"
+    case ascending
+    case descending
+    
+    var title: String {
+        switch self {
+        case .ascending:
+            return String(localized: "Oldest to Newest")
+        case .descending:
+            return String(localized: "Newest to Oldest")
+        }
+    }
+    
+    var filter: String {
+        switch self {
+        case .ascending:
+            return "asc"
+        case .descending:
+            return "desc"
+        }
+    }
     
     var id: Self { self }
 }

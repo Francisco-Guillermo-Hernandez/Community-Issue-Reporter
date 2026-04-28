@@ -11,6 +11,7 @@ import MapKit
 
 struct MiniMapLocator: View {
     @Binding var coordinate: Coordinate
+    @Binding var locator: Locator
     @Environment(\.colorScheme) private var colorScheme
     var onExpandMap: ((Coordinate) -> Void)?
     @State private var cameraPosition: MapCameraPosition
@@ -19,8 +20,13 @@ struct MiniMapLocator: View {
     
     private let span = MKCoordinateSpan(latitudeDelta: 0.00704, longitudeDelta: 0.00704)
     
-    init(coordinate: Binding<Coordinate>, onExpandMap: ((Coordinate) -> Void)? = nil) {
+    init(
+        coordinate: Binding<Coordinate>,
+        locator: Binding<Locator>,
+        onExpandMap: ((Coordinate) -> Void)? = nil
+    ) {
         self._coordinate = coordinate
+        self._locator = locator
         self.selectedCoordinate = getLocation(coordinate)
         self.onExpandMap = onExpandMap
         self.cameraPosition = .region(
@@ -43,9 +49,13 @@ struct MiniMapLocator: View {
             }
             .onChange(of: locationManager.lastLocation) { _, newLocation in
             }
+            .onMapCameraChange { context in
+                selectedCoordinate = context.camera.centerCoordinate
+                handleMapMovement(center: context.camera.centerCoordinate)
+            }
             .aspectRatio(4/3, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .contentShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
             .onMapCameraChange { context in
                 /// Update coordinates when the user interacts with the map
                 selectedCoordinate = context.camera.centerCoordinate
@@ -128,9 +138,34 @@ struct MiniMapLocator: View {
             locationManager.requestAuthorization()
         }
     }
+    
+    private func handleMapMovement(center: CLLocationCoordinate2D) {
+          let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
+
+          Task {
+              try? await Task.sleep(for: .milliseconds(500))
+              guard !Task.isCancelled else { return }
+              guard let request = MKReverseGeocodingRequest(location: location) else { return }
+              let mapItems = try? await request.mapItems
+              guard let mapItem = mapItems?.first else { return }
+              
+              let address = mapItem.address?.fullAddress ??  mapItem.address?.shortAddress ?? "Unknown"
+              
+              let country = mapItem.addressRepresentations?.region?.identifier
+              ?? mapItem.addressRepresentations?.regionName
+              ?? "-1"
+              
+              let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
+              self.locator = LocatorDAO.shared.findBy(cityName: cityName, country: country)
+              self.locator.address = address
+              
+              ReportDataModel.shared.updateLocator(with: locator)
+          }
+      }
 }
 
 #Preview {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
-    MiniMapLocator(coordinate: $coordinate)
+    @Previewable @State var locator: Locator = .init(id: "", countryCode: "", country: "", region: "", city: "", address: "")
+    MapPickerView(coordinate: $coordinate, locator: $locator)
 }

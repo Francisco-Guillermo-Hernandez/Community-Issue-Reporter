@@ -43,7 +43,19 @@ struct SignRequestsView: View {
             }
             .refreshable {
                 Task {
-                    petitions = await PetitionRepository.list()
+                    let query = PaginatedRequestQueryParams(page: 1, limit: 10, ordering: .ascending)
+                    let locator = Locator(countryCode: "ES", country: "Spain", region: "Andalusia", city: "Seville", address: "Calle Falsa 123")
+                    
+                    await PetitionRepository.share.list(
+                        q: query,
+                        locator: locator,
+                        onComplete: { result in
+                            guard let documents = result.documents else { return }
+                            petitions.append(contentsOf: documents)
+                        }, onError: { error in
+                            print(error)
+                        }
+                    )
                 }
             }
             .customToolBar(isPrimaryActionVisible: isPrimaryActionVisible, title: title, subtitle: subtitle) {
@@ -95,7 +107,21 @@ struct SignRequestsView: View {
         }
         .task {
             guard !Task.isCancelled else { return }
-            petitions = await PetitionRepository.list()
+            
+            let query = PaginatedRequestQueryParams(page: 1, limit: 16, ordering: .ascending)
+            let locator = Locator(countryCode: "ES", country: "Spain", region: "Andalusia", city: "Seville", address: "Calle Falsa 123")
+            
+            
+            await PetitionRepository.share.list(
+                q: query,
+                locator: locator,
+                onComplete: { result in
+                    guard let documents = result.documents else { return }
+                    petitions.append(contentsOf: documents)
+                }, onError: { error in
+                    print(error)
+                }
+            )
         }
         .sheet(isPresented: $showCreateRequestView) {
             CreateRequestPetitionView()

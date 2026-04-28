@@ -19,8 +19,22 @@ struct Petition: Identifiable, Codable, Equatable {
     var disabled: Bool?
     var createdAt: Date?
     var updatedAt: Date?
+    var reportsIds: [String]
     
-    init(id: String?, title: String, description: String, targetSignatures: Int, currentSignatures: Int?, categoryId: Int, statusId: Int?, reportedBy: UUID?, disabled: Bool?, createdAt: Date?, updatedAt: Date?) {
+    init(
+        id: String?,
+        title: String,
+        description: String,
+        targetSignatures: Int,
+        currentSignatures: Int?,
+        categoryId: Int,
+        statusId: Int?,
+        reportedBy: UUID?,
+        disabled: Bool?,
+        createdAt: Date?,
+        updatedAt: Date?,
+        reportsIds: [String] = []
+    ) {
         self.id = id
         self.title = title
         self.description = description
@@ -32,6 +46,7 @@ struct Petition: Identifiable, Codable, Equatable {
         self.disabled = disabled
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.reportsIds = reportsIds
     }
 }
 

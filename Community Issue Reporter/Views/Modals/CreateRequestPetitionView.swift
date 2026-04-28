@@ -14,11 +14,9 @@ struct CreateRequestPetitionView: View {
     @State var title: String = ""
     @State var description: String = ""
     @State var category: Categories = .all
-    @State var reportIds: [String] = []
     @State var minimunSignatures: Int = 10
     @State var targetSignatures: Int = 10
     @State var stepperAction: String = ""
-    @State var selectedReportIds: [String] = []
     @State var reports: [Report] = []
     @Environment(\.dismiss) private var dismiss
     
@@ -59,11 +57,13 @@ struct CreateRequestPetitionView: View {
                             }
                         }
                     }
-                    .onChange(of: $model.petition.category) {  newValue in
+                    .onChange(of: model.petition.category) { oldValue, newValue in
                       
-                        let signatures = newValue.minimunAmountOfSignatures
-                           self.minimunSignatures = signatures
-                           self.targetSignatures = signatures
+                        if oldValue != newValue {
+                            let signatures = newValue.minimunAmountOfSignatures
+                               self.minimunSignatures = signatures
+                               self.targetSignatures = signatures
+                        }
                         
                     }
                 } header: {
@@ -72,14 +72,14 @@ struct CreateRequestPetitionView: View {
                 
                 
                 Section {
-                    NavigationLink(destination: ReportsChooserView(reports: reports, selectedReports: $selectedReportIds)) {
+                    NavigationLink(destination: ReportsChooserView(reports: reports, selectedReports: $model.petition.reportsIds)) {
                       HStack {
                           Text("Choose report(s)")
                           
                           Spacer()
                           
-                          if !selectedReportIds.isEmpty {
-                              SelectedDocumentsBadgeView(count: selectedReportIds.count)
+                          if !model.petition.reportsIds.isEmpty {
+                              SelectedDocumentsBadgeView(count: model.petition.reportsIds.count)
                           } else {
                               Image(systemName: "document.badge.plus")
                           }
@@ -90,18 +90,18 @@ struct CreateRequestPetitionView: View {
                 }
                 
                 Section {
-                    Stepper(value: $targetSignatures, in: minimunSignatures...1000, step: 1) {
-                        AnimatedText(text: "\(targetSignatures)")
+                    Stepper(value: $model.petition.targetSignatures, in: minimunSignatures...1000, step: 1) {
+                        AnimatedText(text: "\(model.petition.targetSignatures)")
                     }
-                    .onChange(of: targetSignatures) { oldValue, newValue in
+                    .onChange(of: model.petition.targetSignatures) { oldValue, newValue in
                         if newValue > oldValue {
                             stepperAction = "Increase"
                         } else if newValue < oldValue {
                             stepperAction = "Decrease"
                         }
                     }
-                    .sensoryFeedback(.increase, trigger: (targetSignatures != 0) && stepperAction == "Increase")
-                    .sensoryFeedback(.decrease, trigger: (targetSignatures != 0) && stepperAction == "Decrease")
+                    .sensoryFeedback(.increase, trigger: (model.petition.targetSignatures != 0) && stepperAction == "Increase")
+                    .sensoryFeedback(.decrease, trigger: (model.petition.targetSignatures != 0) && stepperAction == "Decrease")
                 } header: {
                     Text("Set the amount of signatures needed")
                 } footer: {
@@ -133,15 +133,16 @@ struct CreateRequestPetitionView: View {
                         isSubmitting.toggle()
                         
                         Task {
-                            PetitionRepository.share.create(
+                            await PetitionRepository.share.create(
                                 model.petition,
                                 onComplete: { result in
                                 
                                     print(result)
+                                    dismiss()
                                 },
                                 onError: { error in
                                     print(error)
-                                    
+                                    dismiss()
                                 })
                                 
                             
@@ -195,5 +196,5 @@ struct AnimatedText: View {
 
 
 #Preview {
-    CreateRequestPetitionView()
+    CreateRequestPetitionView(model: .constant(.shared))
 }

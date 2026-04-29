@@ -14,8 +14,7 @@ import WidgetKit
 struct Community_Issue_ReporterApp: App {
     
     @StateObject private var authViewModel = AuthViewModel()
-    @State private var store = SettingsStore()
-    @AppStorage("selectedLanguage") private var languageCode = "es-419"
+    @State private var store = SettingsStore.shared
     
     init() {
         copyDatabaseIfNeeded()
@@ -27,7 +26,7 @@ struct Community_Issue_ReporterApp: App {
             WelcomeView()
                 .environmentObject(authViewModel)
                 .environment(\.mySettings, store)
-                .environment(\.locale, .init(identifier: languageCode))
+                .environment(\.locale, .init(identifier: store.selectedLanguageCode))
                 .onOpenURL { url in
                     deepLinkHandler(url)
                     GIDSignIn.sharedInstance.handle(url)

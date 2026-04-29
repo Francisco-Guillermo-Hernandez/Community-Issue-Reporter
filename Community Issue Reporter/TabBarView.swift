@@ -20,19 +20,19 @@ struct TabBarView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             
-            Tab("Issues", systemImage: "map", value: 1) {
+            Tab(String(localized: "Issues"), systemImage: "map", value: 1) {
                 ReportsView()
             }
             
-            Tab("Sign petitions", systemImage: "signature", value: 2) {
+            Tab(String(localized: "Sign petitions"), systemImage: "signature", value: 2) {
                SignRequestsView()
             }
             
-            Tab("Insights", systemImage: "sparkles", value: 3) {
+            Tab(String(localized: "Insights"), systemImage: "sparkles", value: 3) {
                 InsightsView()
             }
             
-            Tab("Add", systemImage: "plus", value: 4, role: .search) {
+            Tab(String(localized: "Add"), systemImage: "plus", value: 4, role: .search) {
                 CreateReportView()
             }
         }

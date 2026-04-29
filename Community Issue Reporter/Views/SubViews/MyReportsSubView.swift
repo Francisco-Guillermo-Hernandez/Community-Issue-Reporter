@@ -7,12 +7,13 @@
 
 import SwiftUI
 
-// MARK: - CellView
-struct ReportCellView: View {
+// MARK: - GenericDatePresenterView
+struct GenericDatePresenterView: View {
+    var text: String
+    var when: String
     
-    var report: Report
-    fileprivate func genericDatePresenter(_ text: String, when: String) -> some View {
-        return HStack(alignment: .center, spacing: .themeSpacing) {
+    var body: some View {
+        HStack(alignment: .center, spacing: .themeSpacing) {
             VStack {
                 Image(systemName: "calendar")
                     .foregroundStyle(Color.secondary)
@@ -31,7 +32,12 @@ struct ReportCellView: View {
             
         }
     }
+}
+
+// MARK: - CellView
+struct ReportCellView: View {
     
+    var report: Report
     var body: some View {
         Group {
             HStack {
@@ -49,9 +55,9 @@ struct ReportCellView: View {
                         .padding(.bottom, .themeSpacing)
                     // detail of the dates
                     HStack {
-                        genericDatePresenter("Created", when: report.createdDate)
-                        genericDatePresenter("Updated", when: report.updatedDate)
-                        genericDatePresenter("Reported", when: report.reportedDate)
+                        GenericDatePresenterView(text: "Created", when: report.createdDate)
+                        GenericDatePresenterView(text: "Updated", when: report.updatedDate)
+                        GenericDatePresenterView(text: "Reported", when: report.reportedDate)
                     }
                     .padding(.horizontal)
                     .padding(.top, .themeSpacing)
@@ -119,14 +125,7 @@ struct MyReportsSubView: View {
                             }
                         }
                 }
-                .listRowInsets(
-                    EdgeInsets(
-                        top: .themeSpacing * 2,
-                        leading: .themeSpacing * 4,
-                        bottom: .themeSpacing * 2,
-                        trailing: .themeSpacing * 4
-                    )
-                )
+                .listRowInsets(themeCellEdgeInsets)
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
             }
@@ -150,6 +149,7 @@ struct MyReportsSubView: View {
         .onAppear {
             refreshID = UUID()
         }
+        .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)
     }
     
@@ -199,6 +199,8 @@ struct MyReportsSubView: View {
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     let reports = [

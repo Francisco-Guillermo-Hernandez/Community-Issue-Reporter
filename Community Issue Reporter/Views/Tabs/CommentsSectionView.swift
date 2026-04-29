@@ -44,6 +44,12 @@ struct CommentsSectionView: View {
                     if comments.isEmpty {
                         ContentUnavailableView {
                             Label("No comments yet.", systemImage: "bubble.left.and.text.bubble.right")
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(
+                                                                Color.theme.foreground.opacity(0.7),
+                                                                Color.theme.primary,
+                                                                Color.theme.foreground.opacity(0.7)
+                                 )
                         } description: {
                             Text("Please tell us how that problem affects you.")
                         } actions: {
@@ -74,6 +80,7 @@ struct CommentsSectionView: View {
                 .padding(.top, 16)
                 .padding(.horizontal, 16)
             }
+            .background(Color.theme.background)
             .task {
                 self.isLoading = true
                 guard !Task.isCancelled else { return }
@@ -131,6 +138,7 @@ struct CommentsSectionView: View {
             
             HStack {
                 TextField("Add a comment", text: $commentInput, axis: .vertical)
+                    .foregroundStyle(disableInput ? Color.theme.muted : .primary)
                     .focused($isTextFieldFocused)
                     .padding(.leading, 8)
                     .disabled(disableInput)

@@ -9,8 +9,8 @@ import Foundation
 
 let langs: [Lang] = [
     Lang(id: 1, name: "English", code: "en"),
-    Lang(id: 2, name: "Español (Latinoaméricano)", code: "es"),
-    Lang(id: 3, name: "Portugues (Brasileiro)", code: "pr"),
-    Lang(id: 4, name: "Dutch", code: "de"),
+    Lang(id: 2, name: "Español (Latinoaméricano)", code: "es-419"),
+    Lang(id: 3, name: "Portugues (Brasileiro)", code: "pt-BR"),
+    Lang(id: 4, name: "Dutch", code: "nl"),
     Lang(id: 5, name: "Français", code: "fr")
 ]

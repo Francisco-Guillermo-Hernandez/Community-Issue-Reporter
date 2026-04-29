@@ -74,10 +74,11 @@ struct SettingsSubView: View {
                         }
                     }
                     .onChange(of: selectedLanguage) { _, newValue in
-//                        self.language = langs[newValue].code
-                        settings.selectedLanguage = newValue
+                        settings.selectedLanguageID = newValue
+                        if let lang = langs.first(where: { $0.id == newValue }) {
+                            settings.selectedLanguageCode = lang.code
+                        }
                     }
-                    .environment(\.locale, .init(identifier: language ))
                     
                     Toggle("Background sync", isOn: $enableBackgroundSync)
                         .disabled(true)
@@ -119,7 +120,7 @@ struct SettingsSubView: View {
                 selectedCity = settings.selectedCity
                 enableBackgroundSync = settings.enableBackgroundSync
                 enableAnonymousTelemetry = settings.enableAnonymousTelemetry
-                selectedLanguage = settings.selectedLanguage
+                selectedLanguage = settings.selectedLanguageID
                 enableAutomaticIdentification = settings.enableAutomaticIdentification
                 enableNotifications = settings.enableNotifications
                 

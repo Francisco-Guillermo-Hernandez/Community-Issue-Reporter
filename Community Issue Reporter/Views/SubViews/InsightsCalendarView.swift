@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct InsightsCalendarView: View {
-    @Binding var path: NavigationPath
+    @Binding var path: [InsightsNavigation]
     @State private var selectedDate: Date = .init()
-    @State private var selectedDaySummary: DaySummary? = nil
     @State private var showDetails: Bool = true
     
     var activityData: [String: DaySummary] = [:]
@@ -28,27 +27,15 @@ struct InsightsCalendarView: View {
             }
             .frame(height: 400)
         }
-        .navigationDestination(for: String.self) { value in
-            if value == "NoActivityView" {
-                SimpleView(title: value)
-            } else {
-                SimpleView(
-                    title: "ActivityListView",
-                    selectedDay: activityData[value],
-                    dateFormatter: value
-                )
-            }
-        }
     }
     
     private func selectionHandler(_ date: Date) {
         self.selectedDate = date
         let dateFormatted = dateFormatter.string(from: date)
-        if let result = activityData[dateFormatted] {
-            self.selectedDaySummary = result
-            path.append(dateFormatted)
+        if let _ = activityData[dateFormatted] {
+            path.append(InsightsNavigation.activity(date: dateFormatted))
         } else {
-            path.append("NoActivityView")
+            path.append(InsightsNavigation.noActivity)
         }
         
     }
@@ -156,16 +143,24 @@ struct MockData {
 
 
 #Preview("Insights Dashboard - Data") {
-    @Previewable @State var path = NavigationPath()
+    @Previewable @Namespace var nameSpace
+    @Previewable @State var path: [InsightsNavigation] = []
     NavigationStack(path: $path) {
         InsightsCalendarView(path: $path, activityData: MockData.activityMap)
+    }
+    .navigationDestination(for: InsightsNavigation.self) { _ in
+        Text("Destination")
     }
 }
 
 #Preview("Insights Dashboard - Empty") {
-    @Previewable @State var path = NavigationPath()
+    @Previewable @Namespace var nameSpace
+    @Previewable @State var path: [InsightsNavigation] = []
     NavigationStack(path: $path) {
         InsightsCalendarView(path: $path, activityData: [:])
+    }
+    .navigationDestination(for: InsightsNavigation.self) { _ in
+        Text("Destination")
     }
 }
 

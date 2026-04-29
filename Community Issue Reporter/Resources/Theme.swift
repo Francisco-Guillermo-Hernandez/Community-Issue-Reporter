@@ -169,6 +169,13 @@ let gridColumns: [GridItem] = [
     GridItem(.flexible(), spacing: .themeSpacing * 4),
 ]
 
+let themeCellEdgeInsets  = EdgeInsets(
+    top: .themeSpacing * 2,
+    leading: .themeSpacing * 4,
+    bottom: .themeSpacing * 2,
+    trailing: .themeSpacing * 4
+)
+
 extension CGFloat {
     static let themeRadius: CGFloat = 12.0 // 0.75rem
     static let themeSpacing: CGFloat = 4.0 // 0.25rem

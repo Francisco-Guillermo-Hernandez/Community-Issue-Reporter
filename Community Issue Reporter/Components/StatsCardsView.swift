@@ -8,16 +8,34 @@
 import SwiftUI
 
 struct StatsCardsView: View {
-    @Namespace private var nameSpace
+    @Binding var path: [InsightsNavigation]
+    var nameSpace: Namespace.ID
+    
     var body: some View {
         VStack(spacing: .themeSpacing * 2) {
             HStack(spacing: .themeSpacing * 2) {
-                NavigationLink {
-                    MyReportsSubView(subViewName: "My reports")
-                        .navigationTransition(.zoom(sourceID: "transition:myReports", in: nameSpace))
-                    
-                } label: {
-//                    ReportCardView()
+                
+               
+//                Button {
+//                    path.append(.myReports)
+//                } label: {
+//                    CardInfoRow(
+//                        data: CardInfoModelView(
+//                            title: "Reports",
+//                            subtitle: "This month",
+//                            stat: "03"
+//                        ),
+//                        action: {}
+//                    )
+//                }
+//                .buttonStyle(.plain)
+//                .matchedTransitionSource(id: "transition:myReports", in: nameSpace) { configuration in
+//                    configuration
+//                        .background(Color.theme.primary)
+//                        .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
+//                }
+                
+                NavigationLink(value: InsightsNavigation.myReports) {
                     CardInfoRow(
                         data: CardInfoModelView(
                             title: "Reports",
@@ -26,40 +44,53 @@ struct StatsCardsView: View {
                         ),
                         action: {}
                     )
-                    .matchedTransitionSource(id: "transition:myReports", in: nameSpace) { configuration in
-                        configuration
-                            .background(Color.theme.primary)
-                            .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
-                    }
-                    
+                }
+                .buttonStyle(.plain)
+                .matchedTransitionSource(id: "transition:myReports", in: nameSpace) { configuration in
+                    configuration
+                        .background(Color.theme.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
                 }
                 
-                NavigationLink {
-                    MyPetitionsSubView(subViewName: "My petitions")
-                        .navigationTransition(.zoom(sourceID: "transition:myPetitions", in: nameSpace))
-                } label: {
-//                    ReportCardView()
+                NavigationLink(value: InsightsNavigation.myPetitions) {
                     CardInfoRow(
                         data: CardInfoModelView(
                             title: "Petitions",
                             subtitle: "This month",
                             stat: "04"
                         ),
-                        action: { }
+                        action: {}
                     )
-                    .matchedTransitionSource(id: "transition:myPetitions", in: nameSpace) { configuration in
-                        configuration
-                            .background(Color.theme.primary)
-                            .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
-                    }
+                }
+                .buttonStyle(.plain)
+                .matchedTransitionSource(id: "transition:myPetitions", in: nameSpace) { configuration in
+                    configuration
+                        .background(Color.theme.primary)
+                        .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
                 }
                 
+//                Button {
+//                    path.append(.myPetitions)
+//                } label: {
+//                    CardInfoRow(
+//                        data: CardInfoModelView(
+//                            title: "Petitions",
+//                            subtitle: "This month",
+//                            stat: "04"
+//                        ),
+//                        action: { }
+//                    )
+//                }
+//                .buttonStyle(.plain)
+//                .matchedTransitionSource(id: "transition:myPetitions", in: nameSpace) { configuration in
+//                    configuration
+//                        .background(Color.theme.primary)
+//                        .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
+//                }
             }
             
             CustomChartSubView()
-
                 .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
-               
         }
         .padding(.leading)
         .padding(.trailing)
@@ -67,7 +98,12 @@ struct StatsCardsView: View {
 }
 
 #Preview {
-    NavigationStack {
-        StatsCardsView()
+    @Previewable @Namespace var nameSpace
+    @Previewable @State var path: [InsightsNavigation] = []
+    NavigationStack(path: $path) {
+        StatsCardsView(path: $path, nameSpace: nameSpace)
+    }
+    .navigationDestination(for: InsightsNavigation.self) { destination in
+        Text("Destination for \(String(describing: destination))")
     }
 }

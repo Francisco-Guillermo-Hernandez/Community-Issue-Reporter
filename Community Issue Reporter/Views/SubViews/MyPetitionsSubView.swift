@@ -62,6 +62,7 @@ struct MyPetitionsSubView: View {
         .listStyle(.plain)
         .background(Color.theme.background)
         .scrollContentBackground(.hidden)
+        .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)
     }
     

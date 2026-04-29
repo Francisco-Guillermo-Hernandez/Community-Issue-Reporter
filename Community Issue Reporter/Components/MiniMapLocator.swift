@@ -52,14 +52,19 @@ struct MiniMapLocator: View {
             .onMapCameraChange { context in
                 selectedCoordinate = context.camera.centerCoordinate
                 handleMapMovement(center: context.camera.centerCoordinate)
+                
+                coordinate = Coordinate(
+                    lat: context.camera.centerCoordinate.latitude,
+                    lng: context.camera.centerCoordinate.longitude
+                )
             }
             .aspectRatio(4/3, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
-            .onMapCameraChange { context in
-                /// Update coordinates when the user interacts with the map
-                selectedCoordinate = context.camera.centerCoordinate
-            }
+//            .onMapCameraChange { context in
+//                /// Update coordinates when the user interacts with the map
+//                selectedCoordinate = context.camera.centerCoordinate
+//            }
             .onChange(of: coordinate) { _, newValue in
                 DispatchQueue.main.async {
                     /// Center the location when the coordinate was updated using MapPicker

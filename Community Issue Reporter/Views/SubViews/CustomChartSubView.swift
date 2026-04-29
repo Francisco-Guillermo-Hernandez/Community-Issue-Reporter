@@ -68,6 +68,7 @@ struct StatsCardView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("\(stats.totalEntries)")
                     .font(.system(size: 64, weight: .bold, design: .rounded))
+                    .fontWidth(.compressed)
                 
                 Text("Entries")
                     .font(.title2.bold())
@@ -77,7 +78,7 @@ struct StatsCardView: View {
                     .opacity(0.6)
             }
 //            .foregroundColor(.white)
-            .foregroundStyle(Color.init(hex: "121212"))
+            .foregroundStyle(Color.theme.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
             
          
@@ -88,29 +89,33 @@ struct StatsCardView: View {
                         y: .value("Count", data.count),
                         width: .fixed(4)
                     )
-                    .foregroundStyle(Color.init(hex: "1a181b"))
+                    .foregroundStyle(Color.theme.primary)
                     .cornerRadius(2)
                 }
             }
             .chartYAxis {
                 AxisMarks(values: [0, 5, 10]) { value in
                     AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
-                        .foregroundStyle(Color.init(hex: "1a181b").opacity(0.3))
+                        .foregroundStyle(Color.theme.primary.opacity(0.3))
                     AxisValueLabel()
-                        .foregroundStyle(Color.init(hex: "1a181b").opacity(0.5))
+                        .foregroundStyle(Color.theme.primary.opacity(0.5))
                 }
             }
             .chartXAxis {
                 AxisMarks(values: .stride(by: .month)) { value in
                   
                     AxisValueLabel(format: .dateTime.month(.narrow))
-                        .foregroundStyle(Color.init(hex: "1a181b").opacity(0.7))
+                        .foregroundStyle(Color.theme.primary.opacity(0.7))
                 }
             }
             .frame(height: 120)
         }
         .padding(24)
-        .background(Color.init(hex: "618b8c"))
+        .background(Color.init(hex: "121212"))
+        .overlay(
+            RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous)
+                .stroke(Color.theme.border, lineWidth: 1)
+        )
         .cornerRadius(24)
 //        .padding()
     }

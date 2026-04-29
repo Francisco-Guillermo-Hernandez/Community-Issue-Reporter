@@ -30,7 +30,7 @@ final class PetitionDataModel {
         )
     }
     
-    func update(_ petition: Petition) {
+    func prepareForModification(_ petition: Petition) {
         self.petition = petition
     }
     

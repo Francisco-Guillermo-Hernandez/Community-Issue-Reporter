@@ -17,7 +17,7 @@ struct CardInfoModelView: Encodable {
 // MARK: - Card row
 struct CardInfoRow: View {
     var data: CardInfoModelView
-    var action: () -> Void = { }
+    var action: () -> Void
     var body: some View {
         HStack(alignment: .lastTextBaseline, spacing: .themeSpacing * 3) {
             
@@ -31,9 +31,9 @@ struct CardInfoRow: View {
             VStack(alignment: .leading, spacing: 0) {
                 
                 Text(data.title)
-                        .font(.title3.bold())
-                        .fontWidth(.condensed)
-                    
+                    .font(.title3.bold())
+                    .fontWidth(.condensed)
+                
                 HStack(spacing: 0) {
                     Text(data.subtitle)
                         .font(.footnote)
@@ -65,12 +65,16 @@ struct CardInfoStyle: ViewModifier {
             .frame(height: 50) // Force the HStack to have a specific height so the infinity frames work
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
-            .foregroundColor(Color(hex: "1a181b"))
-            .background(Color(hex: "ec9458"))
+            .overlay(
+                RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous)
+                    .stroke(Color.theme.border, lineWidth: 1)
+            )
+            .foregroundColor(.theme.primary)
+            .background(Color.init(hex: "121212"))
             .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
     }
 }
 
 #Preview {
-    CardInfoRow(data: CardInfoModelView(title: "Title", subtitle: "Subtitle", stat: "100"))
+    CardInfoRow(data: CardInfoModelView(title: "Title", subtitle: "Subtitle", stat: "100"), action: {})
 }

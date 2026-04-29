@@ -80,6 +80,30 @@ struct SignRequestsView: View {
                 print(error)
                 canLoadMore = false
             }
+        
+//        let petition = Petition(
+//            id: "", // Empty string from JSON
+//            title: "The The The The The The The The The The The Ty",
+//            description: "The only way I could do that was if you want",
+//            targetSignatures: 22,
+//            currentSignatures: 0,
+//            categoryId: 4,
+//            statusId: 1,
+//            reportedBy: UUID(uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"),
+//            disabled: false,
+//            createdAt: Date(timeIntervalSince1970: 799056444.493906),
+//            updatedAt: Date(timeIntervalSince1970: 799056444.493906),
+//            reportsIds: [
+//                "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
+//                "51aec27c-17a3-42f5-94a7-b3e9f54be651",
+//                "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
+//                "e6e67b15-15d7-4523-a85b-cd199d32117e",
+//                "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
+//                "ac90b962-3ea9-405e-8a5b-f99ba3b9439d"
+//            ]
+//        )
+//
+//        self.petitions.append(petition)
         )
         
         isLoading = false
@@ -88,12 +112,14 @@ struct SignRequestsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
+                LazyVStack(alignment: .leading, spacing: .themeSpacing * 4) {
                     headerView()
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Nearby Events")
+                    
+                    VStack(alignment: .leading, spacing: .themeSpacing * 2) {
+                        Text("Nearby Petitions")
                             .font(.title3)
                             .fontWeight(.semibold)
+                            .padding(.horizontal, .themePadding)
                         
                         ForEach(petitions) { petition in
                             EventsOnDay(petition: petition, selectedIndex: petitions.firstIndex(where: { $0.id == petition.id }) ?? 0)
@@ -115,8 +141,9 @@ struct SignRequestsView: View {
                         }
                     }
                 }
-                .padding(15)
             }
+            .background(Color.theme.background)
+            .scrollContentBackground(.hidden)
             .refreshable {
                 await fetchPetitions(reset: true)
             }
@@ -181,7 +208,7 @@ struct SignRequestsView: View {
             Task { await fetchPetitions(reset: true) }
         }
         .sheet(isPresented: $showCreateRequestView) {
-            CreateRequestPetitionView(model: $model)
+            CreateRequestPetitionView(model: model)
                 .navigationTransition(
                     .zoom(sourceID: "openCreateRequest", in: namespace))
         }
@@ -193,7 +220,7 @@ struct SignRequestsView: View {
     /// Header View
     @ViewBuilder
     func headerView() -> some View {
-        VStack(alignment: .leading, spacing: 15) {
+        VStack(alignment: .leading, spacing: .themeSpacing * 4) {
             Text("Sign Request Petitions")
                 .font(.title.bold())
                 .onGeometryChange(for: Bool.self) {
@@ -205,46 +232,18 @@ struct SignRequestsView: View {
                 }
 
             
-            Text("**125** Events   **5.6K** Subscribers")
+            Text("**125** Petitions   **5.6K** signatories")
                 .font(.callout)
             
-            Text("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.")
+            Text("...")
                 .font(.callout)
                 .lineLimit(5)
-            
-
+           
         }
-        .padding(.bottom, 16)
-        .overlay(alignment: .bottom) {
-            Divider()
-                .padding(.horizontal, -16)
-        }
-    
+        .padding(.horizontal, .themePadding)
+        .padding(.bottom, .themePadding)
     }
 
-    @ViewBuilder
-    func CenterDummyContent() -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("Latest petitions")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.gray)
-            }
-            
-            RoundedRectangle(cornerRadius: 32)
-                .foregroundStyle(.gray.tertiary)
-                .frame(height: 220)
-        }
-        .padding(.top, 10)
-        .padding(.bottom, 20)
-        .overlay(alignment: .bottom) {
-            Divider()
-                .padding(.horizontal, -16)
-        }
-    }
     
     @ViewBuilder
     func EventsOnDay(petition: Petition, selectedIndex: Int) -> some View {
@@ -267,45 +266,120 @@ struct SignRequestsView: View {
             
             NavigationLink(destination: PetitionDetailView(petition: petition)) {
                 
-                VStack( spacing: 16) {
+                VStack( spacing: .themeSpacing) {
                     RequestViewPost(petition: petition)
                 }
             }
+            
+            Divider()
+            
+            HStack {
+                Button {
+                    
+                } label: {
+                    Image(systemName: "signature")
+                        .font(.title2)
+                }
+                .buttonSizing(.flexible)
+                .frame(maxWidth: .infinity)
+                
+                Button {
+                    
+                } label: {
+                    Image(systemName: "text.bubble")
+                        .font(.title2)
+                }
+                .buttonSizing(.flexible)
+                .frame(maxWidth: .infinity)
+                
+                Button {
+                    
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.title2)
+                }
+                .buttonSizing(.flexible)
+                .frame(maxWidth: .infinity)
+            }
+            .frame(maxWidth: .infinity)
         }
+        .padding()
+        .foregroundColor(.theme.foreground)
+        .overlay(
+                       Rectangle()
+                           .stroke(Color.theme.border, lineWidth: 1)
+                   )
+        .background(Color.init(hex: "121212"))
+                    
+        
     }
 }
 
 
 struct RequestViewPost: View {
     var petition: Petition
+    @State private var photos: [PhotoSample] = [
+        PhotoSample(id: "1", photo: "a", published: Date(), user: "Jane Doe"),
+        PhotoSample(id: "2", photo: "b", published: Date(), user: "John Smith"),
+        PhotoSample(id: "3", photo: "c", published: Date(), user: "Michael Brown"),
+        PhotoSample(id: "4", photo: "d", published: Date(), user: "Emily Davis"),
+    ]
     var body: some View {
     
-        HStack(spacing: 10) {
-            RoundedRectangle(cornerRadius: 10)
-                .frame(width: 100, height: 100)
+        VStack(spacing: 10) {
             
-            VStack(alignment: .leading, spacing: 10) {
+            HStack {
  
-                Text("Category: \(getCategoryName(id: petition.categoryId))")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+             VStack {
+                 Text("Category:")
+                     .font(.subheadline)
+                     .foregroundColor(.secondary)
+                 
+                 Text(getCategoryName(id: petition.categoryId))
+             }
                    
-                Text("Target Signatures: \(petition.targetSignatures)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+             VStack {
+                 Text("Target Signatures:")
+                     .font(.subheadline)
+                     .foregroundColor(.secondary)
+                 
+                 Text("\(petition.targetSignatures)")
+             }
                 
-                Text(petition.description)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+//                Text(petition.description)
+//                    .font(.subheadline)
+//                    .foregroundColor(.secondary)
         
             }
+            
+            VStack {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHGrid(rows: gridColumns, spacing: 16) {
+                        ForEach(photos, id: \.id) { photo in
                         
-            Image(systemName: "chevron.compact.right")
+                            Image(photo.photo)
+                                .resizable()
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
+                                .aspectRatio(4/3, contentMode: .fill)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+                                .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+                        }
+                    }
+                }
+                .scrollClipDisabled(true)
+            }
+//            .fixedSize(horizontal: true, vertical: false)
+            
+            .frame(maxHeight: 200)
+                        
+//            Image(systemName: "chevron.compact.right")
         }
-        .foregroundStyle(.gray.tertiary)
         
-        Divider()
-            .opacity(0.8)
+//        .foregroundStyle(.gray.tertiary)
+        
+//        Divider()
+//            .opacity(0.8)
     }
 }
 

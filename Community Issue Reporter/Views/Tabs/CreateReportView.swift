@@ -63,6 +63,8 @@ struct CreateReportView: View {
             .toolbarTitleDisplayMode(.inlineLarge)
             .navigationTitle("Report")
             .navigationSubtitle("what do you want to report?")
+            .background(Color.theme.background)
+            .scrollContentBackground(.hidden)
         }
         
     }

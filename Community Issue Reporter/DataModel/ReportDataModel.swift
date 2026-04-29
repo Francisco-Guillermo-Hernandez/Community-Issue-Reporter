@@ -71,6 +71,8 @@ final class ReportDataModel {
     func prepareForModification(_ report: Report) {
         self.report = report
         self.report.reportState = .modifying
+        
+        dump(self.report)
     }
     
     func clear() {

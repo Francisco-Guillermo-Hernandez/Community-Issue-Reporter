@@ -184,6 +184,8 @@ struct ReportView: View {
                 }
             }
             .interactiveDismissDisabled(isFormFilled)
+//            .background(Color.theme.background)
+//            .scrollContentBackground(.hidden)
         }
         .sheet(isPresented: $showMapPickerSheet)  {
             MapPickerView(
@@ -201,6 +203,7 @@ struct ReportView: View {
     private func performActions() -> Void {
         Task {
             
+            print("on create:")
             dump(model.locator)
             
             //

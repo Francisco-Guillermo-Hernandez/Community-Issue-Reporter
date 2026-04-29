@@ -25,11 +25,11 @@ struct CustomCalendar: UIViewRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
-    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UICalendarView, context: Context) -> CGSize? {
-        return uiView.systemLayoutSizeFitting(
-            CGSize(width: proposal.width ?? 300, height: UIView.layoutFittingCompressedSize.height)
-        )
-    }
+//    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UICalendarView, context: Context) -> CGSize? {
+//        return uiView.systemLayoutSizeFitting(
+//            CGSize(width: proposal.width ?? 300, height: UIView.layoutFittingCompressedSize.height)
+//        )
+//    }
 
     func makeUIView(context: Context) -> UICalendarView {
         let view = UICalendarView()

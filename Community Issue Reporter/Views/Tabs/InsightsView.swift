@@ -8,7 +8,7 @@
 import SwiftUI
 
 
-struct MyFindingsView: View {
+struct InsightsView: View {
     @State private var selectedDate = Date()
     @State private var activityData: [String: DaySummary] = [:]
     @State private var navigationPath = NavigationPath()
@@ -34,14 +34,14 @@ struct MyFindingsView: View {
                        
                     InsightsCalendarView(path: $navigationPath, activityData: MockData.activityMap)
                 }
-
-                
             }
+            .background(Color.theme.background)
+            .scrollContentBackground(.hidden)
             .navigationTitle("Insights")
             .toolbarTitleDisplayMode(.inlineLarge)
         }
     }
 }
 #Preview {
-    MyFindingsView()
+    InsightsView()
 }

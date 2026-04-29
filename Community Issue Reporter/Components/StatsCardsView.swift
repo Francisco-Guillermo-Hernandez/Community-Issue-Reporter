@@ -17,6 +17,7 @@ struct StatsCardsView: View {
                         .navigationTransition(.zoom(sourceID: "transition:myReports", in: nameSpace))
                     
                 } label: {
+//                    ReportCardView()
                     CardInfoRow(
                         data: CardInfoModelView(
                             title: "Reports",
@@ -37,6 +38,7 @@ struct StatsCardsView: View {
                     MyPetitionsSubView(subViewName: "My petitions")
                         .navigationTransition(.zoom(sourceID: "transition:myPetitions", in: nameSpace))
                 } label: {
+//                    ReportCardView()
                     CardInfoRow(
                         data: CardInfoModelView(
                             title: "Petitions",
@@ -57,10 +59,6 @@ struct StatsCardsView: View {
             CustomChartSubView()
 
                 .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
-                .contextMenu {
-                    Button("Action 1") { }
-                    Button("Action 2") { }
-                }
                
         }
         .padding(.leading)

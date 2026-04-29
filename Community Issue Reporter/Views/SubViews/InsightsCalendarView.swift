@@ -32,10 +32,10 @@ struct InsightsCalendarView: View {
             if value == "NoActivityView" {
                 SimpleView(title: value)
             } else {
-                
                 SimpleView(
                     title: "ActivityListView",
-                    selectedDay: activityData[value]
+                    selectedDay: activityData[value],
+                    dateFormatter: value
                 )
             }
         }
@@ -58,6 +58,7 @@ struct InsightsCalendarView: View {
 struct SimpleView: View {
     var title: String
     var selectedDay: DaySummary? = nil
+    var dateFormatter: String = ""
     
    var body: some View {
        Group {
@@ -86,6 +87,7 @@ struct SimpleView: View {
                                if let reports = selectedDay?.reports, !reports.isEmpty {
                                    ForEach(reports, id: \.id) { report in
                                        Text(report.id)
+                                           .cellStyle()
                                    }
                                } else {
                                    Text("No reports available")
@@ -97,6 +99,7 @@ struct SimpleView: View {
                                if let signatures = selectedDay?.signatures, !signatures.isEmpty {
                                    ForEach(signatures, id: \.id) { signature in
                                        Text(signature.id)
+                                           .cellStyle()
                                    }
                                } else {
                                    Text("No signatures available")
@@ -111,9 +114,10 @@ struct SimpleView: View {
                }
            }
        }
-      
+       .background(Color.theme.background)
+       .scrollContentBackground(.hidden)
        .toolbarTitleDisplayMode(.inline)
-       .navigationBarTitle(title == "NoActivityView" ? "No Activity" : "demo")
+       .navigationBarTitle(title == "NoActivityView" ? "No Activity" : dateFormatter)
     }
 }
 

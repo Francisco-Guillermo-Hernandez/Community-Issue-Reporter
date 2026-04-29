@@ -29,7 +29,7 @@ struct TabBarView: View {
             }
             
             Tab("Insights", systemImage: "sparkles", value: 3) {
-                MyFindingsView()
+                InsightsView()
             }
             
             Tab("Add", systemImage: "plus", value: 4, role: .search) {

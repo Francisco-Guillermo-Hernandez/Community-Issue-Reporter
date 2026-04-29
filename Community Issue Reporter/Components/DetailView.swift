@@ -171,20 +171,21 @@ struct DetailView: View {
                                 self.showMoreEvidences.toggle()
                             } label: {
                                 RoundedRectangle(cornerRadius: 16)
-                                    .stroke(issue.status.color, lineWidth: 2)
+                                    .stroke(Color.theme.primary, lineWidth: 2)
                                     .frame(width: 160, height: 160)
                                     .foregroundStyle(Color(uiColor: .systemGray6))
                                     .overlay {
                                         VStack(spacing: 8) {
                                             Image(systemName: "photo.stack")
-                                                .foregroundStyle(.blue)
+                                                .foregroundStyle(Color.theme.muted)
+//                                                .opacity(0.3)
                                                 .font(.largeTitle)
                                             
                                             HStack {
                                                 Text("More Evidences...")
                                                     .font(.caption)
                                                     .fontWeight(.black)
-                                                    .foregroundStyle(.gray)
+                                                    .foregroundStyle(Color.theme.foreground)
                                             }
                                         }
                                     }
@@ -390,11 +391,6 @@ struct DetailView: View {
             
         }
     }
-    
-    private  let gridColumns: [GridItem] = [
-        GridItem(.flexible(), spacing: 16),
-    ]
-    
 }
 
 func getMatterToSolve(id: Int) -> String {

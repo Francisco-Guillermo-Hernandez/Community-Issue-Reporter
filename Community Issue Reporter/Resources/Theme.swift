@@ -34,6 +34,32 @@ struct AppTheme {
         )
     )
     
+    static let cardBackground = dynamicColor(
+        light: Color(
+            red: 251/255,
+            green: 251/255,
+            blue: 251/255
+        ),
+        dark: Color(
+            red: 18/255,
+            green: 18/255,
+            blue: 18/255
+        )
+    )
+    
+    static let cardForeground = dynamicColor(
+        light: Color(
+            red: 193/255,
+            green: 193/255,
+            blue: 193/255
+        ),
+        dark: Color(
+            red: 56/255,
+            green: 39/255,
+            blue: 31/255
+        )
+    )
+    
     static let foreground = dynamicColor(
         light: Color(
             red: 56/255,
@@ -138,6 +164,10 @@ struct AppTheme {
             blue: 51/255)
     )
 }
+
+let gridColumns: [GridItem] = [
+    GridItem(.flexible(), spacing: .themeSpacing * 4),
+]
 
 extension CGFloat {
     static let themeRadius: CGFloat = 12.0 // 0.75rem

@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: - CellView
 struct ReportCellView: View {
     
     var report: Report
@@ -76,13 +77,7 @@ struct ReportCellView: View {
     }
 }
 
-struct ReportDetailView: View {
-    var report: Report
-    var body: some View {
-        Text("Hello, world!")
-    }
-}
-
+// MARK: - sub view
 struct MyReportsSubView: View {
     
     @State private var reports: [Report] = []
@@ -148,9 +143,6 @@ struct MyReportsSubView: View {
             }
         } message: {
             Text("Are you sure you want to delete ? This action cannot be undone.")
-        }
-        .toolbar {
-            
         }
         .task(id: refreshID) {
             await fetchReports()

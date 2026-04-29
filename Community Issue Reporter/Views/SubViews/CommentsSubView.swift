@@ -67,6 +67,8 @@ struct CommentsSubView: View {
                         print(error)
                     })
             }
+            .background(Color.theme.background)
+            .scrollContentBackground(.hidden)
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle("My Comments")
         }

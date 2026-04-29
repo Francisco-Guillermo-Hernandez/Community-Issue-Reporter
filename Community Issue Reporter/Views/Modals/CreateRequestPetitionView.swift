@@ -8,21 +8,15 @@
 import SwiftUI
 
 struct CreateRequestPetitionView: View {
-    
-    @Binding var model: PetitionDataModel
+    @Environment(\.dismiss) private var dismiss
+    @State var model: PetitionDataModel
     @State var isSubmitting: Bool = false
-    @State var title: String = ""
-    @State var description: String = ""
-    @State var category: Categories = .all
     @State var minimunSignatures: Int = 10
-    @State var targetSignatures: Int = 10
     @State var stepperAction: String = ""
     @State var reports: [Report] = []
-    @Environment(\.dismiss) private var dismiss
-    
-    
-    init(model: Binding<PetitionDataModel>) {
-        self._model = model
+
+    init(model: PetitionDataModel) {
+        self.model = model
     }
     
     var body: some View {
@@ -62,7 +56,7 @@ struct CreateRequestPetitionView: View {
                         if oldValue != newValue {
                             let signatures = newValue.minimunAmountOfSignatures
                                self.minimunSignatures = signatures
-                               self.targetSignatures = signatures
+                            model.petition.targetSignatures = signatures
                         }
                         
                     }
@@ -195,6 +189,6 @@ struct AnimatedText: View {
 }
 
 
-#Preview {
-    CreateRequestPetitionView(model: .constant(.shared))
-}
+//#Preview {
+//    CreateRequestPetitionView(model: .constant(.shared))
+//}

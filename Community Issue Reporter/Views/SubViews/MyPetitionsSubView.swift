@@ -37,39 +37,107 @@ struct MyPetitionsSubView: View {
     @State private var page: Int = 1
     @State private var model: PetitionDataModel = PetitionDataModel.shared
     
+    init (subViewName: String) {
+        self.subViewName = subViewName
+                let petitions = [
+                    Petition(
+                        id: "", // Empty string from JSON
+                        title: "The The The The The The The The The The The Ty",
+                        description: "The only way I could do that was if you want",
+                        targetSignatures: 22,
+                        currentSignatures: 0,
+                        categoryId: 4,
+                        statusId: 1,
+                        reportedBy: UUID(uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"),
+                        disabled: false,
+                        createdAt: Date(timeIntervalSince1970: 799056444.493906),
+                        updatedAt: Date(timeIntervalSince1970: 799056444.493906),
+                        reportsIds: [
+                            "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
+                            "51aec27c-17a3-42f5-94a7-b3e9f54be651",
+                            "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
+                            "e6e67b15-15d7-4523-a85b-cd199d32117e",
+                            "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
+                            "ac90b962-3ea9-405e-8a5b-f99ba3b9439d"
+                        ]
+                    ),
+                    Petition(
+                        id: "", // Empty string from JSON
+                        title: "The The The The The The The The The The The Ty",
+                        description: "The only way I could do that was if you want",
+                        targetSignatures: 22,
+                        currentSignatures: 0,
+                        categoryId: 4,
+                        statusId: 1,
+                        reportedBy: UUID(uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"),
+                        disabled: false,
+                        createdAt: Date(timeIntervalSince1970: 799056444.493906),
+                        updatedAt: Date(timeIntervalSince1970: 799056444.493906),
+                        reportsIds: [
+                            "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
+                            "51aec27c-17a3-42f5-94a7-b3e9f54be651",
+                            "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
+                            "e6e67b15-15d7-4523-a85b-cd199d32117e",
+                            "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
+                            "ac90b962-3ea9-405e-8a5b-f99ba3b9439d"
+                        ]
+                    ),
+                    Petition(
+                        id: "", // Empty string from JSON
+                        title: "The The The The The The The The The The The Ty",
+                        description: "The only way I could do that was if you want",
+                        targetSignatures: 22,
+                        currentSignatures: 0,
+                        categoryId: 4,
+                        statusId: 1,
+                        reportedBy: UUID(uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"),
+                        disabled: false,
+                        createdAt: Date(timeIntervalSince1970: 799056444.493906),
+                        updatedAt: Date(timeIntervalSince1970: 799056444.493906),
+                        reportsIds: [
+                            "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
+                            "51aec27c-17a3-42f5-94a7-b3e9f54be651",
+                            "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
+                            "e6e67b15-15d7-4523-a85b-cd199d32117e",
+                            "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
+                            "ac90b962-3ea9-405e-8a5b-f99ba3b9439d"
+                        ]
+                    )
+                ]
+        
+               
+        self.petitions.append(contentsOf: petitions)
+    }
+    
     var subViewName: String
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(petitions, id: \.id) { petition in
-                    ZStack {
-                        NavigationLink(destination: self.petition(petition)) {
-                            EmptyView().frame(width: 0, height: 0)
-                        }
-                        .opacity(0)
-                        .frame(width: 0, height: 0)
-                        
-                        PetitionCellView(petition: petition)
-                            .cellStyle()
+        List {
+            ForEach(petitions, id: \.id) { petition in
+                ZStack {
+                    NavigationLink(destination: self.petition(petition)) {
+                        EmptyView().frame(width: 0, height: 0)
                     }
-                    .listRowInsets(themeCellEdgeInsets)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                    .opacity(0)
+                    .frame(width: 0, height: 0)
+                    
+                    PetitionCellView(petition: petition)
+                        .cellStyle()
                 }
+                .listRowInsets(themeCellEdgeInsets)
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             }
-            .task(id: refreshID) {
-                await fetchPetitions()
-            }
-            .onAppear {
-                refreshID = UUID()
-            }
-            .listStyle(.plain)
-            .background(Color.theme.background)
-            .scrollContentBackground(.hidden)
-//            .navigationBarTitleDisplayMode(.inline)
-           
         }
-        .navigationTitle(subViewName)
+//        .task(id: refreshID) {
+//            await fetchPetitions()
+//        }
+//        .onAppear {
+//            refreshID = UUID()
+//        }
+        .listStyle(.plain)
+        .background(Color.theme.background)
+        .scrollContentBackground(.hidden)
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     private func fetchPetitions() async {

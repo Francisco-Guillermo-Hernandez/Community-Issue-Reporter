@@ -58,6 +58,12 @@ fileprivate struct CustomToolBarModifier<Leading: View, Trailing: View, PrimaryA
                                         .font(.callout)
                                         .fontWeight(.semibold)
                                         .transition(.offset(y: 10).combined(with: AnyTransition(.blurReplace)))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                } else {
+                                    Text("Petitions")
+                                        .font(Font.largeTitle.bold())
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+//
                                 }
                                 
                                 ZStack {
@@ -66,6 +72,7 @@ fileprivate struct CustomToolBarModifier<Leading: View, Trailing: View, PrimaryA
                                             .font(.caption2)
                                             .foregroundStyle(.gray)
                                             .contentTransition(.numericText())
+                                            .frame(maxWidth: .infinity, alignment: .leading)
                                     }
                                 }
                                 .opacity(subtitle == nil ? 0 : 1)

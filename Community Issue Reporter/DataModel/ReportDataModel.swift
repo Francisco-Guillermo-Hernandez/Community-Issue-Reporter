@@ -19,17 +19,17 @@ final class ReportDataModel {
     private init() {
         self.locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")
         
-        var coordinate = Coordinate(lat: 0.0, lng: 0.0)
-        if let country = settings.country {
-            
-            
-//            if let region = country.regions[0] {
-//                if let city = region.cities[0] {
-//                    coordinate = Coordinate(lat: city.coordinates.lat, lng: city.coordinates.lng )
-//                }
-//            }
-           
-        }
+//        var coordinate = Coordinate(lat: 0.0, lng: 0.0)
+//        if let country = settings.country {
+//            
+//            
+////            if let region = country.regions[0] {
+////                if let city = region.cities[0] {
+////                    coordinate = Coordinate(lat: city.coordinates.lat, lng: city.coordinates.lng )
+////                }
+////            }
+//           
+//        }
         
         self.report = Report(
             coordinate: .init(lat: 14.493928750122384, lng:-88.9194851492362), //.init(lat: 13.68935, lng: -89.18718),

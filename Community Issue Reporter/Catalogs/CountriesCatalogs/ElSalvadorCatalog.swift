@@ -34,7 +34,7 @@ let elSalvador = Country(id: 2, name: "El Salvador", regions: [
         City(id: 9, name: "Tonacatepeque", legalName: "", coordinates: .init(lat: 13.78111, lng: -89.11861)),
         City(id: 10, name: "Ayutuxtepeque", legalName: "", coordinates: .init(lat: 13.73538, lng: -89.20221)),
         City(id: 11, name: "Mejicanos", legalName: "", coordinates: .init(lat: 13.72397, lng: -89.188)),
-        City(id: 12, name: "San Salvador", legalName: "",isCapital: true, coordinates: .init(lat: 13.68935, lng: -89.18718)),
+        City(id: 12, name: "San Salvador", legalName: "",isCapital: true, coordinates: .init(lat: 13.68935, lng: -89.18718), isDepartmentalCapital: true),
         City(id: 13, name: "Cuscatancingo", legalName: "", coordinates: .init(lat: 13.72702, lng: -89.18161)),
         City(id: 14, name: "Ciudad Delgado", legalName: "", coordinates: .init(lat: 0, lng: 0)),
         City(id: 15, name: "Panchimalco", legalName: "", coordinates: .init(lat: 13.61278, lng: -89.18)),

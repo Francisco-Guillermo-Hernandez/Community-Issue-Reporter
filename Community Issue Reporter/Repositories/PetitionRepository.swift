@@ -62,6 +62,7 @@ final class PetitionRepository {
                 id: id,
                 petition: petition
             )
+            onComplete(result)
         } catch {
             onError(error)
         }
@@ -86,6 +87,7 @@ final class PetitionRepository {
         onError: @escaping (Error) -> Void) async {
             do {
                 let result = try await self.service.deletePetition(id: petitionId)
+                onComplete(result)
             } catch {
                 onError(error)
             }

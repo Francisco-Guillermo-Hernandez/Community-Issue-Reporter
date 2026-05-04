@@ -161,110 +161,110 @@ struct SignRequestsView: View {
             address: "Calle Falsa 123"
         )
 
-        self.petitions = [
-            Petition(
-                id: "1",
-                title: "Hay un bache en la calle",
-                description: "un bache esta causando que los carros se dañen",
-                targetSignatures: 22,
-                currentSignatures: 0,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ]
-            ),
-            Petition(
-                id: "2",
-                title: "Un semaforo no esta funcionando en la avenida",
-                description: "",
-                targetSignatures: 22,
-                currentSignatures: 0,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ]
-            ),
-            Petition(
-                id: "3",
-                title: "Hay una fuga de agua en la colonia",
-                description: "",
-                targetSignatures: 22,
-                currentSignatures: 0,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ]
-            ),
-        ]
+//        self.petitions = [
+//            Petition(
+//                id: "1",
+//                title: "Hay un bache en la calle",
+//                description: "un bache esta causando que los carros se dañen",
+//                targetSignatures: 22,
+//                currentSignatures: 0,
+//                categoryId: 4,
+//                statusId: 1,
+//                reportedBy: UUID(
+//                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
+//                ),
+//                disabled: false,
+//                createdAt: Date(timeIntervalSince1970: 799056444.493906),
+//                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
+//                reportsIds: [
+//                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
+//                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
+//                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
+//                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
+//                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
+//                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
+//                ]
+//            ),
+//            Petition(
+//                id: "2",
+//                title: "Un semaforo no esta funcionando en la avenida",
+//                description: "",
+//                targetSignatures: 22,
+//                currentSignatures: 0,
+//                categoryId: 4,
+//                statusId: 1,
+//                reportedBy: UUID(
+//                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
+//                ),
+//                disabled: false,
+//                createdAt: Date(timeIntervalSince1970: 799056444.493906),
+//                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
+//                reportsIds: [
+//                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
+//                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
+//                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
+//                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
+//                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
+//                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
+//                ]
+//            ),
+//            Petition(
+//                id: "3",
+//                title: "Hay una fuga de agua en la colonia",
+//                description: "",
+//                targetSignatures: 22,
+//                currentSignatures: 0,
+//                categoryId: 4,
+//                statusId: 1,
+//                reportedBy: UUID(
+//                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
+//                ),
+//                disabled: false,
+//                createdAt: Date(timeIntervalSince1970: 799056444.493906),
+//                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
+//                reportsIds: [
+//                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
+//                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
+//                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
+//                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
+//                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
+//                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
+//                ]
+//            ),
+//        ]
 
         //        self.petitions.append(contentsOf: petitions)
 
-        //        await PetitionRepository.share.list(
-        //            q: query,
-        //            locator: locator,
-        //            onComplete: { result in
-        //                guard let documents = result.documents else {
-        //                    canLoadMore = false
-        //                    return
-        //                }
-        //
-        //                if reset {
-        //                    self.petitions = documents
-        //                } else {
-        //                    let existingIds = Set(self.petitions.compactMap { $0.id })
-        //                    let uniqueNewPetitions = documents.filter { doc in
-        //                        guard let id = doc.id else { return true }
-        //                        return !existingIds.contains(id)
-        //                    }
-        //                    self.petitions.append(contentsOf: uniqueNewPetitions)
-        //                }
-        //
-        //                self.canLoadMore = result.hasNext && self.currentPage < self.pageLimit
-        //                if self.canLoadMore {
-        //                    self.currentPage += 1
-        //                }
-        //
-        //            }, onError: { error in
-        //                print(error)
-        //                canLoadMore = false
-        //            }
-        //        )
+                await PetitionRepository.share.list(
+                    q: query,
+                    locator: locator,
+                    onComplete: { result in
+                        guard let documents = result.documents else {
+                            canLoadMore = false
+                            return
+                        }
+        
+                        if reset {
+                            self.petitions = documents
+                        } else {
+                            let existingIds = Set(self.petitions.compactMap { $0.id })
+                            let uniqueNewPetitions = documents.filter { doc in
+                                guard let id = doc.id else { return true }
+                                return !existingIds.contains(id)
+                            }
+                            self.petitions.append(contentsOf: uniqueNewPetitions)
+                        }
+        
+                        self.canLoadMore = result.hasNext && self.currentPage < self.pageLimit
+                        if self.canLoadMore {
+                            self.currentPage += 1
+                        }
+        
+                    }, onError: { error in
+                        print(error)
+                        canLoadMore = false
+                    }
+                )
 
         isLoading = false
     }
@@ -314,7 +314,7 @@ struct SignRequestsView: View {
             .refreshable {
                 await fetchPetitions(reset: true)
             }
-            .toolbar(removing: .sidebarToggle)
+//            .toolbar(removing: .sidebarToggle)
             .navigationSplitViewColumnWidth(600)
             .customToolBar(
                 isPrimaryActionVisible: isPrimaryActionVisible,
@@ -513,9 +513,9 @@ struct RequestViewPost: View {
         VStack(spacing: 10) {
             PostPublisher()
                 
-            HStack {
+            HStack(alignment: .top) {
 
-                VStack {
+                VStack(alignment: .leading) {
                     Text("Category")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
@@ -523,15 +523,17 @@ struct RequestViewPost: View {
                     Text(getCategoryName(id: petition.categoryId))
                 }
 
-                VStack {
-                    Text("Target Signatures:")
+                
+                VStack(alignment: .leading) {
+                    Text("Status")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
 
-                    Text("\(petition.targetSignatures)")
+                    Text(petition.status.title)
                 }
 
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             VStack {
                 ScrollView(.horizontal, showsIndicators: false) {

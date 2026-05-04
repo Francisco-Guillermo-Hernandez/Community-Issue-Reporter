@@ -23,6 +23,7 @@ struct Community_Issue_ReporterApp: App {
     
     var body: some Scene {
         WindowGroup {
+//            CustomCameraView()
             WelcomeView()
                 .environmentObject(authViewModel)
                 .environment(\.mySettings, store)

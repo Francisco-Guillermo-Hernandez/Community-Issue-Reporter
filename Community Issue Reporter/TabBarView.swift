@@ -37,7 +37,6 @@ struct TabBarView: View {
             }
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        
         .onOpenURL { url in
             if url.host == "reports" {
                 selectedTab = 1

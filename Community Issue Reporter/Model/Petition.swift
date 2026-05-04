@@ -62,4 +62,14 @@ extension Petition {
             self.categoryId = newValue.identifier
         }
     }
+    
+    var status: IssueStatus {
+        get {
+            IssueStatus.allCases.first(where: { $0.identifier == self.statusId }) ?? .inProgress
+        }
+        
+        set {
+            self.statusId = newValue.identifier
+        }
+    }
 }

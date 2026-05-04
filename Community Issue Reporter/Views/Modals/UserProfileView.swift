@@ -29,14 +29,39 @@ struct UserProfileView: View {
     }
     
     let options: [ProfileOption] = [
-        ProfileOption(id: "op:reports", title: "My Reports", icon: "bubble.left.and.exclamationmark.bubble.right.fill", color: Color.blue),
-        ProfileOption(id: "op:comments", title: "My Comments", icon: "text.bubble.fill", color: Color.orange),
-        ProfileOption(id: "op:signPetitions", title: "My Sign petitions", icon: "signature", color: Color.purple),
-        ProfileOption(id: "op:licenses", title: "Licenses", icon: "text.page.fill", color: Color.green),
-        ProfileOption(id: "op:settings", title: "Settings", icon: "gear", color: Color.gray),
-        
+        ProfileOption(
+            id: "op:reports",
+            title: String(localized: "My Reports"),
+            icon: "bubble.left.and.exclamationmark.bubble.right.fill",
+            color: Color.blue
+        ),
+        ProfileOption(
+            id: "op:comments",
+            title: String(localized: "My Comments"),
+            icon: "text.bubble.fill",
+            color: Color.orange
+        ),
+        ProfileOption(
+            id: "op:signPetitions",
+            title: String(localized: "My Sign petitions"),
+            icon: "signature",
+            color: Color.purple
+        ),
+        ProfileOption(
+            id: "op:licenses",
+            title: String(localized: "Licenses"),
+            icon: "text.page.fill",
+            color: Color.green
+        ),
+        ProfileOption(
+            id: "op:settings",
+            title: String(localized: "Settings"),
+            icon: "gear",
+            color: Color.gray
+        ),
+
     ]
-    
+
     var body: some View {
         NavigationStack {
             
@@ -109,7 +134,7 @@ struct UserProfileView: View {
                     appState.logout()
                     dismiss()
                 } label: {
-                    Text("Log Out")
+                    Text(String(localized: "Log Out"))
                         .frame(maxWidth: .infinity)
                         .fontWeight(.bold)
                         .padding(8)
@@ -127,7 +152,7 @@ struct UserProfileView: View {
                 }
                 
                 ToolbarItem(placement: .title) {
-                    Text("Profile")
+                    Text(String(localized: "Profile"))
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

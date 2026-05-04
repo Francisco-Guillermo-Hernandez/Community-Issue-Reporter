@@ -13,15 +13,25 @@ struct City: Identifiable, Codable {
     let legalName: String
     let isCapital: Bool
     let coordinates: Coordinate
+    let isDepartmentalCapital: Bool?
     let metadata: [String: String]?
     
-    init(id: Int, name: String, legalName: String, isCapital: Bool = false, coordinates: Coordinate, metadata: [String: String]? = nil) {
+    init(
+        id: Int,
+        name: String,
+        legalName: String,
+        isCapital: Bool = false,
+        coordinates: Coordinate,
+        metadata: [String: String]? = nil,
+        isDepartmentalCapital: Bool? = false
+    ) {
         self.id = id
         self.name = name
         self.legalName = legalName
         self.isCapital = isCapital
         self.coordinates = coordinates
         self.metadata = metadata
+        self.isDepartmentalCapital = isDepartmentalCapital
     }
 }
 
@@ -57,4 +67,8 @@ struct GeographicalRegion: Identifiable, Codable {
     let id: Int
     let name: String
     let countries: [Country]
+}
+
+struct FriendlyCityDistribution: Codable {
+    
 }

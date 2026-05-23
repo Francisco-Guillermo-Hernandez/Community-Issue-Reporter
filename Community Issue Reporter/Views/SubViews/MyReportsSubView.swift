@@ -38,6 +38,7 @@ struct GenericDatePresenterView: View {
 struct ReportCellView: View {
     
     var report: Report
+    var enableChevron: Bool = false
     var body: some View {
         Group {
             HStack {
@@ -55,9 +56,20 @@ struct ReportCellView: View {
                         .padding(.bottom, .themeSpacing)
                     // detail of the dates
                     HStack {
-                        GenericDatePresenterView(text: "Created", when: report.createdDate)
-                        GenericDatePresenterView(text: "Updated", when: report.updatedDate)
-                        GenericDatePresenterView(text: "Reported", when: report.reportedDate)
+                        GenericDatePresenterView(
+                            text: String(localized: "Created", comment: "Created description text at the report section"),
+                            when: report.createdDate
+                        )
+                        
+                        GenericDatePresenterView(
+                            text: String(localized: "Updated", comment: "Updated description text at the report section"),
+                            when: report.updatedDate
+                        )
+                        
+                        GenericDatePresenterView(
+                            text: String(localized: "Reported", comment: "Reported description text at the report section"),
+                            when: report.reportedDate
+                        )
                     }
                     .padding(.horizontal)
                     .padding(.top, .themeSpacing)
@@ -74,7 +86,10 @@ struct ReportCellView: View {
                     }
                     
                 }
-                Image(systemName: "chevron.compact.right")
+                
+                if enableChevron {
+                    Image(systemName: "chevron.compact.right")
+                }
                 
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -93,41 +108,13 @@ struct MyReportsSubView: View {
     @State private var model: ReportDataModel = ReportDataModel.shared
     @State private var refreshID = UUID()
     
+    @Binding var path: [InsightsNavigation]
     var subViewName: String
     var body: some View {
         List {
             ForEach(reports, id: \.id) { report in
-                ZStack {
-                    NavigationLink(destination: self.report(report: report)) {
-                        EmptyView().frame(width: 0, height: 0)
-                    }
-                    .opacity(0)
-                    .frame(width: 0, height: 0)
-                    
-                    ReportCellView(report: report)
-                        .cellStyle()
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            HStack {
-                                Button(role: .destructive) {
-                                    reportToDelete = report
-                                    showDeleteAlert.toggle()
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                                .tint(.theme.destructive)
-                                
-                                Button {
-                                    
-                                } label: {
-                                    Label("Modify", systemImage: "pencil")
-                                }
-                                .tint(.theme.secondary)
-                            }
-                        }
-                }
-                .listRowInsets(themeCellEdgeInsets)
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
+                ReportCellView(report: report)
+                    .cellStyle()
             }
         }
         .listStyle(.plain)
@@ -166,15 +153,7 @@ struct MyReportsSubView: View {
         )
     }
 
-    @ViewBuilder
-    private func report(report: Report) -> some View {
-        ReportView(model: model, onCompletion: { _, _ in
-            refreshID = UUID()
-        })
-        .onAppear {
-            model.prepareForModification(report)
-        }
-    }
+    
     
     private func confirmDeletion(of id: String) {
         withAnimation {
@@ -203,62 +182,10 @@ struct MyReportsSubView: View {
 // MARK: - Preview
 
 #Preview {
-    let reports = [
-        Report(
-            coordinate: Coordinate(lat: 13.693175616298355, lng:-89.21848208712787 ),
-            address: "PanAmerican Highway, San Salvador, San Salvador, El Salvador",
-            title: "Un bache en la avenida",
-            description: "Un bache esta afectando a muchas personas en la avenida",
-            severityId: 1,
-            statusId: 1,
-            issueTypeId: 3,
-            matterToSolveId: 1,
-            cellIndex: "",
-            createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
-            updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
-        ),
-        Report(
-            coordinate: Coordinate(lat: 13.693175616298355, lng:-89.21848208712787 ),
-            address: "PanAmerican Highway, San Salvador, San Salvador, El Salvador",
-            title: "Un bache en la avenida",
-            description: "Un bache esta afectando a muchas personas en la avenida",
-            severityId: 1,
-            statusId: 1,
-            issueTypeId: 3,
-            matterToSolveId: 1,
-            cellIndex: "",
-            createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
-            updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
-        ),
-        Report(
-            coordinate: Coordinate(lat: 13.693175616298355, lng:-89.21848208712787 ),
-            address: "PanAmerican Highway, San Salvador, San Salvador, El Salvador",
-            title: "Un bache en la avenida",
-            description: "Un bache esta afectando a muchas personas en la avenida",
-            severityId: 1,
-            statusId: 1,
-            issueTypeId: 3,
-            matterToSolveId: 1,
-            cellIndex: "",
-            createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
-            updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
-        ),
-        Report(
-            coordinate: Coordinate(lat: 13.693175616298355, lng:-89.21848208712787 ),
-            address: "PanAmerican Highway, San Salvador, San Salvador, El Salvador",
-            title: "Un bache en la avenida",
-            description: "Un bache esta afectando a muchas personas en la avenida",
-            severityId: 1,
-            statusId: 1,
-            issueTypeId: 3,
-            matterToSolveId: 1,
-            cellIndex: "",
-            createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
-            updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
-        )
-    ]
-    NavigationStack {
-        MyReportsSubView(subViewName: "My Reports")
+    @Previewable
+    @State var path: [InsightsNavigation] = []
+    return NavigationStack {
+        MyReportsSubView(path: $path, subViewName: "My Reports")
     }
 }
 

@@ -38,10 +38,10 @@ struct InsightsView: View {
             .navigationDestination(for: InsightsNavigation.self) { destination in
                 switch destination {
                 case .myReports:
-                    MyReportsSubView(subViewName: "My reports")
+                    MyReportsSubView(path: $navigationPath, subViewName: "My reports")
                         .navigationTransition(.zoom(sourceID: "transition:myReports", in: insightsNamespace))
                 case .myPetitions:
-                    MyPetitionsSubView(subViewName: "My petitions")
+                    MyPetitionsSubView(path: $navigationPath, subViewName: "My petitions")
                         .navigationTransition(.zoom(sourceID: "transition:myPetitions", in: insightsNamespace))
                 case .activity(let date):
                     SimpleView(
@@ -51,6 +51,11 @@ struct InsightsView: View {
                     )
                 case .noActivity:
                     SimpleView(title: "NoActivityView")
+                case .report(let report):
+                    SimpleView(title: report.title)
+                case .petition(let petition):
+                    SimpleView(title: petition.title)
+                
                 }
             }
             .background(Color.theme.background)

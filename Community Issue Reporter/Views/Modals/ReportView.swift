@@ -262,7 +262,7 @@ struct ReportView: View {
 
 
 #Preview {
-    var model: ReportDataModel = ReportDataModel.shared
+    let model: ReportDataModel = ReportDataModel.shared
     model.setMatterToSolve(mattersToResolve.first!)
     return ReportView(model: model, onCompletion: { data, type in
         

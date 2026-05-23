@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct ProfileOption: Identifiable, Hashable {
     let id: String
@@ -15,7 +16,7 @@ struct ProfileOption: Identifiable, Hashable {
 }
 
 struct UserProfileView: View {
-    @State private var path = NavigationPath()
+    @State private var navigationPath: [InsightsNavigation] = []
     @State private var sheetSizePreference = "normal"
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
@@ -61,30 +62,17 @@ struct UserProfileView: View {
         ),
 
     ]
+//    @ObservedObject var viewModel: ProfileModel
 
     var body: some View {
         NavigationStack {
             
             ScrollView(.vertical) {
                 
-                VStack(spacing: 8) {
-                    if let url = UserRepository.getProfilePictureURL() {
-                        AsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            ProgressView()
-                        }
-                        .frame(width: 100, height: 100)
-                        .clipShape(Circle())
-                    } else {
-                        Image("user_b")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                    }
+                VStack(spacing: 4) {
+                    
+                    ProfileImage()
+                        .padding(.bottom, 8)
                     
                     Text(UserRepository.getName())
                         .font(.title3)
@@ -171,7 +159,7 @@ struct UserProfileView: View {
         case "op:comments":
             CommentsSubView(subViewName: option.title)
         case "op:reports":
-            MyReportsSubView(subViewName: option.title)
+            MyReportsSubView(path: $navigationPath, subViewName: option.title)
         default:
             Text("\(option.id) selected")
         }

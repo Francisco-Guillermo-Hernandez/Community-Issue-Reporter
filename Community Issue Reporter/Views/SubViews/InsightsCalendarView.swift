@@ -133,9 +133,9 @@ struct MockData {
     
     // Mock for your "Cards" (Journaled/Written)
     static let stats = InsightsResponse(
-        activity_days: activityMap,
-        total_reports: 24,
-        total_signatures: 12
+        activityDays: activityMap,
+        totalReports: 24,
+        totalSignatures: 12
     )
 }
 

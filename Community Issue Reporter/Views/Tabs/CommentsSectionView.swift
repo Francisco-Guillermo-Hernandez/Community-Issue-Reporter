@@ -25,6 +25,8 @@ struct CommentsSectionView: View {
     @State private var limit: Int = 16
     
     init(issue: IssueMarker) {
+        
+        
         self.issue = issue
         self.paginatedResult = PaginatedResponse<Comment>(
             documents: [],
@@ -35,6 +37,9 @@ struct CommentsSectionView: View {
             hasNext: false,
             hasPrev: false,
         )
+        
+        print("issue detail")
+        print(issue.id)
     }
     
     var body: some View {
@@ -60,7 +65,7 @@ struct CommentsSectionView: View {
                         ForEach(comments) { c in
                             CommentRow(
                                 name: c.name!,
-                                time: c.created_at!,
+                                time: c.createdAt!,
                                 message: c.message
                             )
                             .task {
@@ -84,20 +89,17 @@ struct CommentsSectionView: View {
             .task {
                 self.isLoading = true
                 guard !Task.isCancelled else { return }
-                await CommentsRepository.shared.list(
+                
+                let result = await CommentsRepository.shared.list(
                     issue.id,
                     page: currentPage,
                     limit: self.limit,
-                    onComplete: { result in
-                        self.paginatedResult = result
-                        self.comments.append(contentsOf: result.documents!)
-                        
-                        if result.hasNext {
-                            self.currentPage += 1
-                        }
-                    },
-                    onError: { _ in }
+                    onError: { _ in
+                        print("error")
+                    }
                 )
+                self.paginatedResult = result
+                self.comments.append(contentsOf: result.documents ?? [])
                 
                 self.isLoading = false
             }
@@ -177,9 +179,9 @@ struct CommentsSectionView: View {
             self.isSubmitting = true
             let comment = Comment(
                 id: UUID().uuidString,
-                created_at: Date(),
+                createdAt: Date(),
                 name: "Anonymous",
-                report_id: issue.id,
+                reportId: issue.id,
                 message: commentInput,
             )
             
@@ -201,6 +203,7 @@ struct CommentsSectionView: View {
                     },
                     onError: { error in
                         print(error)
+                        print("error")
                         self.disableInput = false
                         self.commentInput = ""
                         self.isSubmitting = false
@@ -215,28 +218,19 @@ struct CommentsSectionView: View {
         
         guard !self.isLoading && self.canLoadMore else { return }
         guard !Task.isCancelled else { return }
-        
         self.isLoading = true
         
-        await CommentsRepository.shared.list(
+        let result = await CommentsRepository.shared.list(
             issue.id,
             page: self.currentPage,
             limit: self.limit,
-            onComplete: { result in
-                let existingIds = Set(self.comments.map { $0.id })
-                guard let documents = result.documents else { return }
-                let uniqueNewComments = documents.filter { !existingIds.contains($0.id) }
-                
-                if !uniqueNewComments.isEmpty {
-                    self.comments.append(contentsOf: uniqueNewComments)
-                    self.canLoadMore = result.hasNext
-                    if self.canLoadMore { self.currentPage += 1 }
-                } else {
-                    self.canLoadMore = false
-                }
-            },
-            onError: { _ in self.isLoading = false }
+            onError: { _ in
+                print("error")
+            }
         )
+        
+        print(result)
+       
         
         isLoading = false
     }

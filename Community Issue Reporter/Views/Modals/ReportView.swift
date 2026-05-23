@@ -16,25 +16,20 @@ struct Option: Hashable {
 
 struct ReportView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var model: ReportDataModel
-    @State private var showDiscardAlert: Bool
-    @State private var isSubmitting: Bool
+    @Bindable var model: ReportDataModel
+    @State private var showDiscardAlert: Bool = false
+    @State private var isSubmitting: Bool = false
     @State private var selectedImages: [MediaResources] = []
-    @State private var showMapPickerSheet: Bool
-    @Binding var showCancelButton: Bool
+    @State private var showMapPickerSheet: Bool = false
+    var showCancelButton: Bool = false
+    
+    var onCompletion: (String, AlertType) -> Void
     
     init(model: ReportDataModel, onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
         self.model = model
-        
-        self.showDiscardAlert = false
-        self.isSubmitting = false
-        self.selectedImages = []
-        self.showMapPickerSheet = false
         self.onCompletion = onCompletion
-        self._showCancelButton = Binding<Bool>(get: { showCancelButton }, set: { _ in })
+        self.showCancelButton = showCancelButton
     }
-    
-    var onCompletion: (String, AlertType) -> Void
     
     private var isFormFilled: Bool {
         //        !address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

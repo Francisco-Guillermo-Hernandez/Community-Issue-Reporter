@@ -32,10 +32,11 @@ struct ReportsChooserView: View {
                         self.selectedReports.append(getId(from: report))
                     }
                 }
+                .frame(maxWidth: .infinity)
             }
 //            .scrollContentBackground(.hidden)
             .interactiveDismissDisabled()
-            .searchable(text: $searchText, placement: .toolbar, prompt: "Search a report")
+            .searchable(text: $searchText, placement: .toolbar, prompt: String(localized: "Search a report"))
             .navigationTitle("Choose one or multiple reports")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -88,15 +89,17 @@ struct MultipleSelectionRow: View {
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Spacer()
-                
-                if isSelected {
+                // The check mark must be at the right always
+                VStack {
                     Image(systemName: "checkmark")
                         .font(.title3)
-                        .foregroundStyle(Color.blue)
+                        .foregroundStyle(isSelected ? Color.blue : .clear)
                 }
+                .frame(alignment: .trailing)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -114,7 +117,37 @@ struct MultipleSelectionRow: View {
 #Preview {
 
     @Previewable
-    @State var reports: [Report] = []
+    @State var reports: [Report] = [
+        Report(
+            id: "1",
+                   coordinate: Coordinate(lat: 13.693175616298355, lng:-89.21848208712787 ),
+                   address: "PanAmerican Highway, San Salvador, San Salvador, El Salvador",
+                   title: "Un bache en la avenida",
+                   description: "Un bache esta afectando a muchas personas en la avenida",
+                   severityId: 1,
+                   statusId: 1,
+                   issueTypeId: 3,
+                   matterToSolveId: 1,
+                   cellIndex: "",
+                   createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
+                   updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
+               ),
+        Report(
+            id: "2",
+                   coordinate: Coordinate(lat: 13.693175616298355, lng:-89.21848208712787 ),
+                   address: "PanAmerican ",
+                   title: "Un bache en la avenida",
+                   description: "Un ",
+                   severityId: 1,
+                   statusId: 1,
+                   issueTypeId: 3,
+                   matterToSolveId: 1,
+                   cellIndex: "",
+                   createdAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
+                   updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
+               )
+        
+    ]
     
     @Previewable
     @State var selectedReports: [String] = []

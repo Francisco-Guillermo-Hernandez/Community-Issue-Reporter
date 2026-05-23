@@ -34,7 +34,7 @@ struct CommentsSubView: View {
             ScrollView(.vertical) {
                 LazyVStack(spacing: 16) {
                     ForEach(comments) { c in
-                        CommentRow(name: c.name!, time: c.created_at!, message: c.message)
+                        CommentRow(name: c.name!, time: c.createdAt!, message: c.message)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                             // The Delete Button
                                             Button(role: .destructive) {

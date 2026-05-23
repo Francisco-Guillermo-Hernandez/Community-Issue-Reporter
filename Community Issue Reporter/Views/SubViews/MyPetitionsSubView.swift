@@ -35,7 +35,7 @@ struct MyPetitionsSubView: View {
     @State private var refreshID = UUID()
     @State private var petitions: [Petition] = []
     @State private var page: Int = 1
-    @State private var model: PetitionDataModel = PetitionDataModel.shared
+//    @State private var model: PetitionDataModel = PetitionDataModel.shared
     @Binding var path: [InsightsNavigation]
 
     var subViewName: String

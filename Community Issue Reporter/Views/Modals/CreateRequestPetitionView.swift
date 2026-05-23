@@ -8,16 +8,19 @@
 import SwiftUI
 
 struct CreateRequestPetitionView: View {
+
     @Environment(\.dismiss) private var dismiss
-    @State var model: PetitionDataModel
     @State var isSubmitting: Bool = false
     @State var minimunSignatures: Int = 10
     @State var stepperAction: String = ""
     @State var reports: [Report] = []
-
-    init(model: PetitionDataModel) {
-        self.model = model
-    }
+    @State private var targetSignatureValue = 10
+ 
+    @State var reportsIds: [String] = []
+    @ObservedObject var model: PetitionDataModel
+    
+    var onCompletion: (String, AlertType) -> Void
+    
     
     var body: some View {
         NavigationStack {
@@ -66,7 +69,8 @@ struct CreateRequestPetitionView: View {
                 
                 
                 Section {
-                    NavigationLink(destination: ReportsChooserView(reports: reports, selectedReports: $model.petition.reportsIds)) {
+                    NavigationLink(
+                        destination: ReportsChooserView(reports: reports, selectedReports: $model.petition.reportsIds)) {
                       HStack {
                           Text("Choose report(s)")
                           
@@ -85,9 +89,10 @@ struct CreateRequestPetitionView: View {
                 
                 Section {
                     Stepper(value: $model.petition.targetSignatures, in: minimunSignatures...1000, step: 1) {
-                        AnimatedText(text: "\(model.petition.targetSignatures)")
+                        AnimatedText(text: "\( model.petition.targetSignatures)")
                     }
                     .onChange(of: model.petition.targetSignatures) { oldValue, newValue in
+                    
                         if newValue > oldValue {
                             stepperAction = "Increase"
                         } else if newValue < oldValue {
@@ -106,6 +111,12 @@ struct CreateRequestPetitionView: View {
             .task {
                 // Let's cancel the task if the user change the view
                 guard !Task.isCancelled else { return }
+                
+//                self.minimunSignatures = model.petition.category.minimunAmountOfSignatures
+//                if model.petition.targetSignatures < minimunSignatures {
+//                    model.petition.targetSignatures = minimunSignatures
+//                }
+                
                 self.reports = await ReportRepository.shared.listReports(onError: { error in
                     print(error)
                 })
@@ -127,15 +138,19 @@ struct CreateRequestPetitionView: View {
                         isSubmitting.toggle()
                         
                         Task {
+                          
+                            
+                            
                             await PetitionRepository.share.create(
                                 model.petition,
                                 onComplete: { result in
                                 
-                                    print(result)
+                                    onCompletion("Petition created", .info)
                                     dismiss()
+                                    
                                 },
                                 onError: { error in
-                                    print(error)
+                                    onCompletion("Error", .error)
                                     dismiss()
                                 })
                                 
@@ -189,6 +204,13 @@ struct AnimatedText: View {
 }
 
 
-//#Preview {
-//    CreateRequestPetitionView(model: .constant(.shared))
-//}
+#Preview {
+
+    @Previewable
+    @State var model = PetitionDataModel()
+    CreateRequestPetitionView(model: model, onCompletion: { _, _ in
+        print("completed")
+        print(model.petition.title)
+        print(model.petition.targetSignatures)
+    })
+}

@@ -37,9 +37,9 @@ struct WelcomeView: View {
             if token == "guest" {
                 Task {
                     await UserRepository.loginAsVisitor(
-                        onSuccess: { state, token in
+                        onSuccess: { state, sessionId in
                             self.userOAuthState = state
-                            saveTokens(u: token)
+                            saveIntoKeychain(sessionId)
                             self.isGuest.toggle()
                         }, onError: { error in
                             print(error)
@@ -49,7 +49,7 @@ struct WelcomeView: View {
             } else {
                 Task {
                     await UserRepository.login(token,
-                        onSuccess: { state, resultToken in
+                        onSuccess: { state, sessionId in
                         
                             self.userOAuthState = state
                            
@@ -57,7 +57,7 @@ struct WelcomeView: View {
                                 print("Welcome")
                             }
                         
-                            self.saveTokens(u: resultToken)
+                            self.saveIntoKeychain(sessionId)
                             self.appState.isLoggedIn.toggle()
                         },
                         onError: { error in
@@ -71,9 +71,8 @@ struct WelcomeView: View {
         }
     }
     
-    private func saveTokens(u: UserTokens) {
-        _ = KeychainService.save(key: .query, value: u.queryActionsToken)
-        _ = KeychainService.save(key: .mutation, value: u.mutationActionsToken)
+    private func saveIntoKeychain(_ sessionId: String) {
+        _ = KeychainService.save(key: .mutation, value: sessionId)
     }
         
 }

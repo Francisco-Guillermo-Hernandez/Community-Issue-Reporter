@@ -15,6 +15,8 @@ struct City: Identifiable, Codable {
     let coordinates: Coordinate
     let isDepartmentalCapital: Bool?
     let metadata: [String: String]?
+    let groupingId: String?
+    let groupingName: String?
     
     init(
         id: Int,
@@ -23,7 +25,9 @@ struct City: Identifiable, Codable {
         isCapital: Bool = false,
         coordinates: Coordinate,
         metadata: [String: String]? = nil,
-        isDepartmentalCapital: Bool? = false
+        isDepartmentalCapital: Bool? = false,
+        groupingId: String? = nil,
+        groupingName: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -32,6 +36,8 @@ struct City: Identifiable, Codable {
         self.coordinates = coordinates
         self.metadata = metadata
         self.isDepartmentalCapital = isDepartmentalCapital
+        self.groupingId = groupingId
+        self.groupingName = groupingName
     }
 }
 
@@ -71,4 +77,40 @@ struct GeographicalRegion: Identifiable, Codable {
 
 struct FriendlyCityDistribution: Codable {
     
+    let firstLevel: String
+    let secondLevel: String
+    let thirdLevel: String
+    let ZipCode: String?
+    let legalGroupName: String
+    let coordinates: Coordinate
+    let isDepartmentalCapital: Bool?
+    let groupingId: String?
+    let groupingName: String?
+
+    init(
+        firstLevel: String,
+        secondLevel: String,
+        thirdLevel: String,
+        ZipCode: String? = "",
+        legalGroupName: String,
+        coordinates: Coordinate,
+        isDepartmentalCapital: Bool? = false,
+        groupingId: String? = nil,
+        groupingName: String? = nil
+    ) {
+        self.firstLevel = firstLevel
+        self.secondLevel = secondLevel
+        self.thirdLevel = thirdLevel
+        self.ZipCode = ZipCode
+        self.legalGroupName = legalGroupName
+        self.coordinates = coordinates
+        self.isDepartmentalCapital = isDepartmentalCapital
+        self.groupingId = groupingId
+        self.groupingName = groupingName
+    }
+}
+
+
+struct FriendlyCityDistributionList: Codable {
+    let cities: [FriendlyCityDistribution]
 }

@@ -19,7 +19,15 @@ enum ReportStates: String, Codable {
 }
 
 
-struct Report: Identifiable, Codable {
+struct Report: Identifiable, Codable, Hashable {
+    
+    static func == (lhs: Report, rhs: Report) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
     var id: String?
     var coordinate: Coordinate
     var address: String

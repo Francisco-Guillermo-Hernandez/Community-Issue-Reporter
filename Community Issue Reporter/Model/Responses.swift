@@ -19,10 +19,18 @@ struct UserTokens: Decodable {
     let mutationActionsToken: String
 }
 
+struct PublicUserData: Decodable {
+    let userName: String
+    let email: String
+    let profilePicture: String
+    let sessionDuration: Int
+}
+
 struct LoginWithOAuthProviderResponse: Decodable {
-    var code: String
-    var authToken: UserTokens
-    var authProvider: String
+    let code: String
+    let authSessionId: String
+    let authProvider: String
+    let publicUserData: PublicUserData
 }
 
 struct PaginatedResponse<T: Decodable>: Decodable {
@@ -66,7 +74,7 @@ struct DaySummary: Decodable {
 }
 
 struct InsightsResponse: Decodable {
-    let activity_days: [String: DaySummary]
-    let total_reports: Int
-    let total_signatures: Int
+    let activityDays: [String: DaySummary]
+    let totalReports: Int
+    let totalSignatures: Int
 }

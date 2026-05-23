@@ -7,7 +7,15 @@
 
 import Foundation
 
-struct Petition: Identifiable, Codable, Equatable {
+struct Petition: Identifiable, Codable, Equatable, Hashable {
+    
+    static func == (lhs: Petition, rhs: Petition) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
     var id: String?
     var title: String
     var description: String

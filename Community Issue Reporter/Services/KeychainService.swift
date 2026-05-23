@@ -11,8 +11,6 @@ import Security
 class KeychainService {
     static func save(key: TokenType, value: String) -> Bool {
         
-        print("tokken: \(value)")
-        print("key: \(key.rawValue)")
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: bundleID,

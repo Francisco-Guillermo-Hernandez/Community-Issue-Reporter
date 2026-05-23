@@ -14,11 +14,11 @@ struct UserService {
         self.client = client
     }
     
-    func login(payload: OAuthSignInPayload) async throws -> LoginWithOAuthProviderResponse {
-        return try await client.post(path: "auth/Google/tokenSignInOrLogin", body: payload)
+    func login(payload: OAuthSignInPayload, headers: Array<HTTPHeader>) async throws -> LoginWithOAuthProviderResponse {
+        return try await client.post(path: "auth/Google/tokenSignInOrLogin", body: payload, headers: headers)
     }
     
-    func loginAsVisitor() async throws -> LoginWithOAuthProviderResponse {
-        return try await client.post(path: "token/generate/for/visitors", body: [String: String]())
+    func loginAsVisitor(_ headers: Array<HTTPHeader>) async throws -> LoginWithOAuthProviderResponse {
+        return try await client.post(path: "auth/visitors/generate/session", body: [String: String](), headers: headers)
     }
 }

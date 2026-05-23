@@ -19,9 +19,9 @@ struct ServiceClient {
     private let decoder: JSONDecoder
     private let delimiter = "/"
     
-    private func getOAuthHeader(t: TokenType) -> HTTPHeader {
-        let token = KeychainService.getToken(t)
-        return HTTPHeader(name: "Authorization", content: "Bearer \(token)")
+    private func getOAuthHeader() -> HTTPHeader {
+        let token = KeychainService.getToken(.mutation)
+        return HTTPHeader(name: "Cookie", content: "session_id=\(token)")
     }
 
     init(baseURL: URL? = development, session: URLSession = .shared) {
@@ -68,7 +68,7 @@ struct ServiceClient {
         }
         
         if withOAuth {
-            let oAuthHeader = getOAuthHeader(t: .query)
+            let oAuthHeader = getOAuthHeader()
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 
@@ -78,6 +78,13 @@ struct ServiceClient {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("Error Response Body: \(jsonString)")
+            }
+            
+            print("request headers:")
+            dump(request.allHTTPHeaderFields)
+            print("respose headers", httpResponse.allHeaderFields)
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
 
@@ -96,7 +103,7 @@ struct ServiceClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if withOAuth {
-            let oAuthHeader = getOAuthHeader(t: .mutation)
+            let oAuthHeader = getOAuthHeader()
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 
@@ -137,7 +144,7 @@ struct ServiceClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if withOAuth {
-            let oAuthHeader = getOAuthHeader(t: .mutation)
+            let oAuthHeader = getOAuthHeader()
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 
@@ -179,7 +186,7 @@ struct ServiceClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if withOAuth {
-            let oAuthHeader = getOAuthHeader(t: .mutation)
+            let oAuthHeader = getOAuthHeader()
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 
@@ -233,7 +240,7 @@ struct ServiceClient {
         }
         
         if withOAuth {
-            let oAuthHeader = getOAuthHeader(t: .mutation)
+            let oAuthHeader = getOAuthHeader()
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 

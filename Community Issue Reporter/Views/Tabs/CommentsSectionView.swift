@@ -47,14 +47,15 @@ struct CommentsSectionView: View {
             ScrollView(.vertical) {
                 LazyVStack(spacing: 16) {
                     if comments.isEmpty {
+                        // Empty state
                         ContentUnavailableView {
                             Label("No comments yet.", systemImage: "bubble.left.and.text.bubble.right")
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(
-                                                                Color.theme.foreground.opacity(0.7),
-                                                                Color.theme.primary,
-                                                                Color.theme.foreground.opacity(0.7)
-                                 )
+                                    Color.theme.foreground.opacity(0.7),
+                                    Color.theme.primary,
+                                    Color.theme.foreground.opacity(0.7)
+                                )
                         } description: {
                             Text("Please tell us how that problem affects you.")
                         } actions: {
@@ -150,8 +151,8 @@ struct CommentsSectionView: View {
                 } label: {
                     if !isSubmitting {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 16)
-                                .frame(width: 40, height: 30)
+                            RoundedRectangle(cornerRadius: .themeRadius * 2)
+                                .frame(width: 64, height: 32)
                             
                             Image(systemName: "paperplane")
                                 .foregroundStyle(.white)
@@ -229,12 +230,8 @@ struct CommentsSectionView: View {
             }
         )
         
-        print(result)
-       
-        
         isLoading = false
     }
-    
 }
 
 #Preview {

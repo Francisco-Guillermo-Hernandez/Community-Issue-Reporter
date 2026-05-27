@@ -76,34 +76,39 @@ struct GeographicalRegion: Identifiable, Codable {
 }
 
 struct FriendlyCityDistribution: Codable {
-    
+    let cityId: String
     let firstLevel: String
     let secondLevel: String
     let thirdLevel: String
     let ZipCode: String?
     let legalGroupName: String
     let coordinates: Coordinate
-    let isDepartmentalCapital: Bool?
+    let isCapitalCity: Int?
+    let isDepartmentalCapital: Int?
     let groupingId: String?
     let groupingName: String?
 
     init(
+        cityId: String,
         firstLevel: String,
         secondLevel: String,
         thirdLevel: String,
         ZipCode: String? = "",
         legalGroupName: String,
         coordinates: Coordinate,
-        isDepartmentalCapital: Bool? = false,
+        isCapitalCity: Int? = 0,
+        isDepartmentalCapital: Int? = 0,
         groupingId: String? = nil,
         groupingName: String? = nil
     ) {
+        self.cityId = cityId
         self.firstLevel = firstLevel
         self.secondLevel = secondLevel
         self.thirdLevel = thirdLevel
         self.ZipCode = ZipCode
         self.legalGroupName = legalGroupName
         self.coordinates = coordinates
+        self.isCapitalCity = isCapitalCity
         self.isDepartmentalCapital = isDepartmentalCapital
         self.groupingId = groupingId
         self.groupingName = groupingName

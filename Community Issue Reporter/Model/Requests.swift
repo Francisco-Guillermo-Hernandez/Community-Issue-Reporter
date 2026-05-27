@@ -16,13 +16,34 @@ struct PaginatedRequestQueryParams: Encodable {
     let limit: Int?
     var issueTypeId: Int?
     var severityId: Int?
+    var countryCode: String?
+    var departmentalCapital: Bool?
+    var cityName: String?
+    var stateName: String?
+    var groupingName: String?
     var ordering: String
-    
-    init(page: Int? = 1, limit: Int? = 3, issueTypeId: Int? = nil, severityId: Int? = nil, ordering: OrderFilter = .descending) {
+
+    init(
+        page: Int? = 1,
+        limit: Int? = 3,
+        issueTypeId: Int? = nil,
+        severityId: Int? = nil,
+        countryCode: String? = nil,
+        departmentalCapital: Bool? = nil,
+        cityName: String? = nil,
+        stateName: String? = nil,
+        groupingName: String? = nil,
+        ordering: OrderFilter = .descending
+    ) {
         self.page = page
         self.limit = limit
         self.issueTypeId = issueTypeId
         self.severityId = severityId
+        self.countryCode = countryCode
+        self.departmentalCapital = departmentalCapital
+        self.cityName = cityName
+        self.stateName = stateName
+        self.groupingName = groupingName
         self.ordering = ordering.filter
     }
 }

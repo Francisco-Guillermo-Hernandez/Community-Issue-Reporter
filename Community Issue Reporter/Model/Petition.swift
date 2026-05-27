@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct Petition: Identifiable, Codable, Equatable, Hashable {
     
@@ -79,5 +80,18 @@ extension Petition {
         set {
             self.statusId = newValue.identifier
         }
+    }
+    
+    var updateSignatures: Int {
+        
+        get {
+            self.targetSignatures
+        }
+        
+        set {
+            self.targetSignatures = newValue
+        }
+        
+        
     }
 }

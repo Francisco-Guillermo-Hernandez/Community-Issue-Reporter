@@ -9,25 +9,25 @@ import Foundation
 
 struct Comment: Identifiable, Codable {
     let id: String
-    var created_at: Date?
-    var updated_at: Date?
+    var createdAt: Date?
+    var updatedAt: Date?
     let name: String?
-    let report_id: String
+    let reportId: String
     let message: String
     
     init(
         id: String,
-        created_at: Date? = nil,
-        updated_at: Date? = nil,
+        createdAt: Date? = nil,
+        updatedAt: Date? = nil,
         name: String? = nil,
-        report_id: String,
+        reportId: String,
         message: String
     ) {
         self.id = id
-        self.created_at = created_at //applyFormat(created_at)
-        self.updated_at = updated_at //applyFormat(updated_at)
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
         self.name = name
-        self.report_id = report_id
+        self.reportId = reportId
         self.message = message
     }
 }

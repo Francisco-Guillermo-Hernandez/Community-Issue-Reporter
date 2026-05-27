@@ -15,7 +15,7 @@ struct SettingsSubView: View {
 
     @State private var geographicalRegion: Int = 1
     @State private var selectedCountry: Int = 0
-    @State private var selectedCity: Int = 0
+//    @State private var selectedCity: Int = 0
     @State private var enableBackgroundSync: Bool = true
     @State private var enableAnonymousTelemetry: Bool = false
     @State private var selectedLanguage: Int = 1
@@ -23,9 +23,20 @@ struct SettingsSubView: View {
 
     @State private var countries: [Country] = []
     @State private var regions: [Region] = []
-    @State private var cities: [City] = []
+    @State private var cities: [FriendlyCityDistribution] = []
     @State private var language: String = "en"
     @State private var enableNotifications: Bool = false
+    
+    @State private var selectedCity: FriendlyCityDistribution = .init(
+                        cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
+                        firstLevel: "El Salvador",
+                        secondLevel: "San Salvador",
+                        thirdLevel: "San Salvador",
+                        ZipCode: "1101",
+                        legalGroupName: "",
+                        coordinates: .init(lat: 13.68935, lng: -89.18718),
+                        isCapitalCity: 1,
+                        isDepartmentalCapital: 1)
     
     var subViewName: String
     var body: some View {
@@ -58,6 +69,16 @@ struct SettingsSubView: View {
                         
                         regions = getRegion(countryId: newValue)
                         settings.selectedCountry = newValue
+                    }
+                    
+                    NavigationLink(destination: CitySelectionView(countryCode: "SV", selectedCity:  $selectedCity, nextStep: {})) {
+                        HStack {
+                            Text("City")
+                            Spacer()
+                            Text(selectedCity.thirdLevel)
+                                .foregroundStyle(Color.secondary)
+                            
+                        }
                     }
                 
                 } header: {
@@ -109,6 +130,14 @@ struct SettingsSubView: View {
                     Text("")
                 }
             }
+            .task {
+                guard let documents = CitiesRepository
+                    .shared
+                    .loadLocalCities(with: "SV")
+                    .documents else { return }
+                
+                cities = documents
+            }
             .scrollDisabled(true)
 //            .scrollContentBackground(.hidden)
             .listSectionSpacing(32)
@@ -117,7 +146,7 @@ struct SettingsSubView: View {
             .onAppear {
                 geographicalRegion = settings.geographicalRegion
                 selectedCountry = settings.selectedCountry
-                selectedCity = settings.selectedCity
+//                selectedCity = settings.selectedCity
                 enableBackgroundSync = settings.enableBackgroundSync
                 enableAnonymousTelemetry = settings.enableAnonymousTelemetry
                 selectedLanguage = settings.selectedLanguageID

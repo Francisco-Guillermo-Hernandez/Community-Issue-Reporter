@@ -7,7 +7,10 @@
 
 import SwiftUI
 
-
+enum CitySelectionMode: String {
+    case modify
+    case step
+}
 
 struct CityCellView: View {
     let city: FriendlyCityDistribution
@@ -18,6 +21,14 @@ struct CityCellView: View {
             Text(city.thirdLevel)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if city.isCapitalCity == 1 {
+                Text("Is the capital of \(city.firstLevel)")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(Color.gray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
 
             Text(city.legalGroupName)
                 .font(.caption)
@@ -29,12 +40,6 @@ struct CityCellView: View {
                     .font(.caption)
                     .foregroundStyle(Color.gray)
                     .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            
-            if city.isCapitalCity == 1 {
-                Text("Is the capital of")
-                    .font(.caption)
-                    .foregroundStyle(Color.gray)
             }
 
         }
@@ -54,25 +59,17 @@ struct CitySelectionView: View {
     @State private var isLoading: Bool = false
     @State private var isSearchActive: Bool = false
     @State private var searchOptionsSelection: CityFilter = .city
-    @State private var selectedCity: FriendlyCityDistribution?
-    
-    var nextStep: () -> Void
 
+    @State private var triggerFeedBack: Bool = false
     
-    init(nextStep: @escaping () -> Void ) {
-        
-        self.nextStep = nextStep
-        let appearance = UINavigationBarAppearance()
-        appearance.titleTextAttributes = [.foregroundColor: UIColor(named: "CardForeground")! ]
-        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor(named: "CardForeground")!]
-        
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-    }
+    var countryCode: String
+    var mode: CitySelectionMode = .step
+    @Binding var selectedCity: FriendlyCityDistribution
+    var nextStep: () -> Void
 
 
     var body: some View {
-        NavigationStack {
+        VStack {
             ScrollView(.vertical) {
                 LazyVStack(spacing: .themeSpacing * 4) {
 
@@ -82,27 +79,11 @@ struct CitySelectionView: View {
                     }
 
                     if cities.isEmpty && !isLoading {
-                        ContentUnavailableView {
-                            Label(
-                                "There are no cities that match with your search.",
-                                systemImage: "map"
-                            )
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(
-                                Color.theme.foreground.opacity(0.7),
-                                Color.theme.primary,
-                                Color.theme.foreground.opacity(0.7)
-                            )
-                        } description: {
-                            Text("Please, write a city name")
-                        } actions: {
-                        }
-                        .containerRelativeFrame(.vertical)
+                      
+                        noContent
                     } else {
-                        ForEach(
-                            friendlyCities.documents ?? [],
-                            id: \.self.cityId
-                        ) { city in
+                        
+                        ForEach(cities,id: \.self.cityId) { city in
                             Button {
                                 selectedCity = city
                             } label: {
@@ -111,12 +92,17 @@ struct CitySelectionView: View {
                                     .overlay {
                                         RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
                                             .stroke(
-                                                selectedCity?.cityId == city.cityId ?
-                                                Color.theme.secondary : .clear, lineWidth: 2
+                                                selectedCity.cityId == city.cityId ?
+                                                Color.theme.primary : .clear, lineWidth: 2
                                             )
                                     }
                             }
+                            .sensoryFeedback(
+                                .impact(weight: .light, intensity: 0.5),
+                                trigger: selectedCity.cityId == city.cityId
+                            )
                         }
+                        
                     }
                 }
                 .padding(.horizontal, 16)
@@ -149,12 +135,12 @@ struct CitySelectionView: View {
 
                     VStack {
                         ThemedButton(
-                            message: String(
-                                localized: "Next Step",
-                                comment: "Next Step at select city view"
-                            ),
-                            action: {},
-                            type: .secondary
+                            message: buttonMessage,
+                            action: {
+                                triggerFeedBack.toggle()
+                                nextStep()
+                            },
+                            type: .primary
                         )
                         .padding()
                         .padding(.top, 0)
@@ -164,29 +150,24 @@ struct CitySelectionView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             }
+            .sensoryFeedback(
+                .impact(weight: .medium),
+                trigger: triggerFeedBack
+            )
             .task {
+                // Invoke the repository at first
                 isLoading = true
-                friendlyCities = await CitiesRepository.shared.filter(
-                    countryCode: "SV",
-                    page: page,
-                    departmentalCapital: true,
+                friendlyCities = CitiesRepository.shared.loadLocalCities(
+                   with: countryCode,
                 )
                 isLoading = false
             }
             .onChange(of: searchText) {
                 Task {
-                    try? await Task.sleep(for: .milliseconds(550))
-                    if searchOptionsSelection == .legal {
-                        await fetchCitiesByGroupingName()
-                    }
-
-                    if searchOptionsSelection == .city {
-                        await fetchByCityName()
-                    }
-
-                    if searchOptionsSelection == .state {
-                        await fetchCitiesByStateName()
-                    }
+                    try? await Task.sleep(for: .milliseconds(450))
+                    if searchOptionsSelection == .legal { await fetchCitiesByGroupingName() }
+                    if searchOptionsSelection == .city  { await fetchByCityName() }
+                    if searchOptionsSelection == .state { await fetchCitiesByStateName() }
                 }
             }
             .onChange(of: searchOptionsSelection) { oldValue, newValue in
@@ -205,11 +186,12 @@ struct CitySelectionView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     
+                    // Menu to filter cities by its options
                     Menu {
                         Picker("Options", selection: $searchOptionsSelection) {
 
-                            ForEach(CityFilter.allCases, id: \.self) { city in
-                                Text(city.text).tag(city.rawValue)
+                            ForEach(CityFilter.allCases, id: \.self) { filter in
+                                Text(filter.text).tag(filter)
                             }
                         }
                     } label: {
@@ -222,23 +204,24 @@ struct CitySelectionView: View {
             }
         }
     }
-
-//    private var cities: [FriendlyCityDistribution] {
-//        var k: [FriendlyCityDistribution] = friendlyCities.documents ?? []
-//        
-//        var result = k.sort { !$0.isCapital && !$1.isCapital}
-//      return result
-//
-//    }
     
-    
-    private var cities: [FriendlyCityDistribution] {
-        guard  let ci = friendlyCities.documents else {
-            return []
+    private var buttonMessage: String {
+        if mode == .modify {
+            return String(
+                localized: "Select a city", 
+                comment: "Update city"
+            )
+        } else {
+            return String(
+               localized: "Next Step",
+               comment: "Next Step at select city view"
+           )
         }
-        
+    }
 
-        let result = ci.sorted { $0.isCapitalCity ?? 0 > $1.isCapitalCity ?? 0 }
+    private var cities: [FriendlyCityDistribution] {
+        guard  let friendlyCities = friendlyCities.documents else { return [] }
+        let result = friendlyCities.sorted { $0.isCapitalCity ?? 0 > $1.isCapitalCity ?? 0 }
         return result
     }
 
@@ -249,7 +232,7 @@ struct CitySelectionView: View {
             await CitiesRepository
             .shared
             .filter(
-                countryCode: "SV",
+                countryCode: countryCode,
                 page: page,
                 groupingName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             )
@@ -263,7 +246,7 @@ struct CitySelectionView: View {
             await CitiesRepository
             .shared
             .filter(
-                countryCode: "SV",
+                countryCode: countryCode,
                 page: page,
                 stateName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             )
@@ -276,16 +259,46 @@ struct CitySelectionView: View {
             await CitiesRepository
             .shared
             .filter(
-                countryCode: "SV",
+                countryCode: countryCode,
                 page: page,
                 cityName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             )
         isLoading = false
     }
+    
+    let noContent: some View = ContentUnavailableView {
+        Label(
+            "There are no cities that match with your search.",
+            systemImage: "map"
+        )
+        .symbolRenderingMode(.palette)
+        .foregroundStyle(
+            Color.theme.foreground.opacity(0.7),
+            Color.theme.primary,
+            Color.theme.foreground.opacity(0.7)
+        )
+    } description: {
+        Text("Please, write a city name")
+    } actions: {
+    }
+    .containerRelativeFrame(.vertical)
 }
 
 #Preview {
-    CitySelectionView(nextStep: {
+    
+    @Previewable
+    @State var sanSalvador: FriendlyCityDistribution = .init(
+                cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
+                firstLevel: "",
+                secondLevel: "",
+                thirdLevel: "",
+                ZipCode: "",
+                legalGroupName: "",
+                coordinates: .init(lat: 0, lng: 0),
+                isCapitalCity: 0,
+                isDepartmentalCapital: 0)
+    let countryCode: String = "SV"
+    CitySelectionView(countryCode: countryCode, selectedCity: $sanSalvador, nextStep: {
         
     })
 }

@@ -11,6 +11,16 @@ struct OAuthSignInPayload: Encodable {
     let token: String
 }
 
+struct MapExplorerQueryParams: Encodable {
+    
+    var lat: Double
+    var lng: Double
+    var radius: Int
+    var issueTypeIds: [Int]
+    var severityIds: [Int]
+    var statusIds: [Int]
+}
+
 struct PaginatedRequestQueryParams: Encodable {
     let page: Int?
     let limit: Int?

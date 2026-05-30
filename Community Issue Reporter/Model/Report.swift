@@ -87,6 +87,16 @@ struct Report: Identifiable, Codable, Hashable {
         }
 }
 
+protocol ReportRepresentable {
+    var issueType: IssueTypes { get set}
+    var severity: Severity { get set }
+    var status: IssueStatus { get set }
+    var reportedDate: String { get }
+    var createdAt: String { get }
+    var updatedAt: String { get }
+    
+}
+
 // MARK: - Extension to use related values of the enums
 extension Report {
     var issueType: IssueTypes {

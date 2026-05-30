@@ -12,6 +12,7 @@ enum CitySelectionMode: String {
     case step
 }
 
+// MARK: - Cell View
 struct CityCellView: View {
     let city: FriendlyCityDistribution
     var body: some View {
@@ -48,7 +49,9 @@ struct CityCellView: View {
     }
 }
 
+// MARK: - View
 struct CitySelectionView: View {
+    @Environment(\.dismiss) private var dismiss
     @State private var page: Int = 1
     @State private var friendlyCities: FriendlyCities = .init(
         documents: [],
@@ -62,7 +65,7 @@ struct CitySelectionView: View {
 
     @State private var triggerFeedBack: Bool = false
     
-    var countryCode: String
+    var countryCode: CountryCode
     var mode: CitySelectionMode = .step
     @Binding var selectedCity: FriendlyCityDistribution
     var nextStep: () -> Void
@@ -93,7 +96,7 @@ struct CitySelectionView: View {
                                         RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
                                             .stroke(
                                                 selectedCity.cityId == city.cityId ?
-                                                Color.theme.primary : .clear, lineWidth: 2
+                                                Color.theme.primary.opacity(0.65) : .clear, lineWidth: 2
                                             )
                                     }
                             }
@@ -139,6 +142,10 @@ struct CitySelectionView: View {
                             action: {
                                 triggerFeedBack.toggle()
                                 nextStep()
+                                
+                                if mode == .modify {
+                                    dismiss()
+                                }
                             },
                             type: .primary
                         )
@@ -158,7 +165,7 @@ struct CitySelectionView: View {
                 // Invoke the repository at first
                 isLoading = true
                 friendlyCities = CitiesRepository.shared.loadLocalCities(
-                   with: countryCode,
+                    of: countryCode,
                 )
                 isLoading = false
             }
@@ -232,7 +239,7 @@ struct CitySelectionView: View {
             await CitiesRepository
             .shared
             .filter(
-                countryCode: countryCode,
+                countryCode: countryCode.rawValue,
                 page: page,
                 groupingName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             )
@@ -246,7 +253,7 @@ struct CitySelectionView: View {
             await CitiesRepository
             .shared
             .filter(
-                countryCode: countryCode,
+                countryCode: countryCode.rawValue,
                 page: page,
                 stateName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             )
@@ -259,7 +266,7 @@ struct CitySelectionView: View {
             await CitiesRepository
             .shared
             .filter(
-                countryCode: countryCode,
+                countryCode: countryCode.rawValue,
                 page: page,
                 cityName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             )
@@ -284,6 +291,8 @@ struct CitySelectionView: View {
     .containerRelativeFrame(.vertical)
 }
 
+
+// MARK: - Preview
 #Preview {
     
     @Previewable
@@ -297,7 +306,7 @@ struct CitySelectionView: View {
                 coordinates: .init(lat: 0, lng: 0),
                 isCapitalCity: 0,
                 isDepartmentalCapital: 0)
-    let countryCode: String = "SV"
+    let countryCode: CountryCode = .SV
     CitySelectionView(countryCode: countryCode, selectedCity: $sanSalvador, nextStep: {
         
     })

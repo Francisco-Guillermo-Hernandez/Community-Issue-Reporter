@@ -198,8 +198,6 @@ struct ReportsView: View {
     private func handleMapMovement(center: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
         
-//        dump(cameraPosition.camera.)
-        
         print("camera position")
        
         Task {

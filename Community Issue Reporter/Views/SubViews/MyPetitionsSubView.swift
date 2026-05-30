@@ -51,7 +51,11 @@ struct MyPetitionsSubView: View {
                 .listRowBackground(Color.clear)
             }
         }
+        .task {
+            await fetchPetitions()
+        }
         .listStyle(.plain)
+        .navigationTitle(subViewName)
         .background(Color.theme.background)
         .scrollContentBackground(.hidden)
         .navigationBarTitleDisplayMode(.inline)
@@ -61,7 +65,7 @@ struct MyPetitionsSubView: View {
         await PetitionRepository.share.list(q: PaginatedRequestQueryParams(page: 1, limit: 16), locator: Locator(countryCode: "", country: "", region: "", city: "", address: ""), onComplete: { result in
 
             guard let documents = result.documents else { return }
-            petitions.append(contentsOf: documents)
+           petitions = documents
 
 
         }, onError: { error in

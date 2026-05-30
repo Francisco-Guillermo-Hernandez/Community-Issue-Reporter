@@ -123,6 +123,7 @@ struct UserProfileView: View {
                     dismiss()
                 } label: {
                     Text(String(localized: "Log Out"))
+                        .fontWeight(.regular)
                         .frame(maxWidth: .infinity)
                         .fontWeight(.bold)
                         .padding(8)
@@ -160,6 +161,9 @@ struct UserProfileView: View {
             CommentsSubView(subViewName: option.title)
         case "op:reports":
             MyReportsSubView(path: $navigationPath, subViewName: option.title)
+        case "op:signPetitions":
+            MyPetitionsSubView(path: $navigationPath, subViewName: option.title)
+            
         default:
             Text("\(option.id) selected")
         }

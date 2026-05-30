@@ -22,15 +22,15 @@ enum Categories: String, CaseIterable, Codable, Equatable {
     
     var title : String {
         switch self {
-        case .all: return String(localized: "All")
-            case .prevention: return "Prevention"
-            case .corrective: return "Corrective"
-            case .repair: return "Repair"
-            case .replacement: return "Replacement"
-            case .construction: return "Construction"
-            case .installation: return "Installation"
-            case .inspection: return "Inspection"
-            case .emergency: return "Emergency"
+            case .all: return String(localized: "All")
+            case .prevention: return String(localized: "Prevention")
+            case .corrective: return String(localized: "Corrective")
+            case .repair: return String(localized: "Repair")
+            case .replacement: return String(localized: "Replacement")
+            case .construction: return String(localized: "Construction")
+            case .installation: return String(localized: "Installation")
+            case .inspection: return String(localized: "Inspection")
+            case .emergency: return String(localized: "Emergency")
         }
     }
     

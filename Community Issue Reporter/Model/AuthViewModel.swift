@@ -13,7 +13,33 @@ class AuthViewModel: ObservableObject {
     @Published var user: GIDGoogleUser?
     @Published var isLoggedIn = false
     @Published var isCheckingStatus = true
+    @Published var isGuestUser: Bool = false
     @Published var landingViewMode: Bool = false
+    @Published var selectedCity: FriendlyCityDistribution? {
+        didSet {
+            saveCityToUserDefaults()
+        }
+    }
+
+    init() {
+        loadCityFromUserDefaults()
+    }
+
+    private func saveCityToUserDefaults() {
+        if let selectedCity = selectedCity {
+            if let encoded = try? JSONEncoder().encode(selectedCity) {
+                UserDefaults.standard.set(encoded, forKey: "selected_city")
+            }
+        }
+    }
+
+    private func loadCityFromUserDefaults() {
+        if let savedCityData = UserDefaults.standard.data(forKey: "selected_city") {
+            if let decodedCity = try? JSONDecoder().decode(FriendlyCityDistribution.self, from: savedCityData) {
+                self.selectedCity = decodedCity
+            }
+        }
+    }
 
     func checkStatus() {
         GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in

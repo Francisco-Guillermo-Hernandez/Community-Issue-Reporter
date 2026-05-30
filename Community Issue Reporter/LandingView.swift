@@ -9,7 +9,7 @@ import SwiftUI
 
 enum LandingNavigation: Hashable {
     case selectCity
-    case userProfile
+    case personalizeProfile
     case essentialInfo
 
 }
@@ -18,7 +18,7 @@ struct LandingView: View {
     @Binding var isGuest: Bool
     @State private var userOAuthState: UserOAuthResultState = .unowned
     @EnvironmentObject var appState: AuthViewModel
-    @State private var path = [String]()
+    @State private var path = [LandingNavigation]()
     @State private var selectedCity: FriendlyCityDistribution = .init(
         cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
         firstLevel: "",
@@ -38,30 +38,35 @@ struct LandingView: View {
             LoginView() { session, type in
                 handleLogin(for: session, with: type)
             }
-        }
-        .navigationDestination(for: LandingNavigation.self) { destination in
-            switch destination {
-            case .selectCity:
-                CitySelectionView(
-                    countryCode: countryCode,
-                    selectedCity: $selectedCity,
-                    nextStep: {
+            .navigationDestination(for: LandingNavigation.self) { destination in
+                switch destination {
+                case .selectCity:
+                    CitySelectionView(
+                        countryCode: countryCode,
+                        selectedCity: $selectedCity,
+                        nextStep: {
+                            appState.selectedCity = selectedCity
+                            path.append(.personalizeProfile)
+                        }
+                    )
 
-                    }
-                )
+                case .personalizeProfile:
+                    UserPersonalizationView(nextStep: {
+                        path.append(.essentialInfo)
+                    })
 
-            case .userProfile:
-                UserPersonalizationView(nextStep: {
+                case .essentialInfo:
+                    EssentialInformationView(finalStep: {
+                        self.appState.isLoggedIn.toggle()
+                    })
 
-                })
-
-            case .essentialInfo:
-                EssentialInformationView(finalStep: {
-
-                })
-
+                }
             }
-
+        }
+        .onAppear {
+            if let savedCity = appState.selectedCity {
+                self.selectedCity = savedCity
+            }
         }
     }
     
@@ -88,10 +93,17 @@ struct LandingView: View {
                            
                             if state == .firstLogin {
                                 print("Welcome")
+                                self.appState.landingViewMode.toggle()
+                                path.append(.selectCity)
+                            } else {
+                                path.append(.selectCity)
+                                self.appState.landingViewMode.toggle()
+                                //
+//                                self.appState.isLoggedIn.toggle()
                             }
                         
                             self.saveIntoKeychain(sessionId)
-                            self.appState.isLoggedIn.toggle()
+                            
                         },
                         onError: { error in
                             print(error)

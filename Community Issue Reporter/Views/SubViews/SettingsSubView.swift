@@ -12,6 +12,7 @@ struct SettingsSubView: View {
 
     @Environment(\.mySettings) private var settings
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var appState: AuthViewModel
 
     @State private var geographicalRegion: Int = 1
     @State private var selectedCountry: Int = 0
@@ -164,6 +165,10 @@ struct SettingsSubView: View {
                 enableAutomaticIdentification = settings.enableAutomaticIdentification
                 enableNotifications = settings.enableNotifications
                 
+                if let savedCity = appState.selectedCity {
+                    self.selectedCity = savedCity
+                }
+                
                 countries = getCountries(geographicalRegion: geographicalRegion)
             }
         }
@@ -182,7 +187,9 @@ struct SettingsSubView: View {
     
     @ViewBuilder
     private func selectCityView() -> some View {
-        CitySelectionView(countryCode: .SV, mode: .modify, selectedCity:  $selectedCity, nextStep: {})
+        CitySelectionView(countryCode: .SV, mode: .modify, selectedCity:  $selectedCity, nextStep: {
+            appState.selectedCity = selectedCity
+        })
     }
     
 }

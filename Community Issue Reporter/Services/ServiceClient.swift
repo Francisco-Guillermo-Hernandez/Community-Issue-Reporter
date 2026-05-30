@@ -6,40 +6,81 @@
 //
 
 import Foundation
+import SwiftMsgpack
+
+///
+enum DecoderType {
+    case json(JSONDecoder)
+    case messagePack(MsgPackDecoder)
+}
+
+///
+enum ServiceError: Error {
+    case baseURLMissing
+    case invalidResponse
+    case httpStatus(Int)
+    case badRequest(String)
+    case unauthorized
+    case notFound
+    case serverError(String)
+}
 
 struct ServiceClient {
-    enum ServiceError: Error {
-        case baseURLMissing
-        case invalidResponse
-        case httpStatus(Int)
-    }
-
+  
     private let baseURL: URL?
     private let session: URLSession
-    private let decoder: JSONDecoder
+    private let decoder: DecoderType
     private let delimiter = "/"
-    
+
+    /// Previously I was using JWT to authorize the endpoints that require, but now I'm using a (BFF) Backend For Frontend so that use sessions instead
     private func getOAuthHeader() -> HTTPHeader {
         let token = KeychainService.getToken(.mutation)
         return HTTPHeader(name: "Cookie", content: "session_id=\(token)")
     }
-
-    init(baseURL: URL? = development, session: URLSession = .shared) {
+    
+    /// initialize the instance by default with .json decoderType
+    init(baseURL: URL? = development, session: URLSession = .shared, decoderType: DecoderType = .json(.init())) {
         self.baseURL = baseURL
         self.session = session
-        self.decoder = ServiceClient.makeJSONDecoder()
+        
+        switch decoderType {
+            case .json: self.decoder = .json(ServiceClient.makeJSONDecoder())
+            case .messagePack(let customPackDecoder): self.decoder = .messagePack(customPackDecoder)
+        }
     }
 
+    /// Decoder used in with the selection
+    private func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+           switch self.decoder {
+           case .json(let jsonDecoder):
+               return try jsonDecoder.decode(type, from: data)
+           case .messagePack(let msgPackDecoder):
+               return try msgPackDecoder.decode(type, from: data)
+           }
+    }
+
+    /// Prepare the query before being sent to the server based on key - value properties
     fileprivate func queryBuilder<Q: Encodable>(_ query: Q?, _ url: inout URL) {
-        if let query = query, let dict = query.dictionary {
-            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-            let queryItems = dict.compactMap { key, value -> URLQueryItem? in
-                return URLQueryItem(name: key, value: "\(value)")
+        guard let query = query, let dict = query.dictionary else { return }
+        
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        var queryItems: [URLQueryItem] = []
+        
+        for (key, value) in dict {
+            // Check if the value is an array
+            if let arrayValue = value as? [Any] {
+                // Create a query item for EACH item in the array
+                let items = arrayValue.map { URLQueryItem(name: key, value: "\($0)") }
+                queryItems.append(contentsOf: items)
+            } else {
+                // Handle regular primitive values (String, Int, Bool, etc.)
+                queryItems.append(URLQueryItem(name: key, value: "\(value)"))
             }
-            components?.queryItems = queryItems
-            if let updatedURL = components?.url {
-                url = updatedURL
-            }
+        }
+        
+        components?.queryItems = queryItems
+        if let updatedURL = components?.url {
+            url = updatedURL
         }
     }
     
@@ -60,6 +101,8 @@ struct ServiceClient {
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("en-US", forHTTPHeaderField: "Accept-Language")
         
         if headers.count > 0 {
             for header in headers {
@@ -72,7 +115,8 @@ struct ServiceClient {
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
 
-        let (data, response) = try await session.data(for: request)
+        
+        let (data, response) = try await session.data(for: request) //NetworkManager.shared.fetchData(request: request) //session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }
@@ -82,13 +126,48 @@ struct ServiceClient {
                 print("Error Response Body: \(jsonString)")
             }
             
+            print("statusCode")
+            print(httpResponse.statusCode)
             print("request headers:")
             dump(request.allHTTPHeaderFields)
             print("respose headers", httpResponse.allHeaderFields)
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
-
-        return try decoder.decode(T.self, from: data)
+        
+//        guard (300...309).contains(httpResponse.statusCode) else {
+//            throw ServiceError.httpStatus(httpResponse.statusCode)
+//        }
+//        
+//        if httpResponse.statusCode == 400 {
+//            if let message = String(data: data, encoding: .utf8) {
+//                print("Error Response Body: \(message)")
+//            }
+//            
+//            let decoder = JSONDecoder()
+//            decoder.keyDecodingStrategy = .convertFromSnakeCase
+//            let error = try decoder.decode(GenericResponse.self, from: data)
+//            
+//            throw ServiceError.badRequest(error.message)
+//        }
+//        
+//        if httpResponse.statusCode == 404 {
+//            throw ServiceError.notFound
+//        }
+//        
+//        if httpResponse.statusCode == 401 {
+//            throw ServiceError.unauthorized
+//        }
+//        
+//        guard (500...599).contains(httpResponse.statusCode) else {
+//            throw ServiceError.serverError(httpResponse.description)
+//        }
+        
+        dump(request.allHTTPHeaderFields)
+        print("respose headers", httpResponse.allHeaderFields)
+        
+        print("status code \(httpResponse.statusCode)")
+        
+        return try decode(T.self, from: data)
     }
     
     func post<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> V {
@@ -129,7 +208,7 @@ struct ServiceClient {
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
         
-        return try decoder.decode(V.self, from: data)
+        return try decode(V.self, from: data)
     }
     
     func delete<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> V {
@@ -166,7 +245,7 @@ struct ServiceClient {
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
         
-        return try decoder.decode(V.self, from: data)
+        return try decode(V.self, from: data)
     }
     
     func put<T: Encodable, V: Decodable>(
@@ -211,7 +290,7 @@ struct ServiceClient {
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
         
-        return try decoder.decode(V.self, from: data)
+        return try decode(V.self, from: data)
     }
     
     func patch<T: Encodable, V: Decodable>(
@@ -267,7 +346,7 @@ struct ServiceClient {
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
 
-        return try decoder.decode(V.self, from: data)
+        return try decode(V.self, from: data)
     }
 
     private func makeFormFields<T: Encodable>(from body: T) throws -> [String: String] {
@@ -339,21 +418,28 @@ struct ServiceClient {
 
     private static func makeJSONDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
-        let formatter = ISO8601DateFormatter()
-//        decoder.keyDecodingStrategy = .convertFromSnakeCase
-
         
-        formatter.formatOptions = [
-            .withInternetDateTime,
-            .withFractionalSeconds
-        ]
+        // Formatter with fractional seconds (e.g., 2026-05-22T20:55:00.000Z)
+        let fractionalFormatter = ISO8601DateFormatter()
+        fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        
+        // Formatter without fractional seconds (e.g., 1970-01-01T00:00:00Z)
+        let standardFormatter = ISO8601DateFormatter()
+        standardFormatter.formatOptions = [.withInternetDateTime]
         
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let value = try container.decode(String.self)
-            if let date = formatter.date(from: value) {
+            
+            // Fractional seconds
+            if let date = fractionalFormatter.date(from: value) {
                 return date
             }
+            // Fallback to standard ISO8601
+            if let date = standardFormatter.date(from: value) {
+                return date
+            }
+            
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO-8601 date: \(value)")
         }
         

@@ -14,13 +14,15 @@ extension Country {
         for region in self.regions {
             for city in region.cities {
                 let friendlyCity = FriendlyCityDistribution(
+                    cityId: "",
                     firstLevel: self.name,
                     secondLevel: region.name,
                     thirdLevel: city.name,
                     ZipCode: "",
                     legalGroupName: city.legalName,
                     coordinates: city.coordinates,
-                    isDepartmentalCapital: city.isDepartmentalCapital,
+                    isCapitalCity: 0,
+                    isDepartmentalCapital: 1,
                     groupingId: city.groupingId,
                     groupingName: city.groupingName
                 )

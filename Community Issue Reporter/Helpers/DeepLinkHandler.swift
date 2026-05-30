@@ -8,14 +8,19 @@
 import Foundation
 
 func deepLinkHandler(_ url: URL) {
-    let components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-    let path = url.path
-    
-    guard let petitionId = components?.queryItems?.first(where: {
-        $0.name == "id"
-    })?.value else { return }
-    
-    print("path: \(path)")
-    print("petition: \(petitionId)")
-    
+
+    let components = url.pathComponents.filter { $0 != "/" }
+
+    // components[0] = "7BTheYpPwK1L" hash
+    // components[1] = "report"
+    // components[2] = "a-big-pothole-in-the-middle-of-the-street"
+
+    guard components.count >= 3, components[1] == "report" else { return }
+
+    let reportId = components[0]
+    let slug = components[2]
+
+    print(
+        "Deep linked successfully to Report ID: \(reportId) with slug: \(slug)"
+    )
 }

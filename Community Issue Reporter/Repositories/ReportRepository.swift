@@ -56,12 +56,14 @@ final class ReportRepository {
     func listByUser(page: Int, onComplete: @escaping (Reports) -> Void, onError: ErrorHandler) async {
         do {
             let result = try await self.reportsService.fetchReportByUser(
-                    q: PaginatedRequestQueryParams(
-                        page: page,
-                        limit: 16
-                    )
+                q: PaginatedRequestQueryParams(
+                    page: page,
+                    limit: 5
                 )
+            )
+            
             onComplete(result)
+    
         } catch {
             onError(error)
         }

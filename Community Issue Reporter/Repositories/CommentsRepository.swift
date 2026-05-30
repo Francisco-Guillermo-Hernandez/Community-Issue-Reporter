@@ -17,13 +17,14 @@ final class CommentsRepository {
         self.commentsService = CommentsService()
     }
     
-    func list(_ reportId: String, page: Int, limit: Int = 3, onComplete: @escaping (Comments) -> Void, onError: ErrorHandler) async  {
+    func list(_ reportId: String, page: Int, limit: Int = 3, onError: ErrorHandler) async -> Comments  {
+      
         do {
-            let result = try await self.commentsService.list(reportId: reportId, q: PaginatedRequestQueryParams(page: page, limit: limit))
-            onComplete(result)
-    
+            let query = PaginatedRequestQueryParams(page: page, limit: limit)
+            return try await self.commentsService.list(reportId: reportId, q: query)
         } catch {
             onError(error)
+            return Comments(documents: [], hasNext: false, hasPrev: false)
         }
     }
     
@@ -43,8 +44,13 @@ final class CommentsRepository {
                 HTTPHeader(name: "country", content: "country"),
                 HTTPHeader(name: "City", content: "city"),
             ]
-            _ = try await self.commentsService.post(comment: CommentRequest(reportId: reportId, message: message), headers: headers)
-            onComplete()
+            let result = try await self.commentsService.post(comment: CommentRequest(reportId: reportId, message: message), headers: headers)
+            
+            if result.code == "COMMENT_CREATED" {
+                onComplete()
+            }
+            
+           
         } catch {
             onError(error)
         }
@@ -52,7 +58,7 @@ final class CommentsRepository {
     
     func update(_ comment: Comment, onComplete: @escaping () -> Void, onError: ErrorHandler) async {
         do {
-            _ = try await self.commentsService.update(comment: Comment(id: comment.id, report_id: comment.report_id, message: comment.message))
+            _ = try await self.commentsService.update(comment: Comment(id: comment.id, reportId: comment.reportId, message: comment.message))
             onComplete()
         } catch {
             onError(error)

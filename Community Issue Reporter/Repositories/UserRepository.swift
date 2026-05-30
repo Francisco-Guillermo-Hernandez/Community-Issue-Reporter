@@ -20,18 +20,27 @@ struct UserRepository {
     
     static func login(
         _ token: String,
-        onSuccess: @escaping (UserOAuthResultState, UserTokens) -> Void,
+        onSuccess: @escaping (UserOAuthResultState, String) -> Void,
         onError: @escaping (_ error: Error) -> Void
     ) async -> Void {
         do {
-            let result = try await UserService().login(payload: OAuthSignInPayload(token: token))
+            let loginHeaders = [
+                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+                HTTPHeader(name: "CountryCode", content: "SV"),
+            ]
+            
+            let result = try await UserService().login(payload: OAuthSignInPayload(token: token), headers: loginHeaders)
+            
+            print("=================")
+            print("result of the login")
+            dump(result)
             
             if result.code == "TOKEN_GENERATED" {
-                onSuccess(.existing, result.authToken)
+                onSuccess(.existing, result.authSessionId)
             }
             
             if result.code == "USER_CREATED_WITH_TOKEN" {
-                onSuccess(.firstLogin, result.authToken)
+                onSuccess(.firstLogin, result.authSessionId)
             }
         } catch {
             onError(error)
@@ -40,13 +49,18 @@ struct UserRepository {
     }
     
     static func loginAsVisitor(
-        onSuccess: @escaping (UserOAuthResultState, UserTokens) -> Void,
+        onSuccess: @escaping (UserOAuthResultState, String) -> Void,
         onError: @escaping (_ error: Error) -> Void
     ) async -> Void {
         do {
-            let result = try await UserService().loginAsVisitor()
+            let headers = [
+                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+                HTTPHeader(name: "CountryCode", content: "SV"),
+            ]
             
-            onSuccess(.inexistent, result.authToken)
+            let result = try await UserService().loginAsVisitor(headers)
+            
+            onSuccess(.inexistent, result.authSessionId)
         } catch {
             onError(error)
         }

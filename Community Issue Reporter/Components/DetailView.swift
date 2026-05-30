@@ -38,7 +38,8 @@ struct DetailView: View {
         PhotoSample(id: "5", photo: "", published: Date(), user: "", more: true),
     ]
     
-    var issue: IssueMarker
+//    var issue: IssueMarker
+    var report: MapExplorerReport
     @State private var color: Color
     @State private var commentButtonPressed: Bool = false
     @State private var showConfirmationDialogRaiseHand: Bool = false
@@ -52,9 +53,9 @@ struct DetailView: View {
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var comments: [Comment] = []
     
-    init(issue: IssueMarker) {
-        self.issue = issue
-        self.color = self.issue.status.color
+    init(report: MapExplorerReport) {
+        self.report = report
+        self.color = self.report.status.color
         self.comments = []
         self.paginatedResult = PaginatedResponse<Comment>(
             total: 0,
@@ -68,13 +69,13 @@ struct DetailView: View {
     
     
     fileprivate func openOnGoogleMaps() {
-        let urlString = "comgooglemaps://?q=\(issue.coordinate.latitude),\(issue.coordinate.longitude)&zoom=14"
+        let urlString = "comgooglemaps://?q=\(report.clLocation.latitude),\(report.clLocation.longitude)&zoom=14"
         if let url = URL(string: urlString), UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
     }
     
-    fileprivate func moreInformation() -> Group<TupleView<(SectionHeader, some View)>> {
+    fileprivate func moreInformation() -> some View {
         return Group {
             SectionHeader(title: "More Information")
             List {
@@ -111,7 +112,7 @@ struct DetailView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                     Spacer()
-                    Text(issue.address)
+                    Text(report.address)
                         .lineLimit(2)
                         .font(.caption)
                 }
@@ -125,7 +126,7 @@ struct DetailView: View {
                             .font(.caption)
                             .fontWeight(.semibold)
                         Spacer()
-                        Text("\(issue.coordinate.latitude)° *N*, \(abs(issue.coordinate.longitude))° *W*")
+                        Text("\(report.lat)° *N*, \(abs(report.lng))° *W*")
                             .font(.caption)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
                             .background(Color.black.opacity(0.001))
@@ -212,7 +213,7 @@ struct DetailView: View {
             SectionHeader(title: "Lastest Comments")
             LazyVStack(spacing: 16) {
                 ForEach(comments) { c in
-                    CommentRow(name: c.name ?? "Annonymous", time: c.created_at!, message: c.message)
+                    CommentRow(name: c.name ?? "Visitor", time: c.createdAt!, message: c.message)
                 }
             }
         }
@@ -239,7 +240,7 @@ struct DetailView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(color.mix(with: .black, by: 0.4))
                     
-                    Text(issue.issueType.title)
+                    Text(report.issueType.title)
                         .font(.footnote)
                         .foregroundStyle(color)
                 }
@@ -251,7 +252,7 @@ struct DetailView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(color.mix(with: .black, by: 0.4))
                     
-                    Text(issue.severity.title)
+                    Text(report.severity.title)
                         .font(.footnote)
                         .foregroundStyle(color)
                 }
@@ -263,7 +264,7 @@ struct DetailView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(color.mix(with: .black, by: 0.4))
                     
-                    Text(issue.status.title)
+                    Text(report.status.title)
                         .font(.footnote)
                         .foregroundStyle(color)
                     
@@ -277,12 +278,12 @@ struct DetailView: View {
     
     fileprivate func headers() -> VStack<TupleView<(some View, some View)>> {
         return VStack( spacing: 4) {
-            Text(issue.title)
+            Text(report.title)
                 .font(.title)
                 .bold()
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text(issue.description)
+            Text(report.description)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -312,16 +313,13 @@ struct DetailView: View {
             }
             .task {
                 guard !Task.isCancelled else { return }
-                await CommentsRepository.shared.list(
-                    issue.id,
-                    page: 1,
-                    onComplete: { result in
-                        self.paginatedResult = result
-                        self.comments.append(contentsOf: result.documents!)
-                    }, onError: { _ in
-                        
-                    }
-                )
+                let result = await CommentsRepository.shared.list(
+                   report.id,
+                   page: 1,
+                   onError: { _ in }
+               )
+                
+                print(result)
             }
             .safeAreaInset(edge: .bottom) {
                 customBottomToolbar(
@@ -346,7 +344,7 @@ struct DetailView: View {
                 )
             }
             .sheet(isPresented: $commentButtonPressed) {
-                CommentsSectionView(issue: self.issue)
+                CommentsSectionView(for: self.report)
             }
             .sheet(isPresented: $showMoreEvidences) {
                 EvidencesView()
@@ -397,23 +395,23 @@ func getMatterToSolve(id: Int) -> String {
     return mattersToResolve.first(where: { $0.id == id })?.title ?? ""
 }
 
-#Preview {
-    let coordinate = CLLocationCoordinate2D(
-        latitude: 37.7749,
-        longitude: -122.4194
-    )
-    
-    let issue = IssueMarker(
-        id: UUID().uuidString,
-        title: "A big pothole",
-        description: "There is a big pothole in the middle of the street",
-        status: 2,
-        coordinate: coordinate,
-        issueType: 1,
-        severity: 2,
-        matterToSolveId: 1,
-        address: "lorem ipsum dolor sit amet consectetur adipiscing elit."
-    )
-    
-    DetailView(issue: issue)
-}
+//#Preview {
+//    let coordinate = CLLocationCoordinate2D(
+//        latitude: 37.7749,
+//        longitude: -122.4194
+//    )
+//    
+//    let issue = IssueMarker(
+//        id: UUID().uuidString,
+//        title: "A big pothole",
+//        description: "There is a big pothole in the middle of the street",
+//        status: 2,
+//        coordinate: coordinate,
+//        issueType: 1,
+//        severity: 2,
+//        matterToSolveId: 1,
+//        address: "lorem ipsum dolor sit amet consectetur adipiscing elit."
+//    )
+//    
+//    DetailView(issue: issue)
+//}

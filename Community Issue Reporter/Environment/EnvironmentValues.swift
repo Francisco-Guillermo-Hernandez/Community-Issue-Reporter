@@ -52,6 +52,16 @@ final class SettingsStore {
         didSet { UserDefaults.standard.set(enableNotifications, forKey: "enableNotifications") }
     }
     
+//    var cityProperties: FriendlyCityDistribution {
+//        didSet {
+////            UserDefaults.object(forKey: "cityProperties")?.set(cityProperties.city).set(cityProperties, forKey: "cityProperties") }
+//            let encoder = JSONEncoder()
+//                if let encodedData = try? encoder.encode(cityProperties) {
+//                    UserDefaults.standard.set(encodedData, forKey: "cityProperties")
+//                }
+//        }
+//    }
+    
     init () {
         self.geographicalRegion = UserDefaults.standard.object(forKey: "geographicalRegion") as? Int ?? 2
         self.selectedCountry = UserDefaults.standard.object(forKey: "selectedCountry") as? Int ?? 2
@@ -63,6 +73,7 @@ final class SettingsStore {
         self.selectedLanguageCode = UserDefaults.standard.string(forKey: "selectedLanguageCode") ?? "es-419"
         self.enableAutomaticIdentification = UserDefaults.standard.object(forKey: "enableAutomaticIdentification") as? Bool ?? false
         self.enableNotifications = UserDefaults.standard.object(forKey: "enableNotifications") as? Bool ?? false
+//        self.cityProperties = UserDefaults.standard.object(forKey: "cityProperties") as? [String: Any] ?? [:]
         
         UserDefaults.standard.register(defaults: [
             "geographicalRegion": 2,
@@ -75,6 +86,9 @@ final class SettingsStore {
             "selectedLanguageCode": "es-419",
             "enableAutomaticIdentification": false,
             "enableNotifications": false,
+//            "cityProperties": {
+//                "demo", "demo",
+//            },
         ])
     }
     

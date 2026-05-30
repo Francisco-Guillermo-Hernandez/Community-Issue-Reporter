@@ -116,7 +116,7 @@ struct ServiceClient {
         }
 
         
-        let (data, response) = try await session.data(for: request) //NetworkManager.shared.fetchData(request: request) //session.data(for: request)
+        let (data, response) = try await NetworkManager.shared.fetchData(request: request) //session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }
@@ -162,8 +162,8 @@ struct ServiceClient {
 //            throw ServiceError.serverError(httpResponse.description)
 //        }
         
-        dump(request.allHTTPHeaderFields)
-        print("respose headers", httpResponse.allHeaderFields)
+//        dump(request.allHTTPHeaderFields)
+//        print("respose headers", httpResponse.allHeaderFields)
         
         print("status code \(httpResponse.statusCode)")
         

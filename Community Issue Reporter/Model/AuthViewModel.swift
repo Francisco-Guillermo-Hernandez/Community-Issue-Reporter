@@ -13,6 +13,7 @@ class AuthViewModel: ObservableObject {
     @Published var user: GIDGoogleUser?
     @Published var isLoggedIn = false
     @Published var isCheckingStatus = true
+    @Published var landingViewMode: Bool = false
 
     func checkStatus() {
         GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in

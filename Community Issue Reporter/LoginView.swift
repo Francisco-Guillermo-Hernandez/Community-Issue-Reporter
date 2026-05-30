@@ -9,9 +9,15 @@ import SwiftUI
 import GoogleSignIn
 import GoogleSignInSwift
 
+enum LoginType {
+    case visitor
+    case user
+}
+
 struct LoginView: View {
     @Environment(\.colorScheme) private var colorScheme
-    let onTokenReceived: (String) -> Void
+    @State private var userOAuthState: UserOAuthResultState = .unowned
+    let onTokenReceived: (String, LoginType) -> Void
     var body: some View {
 //        VStack {
 //            
@@ -36,7 +42,7 @@ struct LoginView: View {
                     .padding(.top, 16)
                         
                 Button {
-                    onTokenReceived("guest")
+                    onTokenReceived("guest", .visitor)
                 } label: {
                     Text("Login as a guest")
                 }
@@ -83,15 +89,15 @@ struct LoginView: View {
                 return
             }
             
-            onTokenReceived(result.user.idToken?.tokenString ?? "")
+            onTokenReceived(result.user.idToken?.tokenString ?? "", .user)
         }
     }
 
 }
 
 #Preview {
-    LoginView() { token in
-        print(token)
+    LoginView() { _, _ in
+        
     }
 }
 

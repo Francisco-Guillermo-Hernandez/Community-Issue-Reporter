@@ -1,5 +1,5 @@
 {
-  "originHash" : "d00cc9bce3f7ccd737e1fffeaa4242743f19124b26aa77334f088bb71620dff0",
+  "originHash" : "db344d0363ce5a578186944bc04124ec988d66dcab813e26b5a7dddc884a2c26",
   "pins" : [
     {
       "identity" : "app-check",
@@ -71,6 +71,15 @@
       "state" : {
         "revision" : "540318ecedd63d883069ae7f1ed811a2df00b6ac",
         "version" : "2.4.0"
+      }
+    },
+    {
+      "identity" : "swift-msgpack",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nnabeyang/swift-msgpack",
+      "state" : {
+        "revision" : "822f5baa133705baf85cf5f919ecbe9fae7e70d3",
+        "version" : "1.1.0"
       }
     },
     {

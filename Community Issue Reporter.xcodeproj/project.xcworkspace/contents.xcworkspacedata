@@ -4,4 +4,7 @@
    <FileRef
       location = "self:">
    </FileRef>
+   <FileRef
+      location = "group:COORDINATE_DATAFLOW.md">
+   </FileRef>
 </Workspace>

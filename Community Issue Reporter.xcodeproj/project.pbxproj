@@ -10,6 +10,7 @@
 		5695C3F82F4D571000755B0E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */; };
 		569E2F452F739EB200B8C9DE /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 569E2F442F739EB200B8C9DE /* GoogleSignIn */; };
 		569E2F472F739EB200B8C9DE /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 569E2F462F739EB200B8C9DE /* GoogleSignInSwift */; };
+		56AC7B4D2FCA72DA0015122D /* SwiftMsgpack in Frameworks */ = {isa = PBXBuildFile; productRef = 56AC7B4C2FCA72DA0015122D /* SwiftMsgpack */; };
 		56D5D99D2F65284500183FCE /* WebP in Frameworks */ = {isa = PBXBuildFile; productRef = 56D5D99C2F65284500183FCE /* WebP */; };
 /* End PBXBuildFile section */
 
@@ -66,6 +67,7 @@
 				569E2F472F739EB200B8C9DE /* GoogleSignInSwift in Frameworks */,
 				56D5D99D2F65284500183FCE /* WebP in Frameworks */,
 				569E2F452F739EB200B8C9DE /* GoogleSignIn in Frameworks */,
+				56AC7B4D2FCA72DA0015122D /* SwiftMsgpack in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,6 +132,7 @@
 				56D5D99C2F65284500183FCE /* WebP */,
 				569E2F442F739EB200B8C9DE /* GoogleSignIn */,
 				569E2F462F739EB200B8C9DE /* GoogleSignInSwift */,
+				56AC7B4C2FCA72DA0015122D /* SwiftMsgpack */,
 			);
 			productName = "Community Issue Reporter";
 			productReference = 56E42B502F46BC8C00AC84C7 /* Community Issue Reporter.app */;
@@ -223,6 +226,7 @@
 			packageReferences = (
 				56D5D99B2F65284500183FCE /* XCRemoteSwiftPackageReference "Swift-WebP" */,
 				569E2F432F739EB200B8C9DE /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				56AC7B4B2FCA72DA0015122D /* XCRemoteSwiftPackageReference "swift-msgpack" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56E42B512F46BC8C00AC84C7 /* Products */;
@@ -427,6 +431,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Reportamelo;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Community Issue Reporter/Community Issue Reporter.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B83C7CWWHT;
@@ -442,8 +447,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -453,12 +458,15 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.Comunity-Issues";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -467,6 +475,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Reportamelo;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Community Issue Reporter/Community Issue Reporter.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = B83C7CWWHT;
@@ -482,8 +491,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -493,12 +502,15 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.Comunity-Issues";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -636,6 +648,14 @@
 				minimumVersion = 9.1.0;
 			};
 		};
+		56AC7B4B2FCA72DA0015122D /* XCRemoteSwiftPackageReference "swift-msgpack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nnabeyang/swift-msgpack";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
 		56D5D99B2F65284500183FCE /* XCRemoteSwiftPackageReference "Swift-WebP" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ainame/Swift-WebP";
@@ -656,6 +676,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 569E2F432F739EB200B8C9DE /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		56AC7B4C2FCA72DA0015122D /* SwiftMsgpack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56AC7B4B2FCA72DA0015122D /* XCRemoteSwiftPackageReference "swift-msgpack" */;
+			productName = SwiftMsgpack;
 		};
 		56D5D99C2F65284500183FCE /* WebP */ = {
 			isa = XCSwiftPackageProductDependency;

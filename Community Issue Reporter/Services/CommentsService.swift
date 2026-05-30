@@ -10,12 +10,12 @@ import Foundation
 struct CommentsService {
     
     private let client: ServiceClient
-    init(client: ServiceClient =  ServiceClient(baseURL: commentService)) {
+    init(client: ServiceClient =  ServiceClient(baseURL: development)) {
         self.client = client
     }
     
     func post(comment: CommentRequest, headers: Array<HTTPHeader>) async throws -> GenericResponse {
-        return try await client.post(path: "comments/", body: comment, headers: headers, withOAuth: true)
+        return try await client.post(path: "comments/create", body: comment, headers: headers, withOAuth: true)
     }
     
     func update(comment: Comment) async throws -> GenericResponse {

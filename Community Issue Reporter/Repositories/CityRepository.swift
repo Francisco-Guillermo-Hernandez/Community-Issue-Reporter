@@ -17,9 +17,9 @@ final class CitiesRepository {
         self.service = CityService()
     }
     
-    func loadLocalCities(with countryCode: String) -> FriendlyCities {
+    func loadLocalCities(of countryCode: CountryCode) -> FriendlyCities {
         // Locate the file in the bundle
-        guard let url = Bundle.main.url(forResource: "\(countryCode).cities", withExtension: "json") else {
+        guard let url = Bundle.main.url(forResource: "\(countryCode.rawValue).cities", withExtension: "json") else {
             fatalError("Failed to locate file in bundle.")
         }
 

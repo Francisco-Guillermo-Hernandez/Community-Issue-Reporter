@@ -10,7 +10,6 @@ import SwiftUI
 struct WelcomeView: View {
     @EnvironmentObject var appState: AuthViewModel
     @State private var isGuest: Bool = false
-    @State private var userOAuthState: UserOAuthResultState = .unowned
     
     var body: some View {
         ZStack {
@@ -22,59 +21,13 @@ struct WelcomeView: View {
             } else if appState.isLoggedIn || isGuest {
                 TabBarView()
             } else {
-                LoginView() { token in
-                    handleLogin(token: token)
-                }
+                LandingView(isGuest: $isGuest)
             }
         }
         .task {
             self.appState.checkStatus()
         }
     }
-    
-    private func handleLogin(token: String) {
-        if !token.isEmpty {
-            if token == "guest" {
-                Task {
-                    await UserRepository.loginAsVisitor(
-                        onSuccess: { state, sessionId in
-                            self.userOAuthState = state
-                            saveIntoKeychain(sessionId)
-                            self.isGuest.toggle()
-                        }, onError: { error in
-                            print(error)
-                        }
-                    )
-                }
-            } else {
-                Task {
-                    await UserRepository.login(token,
-                        onSuccess: { state, sessionId in
-                        
-                            self.userOAuthState = state
-                           
-                            if state == .firstLogin {
-                                print("Welcome")
-                            }
-                        
-                            self.saveIntoKeychain(sessionId)
-                            self.appState.isLoggedIn.toggle()
-                        },
-                        onError: { error in
-                            print(error)
-                        }
-                    )
-                }
-            }
-        } else {
-            /// TODO: show error
-        }
-    }
-    
-    private func saveIntoKeychain(_ sessionId: String) {
-        _ = KeychainService.save(key: .mutation, value: sessionId)
-    }
-        
 }
 
 #Preview {

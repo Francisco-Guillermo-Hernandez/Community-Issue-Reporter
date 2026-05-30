@@ -55,14 +55,23 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
             .label
             .foregroundStyle(Color.init(hex: "1a181b"))
             .background(Color.theme.primary)
-            .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
-            .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+            .contentShape(Capsule())
+            .clipShape(Capsule())
+        
+//            .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+//            .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+        
             .font(Font.body.bold())
             .overlay {
-                RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
+                Capsule()
                     .stroke(Color.theme.primary.mix(with: .white, by: 0.3), lineWidth: 1)
             }
-            .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+//            .overlay {
+//                RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
+//                    .stroke(Color.theme.primary.mix(with: .white, by: 0.3), lineWidth: 1)
+//            }
+            .glassEffect(in: Capsule())
+        //.glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
     }
 }
 

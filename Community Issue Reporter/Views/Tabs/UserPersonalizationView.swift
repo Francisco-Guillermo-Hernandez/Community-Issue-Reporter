@@ -10,6 +10,7 @@ import WebKit
 
 struct UserPersonalizationView: View {
     @State private var toggle = false
+    var nextStep: () -> Void
 
 
     var body: some View {
@@ -20,5 +21,7 @@ struct UserPersonalizationView: View {
 }
 
 #Preview {
-    UserPersonalizationView()
+    UserPersonalizationView(nextStep: {
+        
+    })
 }

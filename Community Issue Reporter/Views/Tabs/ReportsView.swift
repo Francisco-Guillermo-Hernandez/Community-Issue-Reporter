@@ -11,13 +11,17 @@ import Observation
 import SwiftUI
 internal import Combine
 
+
+
+//latitudeDelta: 0.08, longitudeDelta: 0.08
+
 struct ReportsView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
     @State private var cameraPosition: MapCameraPosition = .region(
         MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 13.6929, longitude: -89.2182),
-            span: MKCoordinateSpan(latitudeDelta: 0.08, longitudeDelta: 0.08)
+            center: CLLocationCoordinate2D(latitude: 13.86634819078747, longitude:-89.85026973265276),
+            span: MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta:  0.016440700713786782)
         )
     )
     @State private var hasCenteredOnUser = false
@@ -37,9 +41,9 @@ struct ReportsView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismissSheet
     @Namespace private var animationID
-    @State private var expandedItem: IssueMarker?
+    @State private var expandedItem: MapExplorerReport?
     @Environment(\.dismiss) private var dismiss
-    @State private var issues: [IssueMarker] = []
+    @State private var reports: [MapExplorerReport] = []
     
     private let animation = Animation.easeInOut(duration: 0.25)
     
@@ -48,9 +52,9 @@ struct ReportsView: View {
         return max(min(offsetY / 100, 1), 0)
     }
     
-    private var filteredIssues: [IssueMarker] {
-        issues.filter { selectedStatuses.contains($0.status) }
-    }
+//    private var filteredIssues: [IssueMarker] {
+//        issues.filter { selectedStatuses.contains($0.status) }
+//    }
     
     var body: some View {
         MapReader { proxy in
@@ -58,10 +62,11 @@ struct ReportsView: View {
                 Map(position: $cameraPosition) {
                     UserAnnotation()
                     
-                    ForEach(filteredIssues) { issue in
-                        Annotation(issue.title, coordinate: issue.coordinate) {
-                            annotationView(issue)
+                    ForEach(reports) { report in
+                        Annotation(report.title, coordinate: report.clLocation) {
+                            annotationView(report)
                         }
+
                     }
                     
                     if let searchMarker {
@@ -70,6 +75,8 @@ struct ReportsView: View {
                 }
                 .contentMargins(.bottom, 90, for: .scrollContent)
                 .onMapCameraChange(frequency: .onEnd) { context in
+                    print("all context")
+                    dump(context)
                     handleMapMovement(center: context.camera.centerCoordinate)
                 }
                 
@@ -111,22 +118,22 @@ struct ReportsView: View {
             
         }
         .onChange(of: locationManager.lastLocation) { _, newLocation in
-            guard let newLocation, !hasCenteredOnUser else { return }
-            hasCenteredOnUser = true
-            cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: newLocation.coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.04, longitudeDelta: 0.04)
-                )
-            )
+//            guard let newLocation, !hasCenteredOnUser else { return }
+//            hasCenteredOnUser = true
+//            cameraPosition = .region(
+//                MKCoordinateRegion(
+//                    center: newLocation.coordinate,
+//                    span: MKCoordinateSpan(latitudeDelta: 0.04, longitudeDelta: 0.04)
+//                )
+//            )
         }
         .sheet(isPresented: $showUserProfileOverlay) {
             UserProfileView()
 //                .navigationTransition(
 //                    .zoom(sourceID: "openProfile", in: profileNamespace))
         }
-        .sheet(item: $expandedItem) { issue in
-            DetailView(issue: issue)
+        .sheet(item: $expandedItem) { report in
+            DetailView(report: report)
         }
         .overlay {
             /// customized overlay to show the list of places into a List
@@ -142,9 +149,31 @@ struct ReportsView: View {
         .task {
             // Let's cancel the task if the user change the View or tab
             guard !Task.isCancelled else { return }
-            issues = await ReportRepository.shared.list(onError: { error in
-                print(error)
-            })
+           
+            
+            // Let's build the query
+            let query = MapExplorerQueryParams(
+                lat: 13.868268,
+                lng: -89.850968,
+                radius: 300,
+                issueTypeIds: [1],
+                severityIds: [1],
+                statusIds: [1]
+            )
+            
+        await MapExplorerRepository.shared.listReports(
+                for: query,
+                countryCode: .SV,
+                cityId: "1",
+                onComplete: { reports in
+                    self.reports = reports
+                },
+                onError: {
+                    error in
+                    print("error at reportsView")
+                    print(error)
+                }
+            )
         }
     }
     
@@ -169,10 +198,19 @@ struct ReportsView: View {
     private func handleMapMovement(center: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
         
+//        dump(cameraPosition.camera.)
+        
+        print("camera position")
+       
         Task {
+            
+            
             
             try? await Task.sleep(for: .milliseconds(550))
             guard !Task.isCancelled else { return }
+            
+            print(cameraPosition.region?.span.latitudeDelta ?? "")
+            print(cameraPosition.region?.span.latitudeDelta ?? "")
             
             guard let request = MKReverseGeocodingRequest(location: location) else { return }
             let mapItems = try? await request.mapItems
@@ -327,7 +365,7 @@ struct ReportsView: View {
     
     
     @ViewBuilder
-    private func annotationView(_ issue: IssueMarker) -> some View {
+    private func annotationView(_ issue: MapExplorerReport) -> some View {
         let isSelected = issue.id == selectedPlaceID
         
         Image(systemName: issue.issueType.iconName)

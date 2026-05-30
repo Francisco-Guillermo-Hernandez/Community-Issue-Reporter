@@ -29,15 +29,15 @@ struct CreateRequestPetitionView: View {
                     
                     VStack(alignment: .leading, spacing: 8) {
                        TextInput(
-                            name: "Title",
-                            label: "Please enter a title",
+                            name: String(localized: "Title"),
+                            label: String(localized: "Please enter a title"),
                             validators: titleValidator,
                             value: $model.petition.title
                        )
                     
                        TextInput(
-                            name: "Description",
-                            label: "Please enter a description",
+                            name: String(localized: "Description"),
+                            label: String(localized: "Please enter a description"),
                             validators: descriptionValidator,
                             value: $model.petition.description
                        )
@@ -117,9 +117,15 @@ struct CreateRequestPetitionView: View {
 //                    model.petition.targetSignatures = minimunSignatures
 //                }
                 
-                self.reports = await ReportRepository.shared.listReports(onError: { error in
+                // list reports for the creation of the petition
+                await ReportRepository.shared.listByUser(page: 1, onComplete: { result in
+                    guard let reports = result.documents else { return }
+                    self.reports = reports
+                }, onError: { error in
                     print(error)
                 })
+                
+        
             }
             .toolbar {
                 

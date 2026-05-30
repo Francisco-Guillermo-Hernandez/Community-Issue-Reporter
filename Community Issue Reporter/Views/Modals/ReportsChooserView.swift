@@ -66,18 +66,18 @@ struct MultipleSelectionRow: View {
             action()
         } label: {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(report.description)
                         .fontWeight(.semibold)
-                        .font(.title3)
+                        .font(.headline)
                         .foregroundStyle(.primary)
                     
                     
                     HStack(spacing: 4) {
-                        Text("Address: ")
-                            .font(.caption)
+                        
                         Text(report.address)
                             .font(.caption)
+                            .foregroundStyle(Color.secondary)
                     }
                          
                     if report.reportedAt != nil {

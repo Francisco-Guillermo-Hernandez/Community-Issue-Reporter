@@ -10,7 +10,7 @@ import CoreLocation
 
 struct CommentsSectionView: View {
     
-    var issue: IssueMarker
+    var report: MapExplorerReport
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @FocusState private var isTextFieldFocused: Bool
@@ -24,10 +24,10 @@ struct CommentsSectionView: View {
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var limit: Int = 16
     
-    init(issue: IssueMarker) {
+    init(for report: MapExplorerReport) {
         
         
-        self.issue = issue
+        self.report = report
         self.paginatedResult = PaginatedResponse<Comment>(
             documents: [],
             total: 0,
@@ -39,7 +39,7 @@ struct CommentsSectionView: View {
         )
         
         print("issue detail")
-        print(issue.id)
+        print(report.id)
     }
     
     var body: some View {
@@ -92,7 +92,7 @@ struct CommentsSectionView: View {
                 guard !Task.isCancelled else { return }
                 
                 let result = await CommentsRepository.shared.list(
-                    issue.id,
+                    report.id,
                     page: currentPage,
                     limit: self.limit,
                     onError: { _ in
@@ -182,7 +182,7 @@ struct CommentsSectionView: View {
                 id: UUID().uuidString,
                 createdAt: Date(),
                 name: "Anonymous",
-                reportId: issue.id,
+                reportId: report.id,
                 message: commentInput,
             )
             
@@ -195,7 +195,7 @@ struct CommentsSectionView: View {
             Task {
                 
                 await CommentsRepository.shared.post(
-                    reportId: issue.id,
+                    reportId: report.id,
                     message: self.commentInput,
                     onComplete: {
                         self.disableInput = false
@@ -222,7 +222,7 @@ struct CommentsSectionView: View {
         self.isLoading = true
         
         let result = await CommentsRepository.shared.list(
-            issue.id,
+            report.id,
             page: self.currentPage,
             limit: self.limit,
             onError: { _ in
@@ -234,25 +234,25 @@ struct CommentsSectionView: View {
     }
 }
 
-#Preview {
-    
-    
-    let coordinate = CLLocationCoordinate2D(
-        latitude: 37.7749,
-        longitude: -122.4194
-    )
-    
-    let issue = IssueMarker(
-        id: UUID().uuidString,
-        title: "A big pothole",
-        description: "There is a big pothole in the middle of the street",
-        status: 2,
-        coordinate: coordinate,
-        issueType: 1,
-        severity: 2,
-        matterToSolveId: 1,
-        address: "lorem ipsum dolor sit amet consectetur adipiscing elit."
-    )
-    
-    CommentsSectionView(issue: issue)
-}
+//#Preview {
+//    
+//    
+//    let coordinate = CLLocationCoordinate2D(
+//        latitude: 37.7749,
+//        longitude: -122.4194
+//    )
+//    
+//    let issue = IssueMarker(
+//        id: UUID().uuidString,
+//        title: "A big pothole",
+//        description: "There is a big pothole in the middle of the street",
+//        status: 2,
+//        coordinate: coordinate,
+//        issueType: 1,
+//        severity: 2,
+//        matterToSolveId: 1,
+//        address: "lorem ipsum dolor sit amet consectetur adipiscing elit."
+//    )
+//    
+//    CommentsSectionView(issue: issue)
+//}

@@ -23,8 +23,10 @@ struct Community_Issue_ReporterApp: App {
     
     var body: some Scene {
         WindowGroup {
+//            LandingView()
 //            CustomCameraView()
             WelcomeView()
+//            UserPersonalizationView()
                 .environmentObject(authViewModel)
                 .environment(\.mySettings, store)
                 .environment(\.locale, .init(identifier: store.selectedLanguageCode))

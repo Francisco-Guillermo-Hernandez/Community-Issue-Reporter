@@ -55,6 +55,8 @@ final class ReportDataModel {
         report.matterToSolveId = matter.id
         report.severityId = matter.severity.identifier
         report.issueTypeId = matter.issueType.identifier
+        report.title = matter.title
+        report.description = matter.description
         report.suggestedTitle = matter.title
         report.suggestedDescription = matter.description
     }

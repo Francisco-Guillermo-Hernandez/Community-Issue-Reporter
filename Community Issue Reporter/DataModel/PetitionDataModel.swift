@@ -7,28 +7,29 @@
 
 import Foundation
 import SwiftUI
+internal import Combine
 
-@Observable
-final class PetitionDataModel {
+//@Observable
+ class PetitionDataModel: ObservableObject {
     
-    static let shared = PetitionDataModel()
+    
+//    static let shared = PetitionDataModel()
 
-    var petition: Petition
-    private init() {
-        self.petition = .init(
-            id: "",
-            title: "",
-            description: "",
-            targetSignatures: 0,
-            currentSignatures: 0,
-            categoryId: 1,
-            statusId: 1,
-            reportedBy: UUID(),
-            disabled: false,
-            createdAt: Date(),
-            updatedAt: Date()
-        )
-    }
+    @Published var petition: Petition = .init(
+        id: "",
+        title: "",
+        description: "",
+        targetSignatures: 10,
+        currentSignatures: 0,
+        categoryId: 1,
+        statusId: 1,
+        reportedBy: UUID(),
+        disabled: false,
+        createdAt: Date(),
+        updatedAt: Date(),
+        reportsIds: [],
+    )
+     
     
     func prepareForModification(_ petition: Petition) {
         self.petition = petition

@@ -82,4 +82,25 @@ struct UserRepository {
         
         return profile.name
     }
+    
+    static func getPublicInformation() -> UserProfile? {
+        
+        guard let user = GIDSignIn.sharedInstance.currentUser,
+              let profile = user.profile,
+              let email = user.profile?.email,
+              let username = user.profile?.name,
+              profile.hasImage else { return nil }
+        
+         
+       return UserProfile(
+            username: username,
+            avatar: profile.imageURL(withDimension: 200),
+            email: email
+           
+        )
+    }
+    
+    static func uploadImage(_ image: UIImage, userName: String, completion: @escaping (Result<String, Error>) -> Void) {
+        
+    }
 }

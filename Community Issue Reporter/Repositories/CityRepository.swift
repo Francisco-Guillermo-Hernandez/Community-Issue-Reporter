@@ -29,7 +29,15 @@ final class CitiesRepository {
             
             // Decode the JSON into your
             let decoder = JSONDecoder()
-            let documents = try decoder.decode([FriendlyCityDistribution].self, from: data)
+            var documents = try decoder.decode([FriendlyCityDistribution].self, from: data)
+            
+            // Add the selected city from UserDefaults if it exists at position 0
+            if let savedCityData = UserDefaults.standard.data(forKey: "selected_city"),
+               let decodedCity = try? decoder.decode(FriendlyCityDistribution.self, from: savedCityData) {
+                // Remove the city if it's already in the list to avoid duplicates, then insert at 0
+                documents.removeAll { $0.cityId == decodedCity.cityId }
+                documents.insert(decodedCity, at: 0)
+            }
             
             return PaginatedResponse(documents: documents, hasNext: false, hasPrev: false)
         } catch {

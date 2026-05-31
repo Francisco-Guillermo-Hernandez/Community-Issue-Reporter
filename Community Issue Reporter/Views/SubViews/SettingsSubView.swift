@@ -196,4 +196,5 @@ struct SettingsSubView: View {
 
 #Preview {
     SettingsSubView(subViewName: "Settings")
+        .environmentObject(AuthViewModel())
 }

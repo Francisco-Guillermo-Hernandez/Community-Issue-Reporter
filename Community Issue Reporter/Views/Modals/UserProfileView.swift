@@ -182,6 +182,7 @@ struct UserProfileView: View {
 
 #Preview {
     UserProfileView()
+        .environmentObject(AuthViewModel())
 }
 
 

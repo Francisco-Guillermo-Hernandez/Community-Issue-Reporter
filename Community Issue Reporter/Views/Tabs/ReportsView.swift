@@ -18,6 +18,7 @@ internal import Combine
 struct ReportsView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
+    @EnvironmentObject var appState: AuthViewModel
     @State private var cameraPosition: MapCameraPosition = .region(
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: 13.86634819078747, longitude:-89.85026973265276),
@@ -78,6 +79,10 @@ struct ReportsView: View {
                     print("all context")
                     dump(context)
                     handleMapMovement(center: context.camera.centerCoordinate)
+                    
+                    // Store the span in UserDefaults when the user zooms
+                    UserDefaults.standard.set(context.region.span.latitudeDelta, forKey: "map_latitude_delta")
+                    UserDefaults.standard.set(context.region.span.longitudeDelta, forKey: "map_longitude_delta")
                 }
                 
                 bottom
@@ -145,6 +150,24 @@ struct ReportsView: View {
         .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
         .onAppear {
             showSearchOverlay = false
+            
+            // Set initial position based on selectedCity and saved span
+            if let city = appState.selectedCity {
+                let latDelta = UserDefaults.standard.double(forKey: "map_latitude_delta")
+                let lonDelta = UserDefaults.standard.double(forKey: "map_longitude_delta")
+                
+                // Use saved span if available, otherwise use initial values
+                let span = (latDelta != 0 && lonDelta != 0) ?
+                    MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta) :
+                    MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta: 0.016440700713786782)
+
+                cameraPosition = .region(
+                    MKCoordinateRegion(
+                        center: CLLocationCoordinate2D(latitude: city.coordinates.lat, longitude: city.coordinates.lng),
+                        span: span
+                    )
+                )
+            }
         }
         .task {
             // Let's cancel the task if the user change the View or tab
@@ -153,8 +176,8 @@ struct ReportsView: View {
             
             // Let's build the query
             let query = MapExplorerQueryParams(
-                lat: 13.868268,
-                lng: -89.850968,
+                lat: appState.selectedCity?.coordinates.lat ?? 13.868268,
+                lng: appState.selectedCity?.coordinates.lng ?? -89.850968,
                 radius: 300,
                 issueTypeIds: [1],
                 severityIds: [1],
@@ -164,7 +187,7 @@ struct ReportsView: View {
         await MapExplorerRepository.shared.listReports(
                 for: query,
                 countryCode: .SV,
-                cityId: "1",
+                cityId: appState.selectedCity?.cityId ?? "1",
                 onComplete: { reports in
                     self.reports = reports
                 },
@@ -505,4 +528,5 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
 
 #Preview {
     ReportsView()
+        .environmentObject(AuthViewModel())
 }

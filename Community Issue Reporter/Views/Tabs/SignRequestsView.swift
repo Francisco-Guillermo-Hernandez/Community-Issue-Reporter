@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+struct UserProfile {
+    let username: String?
+    let avatar: URL?
+    let email: String?
+}
+
 struct User: Identifiable {
     let id: String?
     let username: String

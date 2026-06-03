@@ -11,3 +11,5 @@ func isAValidText(_ text: String) -> Bool {
     let pattern = "^[a-zA-Z0-9\\. -#]+$"
     return text.range(of: pattern, options: .regularExpression) != nil
 }
+
+

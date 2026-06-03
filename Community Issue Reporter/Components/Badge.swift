@@ -13,26 +13,38 @@ struct Badge {
     let icon: String
 }
 
+enum BadgeStates: String {
+    case disabled
+    case enabled
+}
+
 struct CustomBadgeView: View {
+    @Environment(\.colorScheme) var colorScheme
     var badge: Badge
+    var state: BadgeStates = .enabled
     var body: some View {
         
         HStack {
             Image(systemName: badge.icon)
-                .tint(.white)
+                .foregroundStyle(Color.secondary)
+
             Text(badge.title)
+                .fixedSize()
                 .font(.caption)
-                .fontWeight(.medium)
+                .foregroundColor(.secondary)
+                .fontWeight(.bold)
         }
         .frame(height: 24)
-        .foregroundStyle(Color.white)
+        .foregroundStyle(Color.clear)
         .padding(.vertical, 4)
         .padding(.horizontal)
         .background(
             Capsule()
-                .fill(badge.color)
+//                .fill(Color.clear)
+//                .fill(badge.color)
+                .fill(Color.theme.cardBackground)
                 .glassEffect(in: .capsule)
-                .brightness(-0.2)
+//                .brightness(colorScheme == .dark ? (-0.9) : 1)
         )
         .overlay {
             Capsule()

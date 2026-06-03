@@ -72,14 +72,19 @@ extension View {
 }
 
 
+enum RegexType: Equatable {
+    case customPattern(String)
+    case email
+}
+
 struct TextInput: View {
-    var name: String = "placeholder"
-    var label: String = "Email"
-    var validators: [Validator] = []
-    var regex: String = "[a-zA-Z0-9,\\u00C0-\\u00FF ]"
-    var axis: Axis = .horizontal
+    var name: String
+    var label: String
+    var validators: [Validator]
+    var regex: RegexType
+    var axis: Axis
     
-    @State private var message: String = ""
+    @State private var message: String
     @State private var isValid: Bool = true
     @State private var status: TextInputStatus = .untouched
     @Binding var value: String
@@ -87,8 +92,35 @@ struct TextInput: View {
     
     @FocusState private var isFocused: Bool
     
+    init(name: String = "placeholder",
+         label: String = "label",
+         validators: [Validator] = [],
+         regex: RegexType = .customPattern("[a-zA-Z0-9,\\u00C0-\\u00FF ]"),
+         axis: Axis = .horizontal,
+         message: String = "",
+         status: TextInputStatus = .untouched,
+         value: Binding<String>,
+         disabled: Bool = false
+    ) {
+        self.name = name
+        self.label = label
+        
+        var initialValidators = validators
+        if regex == .email {
+            initialValidators.append(contentsOf: emailValidator)
+        }
+        self.validators = initialValidators
+        
+        self.regex = regex
+        self.axis = axis
+        self._message = State(initialValue: message)
+        self._status = State(initialValue: status)
+        self._value = value
+        self.disabled = disabled
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) { // gap-2
+        VStack(alignment: .leading, spacing: .themeSpacing * 2) { // gap-2
             LabelView(text: label, isDisabled: disabled)
                 
             TextField(name, text: $value, prompt: promptView, axis: axis)
@@ -103,20 +135,26 @@ struct TextInput: View {
                 .tint(Color.theme.inputRing) // focus-visible:ring-ring
                 .autocorrectionDisabled()
                 .onChange(of: value) { _, newValue in
-                    let filteredValue = filterValue(newValue)
-                    if filteredValue != newValue {
-                        self.value = filteredValue
+                    let filtered = regex == .email ? newValue : filterValue(newValue)
+                    
+                    if filtered != newValue {
+                        self.value = filtered
                     }
-                    validate(filteredValue)
+                    
+                    validate(filtered)
                 }
             
             if !isValid && !message.isEmpty {
                 Text(message)
                     .foregroundColor(Color.theme.destructive)
                     .font(.caption)
+                    .padding(.leading, 12)
             }
         }
         .padding(.vertical, 4)
+        .onAppear {
+            validate(value)
+        }
     }
     
     private var promptView: Text {
@@ -139,11 +177,15 @@ struct TextInput: View {
     }
 
     private func filterValue(_ value: String) -> String {
-        guard !regex.isEmpty else { return value }
-        let allowedPattern = "^(?:\(regex))$"
-        return String(value.filter { character in
-            String(character).range(of: allowedPattern, options: .regularExpression) != nil
-        })
+        
+       if case let .customPattern(regex) = regex {
+           let allowedPattern = "^(?:\(regex))$"
+           return String(value.filter { character in
+               String(character).range(of: allowedPattern, options: .regularExpression) != nil
+           })
+        }
+        
+        return value
     }
 }
 
@@ -156,7 +198,8 @@ private struct LabelView: View {
             .font(.subheadline) // text-sm
             .fontWeight(.medium) // font-medium
             .foregroundStyle(Color.theme.foreground)
-            .opacity(isDisabled ? 0.5 : 1.0)
+            .opacity(isDisabled ? 0.4 : 0.85)
+            .padding(.leading, 12)
     }
 }
 
@@ -166,7 +209,7 @@ private struct LabelView: View {
     @State var value: String = ""
     
     VStack(spacing: 20) {
-        TextInput(name: "hello@reportamelo.app", label: "Email", value: $value)
+        TextInput(name: "hello@reportamelo.app", label: "Email", regex: .email,  value: $value,)
         
         TextInput(name: "hello@reportamelo.app", label: "Invalid State", validators: [
             Validator(name: "error", message: "This is an error", fn: { _ in false })

@@ -163,6 +163,7 @@ struct PhotoChooser: View {
                     cameraCompletion = nil
                     isCameraPresented = false
                 }
+                .ignoresSafeArea()
             }
             .fullScreenCover(isPresented: $isImagePreviewPresented) {
                 if isImagePreviewPresented, let previewImage, let previewID {

@@ -8,8 +8,11 @@
 import Foundation
 internal import Combine
 import GoogleSignIn
+import MapKit
+import SwiftUI
 
 class AuthViewModel: ObservableObject {
+    @Published var userProfile: UserProfile?
     @Published var user: GIDGoogleUser?
     @Published var isLoggedIn = false
     @Published var isCheckingStatus = true
@@ -20,9 +23,35 @@ class AuthViewModel: ObservableObject {
             saveCityToUserDefaults()
         }
     }
+    
+    @Published var cameraPosition: MapCameraPosition = .region(
+        MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 13.86634819078747, longitude:-89.85026973265276),
+            span: MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta:  0.016440700713786782)
+        )
+    )
 
     init() {
         loadCityFromUserDefaults()
+        setupInitialCameraPosition()
+    }
+    
+    private func setupInitialCameraPosition() {
+        if let city = selectedCity {
+            let latDelta = UserDefaults.standard.double(forKey: "map_latitude_delta")
+            let lonDelta = UserDefaults.standard.double(forKey: "map_longitude_delta")
+            
+            let span = (latDelta != 0 && lonDelta != 0) ?
+                MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta) :
+                MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta: 0.016440700713786782)
+
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(latitude: city.coordinates.lat, longitude: city.coordinates.lng),
+                    span: span
+                )
+            )
+        }
     }
 
     private func saveCityToUserDefaults() {
@@ -61,6 +90,7 @@ class AuthViewModel: ObservableObject {
         DispatchQueue.main.async {
             self.user = nil
             self.isLoggedIn = false
+            self.userProfile = nil
             
             _ = KeychainService.deleteToken(key: .query)
             _ = KeychainService.deleteToken(key: .mutation)

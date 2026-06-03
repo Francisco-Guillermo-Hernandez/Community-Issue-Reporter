@@ -15,4 +15,10 @@ struct Coordinate: Codable, Equatable, Hashable {
         self.lat = lat
         self.lng = lng
     }
+    
+    init(_ lat: Double = 0.0, _ lng: Double = 0.0) {
+        self.lat = lat
+        self.lng = lng
+    }
+
 }

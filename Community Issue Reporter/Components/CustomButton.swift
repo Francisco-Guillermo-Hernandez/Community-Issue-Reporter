@@ -11,7 +11,7 @@ import SwiftUI
 enum ThemedButtonType {
     case primary
     case secondary
-    case generic
+    case outline
 }
 
 // MARK: -Custom button
@@ -42,8 +42,8 @@ struct ButtonStyleMapper: ViewModifier {
             content.buttonStyle(ThemedPrimaryButtonStyle())
         case .secondary:
             content.buttonStyle(ThemedSecondaryButtonStyle())
-        case .generic:
-            content.buttonStyle(ThemedButtonGenericStyle())
+        case .outline:
+            content.buttonStyle(ThemedButtonOutlineStyle())
         }
     }
 }
@@ -92,22 +92,63 @@ struct ThemedSecondaryButtonStyle: ButtonStyle {
     }
 }
 
-struct ThemedButtonGenericStyle: ButtonStyle {
+struct ThemedButtonOutlineStyle: ButtonStyle {
+    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.isEnabled) var isEnabled
+    
     func makeBody(configuration: Configuration) -> some View {
-        configuration
-            .label
-            .foregroundStyle(Color.theme.foreground)
-            .background(Color.theme.muted)
-            .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
-            .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+        configuration.label
             .font(Font.body.bold())
-            .overlay {
-                RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
-                    .stroke(Color.theme.muted.mix(with: .black, by: 0.3), lineWidth: 1)
-            }
-            .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+            //.font(.system(size: 14, weight: .medium)) // text-sm font-medium
+//            .frame(height: 36) // h-9
+//            .padding(.horizontal, 12) // px-3
+           
+            .background(backgroundColor(isPressed: configuration.isPressed))
+            .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
+            .contentShape(Capsule())
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(borderColor, lineWidth: 1)
+            )
+            .opacity(isEnabled ? 1.0 : 0.3) // disabled:opacity-50
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+            .animation(.easeOut(duration: 0.2), value: isEnabled)
+            .glassEffect(in: Capsule())
+    }
+    
+    private func backgroundColor(isPressed: Bool) -> Color {
+        if colorScheme == .dark {
+            // dark:bg-input/30 dark:hover:bg-input/50
+            return Color.theme.inputBackground.mix(with: .white, by: 0.67).opacity(isPressed ? 0.2 : 0.1)
+        } else {
+            // bg-background hover:bg-accent
+//            return isPressed ? Color.theme.accent : Color.theme.background
+            return isPressed ? Color.theme.accent : Color.white
+        }
+    }
+    
+    private func foregroundColor(isPressed: Bool) -> Color {
+        if colorScheme == .dark {
+            return Color.theme.foreground
+        } else {
+            // hover:text-accent-foreground
+            return isPressed ? Color.theme.foreground : Color.theme.foreground
+        }
+    }
+    
+    private var borderColor: Color {
+        if colorScheme == .dark {
+            // dark:border-input
+            return Color.theme.inputBorder
+        } else {
+            // border
+            return Color.theme.border
+        }
     }
 }
+
+
 
 struct LinkButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -120,5 +161,25 @@ struct LinkButtonStyle: ButtonStyle {
 
 // MARK: - Preview
 #Preview {
-    ThemedButton(message: "Get Started", action: {}, type: .primary)
+    VStack(spacing: .themeSpacing * 4) {
+        Spacer()
+        ThemedButton(message: "Get Started", action: {}, type: .primary)
+        
+        ThemedButton(message: "Get Started", action: {}, type: .secondary)
+        
+        ThemedButton(message: "Get Started", action: {}, type: .outline)
+        
+        ThemedButton(message: "Get Started", action: {}, type: .outline).disabled(true)
+        Spacer()
+    }
+    .padding()
+//    .background(Color.theme.background.mix(with: Color.black, by: 0.01999))
+//    .background(Color.init(hex: "#f0eee9"))
+//    .background(Color.init(hex: "#FBF8F6")) <--
+//    .background(Color.init(hex: "#F5F4E9"))
+    .background(Color.theme.background)
+//    .background(Color.init(hex: "F3F4F4"))
+    
+//    .background(Color.theme.background.mix(with: Color.black, by: 0.49))
+    .frame(height: .infinity)
 }

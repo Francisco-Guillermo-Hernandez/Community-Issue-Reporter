@@ -82,7 +82,7 @@ struct CitySelectionView: View {
                     }
 
                     if cities.isEmpty && !isLoading {
-                      
+                        /// No content state
                         noContent
                     } else {
                         
@@ -91,8 +91,9 @@ struct CitySelectionView: View {
                                 selectedCity = city
                             } label: {
                                 CityCellView(city: city)
-                                    .cellStyle()
+                                    .cellStyle() /// Apply custom style
                                     .overlay {
+                                        /// Provides a visual feedback about what element is selected
                                         RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
                                             .stroke(
                                                 selectedCity.cityId == city.cityId ?
@@ -110,7 +111,7 @@ struct CitySelectionView: View {
                 }
                 .padding(.horizontal, 16)
             }
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbarTitleDisplayMode(.inline)
             .navigationTitle("Select a city")
             .background(Color.theme.background)
             .searchable(
@@ -297,15 +298,16 @@ struct CitySelectionView: View {
     
     @Previewable
     @State var sanSalvador: FriendlyCityDistribution = .init(
-                cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
-                firstLevel: "",
-                secondLevel: "",
-                thirdLevel: "",
-                ZipCode: "",
-                legalGroupName: "",
-                coordinates: .init(lat: 0, lng: 0),
-                isCapitalCity: 0,
-                isDepartmentalCapital: 0)
+        cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
+        firstLevel: "El Salvador",
+        secondLevel: "San Salvador",
+        thirdLevel: "San Salvador",
+        ZipCode: "1101",
+        legalGroupName: "Distrito de San Salvador",
+        coordinates: .init(lat: 13.701270, lng: -89.224432),
+        isCapitalCity: 1,
+        isDepartmentalCapital: 1
+    )
     let countryCode: CountryCode = .SV
     CitySelectionView(countryCode: countryCode, selectedCity: $sanSalvador, nextStep: {
         

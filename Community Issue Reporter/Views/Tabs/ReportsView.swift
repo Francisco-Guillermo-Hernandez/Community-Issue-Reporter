@@ -19,12 +19,7 @@ struct ReportsView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
     @EnvironmentObject var appState: AuthViewModel
-    @State private var cameraPosition: MapCameraPosition = .region(
-        MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 13.86634819078747, longitude:-89.85026973265276),
-            span: MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta:  0.016440700713786782)
-        )
-    )
+    
     @State private var hasCenteredOnUser = false
     @State private var searchText: String = ""
     @State private var selectedStatuses: Set<IssueStatus> = Set(IssueStatus.allCases)
@@ -60,7 +55,7 @@ struct ReportsView: View {
     var body: some View {
         MapReader { proxy in
             ZStack(alignment: .bottom) {
-                Map(position: $cameraPosition) {
+                Map(position: $appState.cameraPosition) {
                     UserAnnotation()
                     
                     ForEach(reports) { report in
@@ -116,7 +111,7 @@ struct ReportsView: View {
             .padding(.top, 10)
         }
         .onChange(of: searchText) { _, newValue in
-            searchCompleter.update(query: newValue, region: currentRegion(c: cameraPosition))
+            searchCompleter.update(query: newValue, region: currentRegion(c: appState.cameraPosition))
         }
         .onAppear {
 //            locationManager.requestAuthorization()
@@ -125,7 +120,7 @@ struct ReportsView: View {
         .onChange(of: locationManager.lastLocation) { _, newLocation in
 //            guard let newLocation, !hasCenteredOnUser else { return }
 //            hasCenteredOnUser = true
-//            cameraPosition = .region(
+//            appState.cameraPosition = .region(
 //                MKCoordinateRegion(
 //                    center: newLocation.coordinate,
 //                    span: MKCoordinateSpan(latitudeDelta: 0.04, longitudeDelta: 0.04)
@@ -150,24 +145,6 @@ struct ReportsView: View {
         .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
         .onAppear {
             showSearchOverlay = false
-            
-            // Set initial position based on selectedCity and saved span
-            if let city = appState.selectedCity {
-                let latDelta = UserDefaults.standard.double(forKey: "map_latitude_delta")
-                let lonDelta = UserDefaults.standard.double(forKey: "map_longitude_delta")
-                
-                // Use saved span if available, otherwise use initial values
-                let span = (latDelta != 0 && lonDelta != 0) ?
-                    MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta) :
-                    MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta: 0.016440700713786782)
-
-                cameraPosition = .region(
-                    MKCoordinateRegion(
-                        center: CLLocationCoordinate2D(latitude: city.coordinates.lat, longitude: city.coordinates.lng),
-                        span: span
-                    )
-                )
-            }
         }
         .task {
             // Let's cancel the task if the user change the View or tab
@@ -230,8 +207,8 @@ struct ReportsView: View {
             try? await Task.sleep(for: .milliseconds(550))
             guard !Task.isCancelled else { return }
             
-            print(cameraPosition.region?.span.latitudeDelta ?? "")
-            print(cameraPosition.region?.span.latitudeDelta ?? "")
+            print(appState.cameraPosition.region?.span.latitudeDelta ?? "")
+            print(appState.cameraPosition.region?.span.latitudeDelta ?? "")
             
             guard let request = MKReverseGeocodingRequest(location: location) else { return }
             let mapItems = try? await request.mapItems
@@ -251,7 +228,7 @@ struct ReportsView: View {
     private func performSearch() {
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = searchText
-        request.region = currentRegion(c: cameraPosition)
+        request.region = currentRegion(c: appState.cameraPosition)
         
         let search = MKLocalSearch(request: request)
         search.start { response, _ in
@@ -269,7 +246,7 @@ struct ReportsView: View {
                 matterToSolveId: 1,
                 address: address
             )
-            cameraPosition = .region(
+            appState.cameraPosition = .region(
                 MKCoordinateRegion(
                     center: coordinate,
                     span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
@@ -280,7 +257,7 @@ struct ReportsView: View {
     
     private func performSearch(with completion: MKLocalSearchCompletion) {
         let request = MKLocalSearch.Request(completion: completion)
-        request.region = currentRegion(c: cameraPosition)
+        request.region = currentRegion(c: appState.cameraPosition)
         
         let search = MKLocalSearch(request: request)
         search.start { response, _ in
@@ -298,7 +275,7 @@ struct ReportsView: View {
                 matterToSolveId: 1,
                 address: address
             )
-            cameraPosition = .region(
+            appState.cameraPosition = .region(
                 MKCoordinateRegion(
                     center: coordinate,
                     span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
@@ -318,7 +295,7 @@ struct ReportsView: View {
         locationManager.requestAuthorization()
         guard let location = locationManager.lastLocation else { return }
         hasCenteredOnUser = true
-        cameraPosition = .region(
+        appState.cameraPosition = .region(
             MKCoordinateRegion(
                 center: location.coordinate,
                 span: MKCoordinateSpan(latitudeDelta: 0.0082, longitudeDelta: 0.0082)

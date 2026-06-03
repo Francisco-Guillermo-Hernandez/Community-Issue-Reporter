@@ -278,7 +278,7 @@ struct SignRequestsView: View {
     @State var model = PetitionDataModel()
     
     var body: some View {
-        NavigationSplitView {
+        NavigationStack {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: .themeSpacing * 4) {
                     headerView()
@@ -321,7 +321,7 @@ struct SignRequestsView: View {
                 await fetchPetitions(reset: true)
             }
             //            .toolbar(removing: .sidebarToggle)
-            .navigationSplitViewColumnWidth(600)
+          
             .customToolBar(
                 isPrimaryActionVisible: isPrimaryActionVisible,
                 title: title,
@@ -371,8 +371,6 @@ struct SignRequestsView: View {
                 .padding(.horizontal, 4)
             } primaryAction: {
             }
-        } detail: {
-            
         }
         
         .onChange(of: activeSubtitleIndex) { oldValue, newValue in
@@ -453,11 +451,11 @@ struct SignRequestsView: View {
                     : (previousIndex < 0 ? nil : previousIndex)
                 }
             
+            /// Go to detail 
             NavigationLink(destination: PetitionDetailView(petition: petition)) {
                 
                 VStack(spacing: .themeSpacing) {
                     RequestViewPost(petition: petition)
-//                        .clipShape(Rectangle())
                         .scrollClipDisabled(true)
                 }
             }
@@ -561,7 +559,6 @@ struct RequestViewPost: View {
                                     alignment: .topLeading
                                 )
                                 .aspectRatio(4 / 3, contentMode: .fill)
-//                                .clipped()
                                 .clipShape(
                                     RoundedRectangle(
                                         cornerRadius: .themeRadius,

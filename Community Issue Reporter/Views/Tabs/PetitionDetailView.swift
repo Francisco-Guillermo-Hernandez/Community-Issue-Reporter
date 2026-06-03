@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: - View
 struct PetitionDetailView: View {
     var petition: Petition
     var offline: Bool = false
@@ -124,6 +125,7 @@ struct PetitionDetailView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
             }
+            .background(Color.theme.background)
             .toolbar {
                 
                 ToolbarItem(placement: .title) {
@@ -163,6 +165,7 @@ struct PetitionDetailView: View {
     
 }
 
+// MARK: - Section
 struct SectionHeader: View {
     let title: String
     
@@ -174,6 +177,7 @@ struct SectionHeader: View {
     }
 }
 
+// MARK: - Comment row
 struct CommentRow: View {
     let name: String
     let time: Date

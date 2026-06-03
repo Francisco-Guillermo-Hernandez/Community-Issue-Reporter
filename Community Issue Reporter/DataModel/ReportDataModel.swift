@@ -15,24 +15,24 @@ final class ReportDataModel {
     var report: Report
     var locator: Locator
     private let settings = SettingsStore.shared
-    
+   
     private init() {
+        // Let's initialize the locator for the report
         self.locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")
         
-//        var coordinate = Coordinate(lat: 0.0, lng: 0.0)
-//        if let country = settings.country {
-//            
-//            
-////            if let region = country.regions[0] {
-////                if let city = region.cities[0] {
-////                    coordinate = Coordinate(lat: city.coordinates.lat, lng: city.coordinates.lng )
-////                }
-////            }
-//           
-//        }
-        
+        let appState = AuthViewModel()
+        var lat: Double =  13.701270
+        var lng: Double = -89.224432
+    
+        // lets get the coordinates that were set at the landing process or settings view
+        if let selectedCity = appState.selectedCity {
+            lat = selectedCity.coordinates.lat
+            lng = selectedCity.coordinates.lng
+        }
+
+        // Initialize the report template with some basic information
         self.report = Report(
-            coordinate: .init(lat: 14.493928750122384, lng:-88.9194851492362), //.init(lat: 13.68935, lng: -89.18718),
+            coordinate: .init(lat, lng),
             address: "",
             title: "",
             description: "",
@@ -45,6 +45,9 @@ final class ReportDataModel {
             updatedAt: Date(),
             reportState: .new,
         )
+        
+        print("report")
+        dump(report)
         
         
         print("selected country")

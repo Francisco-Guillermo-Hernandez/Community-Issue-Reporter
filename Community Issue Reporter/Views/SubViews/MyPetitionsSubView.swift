@@ -18,7 +18,7 @@ struct PetitionCellView: View {
                         .fontWidth(.condensed)
                         .fontWeight(.bold)
                         .lineLimit(1)
-                    
+
                     Text(petition.description)
                         .font(.caption)
                         .lineLimit(2)
@@ -32,23 +32,52 @@ struct PetitionCellView: View {
 }
 
 struct MyPetitionsSubView: View {
+    @State private var isLoading: Bool = false
     @State private var refreshID = UUID()
     @State private var petitions: [Petition] = []
     @State private var page: Int = 1
-//    @State private var model: PetitionDataModel = PetitionDataModel.shared
+    //    @State private var model: PetitionDataModel = PetitionDataModel.shared
     @Binding var path: [InsightsNavigation]
 
     var subViewName: String
     var body: some View {
-        List {
-            ForEach(petitions, id: \.id) { petition in
-                NavigationLink(value: InsightsNavigation.petition(petition)) {
-                    PetitionCellView(petition: petition)
-                        .cellStyle()
+        Group {
+
+            if isLoading {
+                LoadingView()
+            }
+
+            if petitions.isEmpty && !isLoading {
+                ContentUnavailableView {
+                    Label("No petitions yet.", systemImage: "person.bubble")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(
+                            Color.theme.foreground.opacity(0.7),
+                            Color.theme.primary,
+                            Color.theme.foreground.opacity(0.7)
+                        )
+                } description: {
+                    Text(
+                        "Please create petitions in order to accelerate the process of ..."
+                    )
+                } actions: {
+
                 }
-                .listRowInsets(themeCellEdgeInsets)
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
+                .containerRelativeFrame(.vertical)
+            } else {
+                List {
+                    ForEach(petitions, id: \.id) { petition in
+                        NavigationLink(
+                            value: InsightsNavigation.petition(petition)
+                        ) {
+                            PetitionCellView(petition: petition)
+                                .cellStyle()
+                        }
+                        .listRowInsets(themeCellEdgeInsets)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                    }
+                }
             }
         }
         .task {
@@ -62,20 +91,38 @@ struct MyPetitionsSubView: View {
     }
 
     private func fetchPetitions() async {
-        await PetitionRepository.share.list(q: PaginatedRequestQueryParams(page: 1, limit: 16), locator: Locator(countryCode: "", country: "", region: "", city: "", address: ""), onComplete: { result in
+        isLoading = true
 
-            guard let documents = result.documents else { return }
-           petitions = documents
+        let locator = Locator(
+            countryCode: "",
+            country: "",
+            region: "",
+            city: "",
+            address: ""
+        )
+        let query = PaginatedRequestQueryParams(page: 1, limit: 16)
+        await PetitionRepository.share.list(
+            q: query,
+            locator: locator,
+            onComplete: { result in
 
+                guard let documents = result.documents else { return }
+                petitions = documents
 
-        }, onError: { error in
-            print(error)
-        })
+                isLoading = false
+            },
+            onError: { error in
+                print(error)
+                isLoading = false
+            }
+        )
     }
 }
 
 #Preview {
     @Previewable
     @State var path: [InsightsNavigation] = []
-    return MyPetitionsSubView(path: $path, subViewName: "My Petitions")
+    return NavigationStack {
+        MyPetitionsSubView(path: $path, subViewName: "My Petitions")
+    }
 }

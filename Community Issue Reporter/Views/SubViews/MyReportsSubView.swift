@@ -23,8 +23,10 @@ struct GenericDatePresenterView: View {
                 Text(text)
                     .font(.caption)
                     .fontWeight(.bold)
+                    .fixedSize()
                 
                 Text(when)
+                    .fixedSize()
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -55,7 +57,7 @@ struct ReportCellView: View {
                         .foregroundColor(.secondary)
                         .padding(.bottom, .themeSpacing)
                     // detail of the dates
-                    HStack {
+                    HStack(spacing: .themeSpacing * 4) {
                         GenericDatePresenterView(
                             text: String(localized: "Created", comment: "Created description text at the report section"),
                             when: report.createdDate
@@ -70,18 +72,19 @@ struct ReportCellView: View {
                             text: String(localized: "Reported", comment: "Reported description text at the report section"),
                             when: report.reportedDate
                         )
+                        
                     }
-                    .padding(.horizontal)
+//                    .padding(.horizontal)
                     .padding(.top, .themeSpacing)
                     .padding(.bottom, .themeSpacing)
                     
-                    HStack(spacing: .themeSpacing * 2) {
+                    HStack(spacing: .themeSpacing * 4) {
                         CustomBadgeView(badge: .init(color: report.severity.color, title: report.severity.title, icon: report.severity.iconName))
-                            .opacity(0.77)
+
                         CustomBadgeView(badge: .init(color: report.status.color, title: report.status.title, icon: report.status.iconName))
-                            .opacity(0.77)
+                            
                         
-                        CustomBadgeView(badge: .init(color: report.issueType.color, title: report.issueType.title, icon: report.issueType.iconName)).opacity(0.77)
+                        CustomBadgeView(badge: .init(color: report.issueType.color, title: report.issueType.title, icon: report.issueType.iconName))
                         
                     }
                     
@@ -107,17 +110,48 @@ struct MyReportsSubView: View {
     @State private var reportToDelete: Report? = nil
     @State private var model: ReportDataModel = ReportDataModel.shared
     @State private var refreshID = UUID()
-    
+    @State private var isLoading: Bool = false
+
     @Binding var path: [InsightsNavigation]
     var subViewName: String
     var body: some View {
-        List {
-            ForEach(reports, id: \.id) { report in
-                ReportCellView(report: report)
-                    .cellStyle()
+        Group {
+            if isLoading {
+                /// Show in the middle of the screen
+                LoadingView()
             }
+
+            if reports.isEmpty && !isLoading {
+                // Empty state
+                ContentUnavailableView {
+                    Label(
+                        "No reports yet.",
+                        systemImage: "exclamationmark.bubble"
+                    )
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(
+                        Color.theme.foreground.opacity(0.7),
+                        Color.theme.primary,
+                        Color.theme.foreground.opacity(0.7)
+                    )
+                } description: {
+                    Text("Please sent us reports.")
+                } actions: {
+
+                }
+                .containerRelativeFrame(.vertical)
+            } else {
+                List {
+                    ForEach(reports, id: \.id) { report in
+                        ReportCellView(report: report)
+                            .cellStyle()
+                    }
+                }
+                .listStyle(.plain)
+            }
+
         }
-        .listStyle(.plain)
+      
         .background(Color.theme.background)
         .scrollContentBackground(.hidden)
         .alert("Delete report", isPresented: $showDeleteAlert) {
@@ -131,24 +165,28 @@ struct MyReportsSubView: View {
             Text("Are you sure you want to delete ? This action cannot be undone.")
         }
         .task(id: refreshID) {
-            await fetchReports()
+            await  fetchReports()
         }
-        .onAppear {
-            refreshID = UUID()
-        }
+//        .refreshable {
+//            refreshID = UUID()
+//        }
+//       
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)
     }
     
     private func fetchReports() async {
+        isLoading = true
         await ReportRepository.shared.listByUser(
             page: 1,
             onComplete: { result in
                 guard let reports = result.documents else { return }
                 self.reports = reports
+                isLoading = false
             },
             onError: { error in
                 print(error)
+                isLoading = false
             }
         )
     }

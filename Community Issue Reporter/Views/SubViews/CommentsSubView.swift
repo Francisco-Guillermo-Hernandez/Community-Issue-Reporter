@@ -12,6 +12,7 @@ struct CommentsSubView: View {
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var comments: [Comment] = []
     @Environment(\.dismiss) private var dismiss
+    @State private var isLoading: Bool = false
     
     var subViewName: String
     init(subViewName: String) {
@@ -30,9 +31,28 @@ struct CommentsSubView: View {
     
     
     var body: some View {
-        NavigationStack {
-            ScrollView(.vertical) {
-                LazyVStack(spacing: 16) {
+        ScrollView(.vertical) {
+            LazyVStack(spacing: 16) {
+                if isLoading {
+                    LoadingView()
+                }
+                
+                if comments.isEmpty && !isLoading {
+                    ContentUnavailableView {
+                        Label("No comments yet.", systemImage: "bubble.left.and.text.bubble.right")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(
+                                Color.theme.foreground.opacity(0.7),
+                                Color.theme.primary,
+                                Color.theme.foreground.opacity(0.7)
+                            )
+                    } description: {
+                        Text("Please tell us how that problem affects you.")
+                    } actions: {
+                        
+                    }
+                    .containerRelativeFrame(.vertical)
+                } else {
                     ForEach(comments) { c in
                         CommentRow(name: c.name!, time: c.createdAt!, message: c.message)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -53,28 +73,33 @@ struct CommentsSubView: View {
                                         }
                     }
                 }
-                .padding(.top, 16)
-                .padding(.horizontal, 16)
             }
-            .task {
-                guard !Task.isCancelled else { return }
-                await CommentsRepository.shared.listByUser(
-                    page: 1,
-                    onComplete: { result in
-                        self.comments.append(contentsOf: result.documents!)
-                    },
-                    onError: { error in
-                        print(error)
-                    })
-            }
-            .background(Color.theme.background)
-            .scrollContentBackground(.hidden)
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("My Comments")
+            .padding(.top, 16)
+            .padding(.horizontal, 16)
         }
+        .task {
+            isLoading = true
+            guard !Task.isCancelled else { return }
+            await CommentsRepository.shared.listByUser(
+                page: 1,
+                onComplete: { result in
+                    self.comments.append(contentsOf: result.documents!)
+                    isLoading = false
+                },
+                onError: { error in
+                    print(error)
+                    isLoading = false
+                })
+        }
+        .background(Color.theme.background)
+        .scrollContentBackground(.hidden)
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("My Comments")
     }
 }
 
 #Preview {
-    CommentsSubView(subViewName: "My Comments")
+    return NavigationStack {
+        CommentsSubView(subViewName: "My Comments")
+    }
 }

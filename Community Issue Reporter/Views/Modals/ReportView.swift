@@ -65,6 +65,7 @@ struct ReportView: View {
                     )
                     
                 }
+            
                 
                 ///
                 Section("Issue Details") {

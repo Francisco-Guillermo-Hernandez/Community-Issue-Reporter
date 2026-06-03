@@ -24,6 +24,7 @@ struct UserProfileView: View {
     @State private var showSheet = false
     @State private var selectedOption: String = ""
     @EnvironmentObject var appState: AuthViewModel
+    @ObservedObject var profile = ProfileDataModel()
     
     init () {
         
@@ -70,11 +71,11 @@ struct UserProfileView: View {
             ScrollView(.vertical) {
                 
                 VStack(spacing: 4) {
-                    
-                    ProfileImage()
+//                    
+                    ProfileImage(viewModel: profile)
                         .padding(.bottom, 8)
                     
-                    Text(UserRepository.getName())
+                    Text(UserRepository.shared.getName())
                         .font(.title3)
                         .fontWeight(.semibold)
                     
@@ -117,6 +118,7 @@ struct UserProfileView: View {
                 .scrollDisabled(true)
                 
             }
+            .background(Color.theme.background)
             .safeAreaInset(edge: .bottom) {
                 Button(role: .destructive) {
                     appState.logout()
@@ -134,6 +136,10 @@ struct UserProfileView: View {
                 .padding()
                 .padding(.top, 0)
                
+//                ThemedButton(message: "", action: {
+//                    
+//                }, type: .outline)
+//                .padding()
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -147,6 +153,7 @@ struct UserProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             
         }
+        
     }
     
     @ViewBuilder

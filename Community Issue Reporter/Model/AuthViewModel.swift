@@ -94,6 +94,11 @@ class AuthViewModel: ObservableObject {
             
             _ = KeychainService.deleteToken(key: .query)
             _ = KeychainService.deleteToken(key: .mutation)
+            
+//            UserDefaults.standard.set(nil, forKey: "selected_city")
+            UserDefaults.standard.set(nil, forKey: "map_latitude_delta")
+            UserDefaults.standard.set(nil, forKey: "map_longitude_delta")
+            UserDefaults.standard.set(nil, forKey: "avatar_url")
         }
     }
     

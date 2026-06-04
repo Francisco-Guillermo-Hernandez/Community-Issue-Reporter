@@ -7,6 +7,22 @@
 
 import Foundation
 
+/// Generic Customizable Response
+struct CustomizedResponse<T: Decodable>:  Decodable {
+    let message: String
+    let code: String
+    let data: T?
+    
+    init(message: String, code: String, data: T? = nil) {
+        self.message = message
+        self.code = code
+        self.data = data
+    }
+}
+
+struct AvatarResponse: Decodable {
+    let avatarUrl: String
+}
 
 struct GenericResponse: Identifiable, Codable {
     var id: String
@@ -33,6 +49,7 @@ struct LoginWithOAuthProviderResponse: Decodable {
     let publicUserData: PublicUserData
 }
 
+///  Paginated Response where T change
 struct PaginatedResponse<T: Decodable>: Decodable {
     let documents: [T]?
     let total: Int?

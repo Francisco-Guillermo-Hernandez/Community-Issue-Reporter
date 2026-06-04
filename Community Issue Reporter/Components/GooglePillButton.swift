@@ -36,13 +36,14 @@ struct GooglePillButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
-//            .background(configuration.isPressed ? Color("Google_tapped_color").opacity(0.08) : Color("Google_background_color"))
-            .background(configuration.isPressed ? Color("Google_tapped_color").mix(with: .white, by: 0.9) : Color("Google_background_color"))
+            .background(configuration.isPressed ? Color("Google_tapped_color").opacity(0.08) : Color("Google_background_color"))
+//            .background(configuration.isPressed ? Color("Google_tapped_color").mix(with: .white, by: 0.9) : Color("Google_background_color"))
             .contentShape(Capsule())
             .clipShape(Capsule())
             .overlay {
                 Capsule()
                     .stroke(Color("Google_stroke_color"), lineWidth: 1)
+                
                 
             }
     }

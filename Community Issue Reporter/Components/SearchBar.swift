@@ -69,12 +69,25 @@ struct SearchBar: View {
                         Button {
                             onUserProfileTap()
                         } label: {
-                            Text("FH")
-                                .font(.title2.bold())
+                            if let url = UserRepository.shared.getAvatar() {
+                                CachedAsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                } placeholder: {
+                                    ProgressView()
+                                }
                                 .frame(width: 48, height: 48)
-                                .foregroundStyle(.white)
-                                .background(.gray, in: .circle)
-//                                .transition(.blurReplace)
+                                .clipShape(Circle())
+                                
+                            } else {
+                                Image("user_b")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 48, height: 48)
+                                    .clipShape(Circle())
+
+                            }
                         }
                         .matchedTransitionSource(id: "openProfile", in: profileNamespace)
                     }

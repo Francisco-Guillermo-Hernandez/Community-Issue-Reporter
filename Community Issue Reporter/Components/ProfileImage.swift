@@ -132,11 +132,10 @@ extension View {
     }
 }
 
-struct AvatarOption: Identifiable {
+struct AvatarOption: Identifiable, Hashable {
     var id: String = UUID().uuidString
     var title: String
     var associatedView: CurrentView
-    var image: Image?
 }
 
 // MARK: - Options
@@ -198,7 +197,6 @@ struct UserAvatarPersonalizationSheet: View {
             }
             .geometryGroup()
         }
-        //        .presentationBackground(Color.white)
         .padding([.horizontal, .top], .themePadding * 1.23)
         .frame(maxHeight: .infinity, alignment: .bottom)
     }
@@ -250,18 +248,32 @@ struct UserAvatarPersonalizationSheet: View {
                 columns: Array(repeating: GridItem(), count: 3),
                 spacing: .themeSpacing * 4
             ) {
-                ForEach(options) { option in
+                ForEach(options, id: \.self) { option in
                     let isSelected = selectedPeriod?.id == option.id
 
                     VStack {
                         Group {
                             if option.associatedView == .google {
-                                Image("user_b")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
+                                
+                                if let url = UserRepository.shared.getProfilePictureURL() {
+                                    CachedAsyncImage(url: url) { image in
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                    } placeholder: {
+                                        ProgressView()
+                                    }
                                     .frame(width: 80, height: 80)
                                     .clipShape(Circle())
-
+                                    
+                                } else {
+                                    Image("user_b")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 80, height: 80)
+                                        .clipShape(Circle())
+                                }
+                                
                             }
 
                             if option.associatedView == .camera {
@@ -461,7 +473,7 @@ struct ProfileImage: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 150, height: 150)
                     .clipShape(Circle())
-            } else if let url = UserRepository.shared.getProfilePictureURL() {
+            } else if let url = UserRepository.shared.getAvatar() {
                 CachedAsyncImage(url: url) { image in
                     image
                         .resizable()
@@ -471,6 +483,7 @@ struct ProfileImage: View {
                 }
                 .frame(width: 150, height: 150)
                 .clipShape(Circle())
+                
             } else {
                 Image("user_b")
                     .resizable()

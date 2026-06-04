@@ -14,11 +14,17 @@ enum ThemedButtonType {
     case outline
 }
 
+enum ThemedButtonStyle {
+    case prominent
+    case normal
+}
+
 // MARK: -Custom button
 struct ThemedButton: View {
     var message: String = ""
     var action: () -> Void = { }
     var type: ThemedButtonType = .secondary
+    var style: ThemedButtonStyle = .prominent
     var body: some View {
         Button(action: action) {
             HStack {
@@ -28,13 +34,14 @@ struct ThemedButton: View {
             .frame(maxWidth: .infinity, maxHeight: 48)
         }
         .buttonSizing(.flexible)
-        .modifier(ButtonStyleMapper(type: type))
+        .modifier(ButtonStyleMapper(type: type, style: style))
     }
 }
 
 // MARK: - util to use different styles
 struct ButtonStyleMapper: ViewModifier {
     let type: ThemedButtonType
+    let style: ThemedButtonStyle
     
     func body(content: Content) -> some View {
         switch type {
@@ -43,7 +50,7 @@ struct ButtonStyleMapper: ViewModifier {
         case .secondary:
             content.buttonStyle(ThemedSecondaryButtonStyle())
         case .outline:
-            content.buttonStyle(ThemedButtonOutlineStyle())
+            content.buttonStyle(ThemedButtonOutlineStyle(style: style))
         }
     }
 }
@@ -95,10 +102,11 @@ struct ThemedSecondaryButtonStyle: ButtonStyle {
 struct ThemedButtonOutlineStyle: ButtonStyle {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.isEnabled) var isEnabled
+    let style: ThemedButtonStyle
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(Font.body.bold())
+            .font(style == .normal ? .system(size: 14, weight: .medium) : Font.body.bold()) // style == .prominent ? Font.body.bold() : Font.body
             //.font(.system(size: 14, weight: .medium)) // text-sm font-medium
 //            .frame(height: 36) // h-9
 //            .padding(.horizontal, 12) // px-3
@@ -168,6 +176,8 @@ struct LinkButtonStyle: ButtonStyle {
         ThemedButton(message: "Get Started", action: {}, type: .secondary)
         
         ThemedButton(message: "Get Started", action: {}, type: .outline)
+        
+        ThemedButton(message: "Get Started", action: {}, type: .outline, style: .normal)
         
         ThemedButton(message: "Get Started", action: {}, type: .outline).disabled(true)
         Spacer()

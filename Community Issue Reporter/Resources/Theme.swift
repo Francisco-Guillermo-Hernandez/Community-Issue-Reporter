@@ -20,12 +20,68 @@ struct AppTheme {
         )
     }
     
+    
+    
+    // input theming
+    
+    static let inputText = dynamicColor(
+        light: Color(
+            red: 56/255,
+            green: 39/255,
+            blue: 31/255
+        ),
+        dark: Color(
+            red: 138/255,
+            green: 138/255,
+            blue: 138/255
+        )
+    )
+    
+    static let inputBackground = dynamicColor(
+        light: Color(
+            red: 242/255,
+            green: 242/255,
+            blue: 242/255
+        ),
+        dark: Color(
+            red: 69/255,
+            green: 69/255,
+            blue: 69/255
+        )
+    )
+    
+    static let inputRing = dynamicColor(
+        light: Color(
+            red: 221/255,
+            green: 130/255,
+            blue: 70/255
+        ),
+        dark: Color(
+            red: 236/255,
+            green: 148/255,
+            blue: 88/255
+        )
+    )
+    
+    static let inputBorder = dynamicColor(
+        light: Color(
+            red: 222/255,
+            green: 222/255,
+            blue: 222/255
+        ),
+        dark: Color(
+            red: 51/255,
+            green: 51/255,
+            blue: 51/255
+        )
+    )
+    
     // Colors
     static let background = dynamicColor(
         light: Color(
-            red: 255/255,
-            green: 255/255,
-            blue: 255/255
+            red: 243/255,
+            green: 244/255,
+            blue: 244/255
         ),
         dark: Color(
             red: 26/255,
@@ -145,9 +201,9 @@ struct AppTheme {
             blue: 72/255
         ),
         dark: Color(
-            red: 97/255,
-            green: 139/255,
-            blue: 140/255
+            red: 244/255,
+            green: 78/255,
+            blue: 72/255
         )
     )
     

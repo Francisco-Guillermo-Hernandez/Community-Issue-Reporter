@@ -16,9 +16,15 @@ enum UserOAuthResultState {
     case unowned 
 }
 
-struct UserRepository {
+final class UserRepository {
     
-    static func login(
+    static var shared: UserRepository = .init()
+    var service: UserService
+    private init () {
+        self.service = UserService()
+    }
+    
+    func login(
         _ token: String,
         onSuccess: @escaping (UserOAuthResultState, String) -> Void,
         onError: @escaping (_ error: Error) -> Void
@@ -29,7 +35,7 @@ struct UserRepository {
                 HTTPHeader(name: "CountryCode", content: "SV"),
             ]
             
-            let result = try await UserService().login(payload: OAuthSignInPayload(token: token), headers: loginHeaders)
+            let result = try await self.service.login(payload: OAuthSignInPayload(token: token), headers: loginHeaders)
             
             print("=================")
             print("result of the login")
@@ -48,7 +54,7 @@ struct UserRepository {
         }
     }
     
-    static func loginAsVisitor(
+    func loginAsVisitor(
         onSuccess: @escaping (UserOAuthResultState, String) -> Void,
         onError: @escaping (_ error: Error) -> Void
     ) async -> Void {
@@ -58,7 +64,7 @@ struct UserRepository {
                 HTTPHeader(name: "CountryCode", content: "SV"),
             ]
             
-            let result = try await UserService().loginAsVisitor(headers)
+            let result = try await self.service.loginAsVisitor(headers)
             
             onSuccess(.inexistent, result.authSessionId)
         } catch {
@@ -66,7 +72,7 @@ struct UserRepository {
         }
     }
     
-    static func getProfilePictureURL() -> URL? {
+    func getProfilePictureURL() -> URL? {
         guard let user = GIDSignIn.sharedInstance.currentUser,
               let profile = user.profile,
               profile.hasImage else {
@@ -76,14 +82,14 @@ struct UserRepository {
         return profile.imageURL(withDimension: 100)
     }
     
-    static func getName() -> String {
+    func getName() -> String {
         guard let user = GIDSignIn.sharedInstance.currentUser,
               let profile = user.profile else { return "Visitor" }
         
         return profile.name
     }
     
-    static func getPublicInformation() -> UserProfile? {
+    func getPublicInformation() -> UserProfile? {
         
         guard let user = GIDSignIn.sharedInstance.currentUser,
               let profile = user.profile,
@@ -100,7 +106,41 @@ struct UserRepository {
         )
     }
     
-    static func uploadImage(_ image: UIImage, userName: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func getAvatar() -> URL? {
+        UserDefaults.standard.string(forKey: "avatar_url").flatMap(URL.init(string:))
+    }
+    
+    func changeAvatar(_ image: UIImage, userName: String, completion: @escaping (Result<String, Error>) -> Void) async {
+        
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            completion(.failure(NSError(domain: "UserRepository", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to get image data"])))
+            return
+        }
+        
+        do {
+            let result = try await self.service.change(avatar: imageData)
+            
+            if result.code == "AVATAR_UPDATED" {
+                completion(.success(result.message))
+               
+                if let avatarUrl = result.data?.avatarUrl {
+                    UserDefaults.standard.set(avatarUrl, forKey: "avatar_url")
+                }
+                
+            } else {
+                throw ImageError.unknownError(result.message)
+            }
+            
+        } catch {
+            completion(.failure(error))
+        }
         
     }
+}
+
+
+enum ImageError: Error {
+    case invalidData
+    case tooLarge(String)
+    case unknownError(String)
 }

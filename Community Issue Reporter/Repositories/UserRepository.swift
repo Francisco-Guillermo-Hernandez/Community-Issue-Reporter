@@ -54,7 +54,7 @@ final class UserRepository {
         }
     }
     
-    func loginAsVisitor(
+    func loginAsGuest(
         onSuccess: @escaping (UserOAuthResultState, String) -> Void,
         onError: @escaping (_ error: Error) -> Void
     ) async -> Void {
@@ -62,11 +62,16 @@ final class UserRepository {
             let headers = [
                 HTTPHeader(name: "Client-Type", content: "Mobile-App"),
                 HTTPHeader(name: "CountryCode", content: "SV"),
+                HTTPHeader(name: "CityId", content: "san-salvador")
             ]
             
-            let result = try await self.service.loginAsVisitor(headers)
+            let result = try await self.service.loginAsGuest(headers)
             
-            onSuccess(.inexistent, result.authSessionId)
+            if result.code == "GUEST_SESSION_CREATED" {
+                onSuccess(.inexistent, result.authSessionId)
+            } else {
+                
+            }
         } catch {
             onError(error)
         }

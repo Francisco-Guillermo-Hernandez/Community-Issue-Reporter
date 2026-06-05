@@ -10,12 +10,13 @@ import SwiftUI
 struct ClearButtonModifier: ViewModifier {
     @Binding var text: String
     var isPill: Bool = false
+    var disabled: Bool
     
     func body(content: Content) -> some View {
         content
             .padding(.trailing, text.isEmpty ? 0 : 8)
             .overlay(alignment: .trailing) {
-                if !text.isEmpty {
+                if !text.isEmpty && !disabled {
                     Button {
                         text = ""
                     } label: {

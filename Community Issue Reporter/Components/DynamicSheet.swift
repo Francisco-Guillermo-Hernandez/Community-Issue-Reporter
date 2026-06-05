@@ -51,6 +51,7 @@ fileprivate struct SheetHeightModifier: ViewModifier, Animatable {
     func body(content: Content) -> some View {
         content
             .presentationDetents(height == .zero ? [.medium] : [.height(height)])
+            .presentationBackgroundInteraction(.enabled(upThrough: .height(height)))
     }
 }
 

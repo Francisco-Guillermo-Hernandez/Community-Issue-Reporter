@@ -9,44 +9,31 @@ import SwiftUI
 import GoogleSignIn
 import GoogleSignInSwift
 
-enum LoginType {
-    case visitor
-    case user
-}
-
 struct LoginView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var userOAuthState: UserOAuthResultState = .unowned
     let onTokenReceived: (String, LoginType) -> Void
     var body: some View {
-//        VStack {
-//            
-//        }
+
         ZStack(alignment: .bottom) {
             
             Image("Login_background")
                 .resizable()
-//                .frame(width: .infinity)
 //                .aspectRatio(9/16, contentMode: .fill)
-//                .scaledToFit()
 //                .edgesIgnoringSafeArea(.all)
                 .backgroundExtensionEffect()
             
-    
-            
             VStack(spacing: .themeSpacing * 6) {
-               
-                
-               
                 GooglePillButton(action: loginWithGoogle)
                     .padding(.top, 16)
                         
-                Button {
-                    onTokenReceived("guest", .visitor)
-                } label: {
-                    Text("Login as a guest")
-                }
-                .buttonSizing(.flexible)
+                
+                ThemedButton(
+                    message: "Login as a Guest",
+                    action: loginAsGuest,
+                    type: .outline,
+                    style: .normal
+                )
                
                 
                 LinksView()
@@ -58,10 +45,26 @@ struct LoginView: View {
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: .themeRadius * 4, style: .continuous)
-                    .fill(.white)
+                    .fill(Color.theme.cardBackground)
+                    .glassEffect(in:  RoundedRectangle(cornerRadius: .themeRadius * 4, style: .continuous))
             )
+            .padding(.horizontal, 6)
+            .padding(.bottom, 6)
         }
         .ignoresSafeArea(edges: .bottom)
+    }
+    
+    func loginAsGuest() {
+        Task {
+            await UserRepository.shared.loginAsGuest(
+                onSuccess: { state, sessionId in
+                    self.userOAuthState = state
+                    onTokenReceived(sessionId, .guest)
+                }, onError: { error in
+                    print(error)
+                }
+            )
+        }
     }
     
     func loginWithGoogle() {

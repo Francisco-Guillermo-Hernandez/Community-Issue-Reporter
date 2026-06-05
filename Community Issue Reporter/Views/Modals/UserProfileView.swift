@@ -119,6 +119,11 @@ struct UserProfileView: View {
                 
             }
             .background(Color.theme.background)
+            .overlay {
+                if profile.showPicker {
+                    CustomBlurryOverlay(show: $profile.showPicker)
+                }
+            }
             .safeAreaInset(edge: .bottom) {
                 Button(role: .destructive) {
                     appState.logout()

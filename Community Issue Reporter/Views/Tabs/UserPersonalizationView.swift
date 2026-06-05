@@ -7,6 +7,25 @@
 
 import SwiftUI
 
+struct CustomBlurryOverlay: View {
+   @Binding var show: Bool
+    
+    init(show: Binding<Bool>) {
+        self._show = show
+    }
+    
+    var body: some View {
+        Rectangle()
+            .fill(.ultraThinMaterial)
+            .ignoresSafeArea()
+            .onTapGesture {
+                show.toggle()
+            }
+            .transition(.opacity)
+            .zIndex(1)
+    }
+}
+
 struct UserPersonalizationView: View {
     @Environment(\.dismiss) var dismiss
     @State private var isPresented: Bool = false
@@ -15,6 +34,7 @@ struct UserPersonalizationView: View {
     @State private var email: String = ""
     @State private var user: UserProfile?
     @ObservedObject var profile = ProfileDataModel()
+    let appState = AuthViewModel()
     
     var nextStep: () -> Void
     
@@ -22,18 +42,24 @@ struct UserPersonalizationView: View {
         VStack(spacing: .themeSpacing * 4) {
             
               
-            VStack(spacing: 4) {
+            VStack(spacing: .themeSpacing) {
 
                 ProfileImage(viewModel: profile)
                     .padding(.bottom, 8)
+                    .padding(.top, .themePadding * 2)
 
                 Text(userName)
                     .font(.title3)
                     .fontWeight(.semibold)
 
-                Text("El Salvador")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                HStack {
+                    
+                    if let firstLevel = appState.selectedCity?.firstLevel,  let thirdLevel = appState.selectedCity?.thirdLevel {
+                        Text("\(firstLevel), \(thirdLevel)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
             
             VStack {
@@ -64,6 +90,12 @@ struct UserPersonalizationView: View {
            
             
             Spacer()
+        }
+        .blur(radius: profile.showPicker ? 15 : 0)
+        .overlay {
+            if profile.showPicker {
+                CustomBlurryOverlay(show: $profile.showPicker)
+            }
         }
         .navigationTitle(Text("Personalize your profile"))
         .background(Color.theme.background)

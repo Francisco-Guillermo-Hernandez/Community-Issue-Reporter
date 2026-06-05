@@ -40,6 +40,7 @@ struct PublicUserData: Decodable {
     let email: String
     let profilePicture: String
     let sessionDuration: Int
+    let userType: UserType
 }
 
 struct LoginWithOAuthProviderResponse: Decodable {

@@ -15,7 +15,7 @@ enum ViewOptions: String {
 
 // MARK: -
 enum LoginType {
-    case visitor
+    case guest
     case user
 }
 
@@ -38,4 +38,10 @@ enum CurrentView {
     case initials
     case monogram
     case google
+}
+
+enum UserType: String, Codable {
+    case guest
+    case citizen
+    case government
 }

@@ -140,7 +140,7 @@ struct AvatarOption: Identifiable, Hashable {
 
 // MARK: - Options
 let options: [AvatarOption] = [
-    .init(title: String(localized: "Google Auth"), associatedView: .google),
+    .init(title: String(localized: "Google Auth"), associatedView: .GoogleAuth),
 //    .init(title: String(localized: "Avatar"), associatedView: .avatar),
     .init(title: String(localized: "Monogram"), associatedView: .monogram),
     .init(title: String(localized: "Initials"), associatedView: .initials),
@@ -151,10 +151,11 @@ let options: [AvatarOption] = [
 // MARK: - sheet
 struct UserAvatarPersonalizationSheet: View {
     var animation: Animation
+    var preselectedColor: Color
     @ObservedObject var viewModel: ProfileDataModel
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var currentView: CurrentView = .optionsSelector
-    @State private var selectedPeriod: AvatarOption?
+    @State private var selectedPeriod: AvatarOption? = options[0]
     @State private var duration: String = ""
     @State private var selectedColor: Color = .orange
     @State var orientation = UIDevice.current.orientation
@@ -170,7 +171,7 @@ struct UserAvatarPersonalizationSheet: View {
                 switch currentView {
 
                 case .optionsSelector:
-                    optionsSelectorView()
+                    optionsSelectorView(preselectedColor)
                         .geometryGroup()
                         .transition(
                             .blurReplace(.downUp)
@@ -191,7 +192,7 @@ struct UserAvatarPersonalizationSheet: View {
                 case .initials:
                     textBasedAvatarView(.initials)
 
-                case .google:
+                case .GoogleAuth:
                     Text("Google auth")
                 }
             }
@@ -237,7 +238,7 @@ struct UserAvatarPersonalizationSheet: View {
     }
 
     @ViewBuilder
-    func optionsSelectorView() -> some View {
+    func optionsSelectorView(_ preselectedColor: Color) -> some View {
         VStack(spacing: .themeSpacing * 5) {
             SheetHeaderView(title: String(localized: "Create your Avatar from"), onClose: {
                 dismiss()
@@ -253,32 +254,26 @@ struct UserAvatarPersonalizationSheet: View {
 
                     VStack {
                         Group {
-                            if option.associatedView == .google {
+                            if option.associatedView == .GoogleAuth {
                                 
-                                if let url = UserRepository.shared.getProfilePictureURL() {
-                                    CachedAsyncImage(url: url) { image in
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                    } placeholder: {
-                                        ProgressView()
-                                    }
-                                    .frame(width: 80, height: 80)
-                                    .clipShape(Circle())
-                                    
-                                } else {
-                                    Image("user_b")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
+                                let GoogleAuthAvatar = getGoogleAuthenticatorAvatar()
+                                Button {
+                                    selectedPeriod = option
+                                    applyGoogleAuthenticatorAvatar(GoogleAuthAvatar)
+                                } label: {
+                                    GoogleAuthAvatar
                                         .frame(width: 80, height: 80)
-                                        .clipShape(Circle())
+                                        
                                 }
+                                .buttonStyle(.glass)
+                                .buttonBorderShape(.circle)
                                 
                             }
 
                             if option.associatedView == .camera {
 
                                 Button {
+                                    selectedPeriod = option
                                     takePhotoUsingCamera { images in
                                         onSelect(images)
                                     }
@@ -291,7 +286,8 @@ struct UserAvatarPersonalizationSheet: View {
                                         .background(Color.theme.primary)
                                         .clipShape(Circle())
                                 }
-                                .buttonStyle(.borderless)
+                                .buttonStyle(.glass)
+                                .buttonBorderShape(.circle)
                                 .fullScreenCover(isPresented: $isCameraPresented) {
                                     ImagePicker(sourceType: .camera, onImagePicked: { resource in
                                         
@@ -332,9 +328,9 @@ struct UserAvatarPersonalizationSheet: View {
                                         .clipShape(Circle())
 
                                 }
-                                .buttonStyle(.borderless)
                                 .onChange(of: selectedPhotoItems) { _, newItems in
                                     guard !newItems.isEmpty else { return }
+                                    selectedPeriod = option
                                     loadSelectedImages(from: newItems) { image in
                                         if let avatar = image {
                                             onSelect(avatar)
@@ -342,21 +338,42 @@ struct UserAvatarPersonalizationSheet: View {
                                        
                                     }
                                 }
+                                .buttonStyle(.glass)
+                                .buttonBorderShape(.circle)
                             }
 
                             if option.associatedView == .initials {
-                                MonogramView(
-                                    text: viewModel.getInitials(),
-                                    backgroundColor: .purple
-                                )
+                                Button {
+                                    selectedPeriod = option
+                                    
+                                    withAnimation(animation) {
+                                        currentView = .initials
+                                    }
+                                } label: {
+                                    MonogramView(
+                                        text: viewModel.getInitials(),
+                                        backgroundColor: preselectedColor
+                                    )
+                                }
+                                .buttonStyle(.glass)
+                                .buttonBorderShape(.circle)
 
                             }
 
                             if option.associatedView == .monogram {
-                                MonogramView(
-                                    text: viewModel.getMonogram(),
-                                    backgroundColor: .purple
-                                )
+                                Button {
+                                    selectedPeriod = option
+                                    withAnimation(animation) {
+                                        currentView = .monogram
+                                    }
+                                } label: {
+                                    MonogramView(
+                                        text: viewModel.getMonogram(),
+                                        backgroundColor: preselectedColor
+                                    )
+                                }
+                                .buttonStyle(.glass)
+                                .buttonBorderShape(.circle)
 
                             }
 
@@ -368,28 +385,25 @@ struct UserAvatarPersonalizationSheet: View {
                                     .clipShape(Circle())
                             }
                         }
-
-//                        .opacity(isSelected ? 1 : 0.72)
-                        .onTapGesture {
-                            withAnimation(animation) {
-                                if option.associatedView == .google
-                                    || option.associatedView == .photo
-                                {
-                                    selectedPeriod = isSelected ? nil : option
-                                } else {
-                                    currentView = option.associatedView
-                                }
-
-                                if option.associatedView == .photo {
-                                    currentView = .camera
-                                }
-
+                        .overlay(alignment: .bottomTrailing) {
+                            
+                            if isSelected {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .symbolRenderingMode(.multicolor)
+                                    .symbolColorRenderingMode(.gradient)
+                                    .foregroundColor(.green)
+                                    .font(.system(size: 24, weight: .bold))
+                                    .symbolEffect(.bounce.up.wholeSymbol, options: .nonRepeating)
+                                   
                             }
+                            
                         }
 
                         Text(option.title)
-                            .fontWeight(.semibold)
                             .font(.footnote)
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.primary)
+                            .opacity(isSelected ? 1 : 0.75)
 
                     }
                 }
@@ -415,6 +429,39 @@ struct UserAvatarPersonalizationSheet: View {
             }
         }
     }
+    
+    @ViewBuilder
+    private func getGoogleAuthenticatorAvatar() -> some View {
+        Group {
+            if let url = UserRepository.shared.getProfilePictureURL() {
+                CachedAsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    ProgressView()
+                }
+               
+            } else {
+                Image("user_b")
+                    .resizable()
+            }
+        }
+        .clipShape(Circle())
+        .aspectRatio(contentMode: .fill)
+        .clipShape(Circle())
+    }
+    
+    /// Convert Google existing Avatar from View to image
+    private func applyGoogleAuthenticatorAvatar(_ GoogleAuthAvatar: any View) {
+        
+        let view = GoogleAuthAvatar.frame(width: 200, height: 200)
+        
+        if let image = view.asImage() {
+            viewModel.uploadProfilePicture(image)
+            dismiss()
+        }
+    }
 
     /// Transform Monogram into a image to sent it
     private func applyTextBasedAvatar(_ options: TextBasedAvatarOptions, _ color: Color) {
@@ -425,6 +472,7 @@ struct UserAvatarPersonalizationSheet: View {
                 ? viewModel.getInitials() : viewModel.getMonogram(),
             backgroundColor: color
         )
+        
         if let image = view.asImage() {
             viewModel.uploadProfilePicture(image)
             dismiss()
@@ -450,7 +498,7 @@ struct UserAvatarPersonalizationSheet: View {
             var image: UIImage?
            
             /// To UIImage
-            if let data = try? await items[0].loadTransferable(type: Data.self){
+            if let data = try? await items[0].loadTransferable(type: Data.self) {
                 image = UIImage(data: data)
             }
 
@@ -471,8 +519,7 @@ struct ProfileImage: View {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: 150, height: 150)
-                    .clipShape(Circle())
+                   
             } else if let url = UserRepository.shared.getAvatar() {
                 CachedAsyncImage(url: url) { image in
                     image
@@ -481,33 +528,33 @@ struct ProfileImage: View {
                 } placeholder: {
                     ProgressView()
                 }
-                .frame(width: 150, height: 150)
-                .clipShape(Circle())
                 
             } else {
                 Image("user_b")
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 150, height: 150)
-                    .clipShape(Circle())
-
             }
         }
+        .frame(width: 150, height: 150)
+        .clipShape(Circle())
         .overlay(alignment: .bottomTrailing) {
             Button {
                 viewModel.showPicker.toggle()
             } label: {
                 Image(systemName: "pencil.circle.fill")
                     .symbolRenderingMode(.multicolor)
+                    .symbolColorRenderingMode(.gradient)
                     .font(.system(size: 30))
-                    .foregroundColor(.accentColor)
+                    .foregroundColor(viewModel.isGuest ? .accentColor.mix(with: .black, by: 0.5) : .accentColor)
             }
+            .disabled(viewModel.isGuest)
         }
         .sheet(isPresented: $viewModel.showPicker) {
             let animation: Animation = .snappy(duration: 0.3, extraBounce: 0)
             DynamicSheet(animation: animation) {
                 UserAvatarPersonalizationSheet(
                     animation: animation,
+                    preselectedColor: .purple,
                     viewModel: viewModel
                 )
                 .presentationBackground(Color.theme.background)

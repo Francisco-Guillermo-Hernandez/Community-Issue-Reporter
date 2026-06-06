@@ -25,6 +25,7 @@ final class ProfileDataModel: ObservableObject {
     @Published var userName: String = "Demo User"
     @Published var isUploading: Bool = false
     @Published var showPicker: Bool = false
+    @Published var isGuest: Bool = false
     
     // Default background colors for selection
     let backgroundColors: [Color] = [
@@ -37,7 +38,7 @@ final class ProfileDataModel: ObservableObject {
         isUploading = true
         
         Task {
-           await UserRepository.shared.uploadImage(image, userName: userName) { [weak self] (result: Result<String, Error>) in
+           await UserRepository.shared.changeAvatar(image, userName: userName) { [weak self] (result: Result<String, Error>) in
                 DispatchQueue.main.async {
                     self?.isUploading = false
                     switch result {

@@ -84,7 +84,7 @@ final class UserRepository {
             return nil
         }
         
-        return profile.imageURL(withDimension: 100)
+        return profile.imageURL(withDimension: 200)
     }
     
     func getName() -> String {

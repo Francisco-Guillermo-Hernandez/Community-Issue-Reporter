@@ -21,14 +21,14 @@ struct LandingView: View {
     @State private var path = [LandingNavigation]()
     @State private var selectedCity: FriendlyCityDistribution = .init(
         cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
-        firstLevel: "",
-        secondLevel: "",
-        thirdLevel: "",
-        ZipCode: "",
-        legalGroupName: "",
-        coordinates: .init(lat: 0, lng: 0),
-        isCapitalCity: 0,
-        isDepartmentalCapital: 0
+        firstLevel: "El Salvador",
+        secondLevel: "San Salvador",
+        thirdLevel: "San Salvador",
+        ZipCode: "1101",
+        legalGroupName: "Distrito de San Salvador",
+        coordinates: .init(lat: 13.701270, lng: -89.224432),
+        isCapitalCity: 1,
+        isDepartmentalCapital: 1
     )
     var countryCode: CountryCode = .SV
     var body: some View {
@@ -72,21 +72,12 @@ struct LandingView: View {
     
     private func handleLogin(for session: String, with type: LoginType) {
         if !session.isEmpty {
-            if type == .visitor {
-                Task {
-                    await UserRepository.loginAsVisitor(
-                        onSuccess: { state, sessionId in
-                            self.userOAuthState = state
-                            saveIntoKeychain(sessionId)
-                            self.isGuest.toggle()
-                        }, onError: { error in
-                            print(error)
-                        }
-                    )
-                }
+            if type == .guest {
+                saveIntoKeychain(session)
+                self.isGuest.toggle()
             } else {
                 Task {
-                    await UserRepository.login(session,
+                    await UserRepository.shared.login(session,
                         onSuccess: { state, sessionId in
                         
                             self.userOAuthState = state
@@ -125,4 +116,5 @@ struct LandingView: View {
     @Previewable
     @State var isGuest: Bool = false
     LandingView(isGuest: $isGuest)
+        .environmentObject(AuthViewModel())
 }

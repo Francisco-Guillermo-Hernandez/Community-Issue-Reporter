@@ -10,128 +10,7 @@ import Photos
 import PhotosUI
 import SwiftUI
 
-import SwiftUI
-
-// MARK: - Custom SheetHeader to be used with the custom SheetView
-struct SheetHeaderView: View {
-    let title: String
-    let onClose: () -> Void
-    var body: some View {
-        HStack {
-            Button(role: .close, action: onClose) {
-               Image(systemName: "xmark")
-                    .font(.system(size: 23, weight: .medium))
-                    .symbolRenderingMode(.hierarchical)
-                    .lineHeight(.multiple(factor: 1.5))
-                    .padding(.all, 4)
-           }
-           .buttonBorderShape(.circle)
-           .contentShape(.circle)
-           .buttonStyle(.glass)
-           .frame(maxWidth: 45)
-           
-           Text(title)
-                .font(.headline)
-               .frame(maxWidth: .infinity)
-               .foregroundStyle(.primary)
-            
-           Spacer()
-               .frame(maxWidth: 45)
-        }
-    }
-}
-
-
-// MARK: - Color Grid
-struct ColorGrid: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @Binding var selectedColor: Color
-    var colors: [Color]
-
-    var body: some View {
-        LazyVGrid(columns: columns, spacing: .themeSpacing * 4) {
-            ForEach(colors, id: \.self) { color in
-                Circle()
-//                    .fill(selectedColor == color ? color : color.mix(with: .white, by: 0.4))
-                    .fill(color.opacity(isSelected(color) ? 1 : 0.75))
-                    .scaleEffect(isSelected(color) ? 1.15 : 1)
-                    .frame(width: 40, height: 40)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.6), value: isSelected(color))
-                    .overlay {
-                        if selectedColor == color {
-                            
-                            ZStack {
-                                Circle()
-                                    .stroke(Color.theme.border, lineWidth: 2 )
-                                
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(.white)
-                                    .font(.caption.bold())
-                            }
-                            
-                        }
-                        
-                        
-                    }
-                    .onTapGesture {
-                        selectedColor = color
-                    }
-            }
-        }
-    }
-    
-    private var columns: [GridItem] {
-        Array(
-            repeating: GridItem(.fixed(40), spacing: 15),
-            count: 6
-        )
-    }
-    
-    private func isSelected(_ color: Color) -> Bool {
-        selectedColor == color
-    }
-}
-
-struct MonogramView: View {
-    var mode: MonogramMode = .preview
-    var text: String
-    var backgroundColor: Color
-    var body: some View {
-        ZStack {
-            backgroundColor
-            Text(text)
-                .font(.system(size: mode == .preview ? 36 : 90, weight: .bold))
-                .foregroundColor(.white)
-        }
-        .frame(
-            width: mode == .preview ? 80 : 200,
-            height: mode == .preview ? 80 : 200
-        )
-        .clipShape(Circle())
-    }
-}
-
-extension View {
-    func asImage() -> UIImage? {
-        let controller = UIHostingController(
-            rootView: self.edgesIgnoringSafeArea(.all)
-        )
-        let view = controller.view
-
-        let targetSize = CGSize(width: 200, height: 200)  // Fixed size for avatars
-        view?.bounds = CGRect(origin: .zero, size: targetSize)
-        view?.backgroundColor = .clear
-
-        let renderer = UIGraphicsImageRenderer(size: targetSize)
-        return renderer.image { _ in
-            view?.drawHierarchy(
-                in: CGRect(origin: .zero, size: targetSize),
-                afterScreenUpdates: true
-            )
-        }
-    }
-}
-
+// MARK: - Struct definition
 struct AvatarOption: Identifiable, Hashable {
     var id: String = UUID().uuidString
     var title: String
@@ -247,8 +126,7 @@ struct UserAvatarPersonalizationSheet: View {
             /// Grid Box View
             LazyVGrid(
                 columns: Array(repeating: GridItem(), count: 3),
-                spacing: .themeSpacing * 4
-            ) {
+                spacing: .themeSpacing * 4) {
                 ForEach(options, id: \.self) { option in
                     let isSelected = selectedPeriod?.id == option.id
 

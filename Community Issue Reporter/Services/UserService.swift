@@ -18,7 +18,33 @@ struct UserService {
         return try await client.post(path: "auth/Google/tokenSignInOrLogin", body: payload, headers: headers)
     }
     
-    func loginAsVisitor(_ headers: Array<HTTPHeader>) async throws -> LoginWithOAuthProviderResponse {
-        return try await client.post(path: "auth/visitors/generate/session", body: [String: String](), headers: headers)
+    func loginAsGuest(_ headers: Array<HTTPHeader>) async throws -> LoginWithOAuthProviderResponse {
+        return try await client.post(path: "auth/guest/generate/session", body: [String: String](), headers: headers)
+    }
+    
+    func checkAvailability(of userName: String) async throws -> GenericResponse {
+        return try await client.post(path: "user/check/username", body: ["userName": userName], headers: [])
+    }
+    
+    func change(avatar: Data) async throws -> CustomizedResponse<AvatarResponse> {
+
+        let files: [MultipartFormFile] = [
+            MultipartFormFile(
+                name: "avatar",
+                filename: "avatar.jpg",
+                mimeType: "image/jpeg",
+                data: avatar
+            )
+        ]
+
+        return try await client.post(
+            path: "user/change/avatar",
+            body: [String: String](),
+            headers: [
+                HTTPHeader(name: "Client-Type", content: "Mobile-App")
+            ],
+            formFiles: files,
+            withOAuth: true,
+        )
     }
 }

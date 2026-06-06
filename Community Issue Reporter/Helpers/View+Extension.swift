@@ -41,3 +41,25 @@ extension View {
         }
     }
 }
+
+// MARK: - Extension to transform a View to a UIImage
+extension View {
+    func asImage() -> UIImage? {
+        let controller = UIHostingController(
+            rootView: self.edgesIgnoringSafeArea(.all)
+        )
+        let view = controller.view
+
+        let targetSize = CGSize(width: 200, height: 200)  // Fixed size for avatars
+        view?.bounds = CGRect(origin: .zero, size: targetSize)
+        view?.backgroundColor = .clear
+
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        return renderer.image { _ in
+            view?.drawHierarchy(
+                in: CGRect(origin: .zero, size: targetSize),
+                afterScreenUpdates: true
+            )
+        }
+    }
+}

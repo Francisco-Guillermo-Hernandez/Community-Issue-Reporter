@@ -20,9 +20,14 @@ enum ServiceError: Error {
     case invalidResponse
     case httpStatus(Int)
     case badRequest(String)
-    case unauthorized
+    case unauthorized(String)
+    case forbidden
     case notFound
+    case contentLengthMissing
+    case unSupportedMediaType
+    case unavailableForLegalReasons
     case serverError(String)
+    case tooManyRequests
 }
 
 struct ServiceClient {
@@ -103,6 +108,7 @@ struct ServiceClient {
         request.httpMethod = "GET"
         request.setValue("Application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("en-US", forHTTPHeaderField: "Accept-Language")
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         
         if headers.count > 0 {
             for header in headers {
@@ -116,7 +122,7 @@ struct ServiceClient {
         }
 
         
-        let (data, response) = try await NetworkManager.shared.fetchData(request: request) //session.data(for: request)
+        let (data, response) = try await NetworkManager.shared.fetchData(request: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }
@@ -170,7 +176,48 @@ struct ServiceClient {
         return try decode(T.self, from: data)
     }
     
-    func post<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> V {
+    func errorHandler(for httpResponse: HTTPURLResponse) async throws -> String {
+//        let decoder = JSONDecoder()
+//        return try decoder.decode(T.self, from: data)
+        
+        switch httpResponse.statusCode {
+        case 200...299:
+            return "done"
+            
+        case 300...399:
+            throw ServiceError.httpStatus(httpResponse.statusCode)
+            
+        case 400:
+            throw ServiceError.badRequest("Bad Request")
+        case 401:
+            throw ServiceError.unauthorized("Bad token")
+        case 403:
+            throw ServiceError.forbidden
+        case 404:
+            throw ServiceError.notFound
+        case 411:
+            throw ServiceError.contentLengthMissing
+        case 415:
+            throw ServiceError.unSupportedMediaType
+        case 429:
+            throw ServiceError.tooManyRequests
+        case 500...599:
+            throw ServiceError.serverError("Server Error")
+        case 451:
+            throw ServiceError.unavailableForLegalReasons
+        default:
+            throw ServiceError.httpStatus(httpResponse.statusCode)
+        }
+
+    }
+    
+    func post<T: Encodable, V: Decodable>(
+        path: String,
+        body: T,
+        headers: Array<HTTPHeader> = [],
+        formFiles: [MultipartFormFile] = [],
+        withOAuth: Bool = false
+    ) async throws -> V {
         let sanitizedPath = path.hasPrefix(delimiter) ? String(path.dropFirst()) : path
         guard let baseURL else {
             throw ServiceError.baseURLMissing
@@ -179,7 +226,16 @@ struct ServiceClient {
         let url = baseURL.appendingPathComponent(sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        
+        if formFiles.isEmpty {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } else {
+            let boundary = "Boundary-\(UUID().uuidString)"
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            let fields = try makeFormFields(from: body)
+            request.httpBody = makeMultipartBody(fields: fields, files: formFiles, boundary: boundary)
+        }
         
         if withOAuth {
             let oAuthHeader = getOAuthHeader()
@@ -192,8 +248,12 @@ struct ServiceClient {
             }
         }
         
-        let encoder = JSONEncoder()
-        request.httpBody = try encoder.encode(body)
+       
+        
+        if formFiles.isEmpty {
+            let encoder = JSONEncoder()
+            request.httpBody = try encoder.encode(body)
+        }
         
         let (data, response) = try await session.data(for: request)
         
@@ -220,6 +280,7 @@ struct ServiceClient {
         let url = baseURL.appendingPathComponent(sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if withOAuth {
@@ -262,6 +323,7 @@ struct ServiceClient {
         let url = baseURL.appendingPathComponent(sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if withOAuth {
@@ -308,6 +370,7 @@ struct ServiceClient {
         let url = baseURL.appendingPathComponent(sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
 
         if formFiles.isEmpty {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

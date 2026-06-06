@@ -37,7 +37,7 @@ enum CurrentView {
     case photo
     case initials
     case monogram
-    case google
+    case GoogleAuth
 }
 
 enum UserType: String, Codable {

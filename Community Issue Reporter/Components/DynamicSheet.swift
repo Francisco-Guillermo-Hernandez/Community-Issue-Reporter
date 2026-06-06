@@ -7,6 +7,36 @@
 
 import SwiftUI
 
+// MARK: - Custom SheetHeader to be used with the custom SheetView
+struct SheetHeaderView: View {
+    let title: String
+    let onClose: () -> Void
+    var body: some View {
+        HStack {
+            Button(role: .close, action: onClose) {
+               Image(systemName: "xmark")
+                    .font(.system(size: 23, weight: .medium))
+                    .symbolRenderingMode(.hierarchical)
+                    .lineHeight(.multiple(factor: 1.5))
+                    .padding(.all, 4)
+           }
+           .buttonBorderShape(.circle)
+           .contentShape(.circle)
+           .buttonStyle(.glass)
+           .frame(maxWidth: 45)
+           
+           Text(title)
+                .font(.headline)
+               .frame(maxWidth: .infinity)
+               .foregroundStyle(.primary)
+            
+           Spacer()
+               .frame(maxWidth: 45)
+        }
+    }
+}
+
+// MARK: - Custom sheet
 struct DynamicSheet<Content: View>: View {
     var animation: Animation
     @ViewBuilder var content: Content

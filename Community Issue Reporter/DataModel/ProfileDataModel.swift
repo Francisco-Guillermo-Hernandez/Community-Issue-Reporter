@@ -27,12 +27,61 @@ final class ProfileDataModel: ObservableObject {
     @Published var showPicker: Bool = false
     @Published var isGuest: Bool = false
     
+    // Persistence keys
+    private let selectedOptionKey = "selectedAvatarOption"
+    private let selectedColorKey = "selectedAvatarColor"
+
+    @Published var selectedAvatarOptionView: CurrentView {
+        didSet {
+            UserDefaults.standard.set(selectedAvatarOptionView.rawValue, forKey: selectedOptionKey)
+        }
+    }
+
+    @Published var selectedAvatarColor: Color {
+        didSet {
+            if let hex = selectedAvatarColor.toHex() {
+                UserDefaults.standard.set(hex, forKey: selectedColorKey)
+            }
+        }
+    }
+    
     // Default background colors for selection
     let backgroundColors: [Color] = [
         .indigo, .purple, .init(red: 0.4, green: 0.2, blue: 0.6), .blue, .init(red: 0.5, green: 0.1, blue: 0.3), .pink,
         .emerald, .green, .init(red: 0.6, green: 0.8, blue: 0.1), .cyan, .init(red: 0.1, green: 0.7, blue: 0.9), .init(red: 0.1, green: 0.9, blue: 0.9),
         .yellow, .orange, .init(red: 1.0, green: 0.5, blue: 0.2), .red, .init(red: 0.9, green: 0.1, blue: 0.4), .init(red: 0.8, green: 0.1, blue: 0.7)
     ]
+    
+    init() {
+        let savedOption = UserDefaults.standard.string(forKey: selectedOptionKey) ?? CurrentView.GoogleAuth.rawValue
+        self.selectedAvatarOptionView = CurrentView(rawValue: savedOption) ?? .GoogleAuth
+        
+        let savedColorHex = UserDefaults.standard.string(forKey: selectedColorKey) ?? "FFA500" // Default orange
+        self.selectedAvatarColor = Color(hex: savedColorHex)
+    }
+    
+    func applyGoogleAvatar(completion: @escaping () -> Void) {
+        guard let url = UserRepository.shared.getProfilePictureURL() else { return }
+        isUploading = true
+        
+        Task {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                guard let image = UIImage(data: data) else {
+                    await MainActor.run { isUploading = false }
+                    return
+                }
+                
+                await MainActor.run {
+                    uploadProfilePicture(image)
+                    completion()
+                }
+            } catch {
+                await MainActor.run { isUploading = false }
+                print("Failed to fetch Google avatar: \(error)")
+            }
+        }
+    }
     
     func uploadProfilePicture(_ image: UIImage) {
         isUploading = true

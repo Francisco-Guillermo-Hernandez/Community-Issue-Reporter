@@ -30,13 +30,10 @@ let options: [AvatarOption] = [
 // MARK: - sheet
 struct UserAvatarPersonalizationSheet: View {
     var animation: Animation
-    var preselectedColor: Color
     @ObservedObject var viewModel: ProfileDataModel
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var currentView: CurrentView = .optionsSelector
-    @State private var selectedPeriod: AvatarOption? = options[0]
     @State private var duration: String = ""
-    @State private var selectedColor: Color = .orange
     @State var orientation = UIDevice.current.orientation
 
     @State private var selectedImages: UIImage? = nil
@@ -44,13 +41,18 @@ struct UserAvatarPersonalizationSheet: View {
     @State private var isCameraPresented: Bool = false
 
     @Environment(\.dismiss) var dismiss
+    
+    private var selectedOption: AvatarOption? {
+        options.first(where: { $0.associatedView == viewModel.selectedAvatarOptionView })
+    }
+    
     var body: some View {
         VStack(spacing: .themeSpacing * 5) {
             ZStack {
                 switch currentView {
 
                 case .optionsSelector:
-                    optionsSelectorView(preselectedColor)
+                    optionsSelectorView(viewModel.selectedAvatarColor)
                         .geometryGroup()
                         .transition(
                             .blurReplace(.downUp)
@@ -92,21 +94,22 @@ struct UserAvatarPersonalizationSheet: View {
                 }
             )
             
+             
             MonogramView(
                 text: option == .initials
                     ? viewModel.getInitials() : viewModel.getMonogram(),
-                backgroundColor: selectedColor
+                backgroundColor: viewModel.selectedAvatarColor
             )
 
             ColorGrid(
-                selectedColor: $selectedColor,
+                selectedColor: $viewModel.selectedAvatarColor,
                 colors: viewModel.backgroundColors
             )
 
             ThemedButton(
                 message: String(localized: "Save"),
                 action: {
-                    applyTextBasedAvatar(option, selectedColor)
+                    applyTextBasedAvatar(option, viewModel.selectedAvatarColor)
                 },
                 type: .outline
             )
@@ -128,18 +131,19 @@ struct UserAvatarPersonalizationSheet: View {
                 columns: Array(repeating: GridItem(), count: 3),
                 spacing: .themeSpacing * 4) {
                 ForEach(options, id: \.self) { option in
-                    let isSelected = selectedPeriod?.id == option.id
+                    let isSelected = selectedOption?.associatedView == option.associatedView
 
                     VStack {
                         Group {
                             if option.associatedView == .GoogleAuth {
                                 
-                                let GoogleAuthAvatar = getGoogleAuthenticatorAvatar()
                                 Button {
-                                    selectedPeriod = option
-                                    applyGoogleAuthenticatorAvatar(GoogleAuthAvatar)
+                                    viewModel.selectedAvatarOptionView = option.associatedView
+                                    viewModel.applyGoogleAvatar {
+                                        dismiss()
+                                    }
                                 } label: {
-                                    GoogleAuthAvatar
+                                    getGoogleAuthenticatorAvatar()
                                         .frame(width: 80, height: 80)
                                         
                                 }
@@ -151,7 +155,7 @@ struct UserAvatarPersonalizationSheet: View {
                             if option.associatedView == .camera {
 
                                 Button {
-                                    selectedPeriod = option
+                                    viewModel.selectedAvatarOptionView = option.associatedView
                                     takePhotoUsingCamera { images in
                                         onSelect(images)
                                     }
@@ -208,7 +212,7 @@ struct UserAvatarPersonalizationSheet: View {
                                 }
                                 .onChange(of: selectedPhotoItems) { _, newItems in
                                     guard !newItems.isEmpty else { return }
-                                    selectedPeriod = option
+                                    viewModel.selectedAvatarOptionView = option.associatedView
                                     loadSelectedImages(from: newItems) { image in
                                         if let avatar = image {
                                             onSelect(avatar)
@@ -222,7 +226,7 @@ struct UserAvatarPersonalizationSheet: View {
 
                             if option.associatedView == .initials {
                                 Button {
-                                    selectedPeriod = option
+                                    viewModel.selectedAvatarOptionView = option.associatedView
                                     
                                     withAnimation(animation) {
                                         currentView = .initials
@@ -240,7 +244,7 @@ struct UserAvatarPersonalizationSheet: View {
 
                             if option.associatedView == .monogram {
                                 Button {
-                                    selectedPeriod = option
+                                    viewModel.selectedAvatarOptionView = option.associatedView
                                     withAnimation(animation) {
                                         currentView = .monogram
                                     }
@@ -330,17 +334,6 @@ struct UserAvatarPersonalizationSheet: View {
         .clipShape(Circle())
     }
     
-    /// Convert Google existing Avatar from View to image
-    private func applyGoogleAuthenticatorAvatar(_ GoogleAuthAvatar: any View) {
-        
-        let view = GoogleAuthAvatar.frame(width: 200, height: 200)
-        
-        if let image = view.asImage() {
-            viewModel.uploadProfilePicture(image)
-            dismiss()
-        }
-    }
-
     /// Transform Monogram into a image to sent it
     private func applyTextBasedAvatar(_ options: TextBasedAvatarOptions, _ color: Color) {
 
@@ -432,7 +425,6 @@ struct ProfileImage: View {
             DynamicSheet(animation: animation) {
                 UserAvatarPersonalizationSheet(
                     animation: animation,
-                    preselectedColor: .purple,
                     viewModel: viewModel
                 )
                 .presentationBackground(Color.theme.background)

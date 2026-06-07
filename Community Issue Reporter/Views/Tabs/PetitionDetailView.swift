@@ -7,16 +7,12 @@
 
 import SwiftUI
 
+
+
 // MARK: - View
 struct PetitionDetailView: View {
     var petition: Petition
     var offline: Bool = false
-    private var shareURL: URL {
-        if let url = URL(string: "https://community-issue-reporter.app/petitions/\(petition.id!)") {
-            return url
-        }
-        return URL(string: "https://community-issue-reporter.app") ?? URL(fileURLWithPath: "/")
-    }
     
     var body: some View {
         NavigationStack {
@@ -93,18 +89,15 @@ struct PetitionDetailView: View {
                     
                     SectionHeader(title: "Petition")
                     VStack(spacing: 8) {
-                        HStack {
-                            Text("Signatures Collected")
-                                .font(.subheadline)
+                        Gauge(value: 29.5, in: 0...100) {
+                            Text(String(localized: "Signatures", comment: "Signatures text at the bottom of the gauge"))
+                                .font(.caption)
                                 .fontWeight(.medium)
-                            Spacer()
-                            Text("60/100")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
+                        } currentValueLabel: {
+                            Text("\(Int(29.5)) %")
                         }
+                        .gaugeStyle(.accessoryLinearCapacity)
                         
-                        ProgressView(value: 60, total: 100)
-                            .tint(.primary)
                             
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -129,7 +122,7 @@ struct PetitionDetailView: View {
             .toolbar {
                 
                 ToolbarItem(placement: .title) {
-                    Text("Report")
+                    Text(petition.title)
                 }
                 
                 ToolbarItem() {
@@ -142,24 +135,24 @@ struct PetitionDetailView: View {
                 ToolbarSpacer(.fixed)
                 
                 ToolbarItem() {
-                    ShareLink(item: shareURL) {
+                    ShareLink(item: buildShareURL(for: "7BTheYpPwK1L/report/traffic-light-ou")!) {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
                 }
             }
             
         }
-        .overlay {
-           if offline {
-               ContentUnavailableView {
-                   Label("Connection Issue", systemImage: "wifi.slash")
-               } description: {
-                   Text("Check your internet connection and try again.")
-               } actions: {
-                   Button("Refresh") {}
-               }
-            }
-        }
+//        .overlay {
+//           if offline {
+//               ContentUnavailableView {
+//                   Label("Connection Issue", systemImage: "wifi.slash")
+//               } description: {
+//                   Text("Check your internet connection and try again.")
+//               } actions: {
+//                   Button("Refresh") {}
+//               }
+//            }
+//        }
     }
     
     
@@ -216,5 +209,22 @@ struct CommentRow: View {
 }
 
 #Preview {
-//    PetitionDetailView(idx: 0)
+
+    @Previewable
+    @State var petition: Petition = .init(
+        id: "",
+        title: "Fix those roads, please",
+        description: "",
+        targetSignatures: 100,
+        currentSignatures: 20,
+        categoryId: 1,
+        statusId: 1,
+        reportedBy: UUID(),
+        disabled: false,
+        createdAt: Date(),
+        updatedAt: Date(),
+        reportsIds: []
+    )
+
+    PetitionDetailView(petition: petition)
 }

@@ -13,31 +13,30 @@ struct CustomChartSubView: View {
     
     
     var body: some View {
-        StatsCardView(stats: .from(json: [
-            "total_reports": 77,
-            "january": ["count": 1],
-            "february": ["count": 2],
-            "march": ["count": 1],
-            "april": ["count": 4],
-            "may": ["count": 5],
-            "june": ["count": 6],
-            "july": ["count": 7],
-            "august": ["count": 8],
-            "september": ["count": 9],
-            "october": ["count": 10],
-            "november": ["count": 11],
-            "december": ["count": 12]
-        ]))
+
+        
+        let statsSummary: StatsSummary = .init(
+            totalEntries: 77,
+            monthlyBreakdown: [
+               MonthlyData(month: 1, count: 1),
+                MonthlyData(month: 2, count: 2),
+                MonthlyData(month: 3, count: 1),
+                MonthlyData(month: 4, count: 4),
+                MonthlyData(month: 5, count: 5),
+                MonthlyData(month: 6, count: 6),
+               MonthlyData(month: 7, count: 7),
+               MonthlyData(month: 8, count: 8),
+               MonthlyData(month: 9, count: 9),
+               MonthlyData(month: 10, count: 10),
+               MonthlyData(month: 11, count: 11),
+               MonthlyData(month: 12, count: 12)
+            ]
+        )
+        
+        StatsCardView(stats: statsSummary)
     }
 }
 
-#Preview {
-    CustomChartSubView()
-}
-
-
-import SwiftUI
-import Charts
 
 // MARK: - Data Models
 struct MonthlyData: Identifiable {
@@ -121,23 +120,23 @@ struct StatsCardView: View {
     }
 }
 
-// MARK: - Integration Helper
-extension StatsSummary {
-    static func from(json: [String: Any]) -> StatsSummary {
-        let total = json["total_reports"] as? Int ?? 0
-        let months = [
-            "january", "february", "march", "april", "may", "june",
-            "july", "august", "september", "october", "november", "december"
-        ]
-        
-        let breakdown = months.enumerated().map { index, name in
-            let monthDict = json[name] as? [String: Any]
-            return MonthlyData(month: index + 1, count: monthDict?["count"] as? Int ?? 0)
-        }
-        
-        return StatsSummary(totalEntries: total, monthlyBreakdown: breakdown)
-    }
-}
+//// MARK: - Integration Helper
+//extension StatsSummary {
+//    static func from(json: [String: Any]) -> StatsSummary {
+//        let total = json["total_reports"] as? Int ?? 0
+//        let months = [
+//            "january", "february", "march", "april", "may", "june",
+//            "july", "august", "september", "october", "november", "december"
+//        ]
+//        
+//        let breakdown = months.enumerated().map { index, name in
+//            let monthDict = json[name] as? [String: Any]
+//            return MonthlyData(month: index + 1, count: monthDict?["count"] as? Int ?? 0)
+//        }
+//        
+//        return StatsSummary(totalEntries: total, monthlyBreakdown: breakdown)
+//    }
+//}
 
 // MARK: - Preview
 //struct StatsCardView_Previews: PreviewProvider {
@@ -162,3 +161,8 @@ extension StatsSummary {
 //        }
 //    }
 //}
+
+
+#Preview {
+    CustomChartSubView()
+}

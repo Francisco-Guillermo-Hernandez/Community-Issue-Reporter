@@ -234,25 +234,10 @@ struct CommentsSectionView: View {
     }
 }
 
-//#Preview {
-//    
-//    
-//    let coordinate = CLLocationCoordinate2D(
-//        latitude: 37.7749,
-//        longitude: -122.4194
-//    )
-//    
-//    let issue = IssueMarker(
-//        id: UUID().uuidString,
-//        title: "A big pothole",
-//        description: "There is a big pothole in the middle of the street",
-//        status: 2,
-//        coordinate: coordinate,
-//        issueType: 1,
-//        severity: 2,
-//        matterToSolveId: 1,
-//        address: "lorem ipsum dolor sit amet consectetur adipiscing elit."
-//    )
-//    
-//    CommentsSectionView(issue: issue)
-//}
+#Preview {
+    
+    
+    var report = MapExplorerReport(id: "", lat: 0, lng: 0, address: "", title: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAtRaw: nil, cellIndex: "", createdAtRaw: 0, updatedAtRaw: 0, reportedBy: "", cityId: "", petitionId: "")
+    
+    CommentsSectionView(for: report)
+}

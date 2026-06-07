@@ -85,7 +85,7 @@ struct TextInput: View {
     var axis: Axis
     
     @State private var message: String
-    @State private var isValid: Bool = true
+    @Binding var isValid: Bool
     @State private var status: TextInputStatus = .untouched
     @Binding var value: String
     var disabled: Bool = false
@@ -99,6 +99,7 @@ struct TextInput: View {
          axis: Axis = .horizontal,
          message: String = "",
          status: TextInputStatus = .untouched,
+         isValid: Binding<Bool>,
          value: Binding<String>,
          disabled: Bool = false
     ) {
@@ -115,6 +116,7 @@ struct TextInput: View {
         self.axis = axis
         self._message = State(initialValue: message)
         self._status = State(initialValue: status)
+        self._isValid = isValid
         self._value = value
         self.disabled = disabled
     }
@@ -208,14 +210,17 @@ private struct LabelView: View {
     @Previewable
     @State var value: String = ""
     
+    @Previewable
+    @State var isValid: Bool = false
+    
     VStack(spacing: 20) {
-        TextInput(name: "hello@reportamelo.app", label: "Email", regex: .email,  value: $value,)
+        TextInput(name: "hello@reportamelo.app", label: "Email", regex: .email, isValid: $isValid, value: $value,)
         
         TextInput(name: "hello@reportamelo.app", label: "Invalid State", validators: [
             Validator(name: "error", message: "This is an error", fn: { _ in false })
-        ], value: .constant("error"))
+        ], isValid: .constant(false), value: .constant("error"))
         
-        TextInput(name: "hello@reportamelo.app", label: "Disabled State", value: .constant(""), disabled: true)
+        TextInput(name: "hello@reportamelo.app", label: "Disabled State", isValid: .constant(true), value: .constant(""), disabled: true)
     }
     .padding()
 }

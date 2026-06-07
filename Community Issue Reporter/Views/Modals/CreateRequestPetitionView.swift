@@ -32,6 +32,7 @@ struct CreateRequestPetitionView: View {
                             name: String(localized: "Title"),
                             label: String(localized: "Please enter a title"),
                             validators: titleValidator,
+                            isValid: .constant(true),
                             value: $model.petition.title
                        )
                     
@@ -39,6 +40,7 @@ struct CreateRequestPetitionView: View {
                             name: String(localized: "Description"),
                             label: String(localized: "Please enter a description"),
                             validators: descriptionValidator,
+                            isValid: .constant(true),
                             value: $model.petition.description
                        )
                     }

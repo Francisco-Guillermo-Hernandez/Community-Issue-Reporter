@@ -108,6 +108,7 @@ struct ReportView: View {
                         TextInput(
                             name: "Title",
                             label: String(localized: "Title of the issue", comment: "ReportView: Title of the issue"),
+                            isValid: .constant(true),
                             value: $model.report.title,
                         )
                         
@@ -115,6 +116,7 @@ struct ReportView: View {
                             name: "Description",
                             label: String(localized: "Please describe the issue", comment: "ReportView: Please describe the issue"),
                             axis: .vertical,
+                            isValid: .constant(true),
                             value: $model.report.description,
                             
                         )
@@ -123,6 +125,7 @@ struct ReportView: View {
                             name: "Address",
                             label: String(localized: "Please tell us where is the issue", comment: "ReportView: Please tell us where is the issue"),
                             axis: .vertical,
+                            isValid: .constant(true),
                             value: $model.report.address,
                             
                         )

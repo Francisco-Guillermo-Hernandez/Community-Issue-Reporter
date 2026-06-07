@@ -10,7 +10,8 @@ import CoreLocation
 
 struct CommentsSectionView: View {
     
-    var report: MapExplorerReport
+    var commentFor: CommentForType
+    var resourceId: String
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @FocusState private var isTextFieldFocused: Bool
@@ -24,10 +25,10 @@ struct CommentsSectionView: View {
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var limit: Int = 16
     
-    init(for report: MapExplorerReport) {
+    init(for commentFor: CommentForType, with resourceId: String) {
         
-        
-        self.report = report
+        self.commentFor = commentFor
+        self.resourceId = resourceId
         self.paginatedResult = PaginatedResponse<Comment>(
             documents: [],
             total: 0,
@@ -37,9 +38,6 @@ struct CommentsSectionView: View {
             hasNext: false,
             hasPrev: false,
         )
-        
-        print("issue detail")
-        print(report.id)
     }
     
     var body: some View {
@@ -64,11 +62,7 @@ struct CommentsSectionView: View {
                         .containerRelativeFrame(.vertical)
                     } else {
                         ForEach(comments) { c in
-                            CommentRow(
-                                name: c.name!,
-                                time: c.createdAt!,
-                                message: c.message
-                            )
+                            CommentRow(comment: c)
                             .task {
                                 if let lastComment = self.comments.last, c.id == lastComment.id {
                                     await loadMoreComments()
@@ -92,7 +86,7 @@ struct CommentsSectionView: View {
                 guard !Task.isCancelled else { return }
                 
                 let result = await CommentsRepository.shared.list(
-                    report.id,
+                    resourceId,
                     page: currentPage,
                     limit: self.limit,
                     onError: { _ in
@@ -178,13 +172,8 @@ struct CommentsSectionView: View {
         if !commentInput.isEmpty {
             
             self.isSubmitting = true
-            let comment = Comment(
-                id: UUID().uuidString,
-                createdAt: Date(),
-                name: "Anonymous",
-                reportId: report.id,
-                message: commentInput,
-            )
+            
+            let comment = Comment(commentFor: .report, resourceId: resourceId, message: commentInput)
             
             /// lest add the comment at the top
             comments.insert(comment, at: 0)
@@ -195,7 +184,7 @@ struct CommentsSectionView: View {
             Task {
                 
                 await CommentsRepository.shared.post(
-                    reportId: report.id,
+                    reportId: resourceId,
                     message: self.commentInput,
                     onComplete: {
                         self.disableInput = false
@@ -222,7 +211,7 @@ struct CommentsSectionView: View {
         self.isLoading = true
         
         let result = await CommentsRepository.shared.list(
-            report.id,
+            resourceId,
             page: self.currentPage,
             limit: self.limit,
             onError: { _ in
@@ -230,14 +219,18 @@ struct CommentsSectionView: View {
             }
         )
         
+        if let comments = result.documents {
+//            self.currentPage += 1
+//            self.comments.append(contentsOf: result.documents)
+//            self.canLoadMore = result.hasNext
+            
+            print("load more")
+        }
+        
         isLoading = false
     }
 }
 
 #Preview {
-    
-    
-    var report = MapExplorerReport(id: "", lat: 0, lng: 0, address: "", title: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAtRaw: nil, cellIndex: "", createdAtRaw: 0, updatedAtRaw: 0, reportedBy: "", cityId: "", petitionId: "")
-    
-    CommentsSectionView(for: report)
+    CommentsSectionView(for: .report, with: "")
 }

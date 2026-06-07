@@ -6,8 +6,16 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct EvidencesView: View {
+    @State var orientation = UIDevice.current.orientation
+    
+    @State private var selectedImages: UIImage? = nil
+    @State private var cameraCompletion: ((UIImage) -> Void)? = nil
+    @State private var isCameraPresented: Bool = false
+    @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    
     @Environment(\.dismiss) var dismiss
     
     @State private var photos: [PhotoSample] = [
@@ -18,36 +26,78 @@ struct EvidencesView: View {
     ]
     
     var body: some View {
-        NavigationStack {
-            ScrollView(.vertical) {
-                LazyVGrid(columns: gridColumns, spacing: 4) {
-                    ForEach(photos, id: \.id) { photo in
-                        photoPreview(photo)
-                    }
+        ScrollView(.vertical) {
+            LazyVGrid(columns: gridColumns, spacing: 4) {
+                ForEach(photos, id: \.id) { photo in
+                    photoPreview(photo)
                 }
-                .padding(.horizontal, 16)
             }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .close) { dismiss() }
-                }
-                
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button("gallery", systemImage: "photo.on.rectangle") {
-                        
-                    }
-                    .accessibilityLabel("Add more Evidence from your Gallery")
-                    Button("Add more Evidence", systemImage: "camera") {
-                        
-                    }
-                    .accessibilityLabel("Add more Evidences by taking a photo")
-                }
-                
-                
-            }
-            .navigationTitle("Evidences")
-            .navigationSubtitle("You can take a look of what is happening")
+            .padding(.horizontal, 4)
         }
+        .fullScreenCover(isPresented: $isCameraPresented) {
+            ImagePicker(sourceType: .camera, onImagePicked: { resource in
+                
+                if let resource, let avatar = resource.data {
+                    
+                    onSelect(avatar)
+                }
+                
+                cameraCompletion = nil
+                isCameraPresented = false
+            })
+            .edgesIgnoringSafeArea(.all)
+        }
+        .toolbar {
+            
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                
+            
+                
+                PhotosPicker(
+                    selection: $selectedPhotoItems,
+                    maxSelectionCount: 1,
+                    matching: .any(
+                        of: [
+                            .images,
+                            .panoramas,
+                            .not(.screenshots),
+                            .not(.videos),
+                            .not(.screenRecordings),
+                            .not(.spatialMedia),
+                        ]
+                    )
+                ) {
+                    Image(systemName: "photo.on.rectangle")
+                        .font(.callout)
+
+                }
+                .accessibilityLabel("Add more Evidence from your Gallery")
+                .onChange(of: selectedPhotoItems) { _, newItems in
+                    guard !newItems.isEmpty else { return }
+//                    viewModel.selectedAvatarOptionView = option.associatedView
+                    loadSelectedImages(from: newItems) { image in
+                        if let avatar = image {
+                            onSelect(avatar)
+                        }
+                       
+                    }
+                }
+                
+                
+                Button("Add more Evidence", systemImage: "camera") {
+                    takePhotoUsingCamera { images in
+                        onSelect(images)
+                    }
+                }
+                .accessibilityLabel("Add more Evidences by taking a photo")
+            }
+            
+            
+        }
+        .background(Color.theme.background)
+        .toolbarTitleDisplayMode(.large)
+        .navigationTitle("Evidences")
+        .navigationSubtitle("You can take a look of what is happening")
     }
     
     fileprivate let gridColumns: [GridItem] = [
@@ -55,8 +105,44 @@ struct EvidencesView: View {
         GridItem(.flexible(), spacing: 4),
         GridItem(.flexible(), spacing: 4)
     ]
+    
+    
+    private func takePhotoUsingCamera(onComplete: @escaping (UIImage) -> Void) {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            return
+        }
+        
+        cameraCompletion = onComplete
+        isCameraPresented = true
+    }
+    
+    
+    private func onSelect(_ image: UIImage) {
+        Task {
+            
+            try? await Task.sleep(for: .milliseconds(128))
+            dismiss()
+        }
+    }
+    
+    private func loadSelectedImages(from items: [PhotosPickerItem], onComplete: @escaping (UIImage?) -> Void) {
+        Task {
+            var image: UIImage?
+           
+            /// To UIImage
+            if let data = try? await items[0].loadTransferable(type: Data.self) {
+                image = UIImage(data: data)
+            }
+
+            await MainActor.run {
+                onComplete(image)
+            }
+        }
+    }
 }
 
 #Preview {
-    EvidencesView()
+    NavigationStack {
+        EvidencesView()
+    }
 }

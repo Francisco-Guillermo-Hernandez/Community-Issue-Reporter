@@ -22,8 +22,8 @@ struct UserService {
         return try await client.post(path: "auth/guest/generate/session", body: [String: String](), headers: headers)
     }
     
-    func checkAvailability(of userName: String) async throws -> GenericResponse {
-        return try await client.post(path: "user/check/username", body: ["userName": userName], headers: [])
+    func checkAvailability(of userName: String, _ headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.post(path: "user/check/availability", body: ["userName": userName], headers: headers, withOAuth: true)
     }
     
     func change(avatar: Data) async throws -> CustomizedResponse<AvatarResponse> {

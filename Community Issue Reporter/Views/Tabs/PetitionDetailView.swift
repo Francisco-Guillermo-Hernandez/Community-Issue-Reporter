@@ -170,43 +170,6 @@ struct SectionHeader: View {
     }
 }
 
-// MARK: - Comment row
-struct CommentRow: View {
-    let name: String
-    let time: Date
-    let message: String
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Circle()
-                .fill(Color.gray.opacity(0.2))
-                .frame(width: 36, height: 36)
-                .overlay {
-                    Text(String(name.prefix(1)))
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.gray)
-                }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(name)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                    Text(formatRelativeDate(from: time))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Text(message)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        
-        Divider()
-    }
-}
 
 #Preview {
 

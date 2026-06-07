@@ -12,7 +12,6 @@ func photoPreview(_ photo: PhotoSample) -> some View  {
     Image(photo.photo)
         .resizable()
         .aspectRatio(1, contentMode: .fill)
-//        .frame(width: 160, height: 160)
         .cornerRadius(16)
         .overlay {
             ZStack(alignment: .bottomLeading) {
@@ -30,7 +29,7 @@ func photoPreview(_ photo: PhotoSample) -> some View  {
                             endPoint: .top
                         )
                     )
-                //                                                        .stroke(issue.status.color, lineWidth: 2)
+                
                     .cornerRadius(16)
                 
                 

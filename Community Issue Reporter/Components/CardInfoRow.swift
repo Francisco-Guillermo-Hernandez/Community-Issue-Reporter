@@ -75,6 +75,94 @@ struct CardInfoStyle: ViewModifier {
     }
 }
 
+struct StatCard: View {
+    @Environment(\.colorScheme) var colorScheme
+    var action: () -> Void
+    let description: String
+    let title: String
+    let trend: String
+    let timeframe: String
+    var displayFooter: Bool = true
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            
+            
+            
+            // Header
+            VStack(alignment: .leading, spacing: 8) { // gap-2
+                
+               
+                
+                Text(description)
+                    .font(.subheadline)
+                    .foregroundStyle(Color.theme.foreground.opacity(0.6)) // text-muted-foreground
+                Text(title)
+                    .font(.system(size: 30, weight: .semibold)) // text-3xl font-semibold
+                    .foregroundStyle(foregroundColor)
+                    .fontWidth(.condensed)
+                
+                
+            }
+            .padding(.horizontal, 24) // px-6
+            
+            if displayFooter {
+                // Footer
+                VStack(alignment: .leading, spacing: 4) { // gap-1
+                    Text(trend)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(foregroundColor)
+                    
+//                    Text(timeframe)
+//                        .font(.subheadline)
+//                        .foregroundStyle(Color.theme.foreground.opacity(0.6)) // text-muted-foreground
+                }
+                .padding(.horizontal, 24) // px-6
+            }
+        }
+        .padding(.vertical, 24) // py-6
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                stops: [
+                    .init(color: Color.theme.cardBackground, location: 0),
+                    .init(color: Color.theme.primary.opacity(0.05), location: 1)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .cornerRadius(16) // rounded-xl
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.theme.border, lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1) // shadow-sm
+    }
+    
+    var foregroundColor: Color {
+        colorScheme == .light ?  Color.init(hex: "#38271F") : Color.init(hex: "#8a8a8a")
+    }
+}
+
 #Preview {
     CardInfoRow(data: CardInfoModelView(title: "Title", subtitle: "Subtitle", stat: "100"), action: {})
+}
+
+#Preview("StatCard") {
+    StatCard(
+        action: {  } ,
+        description: "I've Reported",
+        title: "50",
+        trend: "Incidents this month",
+        timeframe: "for the last 6 months"
+    )
+    StatCard(
+        action: {  },
+        description: "I've Created Petitions",
+        title: "5",
+        trend: "Trending up this month",
+        timeframe: "for the last 6 months"
+    )
 }

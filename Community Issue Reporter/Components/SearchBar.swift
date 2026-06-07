@@ -14,6 +14,8 @@ struct SearchBar: View {
     let onUserProfileTap: () -> Void
     @FocusState.Binding var isFocused: Bool
     let profileNamespace: Namespace.ID
+    var avatarURL: URL? = nil
+    @ObservedObject var viewModel = ProfileDataModel()
 
     var body: some View {
         
@@ -23,8 +25,12 @@ struct SearchBar: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.secondary)
                         .padding(.leading, 16)
+                        .font(.system(size: 17, weight: .medium))
+                        
                     
                     TextField("Search...", text: $text)
+                        .font(.body)
+                        .fontWeight(.medium)
                         .textInputAutocapitalization(.words)
                         .modifier(ClearButtonModifier(text: $text, isPill: true, disabled: false))
                         .disableAutocorrection(true)
@@ -69,7 +75,7 @@ struct SearchBar: View {
                         Button {
                             onUserProfileTap()
                         } label: {
-                            if let url = UserRepository.shared.getAvatar() {
+                            if let url = avatarURL ?? UserRepository.shared.getAvatar() {
                                 CachedAsyncImage(url: url) { image in
                                     image
                                         .resizable()
@@ -79,6 +85,8 @@ struct SearchBar: View {
                                 }
                                 .frame(width: 48, height: 48)
                                 .clipShape(Circle())
+                                .id(url)
+
                                 
                             } else {
                                 Image("user_b")

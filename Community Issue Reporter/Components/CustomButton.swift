@@ -57,11 +57,20 @@ struct ButtonStyleMapper: ViewModifier {
 
 // MARK: - Button styles
 struct ThemedPrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) var isEnabled
+    @Environment(\.colorScheme) var colorScheme
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
-            .foregroundStyle(Color.init(hex: "1a181b"))
-            .background(Color.theme.primary)
+//            .foregroundStyle(Color.init(hex: "1a181b"))
+//            .foregroundStyle(Color.init(hex: "FEE8D0"))
+        
+//            .foregroundStyle(colorScheme == .dark ? Color.theme.cardBackground : Color.white)
+//            .background(isEnabled ? Color.theme.primary : Color.theme.primary.opacity(0.5))
+        
+            .background(backgroundColor(isPressed: configuration.isPressed))
+                       .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
+        
             .contentShape(Capsule())
             .clipShape(Capsule())
         
@@ -71,14 +80,47 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
             .font(Font.body.bold())
             .overlay {
                 Capsule()
-                    .stroke(Color.theme.primary.mix(with: .white, by: 0.3), lineWidth: 1)
+                    .stroke(borderColor, lineWidth: 1)
             }
+            .opacity(isEnabled ? 1.0 : 0.65) // disabled:opacity-50
 //            .overlay {
 //                RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
 //                    .stroke(Color.theme.primary.mix(with: .white, by: 0.3), lineWidth: 1)
 //            }
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+            .animation(.easeOut(duration: 0.2), value: isEnabled)
             .glassEffect(in: Capsule())
         //.glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+    }
+    
+    private func backgroundColor(isPressed: Bool) -> Color {
+        if colorScheme == .dark {
+            // dark:bg-input/30 dark:hover:bg-input/50
+            return isPressed ? Color.theme.primary.opacity(0.86) : Color.theme.primary  //Color.theme.inputBackground.mix(with: .white, by: 0.67).opacity(isPressed ? 0.2 : 0.1)
+        } else {
+            // bg-background hover:bg-accent
+//            return isPressed ? Color.theme.accent : Color.theme.background
+            return isPressed ? Color.theme.primary.opacity(0.75) : Color.theme.primary
+        }
+    }
+    
+    private func foregroundColor(isPressed: Bool) -> Color {
+        if colorScheme == .dark {
+            return Color.theme.cardBackground
+        } else {
+            // hover:text-accent-foreground
+            return isPressed ? Color.white : Color.white
+        }
+    }
+    
+    private var borderColor: Color {
+        if colorScheme == .dark {
+            // dark:border-input
+            return Color.theme.primary.mix(with: .white, by: 0.1)
+        } else {
+            // border
+            return Color.theme.primary.mix(with: .white, by: 0.4)
+        }
     }
 }
 
@@ -86,7 +128,7 @@ struct ThemedSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
-            .foregroundStyle(Color.init(hex: "1a181b"))
+            .foregroundStyle(Color.white)
             .background(Color.theme.secondary)
             .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
             .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
@@ -170,6 +212,8 @@ struct LinkButtonStyle: ButtonStyle {
 // MARK: - Preview
 #Preview {
     VStack(spacing: .themeSpacing * 4) {
+        
+        ThemedButton(message: "Next Step", action: {}, type: .primary).disabled(true)
         Spacer()
         ThemedButton(message: "Get Started", action: {}, type: .primary)
         

@@ -69,9 +69,17 @@ struct UserAvatarPersonalizationSheet: View {
 
                 case .monogram:
                     textBasedAvatarView(.monogram)
+                        .geometryGroup()
+                        .transition(
+                            .blurReplace(.downUp)
+                        )
 
                 case .initials:
                     textBasedAvatarView(.initials)
+                        .geometryGroup()
+                        .transition(
+                            .blurReplace(.downUp)
+                        )
 
                 case .GoogleAuth:
                     Text("Google auth")
@@ -344,9 +352,14 @@ struct UserAvatarPersonalizationSheet: View {
             backgroundColor: color
         )
         
-        if let image = view.asImage() {
-            viewModel.uploadProfilePicture(image)
-            dismiss()
+        Task {
+            if let image = view.asImage() {
+               
+                viewModel.uploadProfilePicture(image)
+                try? await Task.sleep(for: .milliseconds(128))
+                dismiss()
+                
+            }
         }
     }
 
@@ -360,8 +373,11 @@ struct UserAvatarPersonalizationSheet: View {
     }
 
     private func onSelect(_ image: UIImage) {
-        viewModel.uploadProfilePicture(image)
-        dismiss()
+        Task {
+            viewModel.uploadProfilePicture(image)
+            try? await Task.sleep(for: .milliseconds(128))
+            dismiss()
+        }
     }
     
     private func loadSelectedImages(from items: [PhotosPickerItem], onComplete: @escaping (UIImage?) -> Void) {
@@ -386,12 +402,19 @@ struct ProfileImage: View {
     var body: some View {
         
         Group {
-            if let image = viewModel.profileImage {
+            
+            if viewModel.isUploading {
+                /// Lets show a progress view when the new image is uploading 
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .controlSize(.regular)
+                
+            } else if let image = viewModel.profileImage {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                    
-            } else if let url = UserRepository.shared.getAvatar() {
+            } else if let url = viewModel.avatarURL ?? UserRepository.shared.getAvatar() {
                 CachedAsyncImage(url: url) { image in
                     image
                         .resizable()
@@ -399,6 +422,7 @@ struct ProfileImage: View {
                 } placeholder: {
                     ProgressView()
                 }
+                .id(url)
                 
             } else {
                 Image("user_b")
@@ -406,7 +430,7 @@ struct ProfileImage: View {
                     .scaledToFill()
             }
         }
-        .frame(width: 150, height: 150)
+        .frame(width: 130, height: 130)
         .clipShape(Circle())
         .overlay(alignment: .bottomTrailing) {
             Button {

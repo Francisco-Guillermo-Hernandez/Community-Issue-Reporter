@@ -26,6 +26,9 @@ final class ProfileDataModel: ObservableObject {
     @Published var isUploading: Bool = false
     @Published var showPicker: Bool = false
     @Published var isGuest: Bool = false
+    @Published var avatarURL: URL?
+    
+    private var cancellables = Set<AnyCancellable>()
     
     // Persistence keys
     private let selectedOptionKey = "selectedAvatarOption"
@@ -58,6 +61,14 @@ final class ProfileDataModel: ObservableObject {
         
         let savedColorHex = UserDefaults.standard.string(forKey: selectedColorKey) ?? "FFA500" // Default orange
         self.selectedAvatarColor = Color(hex: savedColorHex)
+        
+        self.avatarURL = UserDefaults.standard.string(forKey: "avatar_url").flatMap(URL.init(string:))
+        
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .map { _ in UserDefaults.standard.string(forKey: "avatar_url").flatMap(URL.init(string:)) }
+            .removeDuplicates()
+            .receive(on: RunLoop.main)
+            .assign(to: &$avatarURL)
     }
     
     func applyGoogleAvatar(completion: @escaping () -> Void) {
@@ -93,6 +104,7 @@ final class ProfileDataModel: ObservableObject {
                     switch result {
                     case .success(let url):
                         print("Upload success: \(url)")
+                        self?.avatarURL = URL(string: url)
                         self?.profileImage = image
                     case .failure(let error):
                         print("Upload failed: \(error.localizedDescription)")

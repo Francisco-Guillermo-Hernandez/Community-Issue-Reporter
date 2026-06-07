@@ -7,111 +7,6 @@
 
 import SwiftUI
 
-struct UserProfile {
-    let username: String?
-    let avatar: URL?
-    let email: String?
-}
-
-struct User: Identifiable {
-    let id: String?
-    let username: String
-    let avatar: String
-    
-    init(id: String? = nil, username: String, avatar: String) {
-        self.id = UUID().uuidString as String?
-        self.username = username
-        self.avatar = avatar
-    }
-}
-
-struct AvatarView: View {
-    var user: User
-    var body: some View {
-        Image("user")
-            .resizable()
-            .scaledToFill()
-            .frame(width: 36, height: 36)
-            .clipShape(.circle)
-    }
-}
-
-struct Signatories: View {
-    var users: [User]
-    var body: some View {
-        HStack(spacing: -.themeSpacing * 3) {
-            ForEach(users) { user in
-                AvatarView(user: user)
-                    .overlay(
-                        Circle().stroke(Color.theme.border, lineWidth: 1)
-                    )
-            }
-        }
-    }
-}
-
-struct PostPublisher: View {
-    var body: some View {
-        Group {
-            HStack(alignment: .top, spacing: .themeSpacing * 3) {
-                VStack {
-                    Image("user_b")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 48, height: 48)
-                        .clipShape(.circle)
-                }
-                
-                VStack {
-                    Text("John Doe")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Text("Yesterday at 20:20 - SS, SV")
-                        .font(.caption)
-                        .foregroundStyle(Color.gray)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}
-
-struct PostInteractions: View {
-    var sign: () -> Void
-    var comment: () -> Void
-    var share: () -> Void
-    var body: some View {
-        HStack {
-            Button(action: sign) {
-                Image(systemName: "signature")
-                    .font(.title2)
-                    .fontWeight(.bold)
-            }
-            .buttonSizing(.flexible)
-            .frame(maxWidth: .infinity)
-            
-            Button(action: share) {
-                Image(systemName: "text.bubble")
-                    .font(.title2)
-                    .fontWeight(.bold)
-            }
-            .buttonSizing(.flexible)
-            .frame(maxWidth: .infinity)
-            
-            Button(action: share) {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.title2)
-                    .fontWeight(.bold)
-            }
-            .buttonSizing(.flexible)
-            .frame(maxWidth: .infinity)
-        }
-    }
-}
-
 struct SignRequestsView: View {
     @Namespace private var namespace
     @State private var isPrimaryActionVisible: Bool = true
@@ -296,11 +191,11 @@ struct SignRequestsView: View {
                                     $0.id == petition.id
                                 }) ?? 0
                             )
-                            .task {
-                                if petition.id == petitions.last?.id {
-                                    await fetchPetitions()
-                                }
-                            }
+//                            .task {
+//                                if petition.id == petitions.last?.id {
+//                                    await fetchPetitions()
+//                                }
+//                            }
                         }
                         
                         if isLoading {
@@ -340,23 +235,11 @@ struct SignRequestsView: View {
                         in: namespace
                     )
                     
+                    
                     Menu {
-                        
                         Picker("Issue Type", selection: $issueType) {
                             ForEach(IssueTypes.allCases, id: \.self) { type in
-                                Button {
-                                    issueType = type
-                                } label: {
-                                    HStack {
-                                        Text(type.title)
-                                        if issueType == type {
-                                            Image(systemName: "checkmark")
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                        }
-                                    }
-                                   
-                                }
-                               
+                                Text(type.title).tag(type)
                             }
                         }
                         
@@ -379,6 +262,7 @@ struct SignRequestsView: View {
                             systemImage: "line.3.horizontal.decrease"
                         )
                     }
+
                 }
                 .padding(.horizontal, 4)
             } primaryAction: {
@@ -444,30 +328,40 @@ struct SignRequestsView: View {
     func EventsOnDay(petition: Petition, selectedIndex: Int) -> some View {
         
         VStack(alignment: .leading, spacing: 16) {
-            Text(petition.title)
-                .font(.title2)
-                .fontWeight(.black)
-                .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
-                    content
-                        .opacity(activeSubtitleIndex == selectedIndex ? 0 : 1)
-                    //                        .scaleEffect(activeSubtitleIndex == index ? 0.01 : 1, anchor: .top)
-                }
-                .onGeometryChange(for: Bool.self) {
-                    let offset = $0.frame(in: .scrollView).minY
-                    return -offset > 25
-                } action: { newValue in
-                    let previousIndex = selectedIndex - 1
-                    activeSubtitleIndex =
-                    newValue
-                    ? selectedIndex
-                    : (previousIndex < 0 ? nil : previousIndex)
-                }
+            VStack(alignment: .leading) {
+                Text(petition.title)
+                    .font(.title2)
+                    .fontWeight(.black)
+                    .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
+                        content
+                            .opacity(activeSubtitleIndex == selectedIndex ? 0 : 1)
+                        //                        .scaleEffect(activeSubtitleIndex == index ? 0.01 : 1, anchor: .top)
+                    }
+                    .onGeometryChange(for: Bool.self) {
+                        let offset = $0.frame(in: .scrollView).minY
+                        return -offset > 25
+                    } action: { newValue in
+                        let previousIndex = selectedIndex - 1
+                        activeSubtitleIndex =
+                        newValue
+                        ? selectedIndex
+                        : (previousIndex < 0 ? nil : previousIndex)
+                    }
+                
+                Text(petition.description)
+                    .font(.caption)
+                    .foregroundStyle(Color.gray)
+                  
+            }
+            
+            
+            PostPublisher()
             
             /// Go to detail 
             NavigationLink(destination: PetitionDetailView(petition: petition)) {
                 
                 VStack(spacing: .themeSpacing) {
-                    RequestViewPost(petition: petition)
+                    PetitionViewPost(petition: petition)
                         .scrollClipDisabled(true)
                 }
             }
@@ -492,8 +386,16 @@ struct SignRequestsView: View {
                         .font(.caption)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
+                .padding(.bottom, .themeSpacing * 2)
                 
-                PostInteractions(sign: {}, comment: {}, share: {})
+                PostInteractions(
+                    sign: {},
+                    comment: {},
+                    share: {
+                        let shareURL = buildShareURL(for: "7BTheYpPwK1L/report/traffic-light-ou")!
+                        shareFromClosure(item: shareURL)
+                    }
+                )
                 
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -510,88 +412,6 @@ struct SignRequestsView: View {
     }
 }
 
-struct RequestViewPost: View {
-    var petition: Petition
-    @State private var photos: [PhotoSample] = [
-        PhotoSample(id: "1", photo: "a", published: Date(), user: "Jane Doe"),
-        PhotoSample(id: "2", photo: "b", published: Date(), user: "John Smith"),
-        PhotoSample(
-            id: "3",
-            photo: "c",
-            published: Date(),
-            user: "Michael Brown"
-        ),
-        PhotoSample(
-            id: "4",
-            photo: "d",
-            published: Date(),
-            user: "Emily Davis"
-        ),
-    ]
-    var body: some View {
-        
-        VStack(spacing: 10) {
-            PostPublisher()
-            
-            HStack(alignment: .top, spacing: .themeSpacing * 4) {
-                
-                VStack(alignment: .leading) {
-                    Text(String(localized: "Category", comment: "Category text at petition list"))
-                        .font(.caption)
-                        .foregroundStyle(Color.gray)
-                    
-                    Text(getCategoryName(id: petition.categoryId))
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                }
-                
-                
-                VStack(alignment: .leading) {
-                    Text(String(localized: "Status", comment: "Status text at petition list"))
-                        .font(.caption)
-                        .foregroundStyle(Color.gray)
-                    
-                    Text(petition.status.title)
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                }
-                
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            VStack {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    LazyHGrid(rows: gridColumns, spacing: .themeSpacing * 4) {
-                        ForEach(photos, id: \.id) { photo in
-                            
-                            Image(photo.photo)
-                                .resizable()
-                                .frame(
-                                    maxWidth: .infinity,
-                                    alignment: .topLeading
-                                )
-                                .aspectRatio(4 / 3, contentMode: .fill)
-                                .clipShape(
-                                    RoundedRectangle(
-                                        cornerRadius: .themeRadius,
-                                        style: .continuous
-                                    )
-                                )
-                                .contentShape(
-                                    RoundedRectangle(
-                                        cornerRadius: .themeRadius,
-                                        style: .continuous
-                                    )
-                                )
-                        }
-                    }
-                }
-            }
-            .frame(maxHeight: 200)
-            
-        }
-    }
-}
 
 func getCategoryName(id: Int) -> String {
     return Categories.allCases.first(where: { $0.identifier == id })?.title

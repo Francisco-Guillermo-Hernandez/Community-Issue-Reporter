@@ -78,7 +78,23 @@ struct DetailView: View {
     init(report: MapExplorerReport) {
         self.report = report
         self.color = self.report.status.color
-        self.comments = []
+        self.comments = [
+            Comment(
+                commentFor: .report, 
+                resourceId: "",
+                message: "We have problems with potholes in this area."
+            ),
+            Comment(
+                commentFor: .report,
+                resourceId: "",
+                message: "My car is getting damages because of the potholes."
+            ),
+            Comment(
+                commentFor: .report,
+                resourceId: "",
+                message: "We have problems with potholes in this area."
+            )
+        ]
         self.paginatedResult = PaginatedResponse<Comment>(
             total: 0,
             page: 0,
@@ -108,7 +124,7 @@ struct DetailView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                     Spacer()
-                    Text("Anonymous user")
+                    Text("Guest user")
                         .font(.caption)
                 }
 
@@ -120,6 +136,7 @@ struct DetailView: View {
                     Text("2d ago")
                         .font(.caption)
                 }
+                
 
                 HStack {
                     Text("Assigned institution:")
@@ -129,6 +146,7 @@ struct DetailView: View {
                     Text("MOP")
                         .font(.caption)
                 }
+                
 
                 HStack {
                     Text("Address:")
@@ -139,6 +157,7 @@ struct DetailView: View {
                         .lineLimit(2)
                         .font(.caption)
                 }
+                
 
                 Button {
                     self.openInMaps.toggle()
@@ -178,7 +197,9 @@ struct DetailView: View {
                 }
 
             }
+            .listRowBackground(Color.clear)
             .scrollDisabled(true)
+            .scrollContentBackground(.hidden)
             .listStyle(.plain)
             .scrollClipDisabled(true)
             .frame(height: 245)
@@ -186,20 +207,18 @@ struct DetailView: View {
         }
     }
 
-    fileprivate func evidenceOfTheIssues() -> Group<
-        TupleView<(SectionHeader, some View)>
-    > {
+    fileprivate func evidenceOfTheIssues() -> Group<TupleView<(SectionHeader, some View)>> {
         return Group {
-            SectionHeader(title: "Evidence of the issue")
+            SectionHeader(title: "Evidence of the report")
             ScrollView(.horizontal, showsIndicators: true) {
-                LazyHGrid(rows: gridColumns, spacing: 16) {
+                LazyHGrid(rows: gridColumns, spacing: .themeSpacing * 2) {
                     ForEach(photos, id: \.id) { photo in
 
                         if photo.more {
-                            Button {
-                                self.showMoreEvidences.toggle()
-                            } label: {
-                                RoundedRectangle(cornerRadius: 16)
+                           
+                            
+                            NavigationLink(destination:  EvidencesView()) {
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
                                     .stroke(Color.theme.primary, lineWidth: 2)
                                     .frame(width: 160, height: 160)
                                     .foregroundStyle(
@@ -209,15 +228,15 @@ struct DetailView: View {
                                         VStack(spacing: 8) {
                                             Image(systemName: "photo.stack")
                                                 .foregroundStyle(
-                                                    Color.theme.muted
+                                                    Color.theme.foreground
                                                 )
-                                                //                                                .opacity(0.3)
                                                 .font(.largeTitle)
 
                                             HStack {
                                                 Text("More Evidences...")
                                                     .font(.caption)
                                                     .fontWeight(.black)
+                                                  
                                                     .foregroundStyle(
                                                         Color.theme.foreground
                                                     )
@@ -225,7 +244,6 @@ struct DetailView: View {
                                         }
                                     }
                             }
-                            .padding(.trailing, 16)
 
                         } else {
 
@@ -235,8 +253,8 @@ struct DetailView: View {
                     }
                 }
             }
-            .padding(.leading, 16)
-            .padding(.top, 8)
+            .padding(.leading, .themePadding)
+            .padding(.top, 16)
             .scrollClipDisabled()
         }
     }
@@ -244,65 +262,72 @@ struct DetailView: View {
     @ViewBuilder
     func lastComments() -> some View {
         Group {
-            SectionHeader(title: "Lastest Comments")
+            SectionHeader(title: "Latest Comments")
             LazyVStack(spacing: 16) {
                 ForEach(comments) { c in
-                    CommentRow(
-                        name: c.name ?? "Visitor",
-                        time: c.createdAt!,
-                        message: c.message
-                    )
+                    CommentRow(comment: c)
                 }
             }
+            .padding(.leading, 16)
         }
     }
 
     fileprivate func basicInformation() -> some View {
         return HStack(spacing: 17) {
 
+            
+//            VStack(alignment: .leading) {
+//                Text(String(localized: "Category", comment: "Category text at petition list"))
+//                    .font(.caption)
+//                    .foregroundStyle(Color.gray)
+//                
+//                Text(getCategoryName(id: petition.categoryId))
+//                    .font(.caption)
+//                    .fontWeight(.semibold)
+//            }
+            
             Group {
                 VStack {
                     Text("Reported at")
-                        .font(.callout)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(color.mix(with: .black, by: 0.4))
+                        .font(.caption)
+                        .foregroundStyle(Color.gray)
+//                        .foregroundStyle(color.mix(with: .black, by: 0.4))
 
                     Text("04/02/2026")
-                        .font(.footnote)
-                        .foregroundStyle(color)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+
                 }
 
                 VStack {
                     Text("Issue Type")
-                        .font(.callout)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(color.mix(with: .black, by: 0.4))
+                        .font(.caption)
+                        .foregroundStyle(.gray)
 
                     Text(report.issueType.title)
-                        .font(.footnote)
-                        .foregroundStyle(color)
+                        .font(.caption)
+                        .fontWeight(.semibold)
                 }
 
                 VStack {
                     Text("Severity")
-                        .font(.callout)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(color.mix(with: .black, by: 0.4))
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                        
 
                     Text(report.severity.title)
-                        .font(.footnote)
-                        .foregroundStyle(color)
+                        .font(.caption)
+                        .fontWeight(.semibold)
                 }
 
                 VStack {
                     Text("Status")
-                        .font(.callout)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(color.mix(with: .black, by: 0.4))
+                        .font(.caption)
+                        .foregroundStyle(.gray)
 
                     Text(report.status.title)
-                        .font(.footnote)
-                        .foregroundStyle(color)
+                        .font(.caption)
+                        .fontWeight(.semibold)
 
                 }
             }
@@ -315,7 +340,7 @@ struct DetailView: View {
     fileprivate func headers() -> VStack<TupleView<(some View, some View)>> {
         return VStack(spacing: 4) {
             Text(report.title)
-                .font(.title)
+                .font(.title2)
                 .bold()
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -384,10 +409,7 @@ struct DetailView: View {
                 )
             }
             .sheet(isPresented: $commentButtonPressed) {
-                CommentsSectionView(for: self.report)
-            }
-            .sheet(isPresented: $showMoreEvidences) {
-                EvidencesView()
+                CommentsSectionView(for: .report, with: self.report.id)
             }
             .overlay(alignment: .bottom) {
                 if showAlert {
@@ -457,9 +479,9 @@ func getMatterToSolve(id: Int) -> String {
         id: "",
         lat: 0,
         lng: 0,
-        address: "",
-        title: "",
-        description: "",
+        address: "Lorem ipsum dolor sit ammet",
+        title: "A big pothole in the middle of the street",
+        description: "There is a big pothole that is affecting our cars",
         severityId: 1,
         statusId: 1,
         issueTypeId: 1,

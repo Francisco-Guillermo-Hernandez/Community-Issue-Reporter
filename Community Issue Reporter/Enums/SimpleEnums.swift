@@ -30,7 +30,7 @@ enum MonogramMode: String {
 }
 
 // MARK: - 
-enum CurrentView {
+enum CurrentView: String {
     case optionsSelector
     case avatar
     case camera

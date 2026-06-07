@@ -19,7 +19,7 @@ struct CommentsService {
     }
     
     func update(comment: Comment) async throws -> GenericResponse {
-        return try await client.put(path: "comments/\(comment.id)", body: comment, withOAuth: true)
+        return try await client.put(path: "comments/\(comment.id!)", body: comment, withOAuth: true)
     }
     
     func delete(id: String) async throws -> GenericResponse {

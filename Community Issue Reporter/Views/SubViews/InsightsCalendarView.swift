@@ -110,14 +110,14 @@ struct SimpleView: View {
 
 
 struct MockData {
-    static let sampleComment = Comment(
-        id: "2a832de2-3379-4f21-abbd-278c477c5206",
-        createdAt: Date(),
-        updatedAt: Date(),
-        name: "Francisco Hernandez",
-        reportId: "id-1",
-        message: "este bache es peligroso y debe de arreglarse lo mas pronto posible",
-    )
+//    static let sampleComment = Comment(
+//        id: "2a832de2-3379-4f21-abbd-278c477c5206",
+//        createdAt: Date(),
+//        updatedAt: Date(),
+//        name: "Francisco Hernandez",
+//        reportId: "id-1",
+//        message: "este bache es peligroso y debe de arreglarse lo mas pronto posible",
+//    )
     
     static let activityMap: [String: DaySummary] = [
         "2026-04-10": DaySummary(
@@ -166,11 +166,11 @@ struct MockData {
 
 #Preview("Comment Row") {
     List {
-        CommentRow(
-            name: MockData.sampleComment.name ?? "User",
-            time: Date(),
-            message: MockData.sampleComment.message
-        )
+//        CommentRow(
+//            name: MockData.sampleComment.name ?? "User",
+//            time: Date(),
+//            message: MockData.sampleComment.message
+//        )
     }
     .listStyle(.plain)
 }

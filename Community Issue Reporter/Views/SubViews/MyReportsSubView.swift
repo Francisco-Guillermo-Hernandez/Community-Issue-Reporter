@@ -165,6 +165,7 @@ struct MyReportsSubView: View {
             Text("Are you sure you want to delete ? This action cannot be undone.")
         }
         .task(id: refreshID) {
+            guard !Task.isCancelled else { return }
             await  fetchReports()
         }
 //        .refreshable {

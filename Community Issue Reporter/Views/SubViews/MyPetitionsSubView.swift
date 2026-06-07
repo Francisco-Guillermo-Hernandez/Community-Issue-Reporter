@@ -81,6 +81,7 @@ struct MyPetitionsSubView: View {
             }
         }
         .task {
+            guard !Task.isCancelled else { return }
             await fetchPetitions()
         }
         .listStyle(.plain)

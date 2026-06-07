@@ -19,10 +19,12 @@ enum ServiceError: Error {
     case baseURLMissing
     case invalidResponse
     case httpStatus(Int)
-    case badRequest(String)
+    case badRequest(GenericResponse)
     case unauthorized(String)
     case forbidden
     case notFound
+    case notAllowed
+    case notAcceptable
     case contentLengthMissing
     case unSupportedMediaType
     case unavailableForLegalReasons
@@ -140,71 +142,47 @@ struct ServiceClient {
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
         
-//        guard (300...309).contains(httpResponse.statusCode) else {
-//            throw ServiceError.httpStatus(httpResponse.statusCode)
-//        }
-//        
-//        if httpResponse.statusCode == 400 {
-//            if let message = String(data: data, encoding: .utf8) {
-//                print("Error Response Body: \(message)")
-//            }
-//            
-//            let decoder = JSONDecoder()
-//            decoder.keyDecodingStrategy = .convertFromSnakeCase
-//            let error = try decoder.decode(GenericResponse.self, from: data)
-//            
-//            throw ServiceError.badRequest(error.message)
-//        }
-//        
-//        if httpResponse.statusCode == 404 {
-//            throw ServiceError.notFound
-//        }
-//        
-//        if httpResponse.statusCode == 401 {
-//            throw ServiceError.unauthorized
-//        }
-//        
-//        guard (500...599).contains(httpResponse.statusCode) else {
-//            throw ServiceError.serverError(httpResponse.description)
-//        }
-        
-//        dump(request.allHTTPHeaderFields)
-//        print("respose headers", httpResponse.allHeaderFields)
         
         print("status code \(httpResponse.statusCode)")
         
         return try decode(T.self, from: data)
     }
     
-    func errorHandler(for httpResponse: HTTPURLResponse) async throws -> String {
-//        let decoder = JSONDecoder()
-//        return try decoder.decode(T.self, from: data)
-        
+    func HTTPErrorHandler(for httpResponse: HTTPURLResponse, with data: Data) throws {
+       
         switch httpResponse.statusCode {
         case 200...299:
-            return "done"
-            
-        case 300...399:
+            break
+        case 300...303:
+            break
+        case 304:
+            break
+        case 305...399:
             throw ServiceError.httpStatus(httpResponse.statusCode)
-            
         case 400:
-            throw ServiceError.badRequest("Bad Request")
+            let decoder = JSONDecoder()
+            let genericResponse = try decoder.decode(GenericResponse.self, from: data)
+            throw ServiceError.badRequest(genericResponse)
         case 401:
-            throw ServiceError.unauthorized("Bad token")
+            throw ServiceError.unauthorized("Please login")
         case 403:
             throw ServiceError.forbidden
         case 404:
             throw ServiceError.notFound
+        case 405:
+            throw ServiceError.notAllowed
+        case 406:
+            throw ServiceError.notAcceptable
         case 411:
             throw ServiceError.contentLengthMissing
         case 415:
             throw ServiceError.unSupportedMediaType
         case 429:
             throw ServiceError.tooManyRequests
-        case 500...599:
-            throw ServiceError.serverError("Server Error")
         case 451:
             throw ServiceError.unavailableForLegalReasons
+        case 500...599:
+            throw ServiceError.serverError("Server Error")
         default:
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
@@ -248,7 +226,6 @@ struct ServiceClient {
             }
         }
         
-       
         
         if formFiles.isEmpty {
             let encoder = JSONEncoder()
@@ -261,12 +238,7 @@ struct ServiceClient {
             throw ServiceError.invalidResponse
         }
         
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Error Response Body: \(jsonString)")
-            }
-            throw ServiceError.httpStatus(httpResponse.statusCode)
-        }
+        try HTTPErrorHandler(for: httpResponse, with: data)
         
         return try decode(V.self, from: data)
     }

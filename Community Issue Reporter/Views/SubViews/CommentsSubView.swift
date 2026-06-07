@@ -32,7 +32,7 @@ struct CommentsSubView: View {
     
     var body: some View {
         ScrollView(.vertical) {
-            LazyVStack(spacing: 16) {
+            LazyVStack(spacing: .themeSpacing * 4) {
                 if isLoading {
                     LoadingView()
                 }
@@ -54,23 +54,23 @@ struct CommentsSubView: View {
                     .containerRelativeFrame(.vertical)
                 } else {
                     ForEach(comments) { c in
-                        CommentRow(name: c.name!, time: c.createdAt!, message: c.message)
+                        CommentRow(comment: c)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                            // The Delete Button
-                                            Button(role: .destructive) {
-                                               
-                                            } label: {
-                                                Label("Delete", systemImage: "trash")
-                                            }
-                                            
-                                            // The Mute Button
-                                            Button {
-                                               
-                                            } label: {
-                                                Label("Mute", systemImage: "bell.fill")
-                                            }
-                                            .tint(.indigo) // Sets the purple/blue color
-                                        }
+                                // The Delete Button
+                                Button(role: .destructive) {
+                                    
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                
+                                // The Mute Button
+                                Button {
+                                    
+                                } label: {
+                                    Label("Mute", systemImage: "bell.fill")
+                                }
+                                .tint(.indigo) // Sets the purple/blue color
+                            }
                     }
                 }
             }
@@ -89,7 +89,8 @@ struct CommentsSubView: View {
                 onError: { error in
                     print(error)
                     isLoading = false
-                })
+                }
+            )
         }
         .background(Color.theme.background)
         .scrollContentBackground(.hidden)

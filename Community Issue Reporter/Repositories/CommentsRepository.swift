@@ -58,7 +58,7 @@ final class CommentsRepository {
     
     func update(_ comment: Comment, onComplete: @escaping () -> Void, onError: ErrorHandler) async {
         do {
-            _ = try await self.commentsService.update(comment: Comment(id: comment.id, reportId: comment.reportId, message: comment.message))
+            _ = try await self.commentsService.update(comment: comment)
             onComplete()
         } catch {
             onError(error)

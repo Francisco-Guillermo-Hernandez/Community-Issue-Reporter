@@ -16,6 +16,9 @@ enum UserOAuthResultState {
     case unowned 
 }
 
+typealias UserNameCompletion = (Result<String, UserError> ) -> Void
+typealias UserCompletion = (Result<String, Error> ) -> Void
+
 final class UserRepository {
     
     static var shared: UserRepository = .init()
@@ -36,10 +39,6 @@ final class UserRepository {
             ]
             
             let result = try await self.service.login(payload: OAuthSignInPayload(token: token), headers: loginHeaders)
-            
-            print("=================")
-            print("result of the login")
-            dump(result)
             
             if result.code == "TOKEN_GENERATED" {
                 onSuccess(.existing, result.authSessionId)
@@ -115,7 +114,7 @@ final class UserRepository {
         UserDefaults.standard.string(forKey: "avatar_url").flatMap(URL.init(string:))
     }
     
-    func changeAvatar(_ image: UIImage, userName: String, completion: @escaping (Result<String, Error>) -> Void) async {
+    func changeAvatar(_ image: UIImage, userName: String, completion: @escaping UserCompletion) async {
         
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             completion(.failure(NSError(domain: "UserRepository", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to get image data"])))
@@ -141,8 +140,45 @@ final class UserRepository {
         }
         
     }
+    
+    func checkAvailability(of userName: String, completion:  @escaping UserNameCompletion) async {
+        do {
+            
+            let headers = [
+                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+                HTTPHeader(name: "CountryCode", content: "SV"),
+            ]
+            
+            let result = try await self.service.checkAvailability(of: userName, headers)
+            
+            if result.code == "USER_NAME_AVAILABLE" {
+                completion(.success(result.message))
+            }
+            
+        } catch ServiceError.badRequest(let genericResponse) {
+            
+            switch genericResponse.code {
+            
+                case "USER_NAME_TAKEN":
+                    completion(.failure(.taken))
+                case "USER_NAME_INVALID":
+                    completion(.failure(.invalidUserName))
+                default:
+                    completion(.failure(.unknownError(genericResponse.message)))
+            }
+
+        } catch {
+            completion(.failure(.unknownError(error.localizedDescription)))
+        }
+    }
 }
 
+enum UserError: Error {
+    case invalidUserName
+    case tooLarge
+    case unknownError(String)
+    case taken
+}
 
 enum ImageError: Error {
     case invalidData

@@ -164,6 +164,7 @@ struct TextInput: View {
             .foregroundColor(Color.theme.inputText) // maps to muted-foreground
     }
     
+    /// Lets use the validations to check the text
     private func validate(_ value: String) {
         for validator in validators {
             if !validator.fn(value) {
@@ -197,10 +198,10 @@ private struct LabelView: View {
     
     var body: some View {
         Text(text)
-            .font(.subheadline) // text-sm
-            .fontWeight(.medium) // font-medium
+            .font(.caption)
+            .fontWeight(.medium)
             .foregroundStyle(Color.theme.foreground)
-            .opacity(isDisabled ? 0.4 : 0.85)
+            .opacity(isDisabled ? 0.4 : 0.75)
             .padding(.leading, 12)
     }
 }

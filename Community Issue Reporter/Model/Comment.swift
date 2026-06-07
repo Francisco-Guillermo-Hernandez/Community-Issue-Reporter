@@ -7,28 +7,55 @@
 
 import Foundation
 
+enum CommentForType: String, Codable {
+    case report
+    case petition
+}
+
 struct Comment: Identifiable, Codable {
-    let id: String
-    var createdAt: Date?
-    var updatedAt: Date?
-    let name: String?
-    let reportId: String
+    var id: String?
+    let userName: String
+    let profilePicture: String
+    let commentFor: CommentForType
+    let resourceId: String
     let message: String
+    var createdAt: Date
+    var updatedAt: Date?
     
     init(
-        id: String,
-        createdAt: Date? = nil,
-        updatedAt: Date? = nil,
-        name: String? = nil,
-        reportId: String,
-        message: String
+        id: String?,
+        userName: String,
+        profilePicture: String,
+        commentFor: CommentForType,
+        resourceId: String,
+        message: String,
+        createdAt: Date,
+        updatedAt: Date?
     ) {
         self.id = id
+        self.userName = userName
+        self.profilePicture = profilePicture
+        self.commentFor = commentFor
+        self.resourceId = resourceId
+        self.message = message
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.name = name
-        self.reportId = reportId
+    }
+    
+    
+    init(
+        commentFor: CommentForType,
+        resourceId: String,
+        message: String,
+    ) {
+        self.id = UUID().uuidString
+        self.userName = "Guest"
+        self.profilePicture = "https://development-api.reportamelo.app/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg?v=192929292"
+        self.commentFor = commentFor
+        self.resourceId = resourceId
         self.message = message
+        self.createdAt = Date()
+        self.updatedAt = nil
     }
 }
 

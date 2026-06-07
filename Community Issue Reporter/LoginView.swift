@@ -19,8 +19,6 @@ struct LoginView: View {
             
             Image("Login_background")
                 .resizable()
-//                .aspectRatio(9/16, contentMode: .fill)
-//                .edgesIgnoringSafeArea(.all)
                 .backgroundExtensionEffect()
             
             VStack(spacing: .themeSpacing * 6) {

@@ -23,37 +23,46 @@ struct ReportsChooserView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            List(filteredReports, id: \.id) { report in
-                MultipleSelectionRow(report: report, isSelected: self.selectedReports.contains(getId(from: report))) {
-                    if let index = self.selectedReports.firstIndex(of: report.id!) {
-                        self.selectedReports.remove(at: index)
-                    } else {
-                        self.selectedReports.append(getId(from: report))
-                    }
-                }
-                .frame(maxWidth: .infinity)
-            }
-//            .scrollContentBackground(.hidden)
-            .interactiveDismissDisabled()
-            .searchable(text: $searchText, placement: .toolbar, prompt: String(localized: "Search a report"))
-            .navigationTitle("Choose one or multiple reports")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Button {
-                        
-                    } label: {
-                        Label("Options", systemImage: "line.3.horizontal.decrease")
-                    }
+        List(filteredReports, id: \.id) { report in
+            MultipleSelectionRow(of: report, isSelected: isSelected(report)) {
+                if let index = self.selectedReports.firstIndex(of: report.id!) {
+                    self.selectedReports.remove(at: index)
+                } else {
+                    self.selectedReports.append(getId(from: report))
                 }
             }
+            .cellStyle()
         }
+        .listStyle(.plain)
+        .padding(.horizontal, 0)
+        .background(Color.theme.background)
+        .scrollContentBackground(.hidden)
+        .interactiveDismissDisabled()
+        .searchable(
+            text: $searchText,
+            placement: .toolbar, // .navigationBarDrawer,
+            prompt: String(localized: "Search a report")
+        )
+        .navigationTitle("Choose one or multiple reports")
+        .navigationBarTitleDisplayMode(.inline)
+//        .toolbar {
+//            ToolbarItem(placement: .automatic) {
+//                Button {
+//                    
+//                } label: {
+//                    Label("Options", systemImage: "line.3.horizontal.decrease")
+//                }
+//            }
+//        }
     }
     
    private func getId(from report: Report) -> String {
        guard let id = report.id else { return "" }
        return id
+    }
+    
+    private func isSelected(_ report: Report) -> Bool {
+        return self.selectedReports.contains(getId(from: report))
     }
 }
 
@@ -61,6 +70,13 @@ struct MultipleSelectionRow: View {
     var report: Report
     var isSelected: Bool = false
     var action: () -> Void
+    
+    init(of report: Report, isSelected: Bool, action: @escaping () -> Void) {
+        self.report = report
+        self.isSelected = isSelected
+        self.action = action
+    }
+    
     var body: some View {
         Button {
             action()

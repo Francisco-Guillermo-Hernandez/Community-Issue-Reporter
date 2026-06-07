@@ -344,7 +344,19 @@ struct SignRequestsView: View {
                         
                         Picker("Issue Type", selection: $issueType) {
                             ForEach(IssueTypes.allCases, id: \.self) { type in
-                                Text(type.title).tag(type)
+                                Button {
+                                    issueType = type
+                                } label: {
+                                    HStack {
+                                        Text(type.title)
+                                        if issueType == type {
+                                            Image(systemName: "checkmark")
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                        }
+                                    }
+                                   
+                                }
+                               
                             }
                         }
                         

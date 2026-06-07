@@ -51,7 +51,7 @@ struct CreateRequestPetitionView: View {
                                 Text("Select a category").tag(0)
                                     .padding(4)
                             } else {
-                                Text($0.rawValue.capitalized).tag($0)
+                                Text($0.title.capitalized).tag($0)
                                     .padding(4)
                             }
                         }
@@ -110,6 +110,8 @@ struct CreateRequestPetitionView: View {
                 }
         
             }
+            .background(Color.theme.background)
+            .scrollContentBackground(.hidden)
             .task {
                 // Let's cancel the task if the user change the view
                 guard !Task.isCancelled else { return }
@@ -129,6 +131,7 @@ struct CreateRequestPetitionView: View {
                 
         
             }
+            .background(Color.theme.background)
             .toolbar {
                 
                 ToolbarItem(placement: .cancellationAction) {

@@ -84,10 +84,11 @@ struct AppTheme {
             blue: 244/255
         ),
         dark: Color(
-            red: 26/255,
-            green: 24/255,
-            blue: 27/255
+            red: 18/255,
+            green: 18/255,
+            blue: 18/255
         )
+        
     )
     
     static let cardBackground = dynamicColor(
@@ -97,9 +98,9 @@ struct AppTheme {
             blue: 251/255
         ),
         dark: Color(
-            red: 18/255,
-            green: 18/255,
-            blue: 18/255
+            red: 26/255,
+            green: 24/255,
+            blue: 27/255
         )
     )
     

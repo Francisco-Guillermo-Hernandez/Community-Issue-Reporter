@@ -10,3 +10,10 @@ import Foundation
 func getBundle() -> String {
     return Bundle.main.bundleIdentifier ?? "dev.FranciscoHernandez.default"
 }
+
+func userAlias(_ userName: String) -> String {
+    return [
+        "@",
+        userName
+    ].joined()
+}

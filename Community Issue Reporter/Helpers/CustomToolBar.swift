@@ -63,7 +63,7 @@ fileprivate struct CustomToolBarModifier<Leading: View, Trailing: View, PrimaryA
                                     Text("Petitions")
                                         .font(Font.largeTitle.bold())
                                         .frame(maxWidth: .infinity, alignment: .leading)
-//
+                                        .fontWeight(.bold)
                                 }
                                 
                                 ZStack {

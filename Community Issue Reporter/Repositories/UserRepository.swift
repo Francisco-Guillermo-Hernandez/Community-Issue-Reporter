@@ -88,9 +88,17 @@ final class UserRepository {
     
     func getName() -> String {
         guard let user = GIDSignIn.sharedInstance.currentUser,
-              let profile = user.profile else { return "Visitor" }
+              let profile = user.profile else { return "Guest" }
         
         return profile.name
+    }
+    
+    func getUsername() -> String {
+        UserDefaults.standard.string(forKey: "user_name") ?? "guest"
+    }
+    
+    func setUsername(_ username: String) {
+        UserDefaults.standard.set(username, forKey: "user_name")
     }
     
     func getPublicInformation() -> UserProfile? {
@@ -141,6 +149,31 @@ final class UserRepository {
         
     }
     
+    func change(_ userName: String, completion: @escaping UserNameCompletion) async {
+        do {
+            let headers = [
+                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+                HTTPHeader(name: "CountryCode", content: "SV"),
+            ]
+            
+            let result = try await self.service.change(userName, headers)
+            
+            if result.code == "USER_NAME_UPDATED" {
+                completion(.success(result.message))
+            }
+        } catch ServiceError.badRequest(let genericResponse) {
+            switch genericResponse.code {
+                case "UPDATE_NAME_ERROR":
+                    completion(.failure(.serverError(genericResponse.message)))
+    
+                default:
+                    completion(.failure(.unknownError(genericResponse.message)))
+            }
+        } catch {
+            completion(.failure(.unknownError(error.localizedDescription)))
+        }
+    }
+    
     func checkAvailability(of userName: String, completion:  @escaping UserNameCompletion) async {
         do {
             
@@ -171,6 +204,36 @@ final class UserRepository {
             completion(.failure(.unknownError(error.localizedDescription)))
         }
     }
+    
+    func modify(notifications: Notifications, completion : @escaping (Result<String, Error>) -> Void) async {
+        do {
+            let result = try await self.service.modify(notifications, [])
+            
+            if result.code == "NOTIFICATIONS_UPDATED" {
+                completion(.success(""))
+            }
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    
+    func completeLandingPage(completion: @escaping () -> Void) async {
+        do {
+            let result = try await self.service.completeLandingPage()
+            if result.code == "LANDING_COMPLETED_UPDATED" {
+                completion()
+            }
+        } catch {
+            
+        }
+    }
+}
+
+enum NetworkError: Error {
+    case noNetwork
+    case noData
+    case unavailable
+    case unknown
 }
 
 enum UserError: Error {
@@ -178,6 +241,7 @@ enum UserError: Error {
     case tooLarge
     case unknownError(String)
     case taken
+    case serverError(String)
 }
 
 enum ImageError: Error {

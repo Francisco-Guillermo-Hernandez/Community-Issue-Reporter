@@ -53,7 +53,7 @@ struct Signatories: View {
 struct PostPublisher: View {
     var body: some View {
         Group {
-            HStack(alignment: .top, spacing: .themeSpacing * 3) {
+            HStack(alignment: .center, spacing: .themeSpacing * 3) {
                 VStack {
                     Image("user_b")
                         .resizable()
@@ -62,14 +62,21 @@ struct PostPublisher: View {
                         .clipShape(.circle)
                 }
                 
-                VStack {
-                    Text("John Doe")
-                        .font(.subheadline)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: .themeSpacing) {
+                        Text("John Doe")
+                            .font(.subheadline)
+                            .fontWeight(.bold)
+                        
+                        Text(userAlias("john.doe"))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
                     Text("Yesterday at 20:20 - San Salvador, SV")
                         .font(.caption)
-                        .foregroundStyle(Color.gray)
+                        .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

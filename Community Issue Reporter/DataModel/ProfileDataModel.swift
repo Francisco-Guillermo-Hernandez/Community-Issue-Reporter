@@ -31,8 +31,8 @@ final class ProfileDataModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     // Persistence keys
-    private let selectedOptionKey = "selectedAvatarOption"
-    private let selectedColorKey = "selectedAvatarColor"
+    private let selectedOptionKey = "selected_avatar_option"
+    private let selectedColorKey = "selected_avatar_color"
 
     @Published var selectedAvatarOptionView: CurrentView {
         didSet {
@@ -61,6 +61,10 @@ final class ProfileDataModel: ObservableObject {
         
         let savedColorHex = UserDefaults.standard.string(forKey: selectedColorKey) ?? "FFA500" // Default orange
         self.selectedAvatarColor = Color(hex: savedColorHex)
+        
+        if selectedAvatarOptionView == .GoogleAuth, let url = UserRepository.shared.getProfilePictureURL() {
+            UserDefaults.standard.set(url, forKey: "avatar_url")
+        }
         
         self.avatarURL = UserDefaults.standard.string(forKey: "avatar_url").flatMap(URL.init(string:))
         

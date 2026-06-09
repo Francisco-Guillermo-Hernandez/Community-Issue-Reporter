@@ -74,3 +74,5 @@ let userNameValidator: [Validator] = [
         fn: { $0.count >= 3 }
     )
 ]
+
+let userNameRegex = "[a-zA-Z0-9._-]"

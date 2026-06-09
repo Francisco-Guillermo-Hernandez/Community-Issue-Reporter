@@ -75,7 +75,7 @@ struct SearchBar: View {
                         Button {
                             onUserProfileTap()
                         } label: {
-                            if let url = avatarURL ?? UserRepository.shared.getAvatar() {
+                            if let url = avatarURL ?? UserRepository.shared.getAvatar() ?? UserRepository.shared.getProfilePictureURL() {
                                 CachedAsyncImage(url: url) { image in
                                     image
                                         .resizable()

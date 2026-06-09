@@ -148,7 +148,7 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(style == .normal ? .system(size: 14, weight: .medium) : Font.body.bold()) // style == .prominent ? Font.body.bold() : Font.body
+            .font(style == .normal ? .system(size: 14, weight: .regular) : Font.body.bold()) // style == .prominent ? Font.body.bold() : Font.body
             //.font(.system(size: 14, weight: .medium)) // text-sm font-medium
 //            .frame(height: 36) // h-9
 //            .padding(.horizontal, 12) // px-3

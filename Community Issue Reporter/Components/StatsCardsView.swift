@@ -46,9 +46,9 @@ struct StatsCardsView: View {
 //                    )
                     StatCard(
                         action: {},
-                        description: "I've reported",
+                        description: String(localized: "I've reported"),
                         title: "50",
-                        trend: "Issues this month",
+                        trend: String(localized: "Issues this month"),
                         timeframe: ""
                     )
                 }
@@ -70,9 +70,9 @@ struct StatsCardsView: View {
 //                    )
                     StatCard(
                         action: {},
-                        description: "I've created",
+                        description: String(localized: "I've created"),
                         title: "50",
-                        trend: "Petitions to sign",
+                        trend: String(localized: "Petitions this month"),
                         timeframe: "for the last 6 months"
                     )
                 }
@@ -109,18 +109,18 @@ struct StatsCardsView: View {
             HStack {
                 StatCard(
                     action: {},
-                    description: "I've signed",
+                    description: String(localized: "I've commented on"),
                     title: "10",
-                    trend: "Petitions",
+                    trend: String(localized: "Petitions"),
                     timeframe: "for the last 6 months"
                 )
                 .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
                 
                 StatCard(
                     action: {},
-                    description: "I've commented on",
+                    description: String(localized: "I've commented on"),
                     title: "100",
-                    trend: "Incidents",
+                    trend: String(localized: "Incidents"),
                     timeframe: "for the last 6 months"
                 )
                 .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))

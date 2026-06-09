@@ -424,6 +424,16 @@ struct ProfileImage: View {
                 }
                 .id(url)
                 
+            } else if viewModel.selectedAvatarOptionView == .GoogleAuth, let url = UserRepository.shared.getProfilePictureURL() {
+                CachedAsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    ProgressView()
+                }
+                .id(url)
+                
             } else {
                 Image("user_b")
                     .resizable()

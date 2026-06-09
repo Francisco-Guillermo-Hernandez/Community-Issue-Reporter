@@ -116,15 +116,24 @@ struct DetailView: View {
 
     fileprivate func moreInformation() -> some View {
         return Group {
-            SectionHeader(title: "More Information")
+            SectionHeader(title: String(localized: "More Information"))
             List {
 
+                HStack {
+                    Text("Report Id:")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Text(report.id)
+                        .font(.caption)
+                }
+                
                 HStack {
                     Text("Reported by:")
                         .font(.caption)
                         .fontWeight(.semibold)
                     Spacer()
-                    Text("Guest user")
+                    Text(report.reportedBy)
                         .font(.caption)
                 }
 
@@ -202,14 +211,14 @@ struct DetailView: View {
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
             .scrollClipDisabled(true)
-            .frame(height: 245)
+            .frame(height: 295)
 
         }
     }
 
     fileprivate func evidenceOfTheIssues() -> Group<TupleView<(SectionHeader, some View)>> {
         return Group {
-            SectionHeader(title: "Evidence of the report")
+            SectionHeader(title: String(localized: "Evidence of the report"))
             ScrollView(.horizontal, showsIndicators: true) {
                 LazyHGrid(rows: gridColumns, spacing: .themeSpacing * 2) {
                     ForEach(photos, id: \.id) { photo in
@@ -233,7 +242,7 @@ struct DetailView: View {
                                                 .font(.largeTitle)
 
                                             HStack {
-                                                Text("More Evidences...")
+                                                Text(String(localized: "More Evidences..."))
                                                     .font(.caption)
                                                     .fontWeight(.black)
                                                   
@@ -243,6 +252,7 @@ struct DetailView: View {
                                             }
                                         }
                                     }
+                                    .padding(.trailing, 16)
                             }
 
                         } else {
@@ -262,7 +272,7 @@ struct DetailView: View {
     @ViewBuilder
     func lastComments() -> some View {
         Group {
-            SectionHeader(title: "Latest Comments")
+            SectionHeader(title: String(localized: "Latest Comments"))
             LazyVStack(spacing: 16) {
                 ForEach(comments) { c in
                     CommentRow(comment: c)
@@ -342,11 +352,16 @@ struct DetailView: View {
             Text(report.title)
                 .font(.title2)
                 .bold()
+                .fontWidth(.condensed)
+                .fontWeight(.bold)
+                .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Text(report.description)
                 .font(.subheadline)
+//                .fontWidth(.condensed)
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -475,25 +490,31 @@ func getMatterToSolve(id: Int) -> String {
 }
 
 #Preview {
-    var report = MapExplorerReport(
-        id: "",
-        lat: 0,
-        lng: 0,
-        address: "Lorem ipsum dolor sit ammet",
-        title: "A big pothole in the middle of the street",
-        description: "There is a big pothole that is affecting our cars",
-        severityId: 1,
-        statusId: 1,
-        issueTypeId: 1,
-        matterToSolveId: 1,
-        reportedAtRaw: nil,
-        cellIndex: "",
-        createdAtRaw: 0,
-        updatedAtRaw: 0,
-        reportedBy: "",
-        cityId: "",
-        petitionId: ""
-    )
+    
+    NavigationStack {
+        Text("")
+            .sheet(isPresented: .constant(true)) {
+                var report = MapExplorerReport(
+                    id: "SV-SS-260601-aXWsaxls",
+                    lat: 13.701270,
+                    lng: -89.224432,
+                    address: "Lorem ipsum dolor sit ammet",
+                    title: "A big pothole in the middle of the street",
+                    description: "There is a big pothole that is affecting our cars",
+                    severityId: 1,
+                    statusId: 1,
+                    issueTypeId: 1,
+                    matterToSolveId: 1,
+                    reportedAtRaw: nil,
+                    cellIndex: "",
+                    createdAtRaw: 0,
+                    updatedAtRaw: 0,
+                    reportedBy: "John Doe",
+                    cityId: "",
+                    petitionId: ""
+                )
 
-    DetailView(report: report)
+                DetailView(report: report)
+            }
+    }
 }

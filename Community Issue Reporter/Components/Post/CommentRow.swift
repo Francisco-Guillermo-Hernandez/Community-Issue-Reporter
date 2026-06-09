@@ -12,8 +12,8 @@ struct CommentRow: View {
     var comment: Comment
     var body: some View {
         
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: .themeSpacing * 2) {
+            HStack(spacing: .themeSpacing * 3) {
                 
                 
                 Group {
@@ -36,15 +36,15 @@ struct CommentRow: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 4) {
-                        Text(comment.userName)
+                        Text(comment.name)
                             .font(.subheadline)
                             .fontWeight(.bold)
                         
                     }
                     
                     Text(userAlias(comment.userName))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 
                 Spacer(minLength: 0)
@@ -56,7 +56,6 @@ struct CommentRow: View {
             }
             
             Text(comment.message)
-//                .font(.body)
                 .font(.caption)
                 .lineSpacing(4)
                 .multilineTextAlignment(.leading)
@@ -66,16 +65,6 @@ struct CommentRow: View {
         
         Divider()
     }
-    
-    private func userAlias(_ userName: String) -> String {
-        return [
-            "~",
-            userName
-                .lowercased()
-                .split(separator: " ")
-                .joined(separator: ".")
-        ].joined()
-    }
 }
 
 
@@ -83,7 +72,8 @@ struct CommentRow: View {
     
     let comment = Comment(
         id: "1",
-        userName: "John Doe",
+        name: "John Doe",
+        userName: "john.doe",
         profilePicture: "https://development-api.reportamelo.app/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg?v=192929292",
         commentFor: .report,
         resourceId: "",

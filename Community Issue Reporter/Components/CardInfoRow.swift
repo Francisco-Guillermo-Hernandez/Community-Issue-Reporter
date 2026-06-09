@@ -112,7 +112,7 @@ struct StatCard: View {
                     Text(trend)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundStyle(foregroundColor)
+                        .foregroundStyle(Color.theme.inputText)
                     
 //                    Text(timeframe)
 //                        .font(.subheadline)

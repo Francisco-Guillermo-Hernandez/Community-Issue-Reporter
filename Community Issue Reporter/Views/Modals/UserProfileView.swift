@@ -25,6 +25,12 @@ struct UserProfileView: View {
     @State private var selectedOption: String = ""
     @EnvironmentObject var appState: AuthViewModel
     @ObservedObject var profile = ProfileDataModel()
+    @EnvironmentObject var notificationManager: NotificationManager
+    
+    
+    
+    @State private var textToCopy = "Hello, World!"
+       @State private var showCopiedMessage = false
     
     init () {
         
@@ -79,10 +85,61 @@ struct UserProfileView: View {
                         .font(.title3)
                         .fontWeight(.semibold)
                     
-                    Text(countryName)
+                    Text(userAlias(UserRepository.shared.getUsername()))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
+                
+                Button("Enable") {
+                    notificationManager.requestAuthorization()
+                }
+                
+                VStack(spacing: 20) {
+                         Text(notificationManager.isPermissionGranted ? "Notifications Enabled ✅" : "Notifications Disabled ❌")
+                         
+                         if !notificationManager.deviceToken.isEmpty {
+                             Text("Your APNs Device Token:")
+                                 .font(.caption)
+                             Text(notificationManager.deviceToken)
+                                 .font(.system(.caption2, design: .monospaced))
+                                 .padding()
+                                 .background(Color(.systemGray6))
+                         }
+                     }
+                     .padding()
+                
+                
+                
+                
+                Button(action: {
+                    
+                    textToCopy = notificationManager.isPermissionGranted ? notificationManager.deviceToken : ""
+                               // 1. Copy the text string to the system clipboard
+                               UIPasteboard.general.string = textToCopy
+                               
+                               // 2. Provide visual feedback
+                               withAnimation {
+                                   showCopiedMessage = true
+                               }
+                               
+                               // Hide feedback after 2 seconds
+                               DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                   withAnimation {
+                                       showCopiedMessage = false
+                                   }
+                               }
+                           }) {
+                               Label("Copy to Clipboard", systemImage: "doc.on.doc")
+                           }
+                           .buttonStyle(.borderedProminent)
+
+                           if showCopiedMessage {
+                               Text("Copied! 🎉")
+                                   .foregroundColor(.green)
+                                   .transition(.opacity)
+                           }
+                
+                
                 
                 List(options, id: \.self) { option in
                     

@@ -5,6 +5,54 @@
 //  Created by Francisco Hernandez on 21/3/26.
 //
 
+import SwiftUI
+
+struct SettingsGroup<Content: View>: View {
+    let title: String
+    let footerText: String?
+    let content: Content
+
+    // @ViewBuilder allows the closure to construct views implicitly
+    init(title: String, footerText: String? = nil, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.footerText = footerText
+        self.content = content()
+    }
+
+    var body: some View {
+        Group {
+            VStack(spacing: .themeSpacing * 1.5) {
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, .themeSpacing * 4.5)
+                    .foregroundStyle(.secondary)
+                
+                VStack {
+                    VStack(spacing: .themeSpacing * 4) {
+                        content
+                    }
+                    .padding()
+//                    .padding(.bottom, 8)
+//                    .padding(.top, 8)
+                }
+                .customCardStyle()
+                
+                if let footerText = footerText {
+                    Text(footerText)
+                        .font(Font.footnote)
+                        .fontWeight(.regular)
+                        .foregroundStyle(.secondary)
+                        .padding(.leading, .themeSpacing * 4.5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            
+        }
+    }
+}
+
 import MapKit
 import SwiftUI
 
@@ -17,16 +65,20 @@ struct SettingsSubView: View {
     @State private var geographicalRegion: Int = 1
     @State private var selectedCountry: Int = 0
     @State private var enableBackgroundSync: Bool = false
-    @State private var enableAnonymousTelemetry: Bool = false
+    @State private var enableAnonymousTelemetry: Bool = true
     @State private var selectedLanguage: Int = 1
     @State private var enableAutomaticIdentification: Bool = true
 
     @State private var countries: [Country] = []
     @State private var regions: [Region] = []
     @State private var cities: [FriendlyCityDistribution] = []
-    @State private var language: String = "en"
+    @State private var language: String = "es-419"
     @State private var enableNotifications: Bool = false
     @State private var saveLastLocation: Bool = true
+    @State private var useMyCurrentLocation: Bool = false
+    
+    @State private var enablePush: Bool = false
+    @State private var enableEmail: Bool = false
 
     @State private var selectedCity: FriendlyCityDistribution = .init(
         cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
@@ -43,102 +95,170 @@ struct SettingsSubView: View {
     var subViewName: String
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    ///
-                    Picker("Region", selection: $geographicalRegion) {
-                        ForEach(geographicalRegions, id: \.id) { item in
-                            Text(item.name).tag(item.id)
+            
+            ScrollView() {
+                
+                VStack(spacing: .themeSpacing * 8) {
+                    /// Location group
+                    SettingsGroup(title: "Location") {
+//                        HStack {
+//                            Text("Region")
+//                            Spacer()
+//                            Picker("Region", selection: $geographicalRegion) {
+//                                ForEach(geographicalRegions, id: \.id) { item in
+//                                    Text(item.name).tag(item.id)
+//                                }
+//                            }
+//                            
+//                            .onChange(of: geographicalRegion) { _, newValue in
+//                                if settings.geographicalRegion != newValue {
+//                                    selectedCountry = 0
+//                                }
+//
+//                                countries = getCountries(geographicalRegion: newValue)
+//                                settings.geographicalRegion = newValue
+//                            }
+//    //                        .disabled(true)
+//                        }
+//
+
+                        ///
+//                        HStack {
+//                            Text("Country")
+//                            Spacer()
+//                            Picker("Country", selection: $selectedCountry) {
+//                                ForEach(countries, id: \.id) { item in
+//                                    Text(item.name).tag(item.id)
+//                                }
+//                            }
+//                            .onChange(of: selectedCountry) { _, newValue in
+//
+//                                regions = getRegion(countryId: newValue)
+//                                settings.selectedCountry = newValue
+//                            }
+//    //                        .disabled(true)
+//                        }
+//                        .hidden()
+
+                        NavigationLink(destination: selectCityView()) {
+                            HStack {
+                                Text("City")
+                                    .foregroundStyle(Color.theme.inputText)
+                                   
+                                Spacer()
+                                HStack(spacing: 4) {
+                                    Text(selectedCity.thirdLevel)
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                }
+//                                .padding(.trailing, 14)
+//                                    .foregroundStyle(Color.secondary)
+                            }
                         }
                     }
-                    .onChange(of: geographicalRegion) { _, newValue in
-                        if settings.geographicalRegion != newValue {
-                            selectedCountry = 0
-                        }
-
-                        countries = getCountries(geographicalRegion: newValue)
-                        settings.geographicalRegion = newValue
+                    
+                    /// Notifications group
+                    SettingsGroup(title: "Notifications") {
+                        Toggle("Push notifications", isOn: $enablePush)
+                            .foregroundStyle(Color.theme.inputText)
+                        
+                        Toggle("Email notifications", isOn: $enableEmail)
+                            .foregroundStyle(Color.theme.inputText)
                     }
-                    .disabled(true)
-
-                    ///
-                    Picker("Country", selection: $selectedCountry) {
-                        ForEach(countries, id: \.id) { item in
-                            Text(item.name).tag(item.id)
-                        }
+                    
+                    SettingsGroup(title: "App settings") {
+                        
+                        Toggle("Save last location", isOn: $saveLastLocation)
+                            .foregroundStyle(Color.theme.inputText)
+                        
+                        Toggle("Use my current location", isOn: $useMyCurrentLocation)
+                            .foregroundStyle(Color.theme.inputText)
+                        
+                        Toggle("Anonymous telemetry", isOn: $enableAnonymousTelemetry)
+                            .foregroundStyle(Color.theme.inputText)
+                            .onChange(of: enableAnonymousTelemetry) { _, newValue in
+                                settings.enableAnonymousTelemetry = newValue
+                            }
                     }
-                    .onChange(of: selectedCountry) { _, newValue in
-
-                        regions = getRegion(countryId: newValue)
-                        settings.selectedCountry = newValue
-                    }
-                    .disabled(true)
-
-                    NavigationLink(destination: selectCityView()) {
-                        HStack {
-                            Text("City")
-                            Spacer()
-                            Text(selectedCity.thirdLevel)
-                                .foregroundStyle(Color.secondary)
-                        }
-                    }
-
-                } header: {
-                    Text("Where I from?")
-                } footer: {
-                    Text(
-                        "It's important to know where you are from in order to show and report issues to the right people "
-                    )
                 }
-
-                Section {
-
-                    Picker("Language", selection: $selectedLanguage) {
-                        ForEach(langs, id: \.id) { item in
-                            Text(item.name).tag(item.id)
-                        }
-                    }
-                    .onChange(of: selectedLanguage) { _, newValue in
-                        settings.selectedLanguageID = newValue
-                        if let lang = langs.first(where: { $0.id == newValue }) {
-                            settings.selectedLanguageCode = lang.code
-                        }
-                    }
-
-                    Toggle("Save last location", isOn: $saveLastLocation)
-
-                    Toggle("Background sync", isOn: $enableBackgroundSync)
-                        .disabled(true)
-                        .onChange(of: enableBackgroundSync) { _, newValue in
-                            settings.enableBackgroundSync = newValue
-                        }
-
-                    Toggle("Anonymous telemetry", isOn: $enableAnonymousTelemetry)
-                    .disabled(true)
-                    .onChange(of: enableAnonymousTelemetry) { _, newValue in
-                        settings.enableAnonymousTelemetry = newValue
-                    }
-
-                    Toggle("Automatic identification", isOn: $enableAutomaticIdentification)
-                    .disabled(true)
-                    .onChange(of: enableAutomaticIdentification) {
-                        _,
-                        newValue in
-                        settings.enableAutomaticIdentification = newValue
-                    }
-
-                    Toggle("Notifications", isOn: $enableNotifications)
-                        .onChange(of: enableNotifications) { _, newValue in
-
-                        }
-
-                } header: {
-                    Text("App settings")
-                } footer: {
-                    Text("")
-                }
-
+                
             }
+            .padding(.horizontal)
+            
+//            List {
+//                Section {
+//                    ///
+
+//
+//                } header: {
+//                    Text("Where I from?")
+//                } footer: {
+//                    Text(
+//                        "It's important to know where you are from in order to show and report issues to the right people "
+//                    )
+//                }
+//                
+//                
+//
+//                
+//                Section {
+//                   
+//                } header: {
+//                    Text(String(localized: "Notifications"))
+//                } footer: {
+//                    Text("")
+//                }
+//                
+//           
+////                .padding()
+//                
+//                Section {
+//
+//                    Picker("Language", selection: $selectedLanguage) {
+//                        ForEach(langs, id: \.id) { item in
+//                            Text(item.name).tag(item.id)
+//                        }
+//                    }
+//                    .onChange(of: selectedLanguage) { _, newValue in
+//                        settings.selectedLanguageID = newValue
+//                        if let lang = langs.first(where: { $0.id == newValue }) {
+//                            settings.selectedLanguageCode = lang.code
+//                        }
+//                    }
+//
+//
+//
+//                    Toggle("Background sync", isOn: $enableBackgroundSync)
+//                        .disabled(true)
+//                        .onChange(of: enableBackgroundSync) { _, newValue in
+//                            settings.enableBackgroundSync = newValue
+//                        }
+//
+//
+//
+//                    Toggle("Automatic identification", isOn: $enableAutomaticIdentification)
+//                    .disabled(true)
+//                    .onChange(of: enableAutomaticIdentification) {
+//                        _,
+//                        newValue in
+//                        settings.enableAutomaticIdentification = newValue
+//                    }
+//
+//                    Toggle("Notifications", isOn: $enableNotifications)
+//                        .onChange(of: enableNotifications) { _, newValue in
+//
+//                        }
+//
+//                } header: {
+//                    Text("App settings")
+//                } footer: {
+//                    Text("")
+//                }
+//                
+//                
+//
+//            }
+//            .listStyle(.plain)
             .background(Color.theme.background)
             .task {
                 guard let documents = CitiesRepository.shared.loadLocalCities(of: .SV).documents
@@ -170,6 +290,7 @@ struct SettingsSubView: View {
             }
         }
 
+        .background(Color.theme.background)
         .interactiveDismissDisabled(true)
 
     }

@@ -27,6 +27,8 @@ struct SignRequestsView: View {
     private let pageLimit: Int = 16
     @State private var value: Double = 20
     
+    @State private var signatureCount: Int = 125
+    
     @State private var users: [User] = [
         User(username: "janeDoe", avatar: "user"),
         User(username: "mayDoe", avatar: "user"),
@@ -88,7 +90,7 @@ struct SignRequestsView: View {
             Petition(
                 id: "2",
                 title: "Un semaforo no esta funcionando en la avenida",
-                description: "",
+                description: "Un semaforo esta funcionando mal",
                 targetSignatures: 22,
                 currentSignatures: 0,
                 categoryId: 4,
@@ -305,8 +307,15 @@ struct SignRequestsView: View {
     @ViewBuilder
     func headerView() -> some View {
         VStack(alignment: .leading, spacing: .themeSpacing * 4) {
+            Text("**\(petitions.count)** Petitions   **\(signatureCount)** signatories")
+//                .font(Font.headline)
+                .font(.subheadline)
+//                .font(.custom("Lora", size: 16, relativeTo: .title))
+                .foregroundColor(.secondary)
             Text("  ")
-                .font(.title.bold())
+                .frame(height: 0)
+//                .font(.title.bold())
+                .font(.custom("Lora", size: 18, relativeTo: .title))
                 .onGeometryChange(for: Bool.self) {
                     let height = abs($0.size.height - 5)
                     let offset = $0.frame(in: .global).minY
@@ -315,13 +324,10 @@ struct SignRequestsView: View {
                     title = newValue ? "Petitions" : nil
                 }
             
-            Text("**125** Petitions   **5.6K** signatories")
-                .font(Font.headline)
-                .foregroundColor(.secondary)
             
         }
         .padding(.horizontal, .themePadding)
-        .padding(.bottom, .themePadding)
+//        .padding(.bottom, .themePadding)
     }
     
     @ViewBuilder
@@ -331,7 +337,10 @@ struct SignRequestsView: View {
             VStack(alignment: .leading) {
                 Text(petition.title)
                     .font(.title2)
+//                    .font(.custom("Lora", size: 16, relativeTo: .title))
                     .fontWeight(.black)
+                    .fontWidth(.condensed)
+                    .lineLimit(1)
                     .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
                         content
                             .opacity(activeSubtitleIndex == selectedIndex ? 0 : 1)
@@ -350,7 +359,9 @@ struct SignRequestsView: View {
                 
                 Text(petition.description)
                     .font(.caption)
-                    .foregroundStyle(Color.gray)
+                    .lineLimit(1)
+                    .foregroundStyle(.secondary)
+                
                   
             }
             
@@ -378,6 +389,7 @@ struct SignRequestsView: View {
             }
             .gaugeStyle(.accessoryLinearCapacity)
             
+            
             VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 HStack(alignment: .top) {
                     Signatories(users: users)
@@ -387,6 +399,9 @@ struct SignRequestsView: View {
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 .padding(.bottom, .themeSpacing * 2)
+                
+                Divider()
+                    .opacity(0.6)
                 
                 PostInteractions(
                     sign: {},
@@ -403,11 +418,16 @@ struct SignRequestsView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .foregroundColor(.theme.foreground)
-        .overlay(
-            Rectangle()
-                .stroke(Color.theme.border, lineWidth: 1)
-        )
+//        .overlay(
+//            RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
+//                .stroke(Color.theme.border, lineWidth: 1)
+//        )
         .background(Color.theme.cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+        .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+        .padding(.bottom, .themePadding / 2)
+
         
     }
 }

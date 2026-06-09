@@ -22,7 +22,6 @@ struct CustomBlurryOverlay: View {
                 show.toggle()
             }
             .transition(.opacity)
-            .zIndex(1)
     }
 }
 
@@ -35,16 +34,20 @@ enum UserNameAvailabilityStatus {
 
 struct UserPersonalizationView: View {
     @Environment(\.dismiss) var dismiss
+    @FocusState private var isInputFocused: Bool
+    @ObservedObject var profile = ProfileDataModel()
     @State private var isPresented: Bool = false
     @State private var triggerFeedBack: Bool = false
     @State private var userName: String = ""
     @State private var email: String = ""
+    @State private var name: String = ""
     @State private var isEmailValid: Bool = false
     @State private var isUserNameValid: Bool = false
     @State private var user: UserProfile?
     @State private var userNameAvailabilityStatus: UserNameAvailabilityStatus = .untouched
     @State private var userNameErrorMessage: String = ""
-    @ObservedObject var profile = ProfileDataModel()
+    @State private var isLoading: Bool = false
+    
     let appState = AuthViewModel()
     
     var nextStep: () -> Void
@@ -59,19 +62,16 @@ struct UserPersonalizationView: View {
                     ProfileImage(viewModel: profile)
                         .padding(.bottom, 8)
                         .padding(.top, .themePadding * 2)
-
-                    Text(userName)
+                       
+                    Text(name)
                         .font(.title3)
                         .fontWeight(.semibold)
+                    
+                    Text(userAlias(userName))
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
 
-                    HStack {
-                        
-                        if let firstLevel = appState.selectedCity?.firstLevel,  let thirdLevel = appState.selectedCity?.thirdLevel {
-                            Text("\(firstLevel), \(thirdLevel)")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+
                 }
                 
                 VStack {
@@ -81,11 +81,19 @@ struct UserPersonalizationView: View {
                                 name: "John Doe",
                                 label: String(localized: "User Name", comment: "User Name input"),
                                 validators: userNameValidator,
+                                regex: .customPattern(userNameRegex),
                                 isValid: $isUserNameValid,
                                 value: $userName,
                             )
+                            .focused($isInputFocused)
                             .onChange(of: userName) { _, newValue in
                                 profile.userName = newValue
+                            }
+                            .onChange(of: profile.showPicker) { oldValue, newValue in
+                                if newValue {
+                                    isInputFocused = false
+                                }
+                                
                             }
                             
                             showUserNameStates()
@@ -114,10 +122,16 @@ struct UserPersonalizationView: View {
         .task(id: userName) {
         
         
-                            
-           if userName.count >= 3 {
+           /// Check if conditions met
+           if userName.count >= 3 && userName.count < 21 {
+               
+               /// Debouncing time
                try? await Task.sleep(for: .milliseconds(400))
+               
+               /// Set loading state
               userNameAvailabilityStatus = .loading
+               
+               /// Check availability
               await UserRepository.shared.checkAvailability(
                    of: userName,
                    completion: { (result: Result<String, UserError>) in
@@ -126,6 +140,7 @@ struct UserPersonalizationView: View {
                            case .success(let result):
                            print(result)
                               
+                               /// Set available state to show that message
                                userNameAvailabilityStatus = .available
                            case .failure(let error):
                           
@@ -145,6 +160,8 @@ struct UserPersonalizationView: View {
                    }
               )
            } else {
+               
+               /// Set Initial state
                userNameAvailabilityStatus = .untouched
            }
         }
@@ -164,7 +181,11 @@ struct UserPersonalizationView: View {
                 }
                 
                 if let name = user.username {
+                    self.name = name
                     self.userName = name
+                        .lowercased()
+                        .split(separator: " ")
+                        .joined(separator: ".")
                 }
             }
         }
@@ -190,9 +211,7 @@ struct UserPersonalizationView: View {
                         message: String(localized: "Next Step"),
                         action: {
                             triggerFeedBack.toggle()
-                            nextStep()
-                            print("hello")
-                         
+                            updateUsername()
                         },
                         type: .primary
                     )
@@ -212,6 +231,7 @@ struct UserPersonalizationView: View {
         
     }
     
+    /// State machine to handle different scenarios
     @ViewBuilder
     private func showUserNameStates() -> some View {
         Group {
@@ -234,6 +254,36 @@ struct UserPersonalizationView: View {
         }
         .padding(.leading, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func updateUsername() -> Void {
+        Task {
+            isLoading.toggle()
+            
+            /// save userName into userDefault
+            UserRepository.shared.setUsername(userName)
+            await UserRepository.shared.change(userName, completion: { (result: Result<String, UserError>) in
+                switch result {
+                case .success(let message):
+                    print(message)
+                    isLoading.toggle()
+                    nextStep()
+                    
+                    /// Error handling
+                case .failure(let error):
+                    
+                    isLoading.toggle()
+                    print("error from update user name")
+                    dump(error)
+                    switch error {
+                    case .serverError(let message):
+                      print(message)
+                    default:
+                        break
+                    }
+                }
+            })
+        }
     }
     
     private var isFormValid: Bool {

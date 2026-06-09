@@ -26,6 +26,18 @@ struct UserService {
         return try await client.post(path: "user/check/availability", body: ["userName": userName], headers: headers, withOAuth: true)
     }
     
+    func modify(_ notifications: Notifications,  _ headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.patch(path: "user/notifications", body: notifications, headers: headers, withOAuth: true)
+    }
+    
+    func change(_ userName: String, _ headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.patch(path: "user/userName", body: ["userName": userName], headers: headers, withOAuth: true)
+    }
+    
+    func completeLandingPage() async throws -> GenericResponse {
+        return try await client.patch(path: "user/landing/completed", body: [String: String](), headers: [], withOAuth: true)
+    }
+    
     func change(avatar: Data) async throws -> CustomizedResponse<AvatarResponse> {
 
         let files: [MultipartFormFile] = [

@@ -96,3 +96,9 @@ struct InsightsResponse: Decodable {
     let totalReports: Int
     let totalSignatures: Int
 }
+
+struct Notifications: Encodable, Decodable {
+    let app: Bool
+    let email: Bool
+    let web: Bool
+}

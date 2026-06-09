@@ -14,6 +14,7 @@ enum CommentForType: String, Codable {
 
 struct Comment: Identifiable, Codable {
     var id: String?
+    let name: String
     let userName: String
     let profilePicture: String
     let commentFor: CommentForType
@@ -24,6 +25,7 @@ struct Comment: Identifiable, Codable {
     
     init(
         id: String?,
+        name: String,
         userName: String,
         profilePicture: String,
         commentFor: CommentForType,
@@ -33,6 +35,7 @@ struct Comment: Identifiable, Codable {
         updatedAt: Date?
     ) {
         self.id = id
+        self.name = name
         self.userName = userName
         self.profilePicture = profilePicture
         self.commentFor = commentFor
@@ -49,7 +52,8 @@ struct Comment: Identifiable, Codable {
         message: String,
     ) {
         self.id = UUID().uuidString
-        self.userName = "Guest"
+        self.name = "Guest"
+        self.userName = "guest"
         self.profilePicture = "https://development-api.reportamelo.app/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg?v=192929292"
         self.commentFor = commentFor
         self.resourceId = resourceId

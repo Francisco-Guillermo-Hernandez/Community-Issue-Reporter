@@ -12,6 +12,9 @@ import GoogleSignInSwift
 struct LoginView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var userOAuthState: UserOAuthResultState = .unowned
+    @State private var enableBorderBeam: Bool = false
+    @State private var disableLoginButtons: Bool = false
+    
     let onTokenReceived: (String, LoginType) -> Void
     var body: some View {
 
@@ -21,45 +24,81 @@ struct LoginView: View {
                 .resizable()
                 .backgroundExtensionEffect()
             
-            VStack(spacing: .themeSpacing * 6) {
+            VStack(spacing: .themeSpacing * 5) {
+                
+                VStack(alignment: .leading) {
+                    Text("Repórtamelo")
+                        .font(.custom("Lora", size: 24, relativeTo: .title))
+                        .padding(.top, 16)
+                        .kerning(0.1)
+                    
+                    Text("Report your problems and improve your community")
+                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                        .kerning(-0.1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                
                 GooglePillButton(action: loginWithGoogle)
-                    .padding(.top, 16)
-                        
+                    .padding(.top, 8)
+                    .disabled(disableLoginButtons)
                 
                 ThemedButton(
-                    message: "Login as a Guest",
+                    message: String(localized: "Login as a Guest"),
                     action: loginAsGuest,
                     type: .outline,
                     style: .normal
                 )
-               
+                .frame(maxWidth: .infinity, maxHeight: 40)
+                .disabled(disableLoginButtons)
+                .padding(.bottom, 20)
                 
+                
+                ///
                 LinksView()
+                
 
             }
             .padding(.horizontal, .themeSpacing * 8)
             .padding(.top, .themeSpacing * 4)
             .padding(.bottom, .themeSpacing * 8)
             .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: .themeRadius * 4, style: .continuous)
-                    .fill(Color.theme.cardBackground)
-                    .glassEffect(in:  RoundedRectangle(cornerRadius: .themeRadius * 4, style: .continuous))
+            .borderBeam(
+                border: Color.theme.primary,
+                beam: [],
+                beamBlur: 16,
+                cornerRadius: 52,
+                isEnabled: enableBorderBeam
             )
-            .padding(.horizontal, 6)
-            .padding(.bottom, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 52, style: .continuous)
+                    .fill(Color.theme.cardBackground)
+                    .glassEffect(in:  RoundedRectangle(cornerRadius: 52, style: .continuous))
+            )
+            .padding(.horizontal, 8)
+            .padding(.bottom, 8)
+            
+            
         }
         .ignoresSafeArea(edges: .bottom)
     }
     
+    func performLogin() {
+        disableLoginButtons.toggle()
+        enableBorderBeam.toggle()
+    }
+    
     func loginAsGuest() {
         Task {
+            performLogin()
             await UserRepository.shared.loginAsGuest(
                 onSuccess: { state, sessionId in
                     self.userOAuthState = state
                     onTokenReceived(sessionId, .guest)
                 }, onError: { error in
                     print(error)
+                    performLogin()
                 }
             )
         }
@@ -67,6 +106,7 @@ struct LoginView: View {
     
     func loginWithGoogle() {
         // Find the current window scene.
+        performLogin()
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
             print("There is no active window scene")
             return
@@ -85,11 +125,13 @@ struct LoginView: View {
         GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { signInResult, error in
             
             guard let result = signInResult else {
+                performLogin()
                 // Inspect error
                 print("Error signing in: \(error?.localizedDescription ?? "No error description")")
                 return
             }
             
+//            performLogin()
             onTokenReceived(result.user.idToken?.tokenString ?? "", .user)
         }
     }
@@ -99,35 +141,5 @@ struct LoginView: View {
 #Preview {
     LoginView() { _, _ in
         
-    }
-}
-
-
-struct LinksView: View {
-    var underlinedMarkdown: AttributedString {
-        let rawMarkdown = String(localized: "By continuing, you agree to our [Terms of Service](https://reportamelo.app/legal/terms) and [Privacy Policy](https://reportamelo.app/legal/privacy).")
-        
-        // Parse the raw Markdown string
-        guard var attributedString = try? AttributedString(markdown: rawMarkdown) else {
-            return AttributedString(rawMarkdown)
-        }
-        
-        // Loop through all segments to find links
-        for run in attributedString.runs {
-            if run.link != nil {
-                // Apply the underline style to the link range
-                attributedString[run.range].underlineStyle = .single
-            }
-        }
-        
-        return attributedString
-    }
-
-    var body: some View {
-        Text(underlinedMarkdown)
-            .font(.footnote)
-            .foregroundColor(.secondary)
-            .tint(Color.theme.primary.mix(with: .white, by: 0.1))
-            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

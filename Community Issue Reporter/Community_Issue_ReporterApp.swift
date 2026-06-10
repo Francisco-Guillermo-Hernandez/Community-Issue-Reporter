@@ -13,22 +13,30 @@ import WidgetKit
 @main
 struct Community_Issue_ReporterApp: App {
     
+    // Inject
     @StateObject private var authViewModel = AuthViewModel()
+    
+    //
     @State private var store = SettingsStore.shared
+    
+    // Inject the AppDelegate lifecycle adaptor
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
+    // Reference the manager state
+    @StateObject private var notificationManager = AppDelegate.sharedNotificationManager
     
     init() {
         copyDatabaseIfNeeded()
         AppShortcuts.updateAppShortcutParameters()
+        
     }
     
     var body: some Scene {
         WindowGroup {
-//            LandingView()
-//            CustomCameraView()
             WelcomeView()
-//            UserPersonalizationView()
                 .environmentObject(authViewModel)
                 .environment(\.mySettings, store)
+                .environmentObject(notificationManager)
                 .environment(\.locale, .init(identifier: store.selectedLanguageCode))
                 .onOpenURL { url in
                     deepLinkHandler(url)

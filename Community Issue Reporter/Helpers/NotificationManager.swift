@@ -13,12 +13,12 @@ internal import Combine
 class NotificationManager: NSObject, UNUserNotificationCenterDelegate, ObservableObject {
     @Published var isPermissionGranted = false
     @Published var deviceToken: String = ""
-
+    
     override init() {
         super.init()
         UNUserNotificationCenter.current().delegate = self
     }
-
+    
     // Request permissions
     func requestAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in

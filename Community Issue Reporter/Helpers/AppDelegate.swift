@@ -16,14 +16,22 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return true
     }
 
-    // Success: APNs gave us a token
+    // Success: APNs gave us a token try? await Task.sleep(for: .milliseconds(450))
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
-        let tokenString = tokenParts.joined()
+        let token = tokenParts.joined()
+        
+        
+        Task {
+            
+            await UserRepository.shared.sendDevice(token, completion: {
+                print("sent")
+            })
+        }
         
         DispatchQueue.main.async {
-            AppDelegate.sharedNotificationManager.deviceToken = tokenString
-            print("Successfully registered device token: \(tokenString)")
+            AppDelegate.sharedNotificationManager.deviceToken = token
+            print("Successfully registered device token: \(token)")
         }
     }
 

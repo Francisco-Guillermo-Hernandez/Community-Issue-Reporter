@@ -35,12 +35,17 @@ struct UserTokens: Decodable {
     let mutationActionsToken: String
 }
 
+struct Settings: Decodable {
+    let notifications: Notifications
+}
+
 struct PublicUserData: Decodable {
     let userName: String
     let email: String
     let profilePicture: String
     let sessionDuration: Int
     let userType: UserType
+    let settings: Settings
 }
 
 struct LoginWithOAuthProviderResponse: Decodable {
@@ -98,7 +103,7 @@ struct InsightsResponse: Decodable {
 }
 
 struct Notifications: Encodable, Decodable {
-    let app: Bool
-    let email: Bool
-    let web: Bool
+    var app: Bool
+    var email: Bool
+    var web: Bool
 }

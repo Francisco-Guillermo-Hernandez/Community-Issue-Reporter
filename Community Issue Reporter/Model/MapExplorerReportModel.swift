@@ -76,7 +76,7 @@ extension MapExplorerReport {
     }
     
     var reportedDate: String {
-       if reportedAt != nil {
+       if reportedAt == nil {
             String(localized: "Not yet")
        } else {
            formatRelativeDate(from: self.reportedAt ?? Date())

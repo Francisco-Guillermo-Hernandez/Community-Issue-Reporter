@@ -77,8 +77,13 @@ struct SettingsSubView: View {
     @State private var saveLastLocation: Bool = true
     @State private var useMyCurrentLocation: Bool = false
     
-    @State private var enablePush: Bool = false
-    @State private var enableEmail: Bool = false
+    
+    @EnvironmentObject var notificationManager: NotificationManager
+    
+     @State private var textToCopy = "Hello, World!"
+        @State private var showCopiedMessage = false
+    
+    @State var notifications: Notifications = .init(app: false, email: false, web: false)
 
     @State private var selectedCity: FriendlyCityDistribution = .init(
         cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
@@ -91,6 +96,10 @@ struct SettingsSubView: View {
         isCapitalCity: 1,
         isDepartmentalCapital: 1
     )
+    
+    init(subViewName: String) {
+        self.subViewName = subViewName
+    }
 
     var subViewName: String
     var body: some View {
@@ -159,20 +168,39 @@ struct SettingsSubView: View {
                     
                     /// Notifications group
                     SettingsGroup(title: "Notifications") {
-                        Toggle("Push notifications", isOn: $enablePush)
+                        Toggle("Push notifications", isOn: $notifications.app)
                             .foregroundStyle(Color.theme.inputText)
+                            .onChange(of: notifications.app) { oldValue, newValue in
+                                if oldValue != newValue {
+                                    settings.enablePushNotifications = newValue
+                                    updateNotificationSettings()
+                                    
+                                }
+                            }
                         
-                        Toggle("Email notifications", isOn: $enableEmail)
+                        Toggle("Email notifications", isOn: $notifications.email)
                             .foregroundStyle(Color.theme.inputText)
+                            .onChange(of: notifications.email) { oldValue, newValue in
+                                if oldValue != newValue {
+                                    settings.enableEmailNotifications = newValue
+                                    updateNotificationSettings()
+                                }
+                            }
                     }
                     
                     SettingsGroup(title: "App settings") {
                         
                         Toggle("Save last location", isOn: $saveLastLocation)
                             .foregroundStyle(Color.theme.inputText)
+                            .onChange(of: saveLastLocation) { _, newValue in
+                                settings.saveLastLocation = newValue
+                            }
                         
                         Toggle("Use my current location", isOn: $useMyCurrentLocation)
                             .foregroundStyle(Color.theme.inputText)
+                            .onChange(of: useMyCurrentLocation) { _, newValue in
+                                settings.useMyCurrentLocation = newValue
+                            }
                         
                         Toggle("Anonymous telemetry", isOn: $enableAnonymousTelemetry)
                             .foregroundStyle(Color.theme.inputText)
@@ -180,6 +208,53 @@ struct SettingsSubView: View {
                                 settings.enableAnonymousTelemetry = newValue
                             }
                     }
+                    
+                    
+                    Button(action: {
+                                        
+                                        textToCopy = notificationManager.isPermissionGranted ? notificationManager.deviceToken : ""
+                                                   // 1. Copy the text string to the system clipboard
+                                                   UIPasteboard.general.string = textToCopy
+                                                   
+                                                   // 2. Provide visual feedback
+                                                   withAnimation {
+                                                       showCopiedMessage = true
+                                                   }
+                                                   
+                                                   // Hide feedback after 2 seconds
+                                                   DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                       withAnimation {
+                                                           showCopiedMessage = false
+                                                       }
+                                                   }
+                                               }) {
+                                                   Label("Copy to Clipboard", systemImage: "doc.on.doc")
+                                               }
+                                               .buttonStyle(.borderedProminent)
+
+                                               if showCopiedMessage {
+                                                   Text("Copied! 🎉")
+                                                       .foregroundColor(.green)
+                                                       .transition(.opacity)
+                                               }
+                    
+                    Button("Enable") {
+                                       notificationManager.requestAuthorization()
+                                   }
+                                   
+                                   VStack(spacing: 20) {
+                                            Text(notificationManager.isPermissionGranted ? "Notifications Enabled ✅" : "Notifications Disabled ❌")
+                                            
+                                            if !notificationManager.deviceToken.isEmpty {
+                                                Text("Your APNs Device Token:")
+                                                    .font(.caption)
+                                                Text(notificationManager.deviceToken)
+                                                    .font(.system(.caption2, design: .monospaced))
+                                                    .padding()
+                                                    .background(Color(.systemGray6))
+                                            }
+                                        }
+                                        .padding()
                 }
                 
             }
@@ -281,12 +356,17 @@ struct SettingsSubView: View {
                 enableAutomaticIdentification =
                     settings.enableAutomaticIdentification
                 enableNotifications = settings.enableNotifications
+                saveLastLocation = settings.saveLastLocation
+                useMyCurrentLocation = settings.useMyCurrentLocation
 
                 if let savedCity = appState.selectedCity {
                     self.selectedCity = savedCity
                 }
 
                 countries = getCountries(geographicalRegion: geographicalRegion)
+                
+                notifications.email = settings.enableEmailNotifications
+                notifications.app = settings.enablePushNotifications
             }
         }
 
@@ -346,9 +426,28 @@ struct SettingsSubView: View {
         )
     }
 
+    
+    func updateNotificationSettings() {
+        
+            print("updating")
+            Task {
+                try? await Task.sleep(for: .milliseconds(450))
+                await UserRepository.shared.modify(notifications, completion: { (result: Result<String, Error>) in
+                    switch result {
+                        case .success(let message):
+                            print(message)
+                        
+                        case .failure(let error):
+                            print(error)
+                    
+                    }
+                })
+            }
+        }
 }
 
 #Preview {
     SettingsSubView(subViewName: "Settings")
         .environmentObject(AuthViewModel())
+        .environmentObject(NotificationManager())
 }

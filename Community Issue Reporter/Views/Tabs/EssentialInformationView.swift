@@ -10,25 +10,58 @@ import SwiftUI
 struct EssentialInformationView: View {
     @State private var triggerFeedBack: Bool = false
     @EnvironmentObject var notificationManager: NotificationManager
+    @Environment(\.mySettings) private var settings
+    @State var notifications: Notifications = .init(app: false, email: false, web: false)
 
     var finalStep: () -> Void
     var body: some View {
-        VStack {
-            Text("Some information ")
-                .alert("Important Update", isPresented: .constant(false)) {
-                           Button("Delete", role: .destructive) {
-                               // Handle destructive action
-                           }
-                           Button("Cancel", role: .cancel) { } // Automatically dismisses
-                       } message: {
-                           Text("Are you sure you want to permanently delete this item?")
-                       }
-            Spacer()
-        }
-        .onAppear {
-                            // Trigger permission dialog on app launch
-                            notificationManager.requestAuthorization()
+        ScrollView {
+            VStack {
+                
+                /// Notifications group
+                SettingsGroup(title: "Notifications") {
+                    Toggle("Push notifications", isOn: $notifications.app)
+                        .foregroundStyle(Color.theme.inputText)
+                        .onChange(of: notifications.app) { oldValue, newValue in
+                            if oldValue != newValue {
+                                notificationManager.requestAuthorization()
+                            }
+                            
+                            if newValue == false {
+                                settings.enablePushNotifications = false
+                                updateNotificationSettings()
+                            }
                         }
+                    
+                    Toggle("Email notifications", isOn: $notifications.email)
+                        .foregroundStyle(Color.theme.inputText)
+                        .onChange(of: notifications.email) { oldValue, newValue in
+                            settings.enableEmailNotifications = newValue
+                            
+                            if oldValue != newValue {
+                                updateNotificationSettings()
+                            }
+                            
+                        }
+                }
+                
+              
+                Spacer()
+            }
+        }
+        .padding(.horizontal)
+        .toolbarTitleDisplayMode(.inline)
+        .navigationTitle(String(localized: "Notes"))
+        .task {
+            // Trigger permission dialog
+//            notificationManager.requestAuthorization()
+        }
+        .onChange(of: notificationManager.isPermissionGranted) { _, _ in
+            if notificationManager.isPermissionGranted {
+                settings.enablePushNotifications = true
+                updateNotificationSettings()
+            }
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
 
             ZStack {
@@ -80,11 +113,22 @@ struct EssentialInformationView: View {
             })
         }
     }
+    
+    func updateNotificationSettings() {
+        Task {
+            try? await Task.sleep(for: .milliseconds(550))
+            await UserRepository.shared.modify(notifications, completion: { _ in
+                print("updated")
+            })
+        }
+    }
 }
 
 #Preview {
-    EssentialInformationView(finalStep: {
-        
-    })
-    .environmentObject(NotificationManager())
+    NavigationStack {
+        EssentialInformationView(finalStep: {
+            
+        })
+        .environmentObject(NotificationManager())
+    }
 }

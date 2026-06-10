@@ -30,9 +30,10 @@ struct GenericDatePresenterView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            
             
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
@@ -56,7 +57,8 @@ struct ReportCellView: View {
                         .lineLimit(2)
                         .foregroundColor(.secondary)
                         .padding(.bottom, .themeSpacing)
-                    // detail of the dates
+                    
+                    /// detail of the dates
                     HStack(spacing: .themeSpacing * 4) {
                         GenericDatePresenterView(
                             text: String(localized: "Created", comment: "Created description text at the report section"),
@@ -74,18 +76,36 @@ struct ReportCellView: View {
                         )
                         
                     }
-//                    .padding(.horizontal)
                     .padding(.top, .themeSpacing)
                     .padding(.bottom, .themeSpacing)
                     
+                    /// Badges to identify the report
                     HStack(spacing: .themeSpacing * 4) {
-                        CustomBadgeView(badge: .init(color: report.severity.color, title: report.severity.title, icon: report.severity.iconName))
-
-                        CustomBadgeView(badge: .init(color: report.status.color, title: report.status.title, icon: report.status.iconName))
-                            
+                        CustomBadgeView(
+                            badge: .init(
+                                color: report.severity.color,
+                                title: report.severity.title,
+                                icon: report.severity.iconName
+                            )
+                        )
                         
-                        CustomBadgeView(badge: .init(color: report.issueType.color, title: report.issueType.title, icon: report.issueType.iconName))
+                        CustomBadgeView(
+                            badge: .init(
+                                color: report.status.color,
+                                title: report.status.title,
+                                icon: report.status.iconName
+                            )
+                        )
                         
+                        CustomBadgeView(
+                            badge: .init(
+                                color: report.issueType.color,
+                                title: report.issueType.title,
+                                icon: report.issueType.iconName
+                            )
+                        )
+                        
+                       
                     }
                     
                 }

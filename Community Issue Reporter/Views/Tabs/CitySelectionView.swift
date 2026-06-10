@@ -18,28 +18,28 @@ struct CityCellView: View {
     var body: some View {
         VStack {
 
-            
             Text(city.thirdLevel)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .kerning(0.2)
             
             if city.isCapitalCity == 1 {
                 Text("Is the capital of \(city.firstLevel)")
                     .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(Color.gray)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             Text(city.legalGroupName)
                 .font(.caption)
-                .foregroundStyle(Color.gray)
+                .foregroundStyle(Color.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if city.groupingName != nil && city.groupingName != "" {
                 Text(city.groupingName ?? "")
                     .font(.caption)
-                    .foregroundStyle(Color.gray)
+                    .foregroundStyle(Color.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
@@ -309,7 +309,10 @@ struct CitySelectionView: View {
         isDepartmentalCapital: 1
     )
     let countryCode: CountryCode = .SV
-    CitySelectionView(countryCode: countryCode, selectedCity: $sanSalvador, nextStep: {
-        
-    })
+    
+    NavigationStack {
+        CitySelectionView(countryCode: countryCode, selectedCity: $sanSalvador, nextStep: {
+            
+        })
+    }
 }

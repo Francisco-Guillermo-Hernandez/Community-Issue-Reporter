@@ -34,6 +34,7 @@ struct EvidencesView: View {
             }
             .padding(.horizontal, 4)
         }
+        .scrollContentBackground(.hidden)
         .fullScreenCover(isPresented: $isCameraPresented) {
             ImagePicker(sourceType: .camera, onImagePicked: { resource in
                 

@@ -106,10 +106,10 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
     
     private func foregroundColor(isPressed: Bool) -> Color {
         if colorScheme == .dark {
-            return Color.theme.cardBackground
+            return isPressed ? Color(hex: "#fed4a0") : Color.white  //Color.theme.cardBackground
         } else {
             // hover:text-accent-foreground
-            return isPressed ? Color.white : Color.white
+            return isPressed ? Color.init(hex: "#f2ebdd") : Color.white
         }
     }
     

@@ -15,6 +15,7 @@ struct LoadingView: View {
                 .controlSize(.large)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.theme.background)
         .containerRelativeFrame(.vertical)
     }
 }

@@ -8,6 +8,13 @@
 import CoreLocation
 import SwiftUI
 
+struct ReportFollowUpView: View {
+    
+    var body: some View {
+        Text("Follow up")
+    }
+}
+
 struct PhotoSample: Identifiable {
     let id: String
     let photo: String
@@ -136,16 +143,23 @@ struct DetailView: View {
                     Text(report.reportedBy)
                         .font(.caption)
                 }
+                
+                NavigationLink(destination:  IssueTimelineView(report: .mockReport)) {
+                  HStack {
+                      Text("Follow up:")
+                          .font(.caption)
+                          .fontWeight(.semibold)
+                  }
+              }
 
                 HStack {
                     Text("Last update:")
                         .font(.caption)
                         .fontWeight(.semibold)
                     Spacer()
-                    Text("2d ago")
+                    Text(report.updatedDate)
                         .font(.caption)
                 }
-                
 
                 HStack {
                     Text("Assigned institution:")
@@ -156,7 +170,6 @@ struct DetailView: View {
                         .font(.caption)
                 }
                 
-
                 HStack {
                     Text("Address:")
                         .font(.caption)
@@ -166,7 +179,6 @@ struct DetailView: View {
                         .lineLimit(2)
                         .font(.caption)
                 }
-                
 
                 Button {
                     self.openInMaps.toggle()
@@ -194,11 +206,9 @@ struct DetailView: View {
                     titleVisibility: .visible
                 ) {
                     Button("Confirm", role: .confirm) {
-
                         Task {
                             openOnGoogleMaps()
                         }
-
                     }
 
                 } message: {
@@ -211,7 +221,7 @@ struct DetailView: View {
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
             .scrollClipDisabled(true)
-            .frame(height: 295)
+            .frame(height: 335)
 
         }
     }
@@ -286,24 +296,13 @@ struct DetailView: View {
         return HStack(spacing: 17) {
 
             
-//            VStack(alignment: .leading) {
-//                Text(String(localized: "Category", comment: "Category text at petition list"))
-//                    .font(.caption)
-//                    .foregroundStyle(Color.gray)
-//                
-//                Text(getCategoryName(id: petition.categoryId))
-//                    .font(.caption)
-//                    .fontWeight(.semibold)
-//            }
-            
             Group {
                 VStack {
                     Text("Reported at")
                         .font(.caption)
                         .foregroundStyle(Color.gray)
-//                        .foregroundStyle(color.mix(with: .black, by: 0.4))
 
-                    Text("04/02/2026")
+                    Text(report.reportedDate)
                         .font(.caption)
                         .fontWeight(.semibold)
 
@@ -359,7 +358,6 @@ struct DetailView: View {
 
             Text(report.description)
                 .font(.subheadline)
-//                .fontWidth(.condensed)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -461,11 +459,7 @@ struct DetailView: View {
                 }
 
                 ToolbarItem(placement: .automatic) {
-                    ShareLink(
-                        item: buildShareURL(
-                            for: "7BTheYpPwK1L/report/traffic-light-ou"
-                        )!
-                    ) {
+                    ShareLink(item: buildShareURL(for: "7BTheYpPwK1L/report/traffic-light-ou")!) {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
                 }
@@ -491,9 +485,14 @@ func getMatterToSolve(id: Int) -> String {
 
 #Preview {
     
+    @Previewable
+    @State var isPresented: Bool = true
+    
     NavigationStack {
-        Text("")
-            .sheet(isPresented: .constant(true)) {
+        Button("Open"){
+            isPresented.toggle()
+        }
+            .sheet(isPresented: $isPresented) {
                 var report = MapExplorerReport(
                     id: "SV-SS-260601-aXWsaxls",
                     lat: 13.701270,
@@ -507,11 +506,12 @@ func getMatterToSolve(id: Int) -> String {
                     matterToSolveId: 1,
                     reportedAtRaw: nil,
                     cellIndex: "",
-                    createdAtRaw: 0,
-                    updatedAtRaw: 0,
+                    createdAtRaw: 1780036575602,
+                    updatedAtRaw: 1780036575602,
                     reportedBy: "John Doe",
                     cityId: "",
-                    petitionId: ""
+                    petitionId: "",
+//                    updatedAt
                 )
 
                 DetailView(report: report)

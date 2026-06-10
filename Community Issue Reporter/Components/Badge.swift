@@ -26,14 +26,17 @@ struct CustomBadgeView: View {
         
         HStack {
             Image(systemName: badge.icon)
-                .foregroundStyle(Color.secondary)
+//                .foregroundStyle(Color.secondary)
+                .foregroundStyle(Color.theme.inputText)
 
             Text(badge.title)
                 .fixedSize()
                 .font(.caption)
-                .foregroundColor(.secondary)
+//                .foregroundColor(.secondary)
+                .foregroundStyle(Color.theme.inputText)
                 .fontWeight(.bold)
         }
+        .frame(maxWidth: .infinity)
         .frame(height: 24)
         .foregroundStyle(Color.clear)
         .padding(.vertical, 4)

@@ -142,8 +142,9 @@ struct IssueTimelineView: View {
             }
             .padding()
         }
-        .navigationTitle("Issue Resolution")
-        .background(Color(UIColor.systemBackground))
+        
+        .navigationTitle("Report follow up")
+        .background(Color.theme.background)
     }
 }
 

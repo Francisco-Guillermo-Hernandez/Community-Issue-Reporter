@@ -64,6 +64,7 @@ enum TokenType: String {
     case mutation = "mutationActionsToken"
     case query = "queryActionsToken"
     case landingPageComplete
+    case deviceId
 }
 
 extension KeychainService {

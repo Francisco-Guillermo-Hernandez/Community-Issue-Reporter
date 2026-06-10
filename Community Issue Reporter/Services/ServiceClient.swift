@@ -148,7 +148,7 @@ struct ServiceClient {
         return try decode(T.self, from: data)
     }
     
-    func HTTPErrorHandler(for httpResponse: HTTPURLResponse, with data: Data) throws {
+    func HTTPErrorHandler(for httpResponse: HTTPURLResponse, with data: Data, request: URLRequest) throws {
        
         switch httpResponse.statusCode {
         case 200...299:
@@ -161,6 +161,11 @@ struct ServiceClient {
             throw ServiceError.httpStatus(httpResponse.statusCode)
         case 400:
             let decoder = JSONDecoder()
+            
+            if let jsonString = String(data: request.httpBody!, encoding: .utf8) {
+                print("Error Response Body: \(jsonString)")
+            }
+            
             let genericResponse = try decoder.decode(GenericResponse.self, from: data)
             throw ServiceError.badRequest(genericResponse)
         case 401:
@@ -238,7 +243,7 @@ struct ServiceClient {
             throw ServiceError.invalidResponse
         }
         
-        try HTTPErrorHandler(for: httpResponse, with: data)
+        try HTTPErrorHandler(for: httpResponse, with: data, request: request)
         
         return try decode(V.self, from: data)
     }
@@ -374,12 +379,7 @@ struct ServiceClient {
             throw ServiceError.invalidResponse
         }
 
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Error Response Body: \(jsonString)")
-            }
-            throw ServiceError.httpStatus(httpResponse.statusCode)
-        }
+       try HTTPErrorHandler(for: httpResponse, with: data, request: request)
 
         return try decode(V.self, from: data)
     }

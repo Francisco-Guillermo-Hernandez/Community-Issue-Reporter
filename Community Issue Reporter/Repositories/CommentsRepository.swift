@@ -38,13 +38,13 @@ final class CommentsRepository {
         }
     }
     
-    func post(reportId: String, message: String, onComplete: @escaping () -> Void, onError: ErrorHandler) async {
+    func post(_ comment: Comment, onComplete: @escaping () -> Void, onError: ErrorHandler) async {
         do {
             let headers: Array<HTTPHeader> = [
                 HTTPHeader(name: "country", content: "country"),
                 HTTPHeader(name: "City", content: "city"),
             ]
-            let result = try await self.commentsService.post(comment: CommentRequest(reportId: reportId, message: message), headers: headers)
+            let result = try await self.commentsService.post(comment: comment, headers: headers)
             
             if result.code == "COMMENT_CREATED" {
                 onComplete()

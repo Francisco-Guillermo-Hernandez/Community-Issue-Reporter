@@ -29,7 +29,7 @@ final class UserRepository {
     
     func login(
         _ token: String,
-        onSuccess: @escaping (UserOAuthResultState, String) -> Void,
+        onSuccess: @escaping (UserOAuthResultState, String, PublicUserData) -> Void,
         onError: @escaping (_ error: Error) -> Void
     ) async -> Void {
         do {
@@ -41,11 +41,11 @@ final class UserRepository {
             let result = try await self.service.login(payload: OAuthSignInPayload(token: token), headers: loginHeaders)
             
             if result.code == "TOKEN_GENERATED" {
-                onSuccess(.existing, result.authSessionId)
+                onSuccess(.existing, result.authSessionId, result.publicUserData)
             }
             
             if result.code == "USER_CREATED_WITH_TOKEN" {
-                onSuccess(.firstLogin, result.authSessionId)
+                onSuccess(.firstLogin, result.authSessionId, result.publicUserData)
             }
         } catch {
             onError(error)
@@ -76,6 +76,10 @@ final class UserRepository {
         }
     }
     
+    func getProfilePicture() -> String {
+       return  UserDefaults.standard.string(forKey: "avatar_url") ?? ""
+    }
+    
     func getProfilePictureURL() -> URL? {
         guard let user = GIDSignIn.sharedInstance.currentUser,
               let profile = user.profile,
@@ -101,6 +105,11 @@ final class UserRepository {
         UserDefaults.standard.set(username, forKey: "user_name")
     }
     
+    func setAvatar(url: String) -> Void {
+        UserDefaults.standard.set(url, forKey: "avatar_url")
+    }
+    
+    ///
     func getPublicInformation() -> UserProfile? {
         
         guard let user = GIDSignIn.sharedInstance.currentUser,
@@ -136,7 +145,7 @@ final class UserRepository {
                 completion(.success(result.message))
                
                 if let avatarUrl = result.data?.avatarUrl {
-                    UserDefaults.standard.set(avatarUrl, forKey: "avatar_url")
+                    setAvatar(url: avatarUrl)
                 }
                 
             } else {
@@ -205,12 +214,12 @@ final class UserRepository {
         }
     }
     
-    func modify(notifications: Notifications, completion : @escaping (Result<String, Error>) -> Void) async {
+    func modify(_ notifications: Notifications, completion : @escaping (Result<String, Error>) -> Void) async {
         do {
             let result = try await self.service.modify(notifications, [])
             
             if result.code == "NOTIFICATIONS_UPDATED" {
-                completion(.success(""))
+                completion(.success(result.message))
             }
         } catch {
             completion(.failure(error))
@@ -226,6 +235,59 @@ final class UserRepository {
         } catch {
             
         }
+    }
+    
+    
+    func sendDevice(_ token: String, completion: @escaping () -> Void) async {
+        do {
+            let headers = [
+                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+                HTTPHeader(name: "CountryCode", content: "SV"),
+            ]
+            
+            let deviceId = DeviceService.shared.getDeviceId()
+            print("deviceId: \(deviceId)")
+            let deviceToken: DeviceTokenRequest = .init(deviceToken: token, deviceId: deviceId, platform: .iOS)
+            
+            let result = try await self.service.send(deviceToken, headers)
+            if result.code == "DEVICE_TOKEN_UPDATED" {
+                completion()
+            }
+        } catch {
+            
+        }
+    }
+    
+    func userHasCompletedLandingPage() -> Bool {
+        let token = KeychainService.getToken(.deviceId)
+        return token.contains("completion:state:successfully")
+    }
+    
+    func setSettingsFromAuthenticatedUser(with data: PublicUserData) -> Void {
+        setUsername(data.userName)
+        setAvatar(url: data.profilePicture)
+        print("user has been set")
+        print(data.profilePicture)
+    }
+    
+    
+}
+
+enum DeviceType: String, Decodable, Encodable {
+    case iOS = "ios"
+    case android = "android"
+    case web = "web"
+}
+
+struct DeviceTokenRequest: Encodable, Decodable {
+    let deviceToken: String
+    let deviceId:    String
+    let platform:    DeviceType
+    
+    init(deviceToken: String, deviceId: String, platform: DeviceType) {
+        self.deviceToken = deviceToken
+        self.deviceId = deviceId
+        self.platform = platform
     }
 }
 

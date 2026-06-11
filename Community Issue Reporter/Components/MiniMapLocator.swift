@@ -17,6 +17,7 @@ struct MiniMapLocator: View {
     @State private var cameraPosition: MapCameraPosition
     @State private var selectedCoordinate: CLLocationCoordinate2D
     @State private var locationManager = LocationManager()
+//    @State var hideControls: Bool
     
     private let span = MKCoordinateSpan(latitudeDelta: 0.00704, longitudeDelta: 0.00704)
     
@@ -38,48 +39,50 @@ struct MiniMapLocator: View {
     }
     
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            
-            Map(position: $cameraPosition) {
-                UserAnnotation()
-            }
-            .onAppear {
-                /// Request the location permissions to the user
-                locationManager.requestAuthorization()
-            }
-            .onChange(of: locationManager.lastLocation) { _, newLocation in
-            }
-            .onMapCameraChange { context in
-                selectedCoordinate = context.camera.centerCoordinate
-                handleMapMovement(center: context.camera.centerCoordinate)
+        ZStack(alignment: .center) {
+            ZStack(alignment: .topLeading) {
                 
-                coordinate = Coordinate(
-                    lat: context.camera.centerCoordinate.latitude,
-                    lng: context.camera.centerCoordinate.longitude
-                )
-            }
-            .aspectRatio(4/3, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
-//            .onMapCameraChange { context in
-//                /// Update coordinates when the user interacts with the map
-//                selectedCoordinate = context.camera.centerCoordinate
-//            }
-            .onChange(of: coordinate) { _, newValue in
-                DispatchQueue.main.async {
-                    /// Center the location when the coordinate was updated using MapPicker
-                    self.cameraPosition = .region(
-                        MKCoordinateRegion(
-                            center: getLocation(c: newValue),
-                            span: span
-                        )
+                Map(position: $cameraPosition) {
+                    UserAnnotation()
+                }
+                .onAppear {
+                    /// Request the location permissions to the user
+                    locationManager.requestAuthorization()
+                }
+                .onChange(of: locationManager.lastLocation) { _, newLocation in
+                }
+                .onMapCameraChange { context in
+                    selectedCoordinate = context.camera.centerCoordinate
+                    handleMapMovement(center: context.camera.centerCoordinate)
+                    
+                    coordinate = Coordinate(
+                        lat: context.camera.centerCoordinate.latitude,
+                        lng: context.camera.centerCoordinate.longitude
                     )
                 }
+                .aspectRatio(4/3, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)) //.clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+    //            .onMapCameraChange { context in
+    //                /// Update coordinates when the user interacts with the map
+    //                selectedCoordinate = context.camera.centerCoordinate
+    //            }
+                .onChange(of: coordinate) { _, newValue in
+                    DispatchQueue.main.async {
+                        /// Center the location when the coordinate was updated using MapPicker
+                        self.cameraPosition = .region(
+                            MKCoordinateRegion(
+                                center: getLocation(c: newValue),
+                                span: span
+                            )
+                        )
+                    }
+                }
+               
+                mapControls
             }
             
-            
             centerMarker
-            mapControls
         }
     }
     
@@ -87,13 +90,14 @@ struct MiniMapLocator: View {
     private var centerMarker: some View {
         Image(systemName: "plus")
             .font(.system(size: 40, weight: .light))
-            .foregroundColor(.cyan)
+//            .foregroundColor(.cyan)
+            .foregroundColor(Color.theme.primary)
             .frame(maxWidth: .infinity, maxHeight: 250)
             .accessibilityHidden(true)
     }
     
     private var mapControls: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: .themeSpacing * 6) {
             Button {
                 centerOnUser()
             } label: {
@@ -167,6 +171,18 @@ struct MiniMapLocator: View {
               ReportDataModel.shared.updateLocator(with: locator)
           }
       }
+}
+
+#Preview("Minimap") {
+    @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
+    @Previewable @State var locator: Locator = .init(id: "", countryCode: "", country: "", region: "", city: "", address: "")
+    MiniMapLocator(
+        coordinate: $coordinate,
+        locator: $locator,
+        onExpandMap: { _ in
+//            showMapPickerSheet.toggle()
+        }
+    )
 }
 
 #Preview {

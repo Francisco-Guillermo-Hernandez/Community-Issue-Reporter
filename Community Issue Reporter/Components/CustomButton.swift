@@ -55,6 +55,16 @@ struct ButtonStyleMapper: ViewModifier {
     }
 }
 
+struct GlassBounceModifier: ViewModifier {
+    var isPressed: Bool
+    
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .animation(.interpolatingSpring(stiffness: 256, damping: 40), value: isPressed)
+    }
+}
+
 // MARK: - Button styles
 struct ThemedPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) var isEnabled
@@ -80,23 +90,24 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
             .font(Font.body.bold())
             .overlay {
                 Capsule()
-                    .stroke(borderColor, lineWidth: 1)
+                    .stroke(borderColor, lineWidth: isEnabled ? 1 : 0)
             }
-            .opacity(isEnabled ? 1.0 : 0.65) // disabled:opacity-50
+            .opacity(isEnabled ? 1.0 : 0.51) // disabled:opacity-50
 //            .overlay {
 //                RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
 //                    .stroke(Color.theme.primary.mix(with: .white, by: 0.3), lineWidth: 1)
 //            }
             .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
             .animation(.easeOut(duration: 0.2), value: isEnabled)
-            .glassEffect(in: Capsule())
+            .glassEffect(.regular, in: Capsule())
+            .modifier(GlassBounceModifier(isPressed: configuration.isPressed))
         //.glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
     }
     
     private func backgroundColor(isPressed: Bool) -> Color {
         if colorScheme == .dark {
             // dark:bg-input/30 dark:hover:bg-input/50
-            return isPressed ? Color.theme.primary.opacity(0.86) : Color.theme.primary  //Color.theme.inputBackground.mix(with: .white, by: 0.67).opacity(isPressed ? 0.2 : 0.1)
+            return isPressed ? Color.theme.primary.opacity(0.86) : Color.theme.primary //Color.theme.inputBackground.mix(with: .white, by: 0.67).opacity(isPressed ? 0.2 : 0.1)
         } else {
             // bg-background hover:bg-accent
 //            return isPressed ? Color.theme.accent : Color.theme.background
@@ -164,7 +175,8 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
             .opacity(isEnabled ? 1.0 : 0.3) // disabled:opacity-50
             .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
             .animation(.easeOut(duration: 0.2), value: isEnabled)
-            .glassEffect(in: Capsule())
+            .glassEffect(.regular, in: Capsule())
+            .modifier(GlassBounceModifier(isPressed: configuration.isPressed))
     }
     
     private func backgroundColor(isPressed: Bool) -> Color {

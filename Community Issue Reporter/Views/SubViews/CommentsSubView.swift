@@ -83,7 +83,9 @@ struct CommentsSubView: View {
             await CommentsRepository.shared.listByUser(
                 page: 1,
                 onComplete: { result in
-                    self.comments.append(contentsOf: result.documents!)
+                    guard let documents = result.documents else { return }
+                    
+                    self.comments.append(contentsOf: documents)
                     isLoading = false
                 },
                 onError: { error in

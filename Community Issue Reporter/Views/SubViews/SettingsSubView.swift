@@ -7,6 +7,23 @@
 
 import SwiftUI
 
+struct SettingsHeaderView: View {
+    var title: String
+    
+    init(_ title: String) {
+        self.title = title
+    }
+    
+    var body: some View {
+        Text(title)
+            .font(.headline)
+            .fontWeight(.bold)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, .themeSpacing * 4.5)
+            .foregroundStyle(.secondary)
+    }
+}
+
 struct SettingsGroup<Content: View>: View {
     let title: String
     let footerText: String?
@@ -22,13 +39,8 @@ struct SettingsGroup<Content: View>: View {
     var body: some View {
         Group {
             VStack(spacing: .themeSpacing * 1.5) {
-                Text(title)
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, .themeSpacing * 4.5)
-                    .foregroundStyle(.secondary)
                 
+                SettingsHeaderView(title)
                 VStack {
                     VStack(spacing: .themeSpacing * 4) {
                         content

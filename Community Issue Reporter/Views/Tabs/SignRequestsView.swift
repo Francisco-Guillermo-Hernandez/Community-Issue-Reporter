@@ -7,6 +7,25 @@
 
 import SwiftUI
 
+struct SimpleCommentsView: View {
+    var id: String
+    var body: some View {
+        Text(id)
+    }
+}
+
+struct SimpleDetailView: View {
+    var other: String
+    var body: some View {
+        Text("ddd")
+    }
+}
+
+enum SignRequestsViewsDestinations: Hashable {
+    case comments(postId: String)
+    case postDetail(of: Petition)
+}
+
 struct SignRequestsView: View {
     @Namespace private var namespace
     @State private var isPrimaryActionVisible: Bool = true
@@ -26,6 +45,8 @@ struct SignRequestsView: View {
     @State private var canLoadMore: Bool = true
     private let pageLimit: Int = 16
     @State private var value: Double = 20
+    
+    @State private var navigationPath: [SignRequestsViewsDestinations] = []
     
     @State private var signatureCount: Int = 125
     
@@ -174,101 +195,111 @@ struct SignRequestsView: View {
     @State private var level: Int = 20
     @State var model = PetitionDataModel()
     
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: .themeSpacing * 4) {
-                    headerView()
-                    
-                    VStack(alignment: .leading, spacing: .themeSpacing * 2) {
-                        //                        Text("Nearby Petitions")
-                        //                            .font(.title3)
-                        //                            .fontWeight(.semibold)
-                        //                            .padding(.horizontal, .themePadding)
-                        
-                        ForEach(petitions) { petition in
-                            EventsOnDay(
-                                petition: petition,
-                                selectedIndex: petitions.firstIndex(where: {
-                                    $0.id == petition.id
-                                }) ?? 0
-                            )
-//                            .task {
-//                                if petition.id == petitions.last?.id {
-//                                    await fetchPetitions()
-//                                }
-//                            }
-                        }
-                        
-                        if isLoading {
-                            HStack {
-                                Spacer()
-                                ProgressView()
-                                    .progressViewStyle(.circular)
-                                Spacer()
-                            }
-                            .padding()
-                        }
-                    }
-                }
-            }
-            .background(Color.theme.background)
-            .scrollContentBackground(.hidden)
-            .refreshable {
-                await fetchPetitions(reset: true)
-            }
-            //            .toolbar(removing: .sidebarToggle)
-          
-            .customToolBar(
-                isPrimaryActionVisible: isPrimaryActionVisible,
-                title: title,
-                subtitle: subtitle
-            ) {
+    fileprivate func posts() -> some View {
+        return LazyVStack(alignment: .leading, spacing: .themeSpacing * 4) {
+            headerView()
+            
+            VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 
-            } trailing: {
                 
-                HStack(spacing: 16) {
-                    
-                    Button("Add", systemImage: "plus") {
-                        showCreateRequestView.toggle()
-                    }
-                    .matchedTransitionSource(
-                        id: "openCreateRequest",
-                        in: namespace
+                ForEach(petitions) { petition in
+                    EventsOnDay(
+                        petition: petition,
+                        selectedIndex: petitions.firstIndex(where: {
+                            $0.id == petition.id
+                        }) ?? 0
                     )
-                    
-                    
-                    Menu {
-                        Picker("Issue Type", selection: $issueType) {
-                            ForEach(IssueTypes.allCases, id: \.self) { type in
-                                Text(type.title).tag(type)
-                            }
-                        }
-                        
-                        Picker("Severity", selection: $severity) {
-                            ForEach(Severity.allCases, id: \.self) { level in
-                                Text(level.title).tag(level)
-                            }
-                        }
-                        
-                        Picker("Order Filter", selection: $orderFilter) {
-                            ForEach(OrderFilter.allCases, id: \.self) {
-                                filter in
-                                Text(filter.title).tag(filter)
-                            }
-                        }
-                        
-                    } label: {
-                        Label(
-                            "Options",
-                            systemImage: "line.3.horizontal.decrease"
-                        )
-                    }
-
+                    //                            .task {
+                    //                                if petition.id == petitions.last?.id {
+                    //                                    await fetchPetitions()
+                    //                                }
+                    //                            }
                 }
-                .padding(.horizontal, 4)
-            } primaryAction: {
+                
+                if isLoading {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Spacer()
+                    }
+                    .padding()
+                }
             }
+            
+        }
+        .customToolBar(
+            isPrimaryActionVisible: isPrimaryActionVisible,
+            title: title,
+            subtitle: subtitle
+        ) {} trailing: {
+            
+            HStack(spacing: 16) {
+                
+                Button("Add", systemImage: "plus") {
+                    showCreateRequestView.toggle()
+                }
+                .matchedTransitionSource(
+                    id: "openCreateRequest",
+                    in: namespace
+                )
+                
+                
+                Menu {
+                    Picker("Issue Type", selection: $issueType) {
+                        ForEach(IssueTypes.allCases, id: \.self) { type in
+                            Text(type.title).tag(type)
+                        }
+                    }
+                    
+                    Picker("Severity", selection: $severity) {
+                        ForEach(Severity.allCases, id: \.self) { level in
+                            Text(level.title).tag(level)
+                        }
+                    }
+                    
+                    Picker("Order Filter", selection: $orderFilter) {
+                        ForEach(OrderFilter.allCases, id: \.self) {
+                            filter in
+                            Text(filter.title).tag(filter)
+                        }
+                    }
+                    
+                } label: {
+                    Label(
+                        "Options",
+                        systemImage: "line.3.horizontal.decrease"
+                    )
+                }
+                
+            }
+            .padding(.horizontal, 4)
+        } primaryAction: {
+        }
+    }
+    
+    var body: some View {
+        NavigationStack(path: $navigationPath) {
+            ScrollView {
+                posts()
+                    .navigationDestination(for: SignRequestsViewsDestinations.self) { destination in
+                        switch destination {
+                        case .comments(let id):
+                            SimpleCommentsView(id: id)
+                        case .postDetail(let petition):
+                            PetitionDetailView(petition: petition)
+                        }
+                    }
+                
+            }
+         
+            
+//            .background(Color.theme.background)
+//            .scrollContentBackground(.hidden)
+//            .refreshable {
+//                await fetchPetitions(reset: true)
+//            }
+            
         }
         
         .onChange(of: activeSubtitleIndex) { oldValue, newValue in
@@ -327,7 +358,6 @@ struct SignRequestsView: View {
             
         }
         .padding(.horizontal, .themePadding)
-//        .padding(.bottom, .themePadding)
     }
     
     @ViewBuilder
@@ -369,12 +399,19 @@ struct SignRequestsView: View {
             PostPublisher()
             
             /// Go to detail 
-            NavigationLink(destination: PetitionDetailView(petition: petition)) {
-                
-                VStack(spacing: .themeSpacing) {
-                    PetitionViewPost(petition: petition)
-                        .scrollClipDisabled(true)
-                }
+//            NavigationLink(destination: PetitionDetailView(petition: petition)) {
+//                
+//                VStack(spacing: .themeSpacing) {
+//                    PetitionViewPost(petition: petition)
+//                        .scrollClipDisabled(true)
+//                }
+//            }
+            
+            Button {
+                navigationPath.append(SignRequestsViewsDestinations.postDetail(of: petition))
+            } label: {
+                PetitionViewPost(petition: petition)
+//                    .scrollClipDisabled(true)
             }
             
             Divider()
@@ -404,8 +441,12 @@ struct SignRequestsView: View {
                     .opacity(0.6)
                 
                 PostInteractions(
-                    sign: {},
-                    comment: {},
+                    sign: {
+                        
+                    },
+                    comment: {
+                        navigationPath.append(SignRequestsViewsDestinations.comments(postId: "sample"))
+                    },
                     share: {
                         let shareURL = buildShareURL(for: "7BTheYpPwK1L/report/traffic-light-ou")!
                         shareFromClosure(item: shareURL)
@@ -418,10 +459,6 @@ struct SignRequestsView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .foregroundColor(.theme.foreground)
-//        .overlay(
-//            RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-//                .stroke(Color.theme.border, lineWidth: 1)
-//        )
         .background(Color.theme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))

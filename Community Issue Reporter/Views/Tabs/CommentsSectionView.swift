@@ -169,10 +169,13 @@ struct CommentsSectionView: View {
     }
     
     private func addComment() {
+        
+        /// Apply validations
         if !commentInput.isEmpty {
             
             self.isSubmitting = true
             
+            /// Prepare the comment to send
             let comment = Comment(commentFor: .report, resourceId: resourceId, message: commentInput)
             
             /// lest add the comment at the top
@@ -184,14 +187,15 @@ struct CommentsSectionView: View {
             Task {
                 
                 await CommentsRepository.shared.post(
-                    reportId: resourceId,
-                    message: self.commentInput,
+                    comment,
                     onComplete: {
                         self.disableInput = false
                         self.commentInput = ""
                         self.isSubmitting = false
                     },
                     onError: { error in
+                        
+                        /// TODO: Error handling
                         print(error)
                         print("error")
                         self.disableInput = false

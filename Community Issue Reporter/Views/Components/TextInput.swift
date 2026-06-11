@@ -32,42 +32,52 @@ struct TailwindInputModifier: ViewModifier {
     var isFocused: Bool
     var isInvalid: Bool
     var isDisabled: Bool
+    var axis: Axis
     
     func body(content: Content) -> some View {
         content
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
-            .frame(height: 36)
+            .frame(height: axis == .vertical ? 60 : 36)
             .font(.system(size: 14)) // md:text-sm
             .background(
                 colorScheme == .dark ? Color.theme.inputBackground.opacity(0.3) : Color.clear
             )
-            .clipShape(Capsule())
-            .contentShape(Capsule())
+            .clipShape(shapeMask)
+            .contentShape(shapeMask)
             .overlay(
-                Capsule()
+                shapeMask
                     .stroke(
                         isInvalid ? Color.theme.destructive : (isFocused ? Color.theme.inputRing : Color.theme.inputBorder),
                         lineWidth: 1
                     )
             )
-            .background(
-                Capsule()
-                    .stroke(
-                        isInvalid ? Color.theme.destructive.opacity(0.2) : (isFocused ? Color.theme.inputRing.opacity(0.5) : Color.clear),
-                        lineWidth: 3
-                    )
-                    .padding(-1.5) // Half of line width to grow outwards
-            )
+//            .background(
+//                shapeMask
+//                    .stroke(
+//                        isInvalid ? Color.theme.destructive.opacity(0.2) : (isFocused ? Color.theme.inputRing.opacity(0.5) : Color.clear),
+//                        lineWidth: 3
+//                    )
+////                    .padding(-1.5) // Half of line width to grow outwards
+//            )
             .opacity(isDisabled ? 0.5 : 1.0)
             .animation(.easeOut(duration: 0.2), value: isFocused)
             .animation(.easeOut(duration: 0.2), value: isInvalid)
     }
+    
+    var shapeMask: AnyShape {
+        if axis == .vertical {
+            return AnyShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+        } else {
+            return AnyShape(Capsule())
+        }
+    }
+    
 }
 
 extension View {
-    func tailwindInputStyle(isFocused: Bool, isInvalid: Bool, isDisabled: Bool) -> some View {
-        self.modifier(TailwindInputModifier(isFocused: isFocused, isInvalid: isInvalid, isDisabled: isDisabled))
+    func tailwindInputStyle(isFocused: Bool, isInvalid: Bool, isDisabled: Bool, axis: Axis) -> some View {
+        self.modifier(TailwindInputModifier(isFocused: isFocused, isInvalid: isInvalid, isDisabled: isDisabled, axis: axis))
     }
 }
 
@@ -131,7 +141,8 @@ struct TextInput: View {
                 .tailwindInputStyle(
                     isFocused: isFocused,
                     isInvalid: !isValid,
-                    isDisabled: disabled
+                    isDisabled: disabled,
+                    axis: axis
                 )
                 .foregroundStyle(Color.theme.foreground)
                 .tint(Color.theme.inputRing) // focus-visible:ring-ring
@@ -222,6 +233,8 @@ private struct LabelView: View {
         ], isValid: .constant(false), value: .constant("error"))
         
         TextInput(name: "hello@reportamelo.app", label: "Disabled State", isValid: .constant(true), value: .constant(""), disabled: true)
+        
+        TextInput(name: "Address", axis: .vertical, isValid: .constant(true), value: .constant("lorem ipsum  dosllsl sllslsl slslslls lslslsl sllsls slllls sllllslslslllslsllslsllsllslsllslsl"))
     }
     .padding()
 }

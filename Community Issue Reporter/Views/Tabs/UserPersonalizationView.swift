@@ -302,7 +302,7 @@ struct CustomCardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background(Color.theme.cardBackground)
-            .cornerRadius(.themeRadius) // rounded-xl
+//            .cornerRadius(.themeRadius) // rounded-xl
             .overlay(
                 RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
                                    .stroke(Color.theme.border, lineWidth: 1)

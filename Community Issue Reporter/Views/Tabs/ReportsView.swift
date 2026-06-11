@@ -112,6 +112,7 @@ struct ReportsView: View {
             .padding(.horizontal, 16)
             .padding(.top, 10)
         }
+        .toolbarVisibility(.hidden, for: .navigationBar)
         .onChange(of: searchText) { _, newValue in
             searchCompleter.update(query: newValue, region: currentRegion(c: appState.cameraPosition))
         }
@@ -507,6 +508,8 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
 }
 
 #Preview {
-    ReportsView()
-        .environmentObject(AuthViewModel())
+    NavigationStack {
+        ReportsView()
+            .environmentObject(AuthViewModel())
+    }
 }

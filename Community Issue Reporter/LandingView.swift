@@ -78,19 +78,20 @@ struct LandingView: View {
             } else {
                 Task {
                     await UserRepository.shared.login(session,
-                        onSuccess: { state, sessionId in
+                        onSuccess: { state, sessionId, data in
                         
                             self.userOAuthState = state
                            
                             if state == .firstLogin {
-                                print("Welcome")
                                 self.appState.landingViewMode.toggle()
                                 path.append(.selectCity)
                             } else {
-                                path.append(.selectCity)
-                                self.appState.landingViewMode.toggle()
+//                                path.append(.selectCity)
+//                                self.appState.landingViewMode.toggle()
                                 //
-//                                self.appState.isLoggedIn.toggle()
+                                
+                                UserRepository.shared.setSettingsFromAuthenticatedUser(with: data)
+                                self.appState.isLoggedIn.toggle()
                             }
                         
                             self.saveIntoKeychain(sessionId)
@@ -98,6 +99,7 @@ struct LandingView: View {
                         },
                         onError: { error in
                             print(error)
+                        /// TODO: show errors
                         }
                     )
                 }

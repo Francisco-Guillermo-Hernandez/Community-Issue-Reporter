@@ -24,6 +24,7 @@ struct CommentsSectionView: View {
     @State private var isSubmitting: Bool = false
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var limit: Int = 16
+    @State private var animateInputIn: Bool = false
     
     init(for commentFor: CommentForType, with resourceId: String) {
         
@@ -41,77 +42,67 @@ struct CommentsSectionView: View {
     }
     
     var body: some View {
-        NavigationStack {
-            ScrollView(.vertical) {
-                LazyVStack(spacing: 16) {
-                    if comments.isEmpty {
-                        // Empty state
-                        ContentUnavailableView {
-                            Label("No comments yet.", systemImage: "bubble.left.and.text.bubble.right")
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(
-                                    Color.theme.foreground.opacity(0.7),
-                                    Color.theme.primary,
-                                    Color.theme.foreground.opacity(0.7)
-                                )
-                        } description: {
-                            Text("Please tell us how that problem affects you.")
-                        } actions: {
-                            
-                        }
-                        .containerRelativeFrame(.vertical)
-                    } else {
-                        ForEach(comments) { c in
-                            CommentRow(comment: c)
-                            .task {
-                                if let lastComment = self.comments.last, c.id == lastComment.id {
-                                    await loadMoreComments()
-                                }
+        ScrollView(.vertical) {
+            LazyVStack(spacing: 16) {
+                if comments.isEmpty {
+                    // Empty state
+                    ContentUnavailableView {
+                        Label("No comments yet.", systemImage: "bubble.left.and.text.bubble.right")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(
+                                Color.theme.foreground.opacity(0.7),
+                                Color.theme.primary,
+                                Color.theme.foreground.opacity(0.7)
+                            )
+                    } description: {
+                        Text("Please tell us how that problem affects you.")
+                    } actions: {
+                        
+                    }
+                    .containerRelativeFrame(.vertical)
+                } else {
+                    ForEach(comments) { c in
+                        CommentRow(comment: c)
+                        .task {
+                            if let lastComment = self.comments.last, c.id == lastComment.id {
+                                await loadMoreComments()
                             }
                         }
                     }
-                    
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .padding()
-                    }
                 }
-                .padding(.top, 16)
-                .padding(.horizontal, 16)
-            }
-            .background(Color.theme.background)
-            .task {
-                self.isLoading = true
-                guard !Task.isCancelled else { return }
                 
-                let result = await CommentsRepository.shared.list(
-                    resourceId,
-                    page: currentPage,
-                    limit: self.limit,
-                    onError: { _ in
-                        print("error")
-                    }
-                )
-                self.paginatedResult = result
-                self.comments.append(contentsOf: result.documents ?? [])
-                
-                self.isLoading = false
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("Comments")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .close) {
-                        dismiss()
-                    }
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .padding()
                 }
             }
-            .interactiveDismissDisabled(isTextFieldFocused && !commentInput.isEmpty)
-            .safeAreaInset(edge: .bottom) {
-                inputBar
-            }
+            .padding(.top, 16)
+            .padding(.horizontal, 16)
+        }
+        .background(Color.theme.background)
+        .task {
+            self.isLoading = true
+            guard !Task.isCancelled else { return }
             
+            let result = await CommentsRepository.shared.list(
+                resourceId,
+                page: currentPage,
+                limit: self.limit,
+                onError: { _ in
+                    print("error")
+                }
+            )
+            self.paginatedResult = result
+            self.comments.append(contentsOf: result.documents ?? [])
+            
+            self.isLoading = false
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Comments")
+        .interactiveDismissDisabled(isTextFieldFocused && !commentInput.isEmpty)
+        .safeAreaInset(edge: .bottom) {
+            inputBar
         }
     }
     
@@ -236,5 +227,7 @@ struct CommentsSectionView: View {
 }
 
 #Preview {
-    CommentsSectionView(for: .report, with: "")
+    NavigationStack {
+        CommentsSectionView(for: .report, with: "")
+    }
 }

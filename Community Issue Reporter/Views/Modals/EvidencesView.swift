@@ -25,14 +25,28 @@ struct EvidencesView: View {
         PhotoSample(id: "4", photo: "d", published: Date(), user: "Emily Davis"),
     ]
     
+    @Namespace private var nameSpace
+    @State private var previewID: String = ""
+    
     var body: some View {
         ScrollView(.vertical) {
             LazyVGrid(columns: gridColumns, spacing: 4) {
                 ForEach(photos, id: \.id) { photo in
-                    photoPreview(photo)
+                    NavigationLink(value: photo) {
+                        photoPreview(photo)
+                            .matchedTransitionSource(id: photo.id, in: nameSpace)
+                    }
+                    .buttonStyle(.plain)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        previewID = photo.id
+                    })
                 }
             }
             .padding(.horizontal, 4)
+        }
+        .navigationDestination(for: PhotoSample.self) { photo in
+            PhotoDetailView(photos: photos, previewID: $previewID, nameSpace: nameSpace)
+                .navigationTransition(.zoom(sourceID: previewID, in: nameSpace))
         }
         .scrollContentBackground(.hidden)
         .fullScreenCover(isPresented: $isCameraPresented) {

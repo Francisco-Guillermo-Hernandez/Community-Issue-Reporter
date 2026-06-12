@@ -7,20 +7,6 @@
 
 import SwiftUI
 
-struct SimpleCommentsView: View {
-    var id: String
-    var body: some View {
-        Text(id)
-    }
-}
-
-struct SimpleDetailView: View {
-    var other: String
-    var body: some View {
-        Text("ddd")
-    }
-}
-
 enum SignRequestsViewsDestinations: Hashable {
     case comments(postId: String)
     case postDetail(of: Petition)
@@ -43,12 +29,15 @@ struct SignRequestsView: View {
     @State private var currentPage: Int = 1
     @State private var isLoading: Bool = false
     @State private var canLoadMore: Bool = true
+    @State private var showSignatureModal: Bool = false
     private let pageLimit: Int = 16
     @State private var value: Double = 20
     
     @State private var navigationPath: [SignRequestsViewsDestinations] = []
     
     @State private var signatureCount: Int = 125
+    
+    @State var strokes: [SignatureLine] = []
     
     @State private var users: [User] = [
         User(username: "janeDoe", avatar: "user"),
@@ -285,23 +274,26 @@ struct SignRequestsView: View {
                     .navigationDestination(for: SignRequestsViewsDestinations.self) { destination in
                         switch destination {
                         case .comments(let id):
-                            SimpleCommentsView(id: id)
+                            CommentsSectionView(for: .petition, with: id)
+                                .toolbar(.hidden, for: .tabBar)
+                                
+                            
                         case .postDetail(let petition):
                             PetitionDetailView(petition: petition)
+                                .toolbar(.hidden, for: .tabBar)
                         }
                     }
                 
             }
-         
-            
-//            .background(Color.theme.background)
+            .background(Color.theme.background)
+            .toolbar(navigationPath.isEmpty ? .visible : .hidden, for: .tabBar)
+            .animation(.easeInOut(duration: 0.35), value: navigationPath.isEmpty)
 //            .scrollContentBackground(.hidden)
 //            .refreshable {
 //                await fetchPetitions(reset: true)
 //            }
             
         }
-        
         .onChange(of: activeSubtitleIndex) { oldValue, newValue in
             if let newValue {
                 subtitle = petitions[newValue].title
@@ -442,7 +434,7 @@ struct SignRequestsView: View {
                 
                 PostInteractions(
                     sign: {
-                        
+                        showSignatureModal.toggle()
                     },
                     comment: {
                         navigationPath.append(SignRequestsViewsDestinations.comments(postId: "sample"))
@@ -452,6 +444,12 @@ struct SignRequestsView: View {
                         shareFromClosure(item: shareURL)
                     }
                 )
+                .sheet(isPresented: $showSignatureModal) {
+                    PreviewSignatureView() {
+                        
+                    }
+//                        .presentationSizing(.fitted)
+                }
                 
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -459,7 +457,7 @@ struct SignRequestsView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .foregroundColor(.theme.foreground)
-        .background(Color.theme.cardBackground)
+//        .background(Color.theme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))

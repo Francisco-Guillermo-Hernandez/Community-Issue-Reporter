@@ -83,6 +83,7 @@ struct CreateReportView: View {
                 
             }
         })
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             handler.showAccessory()
             model.setMatterToSolve(matter)

@@ -100,7 +100,8 @@ struct ReportView: View {
                 
                 
             }
-            .padding(.top, .themePadding)
+//            .padding(.top, .themePadding)
+            .padding(.top, 8)
             .padding()
             
             
@@ -272,6 +273,11 @@ struct ReportView: View {
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             StepsIndicator(numberOfSteps: numberOfSteps, currentStep: $currentStep)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 16) {
+            ThemedButton(message: "Next", action: {}, type: .primary, style: .prominent)
+//                .padding(.horizontal)
+                .padding()
         }
         .background(Color.theme.background)
         .sheet(isPresented: $showMapPickerSheet)  {

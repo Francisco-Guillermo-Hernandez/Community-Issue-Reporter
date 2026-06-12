@@ -8,14 +8,21 @@
 import CoreLocation
 import SwiftUI
 
+enum DetailNavigationDestination: Hashable {
+    case comment(String)
+    case reportFollowUp(Report)
+    case moreEvidences(String)
+}
+
 struct ReportFollowUpView: View {
+    let report: Report
     
     var body: some View {
-        Text("Follow up")
+        Text("Follow up for \(report.title)")
     }
 }
 
-struct PhotoSample: Identifiable {
+struct PhotoSample: Identifiable, Hashable {
     let id: String
     let photo: String
     let published: Date
@@ -70,7 +77,8 @@ struct DetailView: View {
     //    var issue: IssueMarker
     var report: MapExplorerReport
     @State private var color: Color
-    @State private var commentButtonPressed: Bool = false
+    @State private var path = NavigationPath()
+    @State private var activeDetent: PresentationDetent = .fraction(0.30)
     @State private var showConfirmationDialogRaiseHand: Bool = false
     @State private var showConfirmationDialogAddNotification: Bool = false
     @State private var openInMaps: Bool = false
@@ -133,6 +141,13 @@ struct DetailView: View {
                     Spacer()
                     Text(report.id)
                         .font(.caption)
+                }
+                .contextMenu {
+                    Button {
+                        UIPasteboard.general.string = report.id
+                    } label: {
+                        Label("Copy ID", systemImage: "doc.on.doc")
+                    }
                 }
                 
                 HStack {
@@ -236,7 +251,7 @@ struct DetailView: View {
                         if photo.more {
                            
                             
-                            NavigationLink(destination:  EvidencesView()) {
+                            NavigationLink(value: DetailNavigationDestination.moreEvidences(report.id)) {
                                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                                     .stroke(Color.theme.primary, lineWidth: 2)
                                     .frame(width: 160, height: 160)
@@ -365,7 +380,7 @@ struct DetailView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ScrollView(.vertical) {
                 VStack(alignment: .leading) {
                     headers()
@@ -396,33 +411,44 @@ struct DetailView: View {
                 print(result)
             }
             .safeAreaInset(edge: .bottom) {
-                customBottomToolbar(
-                    commentAction: {
-                        commentButtonPressed.toggle()
-                    },
-                    addPhotoAction: {},
-                    affectedAction: { status in
-                        type = .info
-                        status
-                            ? (message = "Added to affected list")
-                            : (message = "Removed from affected list")
-                        showAlert = true
-                        hideAlert()
-                    },
-                    addNotificationAction: { status in
-                        type = .info
-                        status
-                            ? (message = "Added to notification list")
-                            : (message = "Removed from notification list")
-                        showAlert = true
-                        hideAlert()
-                    },
-                    affectedState: $affectedState,
-                    notificationState: $notificationState
-                )
+                if activeDetent == .large {
+                    customBottomToolbar(
+                        commentAction: {
+                            path.append(DetailNavigationDestination.comment(self.report.id))
+                        },
+                        addPhotoAction: {},
+                        affectedAction: { status in
+                            type = .info
+                            status
+                                ? (message = "Added to affected list")
+                                : (message = "Removed from affected list")
+                            showAlert = true
+                            hideAlert()
+                        },
+                        addNotificationAction: { status in
+                            type = .info
+                            status
+                                ? (message = "Added to notification list")
+                                : (message = "Removed from notification list")
+                            showAlert = true
+                            hideAlert()
+                        },
+                        affectedState: $affectedState,
+                        notificationState: $notificationState
+                    )
+                    .transition(.move(edge: .bottom))
+                }
             }
-            .sheet(isPresented: $commentButtonPressed) {
-                CommentsSectionView(for: .report, with: self.report.id)
+            .animation(.easeInOut, value: activeDetent)
+            .navigationDestination(for: DetailNavigationDestination.self) { destination in
+                switch destination {
+                case .comment(let id):
+                    CommentsSectionView(for: .report, with: id)
+                case .reportFollowUp(let report):
+                    ReportFollowUpView(report: report)
+                case .moreEvidences(let id):
+                    EvidencesView(with: id)
+                }
             }
             .overlay(alignment: .bottom) {
                 if showAlert {
@@ -467,7 +493,7 @@ struct DetailView: View {
 
         }
         .toolbarTitleDisplayMode(.inlineLarge)
-        .presentationDetents([.fraction(0.30), .medium, .large])
+        .presentationDetents([.fraction(0.30), .medium, .large], selection: $activeDetent)
         .presentationDragIndicator(.visible)
     }
 

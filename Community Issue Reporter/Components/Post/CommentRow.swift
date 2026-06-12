@@ -62,8 +62,10 @@ struct CommentRow: View {
             
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, 4)
         
         Divider()
+            .opacity(0.65)
     }
 }
 
@@ -82,5 +84,11 @@ struct CommentRow: View {
         updatedAt: Date()
     )
     
-    CommentRow(comment: comment)
+    NavigationStack {
+        ScrollView(showsIndicators: false) {
+            CommentRow(comment: comment)
+        }
+        .padding()
+        .background(Color.theme.background)
+    }
 }

@@ -83,6 +83,7 @@ struct PetitionViewPost: View {
                         }
                     }
                 }
+                .scrollClipDisabled()
             }
             .frame(maxHeight: 200)
             

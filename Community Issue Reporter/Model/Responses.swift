@@ -37,6 +37,7 @@ struct UserTokens: Decodable {
 
 struct Settings: Decodable {
     let notifications: Notifications
+    let privacySettings: PrivacySettings
 }
 
 struct PublicUserData: Decodable {
@@ -46,6 +47,7 @@ struct PublicUserData: Decodable {
     let sessionDuration: Int
     let userType: UserType
     let settings: Settings
+    let landingPageCompleted: Bool
 }
 
 struct LoginWithOAuthProviderResponse: Decodable {
@@ -106,4 +108,9 @@ struct Notifications: Encodable, Decodable {
     var app: Bool
     var email: Bool
     var web: Bool
+}
+
+struct PrivacySettings: Encodable, Decodable {
+    var showMyProfile: Bool
+    var showMyUseNameWhenShare: Bool
 }

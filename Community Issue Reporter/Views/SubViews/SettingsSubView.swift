@@ -92,10 +92,11 @@ struct SettingsSubView: View {
     
     @EnvironmentObject var notificationManager: NotificationManager
     
-     @State private var textToCopy = "Hello, World!"
-        @State private var showCopiedMessage = false
+    @State private var textToCopy = "Hello, World!"
+    @State private var showCopiedMessage = false
     
-    @State var notifications: Notifications = .init(app: false, email: false, web: false)
+    @State var notifications: Notifications = .init(app: false, email: true, web: false)
+    @State var privacySettings: PrivacySettings = .init(showMyProfile: true, showMyUseNameWhenShare: true)
 
     @State private var selectedCity: FriendlyCityDistribution = .init(
         cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
@@ -176,6 +177,26 @@ struct SettingsSubView: View {
 //                                    .foregroundStyle(Color.secondary)
                             }
                         }
+                    }
+                    
+                    SettingsGroup(title: "Privacy", footerText: "") {
+                        Toggle("Show my profile", isOn: $privacySettings.showMyProfile)
+                            .foregroundStyle(Color.theme.inputText)
+                            .onChange(of: privacySettings.showMyProfile) { oldValue, newValue in
+                                if oldValue != newValue {
+                                    settings.showMyProfile = newValue
+                                    updatePrivacySettings()
+                                }
+                            }
+                        
+                        Toggle("Show my profiles when I share", isOn: $privacySettings.showMyUseNameWhenShare)
+                            .foregroundStyle(Color.theme.inputText)
+                            .onChange(of: privacySettings.showMyUseNameWhenShare) { oldValue, newValue in
+                                if oldValue != newValue {
+                                    settings.showMyUseNameWhenShare = newValue
+                                    updatePrivacySettings()
+                                }
+                            }
                     }
                     
                     /// Notifications group
@@ -370,7 +391,10 @@ struct SettingsSubView: View {
                 enableNotifications = settings.enableNotifications
                 saveLastLocation = settings.saveLastLocation
                 useMyCurrentLocation = settings.useMyCurrentLocation
-
+                
+                privacySettings.showMyProfile = settings.showMyProfile
+                privacySettings.showMyUseNameWhenShare = settings.showMyUseNameWhenShare
+                
                 if let savedCity = appState.selectedCity {
                     self.selectedCity = savedCity
                 }
@@ -438,12 +462,21 @@ struct SettingsSubView: View {
         )
     }
 
+    func updatePrivacySettings() {
+        Task {
+            print("update privacy settings")
+            try? await Task.sleep(for: .milliseconds(550))
+            await UserRepository.shared.privacy(settings: privacySettings, completion: {
+              print("privacy settings updated")
+            })
+        }
+    }
     
     func updateNotificationSettings() {
         
             print("updating")
             Task {
-                try? await Task.sleep(for: .milliseconds(450))
+                try? await Task.sleep(for: .milliseconds(550))
                 await UserRepository.shared.modify(notifications, completion: { (result: Result<String, Error>) in
                     switch result {
                         case .success(let message):

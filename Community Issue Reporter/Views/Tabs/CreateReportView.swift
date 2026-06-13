@@ -16,7 +16,6 @@ struct CreateReportView: View {
     @State private var issueType: IssueTypes = .all
     @State private var severity: Severity = .all
     @State private var model = ReportDataModel.shared
-    @EnvironmentObject var handler: AccessoryHandler
     
     var body: some View {
         NavigationStack {
@@ -85,7 +84,6 @@ struct CreateReportView: View {
         })
         .toolbar(.hidden, for: .tabBar)
         .onAppear {
-            handler.showAccessory()
             model.setMatterToSolve(matter)
         }
     }
@@ -170,5 +168,4 @@ struct CardView: View {
 
 #Preview {
     CreateReportView()
-        .environmentObject(AccessoryHandler())
 }

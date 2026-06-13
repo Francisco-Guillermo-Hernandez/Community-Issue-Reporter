@@ -42,6 +42,10 @@ struct ReportsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var reports: [MapExplorerReport] = []
     
+    @EnvironmentObject var handler: ReportDetailsHandler
+    
+    
+    
     private let animation = Animation.easeInOut(duration: 0.25)
     
     
@@ -390,7 +394,7 @@ struct ReportsView: View {
             .contentShape(.rect)
             .onTapGesture {
                 expandedItem = issue
-                showDetailView.toggle()
+//                showDetailView.toggle()
                 withAnimation(animation) {
                     selectedPlaceID = issue.id
                 }
@@ -511,5 +515,6 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
     NavigationStack {
         ReportsView()
             .environmentObject(AuthViewModel())
+            .environmentObject(ReportDetailsHandler())
     }
 }

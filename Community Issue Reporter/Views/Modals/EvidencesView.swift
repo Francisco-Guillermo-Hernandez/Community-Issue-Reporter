@@ -28,6 +28,12 @@ struct EvidencesView: View {
     @Namespace private var nameSpace
     @State private var previewID: String = ""
     
+    var id: String
+    
+    init(with id: String) {
+        self.id = id
+    }
+    
     var body: some View {
         ScrollView(.vertical) {
             LazyVGrid(columns: gridColumns, spacing: 4) {
@@ -158,6 +164,6 @@ struct EvidencesView: View {
 
 #Preview {
     NavigationStack {
-        EvidencesView()
+        EvidencesView(with: "")
     }
 }

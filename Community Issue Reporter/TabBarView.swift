@@ -17,11 +17,15 @@ struct TabBarView: View {
     @AppStorage("openReportFromShortcut") private var openReportFromShortcut = false
     @State private var showShortcutReport: Bool = false
     
+    @StateObject private var reportHandler = ReportDetailsHandler()
+    
+    
     var body: some View {
         TabView(selection: $selectedTab) {
             
             Tab(String(localized: "Issues"), systemImage: "map", value: 1) {
                 ReportsView()
+                    .environmentObject(reportHandler)
             }
             
             Tab(String(localized: "Sign petitions"), systemImage: "signature", value: 2) {
@@ -38,9 +42,13 @@ struct TabBarView: View {
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .onOpenURL { url in
-            if url.host == "reports" {
+            
+            guard let data = deepLinkHandler(url) else { return }
+            
+            if data.type == .report {
                 selectedTab = 1
-                presentSheetOnDeepLink.toggle()
+                
+                retrieveAndPresentReportDetails(of: "f0a38d15-2546-4f13-b622-437299ae687a")
             }
         }
         .onAppear {
@@ -55,27 +63,54 @@ struct TabBarView: View {
                 showShortcutReport = true
             }
         }
-        .sheet(isPresented: $presentSheetOnDeepLink) {
-            VStack {
-                
-                Text("Hello from sheet")
-            }
-        }
         .sheet(isPresented: $showShortcutReport) {
             ReportView(model: model, onCompletion: { _, _ in
                 
             }, showCancelButton: true)
             .onAppear {
                 model.setMatterToSolve(mattersToResolve.first!)
-//                model.configure(with: settings)
             }
         }
         .sensoryFeedback(.selection, trigger: selectedTab)
         
+    }
+    
+    ///
+    private func retrieveAndPresentReportDetails(of reportId: String) {
+        Task {
+            ///
+            reportHandler.isLoading = true
+            await MapExplorerRepository.shared.report(
+                 reportId,
+                 countryCode: .SV,
+                 cityId: "",
+                 completion: { result in
+                     
+                     ///
+                     reportHandler.isLoading = false
+                     
+                     switch result {
+                     case .success(let report):
+                         
+                         print(report)
+                         reportHandler.showDetails(of: report)
+                         case .failure(let error):
+                         print(error)
+                         
+                     }
+                 }
+             )
+        }
+    }
+    
+    ///
+    private func retrieveAndPresentPetitionDetails(of petitionId: String) {
+        Task {}
     }
 }
 
 
 #Preview {
     TabBarView()
+        .environmentObject(AuthViewModel())
 }

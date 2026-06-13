@@ -7,6 +7,16 @@
 
 import SwiftUI
 
+enum ReportNavigationDestination: Hashable {
+    ///
+    case reportWizard
+    
+    case reportLocation
+    case attachMedia
+    case addInformation
+    case finalStep
+}
+
 struct CreateReportView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var searchText = ""
@@ -16,13 +26,14 @@ struct CreateReportView: View {
     @State private var issueType: IssueTypes = .all
     @State private var severity: Severity = .all
     @State private var model = ReportDataModel.shared
+    @State private var navigationPath: [ReportNavigationDestination] = []
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             ScrollView(.vertical) {
                 LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 3) {
                     ForEach(filteredMatters, id: \.id) { matter in
-                        NavigationLink(destination: report(matter: matter)) {
+                        NavigationLink(destination: wizard(matter: matter)) {
                             CardView(matter: matter)
                         }
                     }
@@ -59,7 +70,8 @@ struct CreateReportView: View {
                 }
             }
             .padding(.horizontal)
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search")
+            .searchable(text: $searchText, prompt: "Search")
+            .toolbar(.visible, for: .tabBar)
             .toolbarTitleDisplayMode(.inlineLarge)
             .navigationTitle("Report")
             .navigationSubtitle("what do you want to report?")
@@ -71,8 +83,8 @@ struct CreateReportView: View {
     
     /// Open report view with type of matter chosen
     @ViewBuilder
-    private func report(matter: MatterToSolve) -> some View {
-        ReportView(model: model, onCompletion: { incomingMessage, alertType in
+    private func wizard(matter: MatterToSolve) -> some View {
+        ReportWizardView(path: $navigationPath, model: model, onCompletion: { incomingMessage, alertType in
             message = incomingMessage
             type = alertType
             show = true

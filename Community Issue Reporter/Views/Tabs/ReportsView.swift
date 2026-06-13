@@ -142,6 +142,9 @@ struct ReportsView: View {
         .sheet(item: $expandedItem) { report in
             DetailView(report: report)
         }
+        .sheet(isPresented: $handler.isPresented) {
+            DetailView(report: handler.report!)
+        }
         .overlay {
             /// customized overlay to show the list of places into a List
             if showSearchOverlay {

@@ -15,6 +15,59 @@ struct Option: Hashable {
 }
 
 
+struct ReportLocationView: View {
+    @Bindable var model: ReportDataModel
+    var numberOfSteps: Int
+    @Binding var currentStep: Int
+    @State private var showMapPickerSheet: Bool = false
+    var body: some View {
+        VStack {
+            SettingsHeaderView("Location")
+            VStack {
+                MiniMapLocator(
+                    coordinate: $model.report.coordinate,
+                    locator: $model.locator,
+                    onExpandMap: { _ in
+                        showMapPickerSheet.toggle()
+                    }
+                )
+                
+             
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
+                                   .stroke(Color.theme.border, lineWidth: 1)
+            )
+            .cornerRadius(.themeRadius * 2)
+            .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1) // shadow-sm
+            .sheet(isPresented: $showMapPickerSheet)  {
+                MapPickerView(
+                    coordinate: $model.report.coordinate,
+                    locator: $model.locator,
+                    onConfirm: { coordinate, locator in
+                        model.updateCoordinate(coordinate)
+                        model.updateLocator(with: locator)
+                        self.showMapPickerSheet = false
+                    }
+                )
+            }
+            .frame(maxHeight: .infinity)
+            
+            Spacer()
+           
+        }
+        
+        .safeAreaInset(edge: .bottom, spacing: 16) {
+            ThemedButton(message: "Next Step", action: {
+                currentStep += 1
+            }, type: .primary, style: .prominent)
+//                .disabled(nextButtonValidator)
+                .padding()
+        }
+        
+    }
+}
+
 struct AttachMediaView:View {
     var body: some View {
         Text("Attach media")
@@ -23,88 +76,9 @@ struct AttachMediaView:View {
 
 
 struct AddInformationView: View {
-    var body: some View {
-        Text("Information")
-    }
-}
-
-struct ReportLocationView: View {
-    var body: some View {
-        Text("location")
-    }
-}
-
-
-struct FinalStepView: View {
-    var body: some View {
-        Text("Final Step")
-    }
-}
-
-
-struct ReportView: View {
-    @Environment(\.dismiss) private var dismiss
     @Bindable var model: ReportDataModel
-    @State private var showDiscardAlert: Bool = false
-    @State private var isSubmitting: Bool = false
-    @State private var selectedImages: [MediaResources] = []
-    @State private var showMapPickerSheet: Bool = false
-    @State private var numberOfSteps: Int = 4
-       @State private var currentStep: Int = 1
-    
-    
-    @State private var textInput: String = ""
-
-    
-    var showCancelButton: Bool = false
-    
-    var onCompletion: (String, AlertType) -> Void
-    
-    
-    
-    init(model: ReportDataModel, onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
-        self.model = model
-        self.onCompletion = onCompletion
-        self.showCancelButton = showCancelButton
-    }
-    
-    private var isFormFilled: Bool {
-        //        !address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        //        || !descriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        //        || !selectedImages.isEmpty
-        return true
-    }
-    
     var body: some View {
-        ScrollView {
-            
-            VStack(spacing: .themeSpacing * 1.5) {
-                
-                SettingsHeaderView("Location")
-                VStack {
-                    MiniMapLocator(
-                        coordinate: $model.report.coordinate,
-                        locator: $model.locator,
-                        onExpandMap: { _ in
-                            showMapPickerSheet.toggle()
-                        }
-                    )
-                }
-                .overlay(
-                    RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-                                       .stroke(Color.theme.border, lineWidth: 1)
-                )
-                .cornerRadius(.themeRadius * 2)
-                .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1) // shadow-sm
-                
-                
-                
-            }
-//            .padding(.top, .themePadding)
-            .padding(.top, 8)
-            .padding()
-            
-            
+        VStack {
             SettingsGroup(title: "Details") {
                 TextInput(
                     name: "Address",
@@ -124,132 +98,73 @@ struct ReportView: View {
                              
             }
             .padding()
+        }
+    }
+}
+
+
+
+struct FinalStepView: View {
+    var body: some View {
+        Text("Final Step")
+    }
+}
+
+
+struct ReportWizardView: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var path: [ReportNavigationDestination]
+    @Bindable var model: ReportDataModel
+    @State private var showDiscardAlert: Bool = false
+    @State private var isSubmitting: Bool = false
+    @State private var selectedImages: [MediaResources] = []
+    @State private var numberOfSteps: Int = 4
+    @State private var currentStep: Int = 1
+    
+    
+    @State private var textInput: String = ""
+
+    
+    var showCancelButton: Bool = false
+    
+    var onCompletion: (String, AlertType) -> Void
+    
+    
+    
+    init(path: Binding<[ReportNavigationDestination]>, model: ReportDataModel, onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
+        self._path = path
+        self.model = model
+        self.onCompletion = onCompletion
+        self.showCancelButton = showCancelButton
+    }
+    
+    private var isFormFilled: Bool {
+        return true
+    }
+    
+    var body: some View {
+        ScrollView {
             
-//            Form {
-//                /// This section is dedicated to select a location on the map
-//                Section("Location") {
-//                    MiniMapLocator(
-//                        coordinate: $model.report.coordinate,
-//                        locator: $model.locator,
-//                        onExpandMap: { _ in
-//                            showMapPickerSheet.toggle()
-//                        }
-//                    )
-//                }
-//                
-//                /// This section is dedicated to select the evidence of the issue
-//                Section("Photos") {
-//                    PhotoChooser(
-//                        onSelect: { images in
-//                            print("Selected images: \(images.count)")
-//                            self.selectedImages = images
-//                        },
-//                        onDelete: { index in
-//                            self.selectedImages.remove(at: index)
-//                        }
-//                    )
-//                    
-//                }
-//            
-//                
-//                ///
-//                Section("Issue Details") {
-//                    
-//                    Picker("Issue type", selection: $model.report.issueType) {
-//                        ForEach(IssueTypes.allCases, id: \.self) { issue in
-//                            HStack(spacing: 80) {
-//                                Text(issue.title)
-//                                
-//                                Spacer()
-//                                Image(systemName: issue.iconName)
-//                                
-//                            }
-//                            .tag(issue)
-//                        }
-//                    }
-//                    
-//                    
-//                    
-//                    Picker("Severity level", selection: $model.report.severity) {
-//                        ForEach(Severity.allCases, id: \.self) { level in
-//                            HStack(spacing: 8) {
-//                                
-//                                Image(systemName: level.iconName)
-//                                    .padding(.trailing, 10)
-//                                Text(level.title)
-//                            }
-//                            .tag(level)
-//                        }
-//                    }
-//                    
-//                }
-//                .padding(.horizontal, 8)
-//                
-//                ///
-//                Section("Details") {
-//                    
-//                    
-//                    VStack {
-//                        TextInput(
-//                            name: "Title",
-//                            label: String(localized: "Title of the issue", comment: "ReportView: Title of the issue"),
-//                            isValid: .constant(true),
-//                            value: $model.report.title,
-//                        )
-//                        
-//                        TextInput(
-//                            name: "Description",
-//                            label: String(localized: "Please describe the issue", comment: "ReportView: Please describe the issue"),
-//                            axis: .vertical,
-//                            isValid: .constant(true),
-//                            value: $model.report.description,
-//                            
-//                        )
-//                        
-//                        TextInput(
-//                            name: "Address",
-//                            label: String(localized: "Please tell us where is the issue", comment: "ReportView: Please tell us where is the issue"),
-//                            axis: .vertical,
-//                            isValid: .constant(true),
-//                            value: $model.report.address,
-//                            
-//                        )
-//                    }
-//                }
-//                
-//                
-//            }
-//            .navigationTitle("Report")
+            VStack(spacing: .themeSpacing * 1.5) {
+                
+                ReportLocationView(model: model, numberOfSteps: numberOfSteps, currentStep: $currentStep)
+                
+                
+            }
+            .padding(.top, 8)
+            .padding()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 
-                if showCancelButton {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(role: .close) {
-                            if isFormFilled {
-                                showDiscardAlert = true
-                            } else {
-                                dismiss()
-                            }
-                        }
-                        .accessibilityLabel("Close")
-                        .confirmationDialog("Are you sure...", isPresented: $showDiscardAlert)  {
-                            
-                            Button("Keep editing", role: .cancel) {
-                                showDiscardAlert = false
-                            }
-                            Button("Discard changes", role: .destructive) {
-                                dismiss()
-                            }
-                        } message: {
-                            Text("You have unsaved information in this report.")
-                        }
-                    }
-                }
+
                 
                 ToolbarItem(placement: .title) {
-                    Text("Report a new issue")
+                    StepsIndicator(numberOfSteps: numberOfSteps, currentStep: $currentStep)
+                        .frame(maxWidth: .infinity)
                 }
+                
+                
+                
                 
 //                ToolbarItem(placement: .confirmationAction) {
 //                    Button {
@@ -268,29 +183,10 @@ struct ReportView: View {
 //                }
             }
             .interactiveDismissDisabled(isFormFilled)
-//            .background(Color.theme.background)
-//            .scrollContentBackground(.hidden)
         }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            StepsIndicator(numberOfSteps: numberOfSteps, currentStep: $currentStep)
-        }
-        .safeAreaInset(edge: .bottom, spacing: 16) {
-            ThemedButton(message: "Next", action: {}, type: .primary, style: .prominent)
-//                .padding(.horizontal)
-                .padding()
-        }
+        
         .background(Color.theme.background)
-        .sheet(isPresented: $showMapPickerSheet)  {
-            MapPickerView(
-                coordinate: $model.report.coordinate,
-                locator: $model.locator,
-                onConfirm: { coordinate, locator in
-                    model.updateCoordinate(coordinate)
-                    model.updateLocator(with: locator)
-                    self.showMapPickerSheet = false
-                }
-            )
-        }
+        
     }
     
     private func performActions() -> Void {
@@ -338,6 +234,7 @@ struct ReportView: View {
                 )
             }
             
+            
             await MainActor.run {
                 if model.report.id != "-1" {
                     dismiss()
@@ -350,15 +247,24 @@ struct ReportView: View {
         }
     }
     
+    
+    var nextButtonValidator: Bool {
+        currentStep == numberOfSteps
+    }
 }
 
 
 
 #Preview {
+    @Previewable
+    @State  var path: [ReportNavigationDestination] = []
+    
+    
     let model: ReportDataModel = ReportDataModel.shared
     model.setMatterToSolve(mattersToResolve.first!)
+    
     return NavigationStack {
-        ReportView(model: model, onCompletion: { data, type in
+        ReportWizardView(path: $path, model: model, onCompletion: { data, type in
             
         }, showCancelButton: true)
     }

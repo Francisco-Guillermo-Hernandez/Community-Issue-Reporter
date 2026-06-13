@@ -14,7 +14,7 @@ struct CommentsService {
         self.client = client
     }
     
-    func post(comment: CommentRequest, headers: Array<HTTPHeader>) async throws -> GenericResponse {
+    func post(comment: Comment, headers: Array<HTTPHeader>) async throws -> GenericResponse {
         return try await client.post(path: "comments/create", body: comment, headers: headers, withOAuth: true)
     }
     

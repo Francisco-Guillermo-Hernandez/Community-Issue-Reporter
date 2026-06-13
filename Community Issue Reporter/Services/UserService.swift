@@ -42,6 +42,10 @@ struct UserService {
         return try await client.patch(path: "user/device/token", body: deviceToken, headers: headers, withOAuth: true)
     }
     
+    func privacy(_ settings: PrivacySettings, _ headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.patch(path: "user/privacy", body: settings, headers: headers, withOAuth: true)
+    }
+    
     func change(avatar: Data) async throws -> CustomizedResponse<AvatarResponse> {
 
         let files: [MultipartFormFile] = [

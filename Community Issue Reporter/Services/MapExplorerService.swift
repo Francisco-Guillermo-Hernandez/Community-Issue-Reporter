@@ -18,4 +18,8 @@ struct MapExplorerService {
     func reports(q: MapExplorerQueryParams, h: [HTTPHeader]) async throws -> MapExplorerReports {
         return try await client.get(path: "map-explorer/reports", query: q, headers: h, withOAuth: false)
     }
+    
+    func report(_ id: String, h: [HTTPHeader]) async throws -> MapExplorerReport {
+        return try await client.get(path: "map-explorer/reports/\(id)", headers: h, withOAuth: false)
+    }
 }

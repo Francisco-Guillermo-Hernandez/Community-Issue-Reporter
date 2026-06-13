@@ -15,9 +15,7 @@ struct WelcomeView: View {
         ZStack {
             
             if appState.isCheckingStatus {
-                ProgressView()
-                        .progressViewStyle(.circular)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                LoadingView()
             } else if appState.isLoggedIn || isGuest {
                 TabBarView()
             } else {

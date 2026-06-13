@@ -23,8 +23,10 @@ final class UserRepository {
     
     static var shared: UserRepository = .init()
     var service: UserService
+    var settings: SettingsStore
     private init () {
         self.service = UserService()
+        self.settings = .init()
     }
     
     func login(
@@ -254,7 +256,7 @@ final class UserRepository {
                 completion()
             }
         } catch {
-            
+            print(error)
         }
     }
     
@@ -264,10 +266,34 @@ final class UserRepository {
     }
     
     func setSettingsFromAuthenticatedUser(with data: PublicUserData) -> Void {
+        
+        /// Personalization settings
         setUsername(data.userName)
         setAvatar(url: data.profilePicture)
-        print("user has been set")
-        print(data.profilePicture)
+        
+        /// Notification settings
+        settings.enableEmailNotifications = data.settings.notifications.email
+        
+        /// Privacy settings
+        settings.showMyProfile = data.settings.privacySettings.showMyProfile
+        settings.showMyUseNameWhenShare = data.settings.privacySettings.showMyUseNameWhenShare
+    }
+    
+    func privacy(settings: PrivacySettings, completion: @escaping () -> Void) async {
+        do {
+            
+            let headers = [
+                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+            ]
+            
+            let result = try await self.service.privacy(settings, headers)
+
+            if result.code == "PRIVACY_SETTINGS_UPDATED" {
+                completion()
+            }
+        } catch {
+            print(error)
+        }
     }
     
     

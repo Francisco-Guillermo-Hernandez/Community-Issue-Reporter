@@ -86,12 +86,19 @@ struct LandingView: View {
                                 self.appState.landingViewMode.toggle()
                                 path.append(.selectCity)
                             } else {
-//                                path.append(.selectCity)
-//                                self.appState.landingViewMode.toggle()
-                                //
                                 
-                                UserRepository.shared.setSettingsFromAuthenticatedUser(with: data)
-                                self.appState.isLoggedIn.toggle()
+                                
+                                if data.landingPageCompleted {
+                                    /// Set preferences 
+                                    UserRepository.shared.setSettingsFromAuthenticatedUser(with: data)
+                                    self.appState.isLoggedIn.toggle()
+                                } else {
+                                    
+                                    /// Uncompleted landing process
+                                    path.append(.selectCity)
+                                    self.appState.landingViewMode.toggle()
+                                }
+                                
                             }
                         
                             self.saveIntoKeychain(sessionId)

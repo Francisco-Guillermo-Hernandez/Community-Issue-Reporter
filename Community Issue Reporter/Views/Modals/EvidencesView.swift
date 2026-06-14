@@ -23,6 +23,7 @@ struct EvidencesView: View {
         PhotoSample(id: "2", photo: "b", published: Date(), user: "John Smith"),
         PhotoSample(id: "3", photo: "c", published: Date(), user: "Michael Brown"),
         PhotoSample(id: "4", photo: "d", published: Date(), user: "Emily Davis"),
+        PhotoSample(id: "5", photo: "d", published: Date(), user: "Emily Davis"),
     ]
     
     @Namespace private var nameSpace
@@ -48,7 +49,7 @@ struct EvidencesView: View {
                     })
                 }
             }
-            .padding(.horizontal, 4)
+            .padding(.horizontal, .themePadding)
         }
         .navigationDestination(for: PhotoSample.self) { photo in
             PhotoDetailView(photos: photos, previewID: $previewID, nameSpace: nameSpace)
@@ -115,7 +116,7 @@ struct EvidencesView: View {
             
             
         }
-        .background(Color.theme.background)
+//        .background(Color.theme.background)
         .toolbarTitleDisplayMode(.large)
         .navigationTitle("Evidences")
         .navigationSubtitle("You can take a look of what is happening")

@@ -20,6 +20,14 @@ final class SettingsStore {
         didSet { UserDefaults.standard.set(selectedCountry, forKey: "selectedCountry") }
     }
     
+    var countryCode: String {
+        didSet { UserDefaults.standard.set(countryCode, forKey: "countryCode") }
+    }
+    
+    var cityId: String {
+        didSet { UserDefaults.standard.set(cityId, forKey: "cityId") }
+    }
+    
     var selectedState: Int {
         didSet { UserDefaults.standard.set(selectedState, forKey: "selectedState") }
     }
@@ -52,28 +60,50 @@ final class SettingsStore {
         didSet { UserDefaults.standard.set(enableNotifications, forKey: "enableNotifications") }
     }
     
-//    var cityProperties: FriendlyCityDistribution {
-//        didSet {
-////            UserDefaults.object(forKey: "cityProperties")?.set(cityProperties.city).set(cityProperties, forKey: "cityProperties") }
-//            let encoder = JSONEncoder()
-//                if let encodedData = try? encoder.encode(cityProperties) {
-//                    UserDefaults.standard.set(encodedData, forKey: "cityProperties")
-//                }
-//        }
-//    }
+    var enablePushNotifications: Bool {
+        didSet { UserDefaults.standard.set(enablePushNotifications, forKey: "enablePushNotifications") }
+    }
+    
+    var enableEmailNotifications: Bool {
+        didSet { UserDefaults.standard.set(enableEmailNotifications, forKey: "enableEmailNotifications") }
+    }
+    
+    var saveLastLocation: Bool {
+        didSet { UserDefaults.standard.set(saveLastLocation, forKey: "saveLastLocation") }
+    }
+  
+    var useMyCurrentLocation: Bool {
+        didSet { UserDefaults.standard.set(useMyCurrentLocation, forKey: "useMyCurrentLocation") }
+    }
+    
+    var showMyProfile: Bool {
+        didSet { UserDefaults.standard.set(showMyProfile, forKey: "showMyProfile") }
+    }
+    
+    var showMyUseNameWhenShare: Bool {
+        didSet { UserDefaults.standard.set(showMyUseNameWhenShare, forKey: "showMyUseNameWhenShare") }
+    }
     
     init () {
+
         self.geographicalRegion = UserDefaults.standard.object(forKey: "geographicalRegion") as? Int ?? 2
         self.selectedCountry = UserDefaults.standard.object(forKey: "selectedCountry") as? Int ?? 2
         self.selectedState = UserDefaults.standard.object(forKey: "selectedState") as? Int ?? 0
         self.selectedCity = UserDefaults.standard.object(forKey: "selectedCity") as? Int ?? 0
+        self.countryCode = UserDefaults.standard.string(forKey: "countryCode") ?? "SV"
+        self.cityId = UserDefaults.standard.string(forKey: "cityId") ?? "a67b90f9-1d76-4835-a994-03cd04f1d619"
         self.enableBackgroundSync = UserDefaults.standard.object(forKey: "enableBackgroundSync") as? Bool ?? true
-        self.enableAnonymousTelemetry = UserDefaults.standard.object(forKey: "enableAnonymousTelemetry") as? Bool ?? false
+        self.enableAnonymousTelemetry = UserDefaults.standard.bool(forKey: "enableAnonymousTelemetry")
         self.selectedLanguageID = UserDefaults.standard.object(forKey: "selectedLanguageID") as? Int ?? 1
         self.selectedLanguageCode = UserDefaults.standard.string(forKey: "selectedLanguageCode") ?? "es-419"
         self.enableAutomaticIdentification = UserDefaults.standard.object(forKey: "enableAutomaticIdentification") as? Bool ?? false
         self.enableNotifications = UserDefaults.standard.object(forKey: "enableNotifications") as? Bool ?? false
-//        self.cityProperties = UserDefaults.standard.object(forKey: "cityProperties") as? [String: Any] ?? [:]
+        self.enablePushNotifications = UserDefaults.standard.bool(forKey: "enablePushNotifications")
+        self.enableEmailNotifications = UserDefaults.standard.bool(forKey: "enableEmailNotifications")
+        self.saveLastLocation = UserDefaults.standard.bool(forKey: "saveLastLocation")
+        self.useMyCurrentLocation = UserDefaults.standard.bool(forKey: "useMyCurrentLocation")
+        self.showMyProfile = UserDefaults.standard.bool(forKey: "showMyProfile")
+        self.showMyUseNameWhenShare = UserDefaults.standard.bool(forKey: "showMyUseNameWhenShare")
         
         UserDefaults.standard.register(defaults: [
             "geographicalRegion": 2,
@@ -81,14 +111,18 @@ final class SettingsStore {
             "selectedState": 0,
             "selectedCity": 0,
             "enableBackgroundSync": true,
-            "enableAnonymousTelemetry": false,
+            "enableAnonymousTelemetry": true,
             "selectedLanguageID": 1,
             "selectedLanguageCode": "es-419",
             "enableAutomaticIdentification": false,
             "enableNotifications": false,
-//            "cityProperties": {
-//                "demo", "demo",
-//            },
+            "enablePushNotifications": false,
+            "enableEmailNotifications": true,
+            "saveLastLocation": false,
+            "showMyProfile": true,
+            "showMyUseNameWhenShare": true,
+            "countryCode": "SV",
+            "cityId": "a67b90f9-1d76-4835-a994-03cd04f1d619"
         ])
     }
     

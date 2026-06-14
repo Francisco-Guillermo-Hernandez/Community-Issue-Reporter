@@ -33,9 +33,37 @@ struct CellViewModifier: ViewModifier {
     }
 }
 
+
+struct SimpleCellViewModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundColor(.theme.foreground)
+//            .padding(0)
+//            .listRowSpacing(0)
+            
+//            .padding()
+//            .background(Color.theme.cardBackground)
+            .listRowBackground(Color.clear)
+//            .listRowSeparator(.hidden)
+            .listRowInsets(
+                EdgeInsets(
+                    top: 16,
+                    leading: 0,
+                    bottom: 16,
+                    trailing: 0
+                )
+            )
+            
+    }
+}
+
 extension View {
     func cellStyle() -> some View {
         self.modifier(CellViewModifier())
+    }
+    
+    func simpleCellStyle() -> some View {
+        self.modifier(SimpleCellViewModifier())
     }
 }
 
@@ -69,4 +97,48 @@ extension View {
         .background(Color.theme.background)
        
     }
+}
+
+
+#Preview("Simple cell") {
+    ScrollView {
+        List {
+            HStack {
+                Text("Reported by:")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Spacer()
+                Text("John Doe")
+                    .font(.caption)
+            }
+            .simpleCellStyle()
+            
+            HStack {
+                Text("Reported by:")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Spacer()
+                Text("Jane Doe")
+                    .font(.caption)
+            }
+            .frame(maxWidth: .infinity)
+            .simpleCellStyle()
+        }
+        .environment(\.defaultMinListRowHeight, 0)
+//        .overlay {
+//            Rectangle()
+//                .stroke(Color.black, lineWidth: 1)
+//        }
+        .padding()
+        .listRowBackground(Color.clear)
+        .scrollDisabled(true)
+        .scrollContentBackground(.hidden)
+    //    .listStyle(.insetGrouped)
+        .listStyle(.plain)
+        .scrollClipDisabled(true)
+        .frame(height: 335)
+        .contentMargins(.all, 0, for: .scrollContent)
+    }
+    .frame(maxWidth: .infinity)
+    .background(Color.theme.primary)
 }

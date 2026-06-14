@@ -60,7 +60,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
                 }
             }
         }
-        .onAppear {
+        .task {
             loadFromCache()
         }
     }

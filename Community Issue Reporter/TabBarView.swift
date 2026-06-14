@@ -16,6 +16,8 @@ struct TabBarView: View {
     @State private var presentSheetOnDeepLink: Bool = false
     @AppStorage("openReportFromShortcut") private var openReportFromShortcut = false
     @State private var showShortcutReport: Bool = false
+    @State private var isShowingAlert = false
+        @State private var alertMessage = ""
     
     @StateObject private var reportHandler = ReportDetailsHandler()
     
@@ -40,6 +42,12 @@ struct TabBarView: View {
                 CreateReportView()
             }
         }
+        
+        .alert("Status Update", isPresented: $isShowingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
         .tabBarMinimizeBehavior(.onScrollDown)
         .onOpenURL { url in
             
@@ -51,7 +59,7 @@ struct TabBarView: View {
                 retrieveAndPresentReportDetails(of: "f0a38d15-2546-4f13-b622-437299ae687a")
             }
         }
-        .onAppear {
+        .task {
             if openReportFromShortcut {
                 openReportFromShortcut = false
                 showShortcutReport = true
@@ -64,10 +72,10 @@ struct TabBarView: View {
             }
         }
         .sheet(isPresented: $showShortcutReport) {
-            ReportView(model: model, onCompletion: { _, _ in
+            ReportWizardView(model: model, onCompletion: { _, _ in
                 
             }, showCancelButton: true)
-            .onAppear {
+            .task {
                 model.setMatterToSolve(mattersToResolve.first!)
             }
         }
@@ -77,9 +85,10 @@ struct TabBarView: View {
     
     ///
     private func retrieveAndPresentReportDetails(of reportId: String) {
-        Task {
+        Task { 
             ///
             reportHandler.isLoading = true
+            reportHandler.isPresented = true
             await MapExplorerRepository.shared.report(
                  reportId,
                  countryCode: .SV,
@@ -94,9 +103,19 @@ struct TabBarView: View {
                          
                          print(report)
                          reportHandler.showDetails(of: report)
-                         case .failure(let error):
-                         print(error)
+                     case .failure(let error):
                          
+                         switch error {
+                         case .notFound:
+                             print("Report not found")
+                             alertMessage = "Report not found"
+                             isShowingAlert = true
+                         case .invalidPetition:
+                             alertMessage = "Invalid report ID"
+                             isShowingAlert = true
+                         default:
+                             print("Failed to fetch report: \(error.localizedDescription)")
+                         }
                      }
                  }
              )

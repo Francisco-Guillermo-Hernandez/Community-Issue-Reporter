@@ -499,6 +499,11 @@ struct MultipartFormFile {
     var data: Data
 }
 
+struct FormField {
+    var name: String
+    var value: String
+}
+
 
 struct HTTPHeader {
     var name: String

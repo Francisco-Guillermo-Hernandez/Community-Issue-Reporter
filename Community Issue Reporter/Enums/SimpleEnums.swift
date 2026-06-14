@@ -7,13 +7,13 @@
 
 import Foundation
 
-// MARK: -
+// MARK: - 
 enum ViewOptions: String {
     case list
     case listAndModify
 }
 
-// MARK: -
+// MARK: - Login options presented in the LoginView page
 enum LoginType {
     case guest
     case user
@@ -29,8 +29,8 @@ enum MonogramMode: String {
     case send
 }
 
-// MARK: - 
-enum CurrentView: String {
+// MARK: - Options to create an avatar
+enum AvatarCreatedFrom: String, Codable {
     case optionsSelector
     case avatar
     case camera
@@ -38,8 +38,10 @@ enum CurrentView: String {
     case initials
     case monogram
     case GoogleAuth
+    case Memoji
 }
 
+// MARK: - type of user can login into the app
 enum UserType: String, Codable {
     case guest
     case citizen

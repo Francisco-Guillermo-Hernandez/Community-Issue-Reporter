@@ -16,18 +16,14 @@ struct TabBarView: View {
     @State private var presentSheetOnDeepLink: Bool = false
     @AppStorage("openReportFromShortcut") private var openReportFromShortcut = false
     @State private var showShortcutReport: Bool = false
-    @State private var isShowingAlert = false
-        @State private var alertMessage = ""
-    
-    @StateObject private var reportHandler = ReportDetailsHandler()
-    
+    @EnvironmentObject var router: DeepLinkRouter
     
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: $router.activeTab) {
             
             Tab(String(localized: "Issues"), systemImage: "map", value: 1) {
                 ReportsView()
-                    .environmentObject(reportHandler)
+                    .environmentObject(router)
             }
             
             Tab(String(localized: "Sign petitions"), systemImage: "signature", value: 2) {
@@ -42,28 +38,23 @@ struct TabBarView: View {
                 CreateReportView()
             }
         }
-        
-        .alert("Status Update", isPresented: $isShowingAlert) {
+        .alert("Status Update", isPresented: $router.presentAlert) {
             Button("OK", role: .cancel) { }
         } message: {
-            Text(alertMessage)
+            Text(router.message)
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        .onOpenURL { url in
-            
-            guard let data = deepLinkHandler(url) else { return }
-            
-            if data.type == .report {
-                selectedTab = 1
-                
-                retrieveAndPresentReportDetails(of: "f0a38d15-2546-4f13-b622-437299ae687a")
-            }
-        }
         .task {
+            router.isReadyToRoute = true
+            router.processPendingDeepLink()
+            
             if openReportFromShortcut {
                 openReportFromShortcut = false
                 showShortcutReport = true
             }
+        }
+        .onDisappear {
+            router.isReadyToRoute = false
         }
         .onChange(of: openReportFromShortcut) { _, newValue in
             if newValue {
@@ -82,54 +73,12 @@ struct TabBarView: View {
         .sensoryFeedback(.selection, trigger: selectedTab)
         
     }
-    
-    ///
-    private func retrieveAndPresentReportDetails(of reportId: String) {
-        Task { 
-            ///
-            reportHandler.isLoading = true
-            reportHandler.isPresented = true
-            await MapExplorerRepository.shared.report(
-                 reportId,
-                 countryCode: .SV,
-                 cityId: "",
-                 completion: { result in
-                     
-                     ///
-                     reportHandler.isLoading = false
-                     
-                     switch result {
-                     case .success(let report):
-                         
-                         print(report)
-                         reportHandler.showDetails(of: report)
-                     case .failure(let error):
-                         
-                         switch error {
-                         case .notFound:
-                             print("Report not found")
-                             alertMessage = "Report not found"
-                             isShowingAlert = true
-                         case .invalidPetition:
-                             alertMessage = "Invalid report ID"
-                             isShowingAlert = true
-                         default:
-                             print("Failed to fetch report: \(error.localizedDescription)")
-                         }
-                     }
-                 }
-             )
-        }
-    }
-    
-    ///
-    private func retrieveAndPresentPetitionDetails(of petitionId: String) {
-        Task {}
-    }
 }
 
 
 #Preview {
     TabBarView()
         .environmentObject(AuthViewModel())
+        .environmentObject(DeepLinkRouter())
+        
 }

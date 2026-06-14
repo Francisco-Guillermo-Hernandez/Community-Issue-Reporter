@@ -51,7 +51,7 @@ struct PulseRingView: View {
 
         for index in 0..<animate.count {
             let delay = Double(index) * 0.2
-            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: false).delay(delay)) {
+            withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: false).delay(delay)) {
                 animate[index] = true
             }
         }

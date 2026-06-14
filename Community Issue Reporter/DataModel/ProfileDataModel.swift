@@ -34,7 +34,7 @@ final class ProfileDataModel: ObservableObject {
     private let selectedOptionKey = "selected_avatar_option"
     private let selectedColorKey = "selected_avatar_color"
 
-    @Published var selectedAvatarOptionView: CurrentView {
+    @Published var selectedAvatarOptionView: AvatarCreatedFrom {
         didSet {
             UserDefaults.standard.set(selectedAvatarOptionView.rawValue, forKey: selectedOptionKey)
         }
@@ -56,8 +56,8 @@ final class ProfileDataModel: ObservableObject {
     ]
     
     init() {
-        let savedOption = UserDefaults.standard.string(forKey: selectedOptionKey) ?? CurrentView.GoogleAuth.rawValue
-        self.selectedAvatarOptionView = CurrentView(rawValue: savedOption) ?? .GoogleAuth
+        let savedOption = UserDefaults.standard.string(forKey: selectedOptionKey) ?? AvatarCreatedFrom.GoogleAuth.rawValue
+        self.selectedAvatarOptionView = AvatarCreatedFrom(rawValue: savedOption) ?? .GoogleAuth
         
         let savedColorHex = UserDefaults.standard.string(forKey: selectedColorKey) ?? "FFA500" // Default orange
         self.selectedAvatarColor = Color(hex: savedColorHex)
@@ -88,7 +88,7 @@ final class ProfileDataModel: ObservableObject {
                 }
                 
                 await MainActor.run {
-                    uploadProfilePicture(image)
+                    uploadProfilePicture(image, from: .GoogleAuth)
                     completion()
                 }
             } catch {
@@ -98,23 +98,25 @@ final class ProfileDataModel: ObservableObject {
         }
     }
     
-    func uploadProfilePicture(_ image: UIImage) {
+    
+    @MainActor
+    func uploadProfilePicture(_ image: UIImage, from: AvatarCreatedFrom) {
         isUploading = true
         
         Task {
-           await UserRepository.shared.changeAvatar(image, userName: userName) { [weak self] (result: Result<String, Error>) in
-                DispatchQueue.main.async {
-                    self?.isUploading = false
-                    switch result {
-                    case .success(let url):
-                        print("Upload success: \(url)")
-                        self?.avatarURL = URL(string: url)
-                        self?.profileImage = image
-                    case .failure(let error):
-                        print("Upload failed: \(error.localizedDescription)")
-                    }
-                }
+            do {
+                
+                let urlString = try await UserRepository.shared.changeAvatar(image, from)
+                
+                self.avatarURL = URL(string: urlString)
+                self.profileImage = image
+                print("Upload success: \(urlString)")
+                
+            } catch {
+                print("Upload failed: \(error.localizedDescription)")
             }
+
+            isUploading = false
         }
     }
     

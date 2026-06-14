@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+
 @Observable
 final class ReportDataModel {
    
@@ -16,6 +17,7 @@ final class ReportDataModel {
     var locator: Locator
     private let settings = SettingsStore.shared
    
+    var isAddressValid: Bool = false
     private init() {
         // Let's initialize the locator for the report
         self.locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")

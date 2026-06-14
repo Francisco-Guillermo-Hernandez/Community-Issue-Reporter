@@ -52,9 +52,9 @@ struct Comment: Identifiable, Codable {
         message: String,
     ) {
         self.id = UUID().uuidString
+        self.profilePicture = ""
         self.name = UserRepository.shared.getName()
         self.userName = UserRepository.shared.getUsername()
-        self.profilePicture = UserRepository.shared.getProfilePicture()
         self.commentFor = commentFor
         self.resourceId = resourceId
         self.message = message

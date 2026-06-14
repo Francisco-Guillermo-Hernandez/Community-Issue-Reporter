@@ -11,9 +11,9 @@ import Foundation
 struct CustomizedResponse<T: Decodable>:  Decodable {
     let message: String
     let code: String
-    let data: T?
+    let data: T
     
-    init(message: String, code: String, data: T? = nil) {
+    init(message: String, code: String, data: T) {
         self.message = message
         self.code = code
         self.data = data
@@ -30,16 +30,26 @@ struct GenericResponse: Identifiable, Codable {
     var code: String
 }
 
+///
 struct UserTokens: Decodable {
     let queryActionsToken: String
     let mutationActionsToken: String
 }
 
+struct ReportLocatorSettings: Decodable {
+    let countryCode: String
+    let cityId: String
+}
+
+///
 struct Settings: Decodable {
     let notifications: Notifications
     let privacySettings: PrivacySettings
+    let avatarCreatedFrom: AvatarCreatedFrom
+    let reportLocatorSettings: ReportLocatorSettings
 }
 
+///
 struct PublicUserData: Decodable {
     let userName: String
     let email: String
@@ -50,6 +60,7 @@ struct PublicUserData: Decodable {
     let landingPageCompleted: Bool
 }
 
+///
 struct LoginWithOAuthProviderResponse: Decodable {
     let code: String
     let authSessionId: String

@@ -61,3 +61,7 @@ struct PaginatedRequestQueryParams: Encodable {
 struct LocatorHeaders {
     let headers: Array<HTTPHeader>
 }
+
+struct AvatarCreatedFromRequest: Encodable {
+    let avatarCreatedFrom: AvatarCreatedFrom
+}

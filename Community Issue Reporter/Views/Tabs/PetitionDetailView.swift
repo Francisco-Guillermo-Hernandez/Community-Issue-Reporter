@@ -151,8 +151,9 @@ struct SectionHeader: View {
     var body: some View {
         Text(title)
             .font(.headline)
-            .padding(.top, 16)
+//            .padding(.top, 16)
             .fontWeight(.bold)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

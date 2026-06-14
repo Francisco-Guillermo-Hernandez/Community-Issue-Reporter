@@ -379,7 +379,7 @@ struct SettingsSubView: View {
             .listSectionSpacing(32)
             .toolbarTitleDisplayMode(.inline)
             .navigationTitle(subViewName)
-            .onAppear {
+            .task {
                 geographicalRegion = settings.geographicalRegion
                 selectedCountry = settings.selectedCountry
                 //                selectedCity = settings.selectedCity

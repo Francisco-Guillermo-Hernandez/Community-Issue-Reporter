@@ -445,7 +445,7 @@ struct SignRequestsView: View {
                     }
                 )
                 .sheet(isPresented: $showSignatureModal) {
-                    PreviewSignatureView() {
+                    PreviewSignatureView(petitionName: "") {
                         
                     }
 //                        .presentationSizing(.fitted)

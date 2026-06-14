@@ -120,7 +120,7 @@ struct ReportsView: View {
         .onChange(of: searchText) { _, newValue in
             searchCompleter.update(query: newValue, region: currentRegion(c: appState.cameraPosition))
         }
-        .onAppear {
+        .task {
 //            locationManager.requestAuthorization()
             
         }
@@ -143,7 +143,8 @@ struct ReportsView: View {
             DetailView(report: report)
         }
         .sheet(isPresented: $handler.isPresented) {
-            DetailView(report: handler.report!)
+            DetailView(report: handler.report)
+                .skeleton(isRedacted: handler.isLoading)
         }
         .overlay {
             /// customized overlay to show the list of places into a List
@@ -153,7 +154,7 @@ struct ReportsView: View {
             
         }
         .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
-        .onAppear {
+        .task {
             showSearchOverlay = false
         }
         .task {
@@ -344,7 +345,7 @@ struct ReportsView: View {
                         applySuggestion(suggestion)
                     })
                 }
-                .onAppear {
+                .task {
                     isOverlaySearchFocused = true
                 }
             }

@@ -26,17 +26,27 @@ struct CreateReportView: View {
     @State private var issueType: IssueTypes = .all
     @State private var severity: Severity = .all
     @State private var model = ReportDataModel.shared
-    @State private var navigationPath: [ReportNavigationDestination] = []
+    @State private var showWizard = false
     
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack {
             ScrollView(.vertical) {
                 LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 3) {
+//                    ForEach(filteredMatters, id: \.id) { matter in
+//                        Button {
+//                            model.setMatterToSolve(matter)
+//                            showWizard = true
+//                        } label: {
+//                            CardView(matter: matter)
+//                        }
+//                        .buttonStyle(.plain)
+//                    }
+                    
                     ForEach(filteredMatters, id: \.id) { matter in
-                        NavigationLink(destination: wizard(matter: matter)) {
-                            CardView(matter: matter)
-                        }
-                    }
+                                            NavigationLink(destination: report(matter: matter)) {
+                                                CardView(matter: matter)
+                                            }
+                                        }
                 }
             }
             .overlay(alignment: .bottom) {
@@ -77,28 +87,53 @@ struct CreateReportView: View {
             .navigationSubtitle("what do you want to report?")
             .background(Color.theme.background)
             .scrollContentBackground(.hidden)
+            .sheet(isPresented: $showWizard) {
+                ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
+                    message = incomingMessage
+                    type = alertType
+                    show = true
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+                        self.show = false
+                    }
+                })
+            }
         }
-        
     }
     
     /// Open report view with type of matter chosen
     @ViewBuilder
-    private func wizard(matter: MatterToSolve) -> some View {
-        ReportWizardView(path: $navigationPath, model: model, onCompletion: { incomingMessage, alertType in
+    private func report(matter: MatterToSolve) -> some View {
+//        ReportView(model: model, onCompletion: { incomingMessage, alertType in
+//            message = incomingMessage
+//            type = alertType
+//            show = true
+//            
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+//                self.show = false
+//                
+//            }
+//        })
+//        .toolbar(.hidden, for: .tabBar)
+//        .onAppear {
+//            model.setMatterToSolve(matter)
+//        }
+        
+        ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
             message = incomingMessage
             type = alertType
             show = true
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
                 self.show = false
-                
             }
         })
-        .toolbar(.hidden, for: .tabBar)
-        .onAppear {
-            model.setMatterToSolve(matter)
-        }
+        
+        .task {
+                   model.setMatterToSolve(matter)
+               }
     }
+    
     
     private var filteredMatters: [MatterToSolve] {
         let trimmedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)

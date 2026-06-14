@@ -46,7 +46,7 @@ struct UserService {
         return try await client.patch(path: "user/privacy", body: settings, headers: headers, withOAuth: true)
     }
     
-    func change(avatar: Data) async throws -> CustomizedResponse<AvatarResponse> {
+    func change(avatar: Data, from: AvatarCreatedFrom) async throws -> CustomizedResponse<AvatarResponse> {
 
         let files: [MultipartFormFile] = [
             MultipartFormFile(
@@ -59,7 +59,7 @@ struct UserService {
 
         return try await client.post(
             path: "user/change/avatar",
-            body: [String: String](),
+            body: AvatarCreatedFromRequest(avatarCreatedFrom: from),
             headers: [
                 HTTPHeader(name: "Client-Type", content: "Mobile-App")
             ],

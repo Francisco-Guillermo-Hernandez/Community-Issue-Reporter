@@ -24,9 +24,15 @@ final class UserRepository {
     static var shared: UserRepository = .init()
     var service: UserService
     var settings: SettingsStore
+    var headers: [HTTPHeader]
     private init () {
         self.service = UserService()
         self.settings = .init()
+        self.headers = [
+            HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+            HTTPHeader(name: "CountryCode", content: "SV"),
+            HTTPHeader(name: "CityId", content: "san-salvador")
+        ]
     }
     
     func login(
@@ -35,12 +41,8 @@ final class UserRepository {
         onError: @escaping (_ error: Error) -> Void
     ) async -> Void {
         do {
-            let loginHeaders = [
-                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
-                HTTPHeader(name: "CountryCode", content: "SV"),
-            ]
-            
-            let result = try await self.service.login(payload: OAuthSignInPayload(token: token), headers: loginHeaders)
+        
+            let result = try await self.service.login(payload: OAuthSignInPayload(token: token), headers: headers)
             
             if result.code == "TOKEN_GENERATED" {
                 onSuccess(.existing, result.authSessionId, result.publicUserData)
@@ -60,12 +62,7 @@ final class UserRepository {
         onError: @escaping (_ error: Error) -> Void
     ) async -> Void {
         do {
-            let headers = [
-                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
-                HTTPHeader(name: "CountryCode", content: "SV"),
-                HTTPHeader(name: "CityId", content: "san-salvador")
-            ]
-            
+        
             let result = try await self.service.loginAsGuest(headers)
             
             if result.code == "GUEST_SESSION_CREATED" {
@@ -107,7 +104,7 @@ final class UserRepository {
         UserDefaults.standard.set(username, forKey: "user_name")
     }
     
-    func setAvatar(url: String) -> Void {
+    func setAvatar(url: String, _ createdFrom: AvatarCreatedFrom) -> Void {
         UserDefaults.standard.set(url, forKey: "avatar_url")
     }
     
@@ -133,40 +130,31 @@ final class UserRepository {
         UserDefaults.standard.string(forKey: "avatar_url").flatMap(URL.init(string:))
     }
     
-    func changeAvatar(_ image: UIImage, userName: String, completion: @escaping UserCompletion) async {
+    
+    func changeAvatar(_ image: UIImage, _ from: AvatarCreatedFrom) async throws -> String {
         
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            completion(.failure(NSError(domain: "UserRepository", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to get image data"])))
-            return
+            throw ImageError.unknownError("Failed to get image data")
         }
         
-        do {
-            let result = try await self.service.change(avatar: imageData)
-            
-            if result.code == "AVATAR_UPDATED" {
-                completion(.success(result.message))
-               
-                if let avatarUrl = result.data?.avatarUrl {
-                    setAvatar(url: avatarUrl)
-                }
-                
-            } else {
-                throw ImageError.unknownError(result.message)
-            }
-            
-        } catch {
-            completion(.failure(error))
-        }
+        let result = try await self.service.change(avatar: imageData, from: from)
         
+        if result.code == "AVATAR_UPDATED" {
+           
+            let avatarUrl = result.data.avatarUrl
+            
+            setAvatar(url: avatarUrl, from)
+            return avatarUrl
+            
+        } else {
+            throw ImageError.unknownError(result.message)
+        }
     }
     
+    /// Once the user name has been verified its availability we proceed to update to the user name that user types
     func change(_ userName: String, completion: @escaping UserNameCompletion) async {
         do {
-            let headers = [
-                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
-                HTTPHeader(name: "CountryCode", content: "SV"),
-            ]
-            
+           
             let result = try await self.service.change(userName, headers)
             
             if result.code == "USER_NAME_UPDATED" {
@@ -185,13 +173,10 @@ final class UserRepository {
         }
     }
     
+    /// Check availability of a user name if user name has taken it's handled with an error
     func checkAvailability(of userName: String, completion:  @escaping UserNameCompletion) async {
         do {
             
-            let headers = [
-                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
-                HTTPHeader(name: "CountryCode", content: "SV"),
-            ]
             
             let result = try await self.service.checkAvailability(of: userName, headers)
             
@@ -239,13 +224,10 @@ final class UserRepository {
         }
     }
     
-    
+    /// Send device identifier in order to send push notifications
+    /// Isn't stored device type or model only a hash 
     func sendDevice(_ token: String, completion: @escaping () -> Void) async {
         do {
-            let headers = [
-                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
-                HTTPHeader(name: "CountryCode", content: "SV"),
-            ]
             
             let deviceId = DeviceService.shared.getDeviceId()
             print("deviceId: \(deviceId)")
@@ -269,7 +251,7 @@ final class UserRepository {
         
         /// Personalization settings
         setUsername(data.userName)
-        setAvatar(url: data.profilePicture)
+        setAvatar(url: data.profilePicture, data.settings.avatarCreatedFrom)
         
         /// Notification settings
         settings.enableEmailNotifications = data.settings.notifications.email
@@ -277,14 +259,14 @@ final class UserRepository {
         /// Privacy settings
         settings.showMyProfile = data.settings.privacySettings.showMyProfile
         settings.showMyUseNameWhenShare = data.settings.privacySettings.showMyUseNameWhenShare
+        
+        /// Reporting settings
+        settings.countryCode = data.settings.reportLocatorSettings.countryCode
+        settings.cityId = data.settings.reportLocatorSettings.cityId
     }
     
     func privacy(settings: PrivacySettings, completion: @escaping () -> Void) async {
         do {
-            
-            let headers = [
-                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
-            ]
             
             let result = try await self.service.privacy(settings, headers)
 

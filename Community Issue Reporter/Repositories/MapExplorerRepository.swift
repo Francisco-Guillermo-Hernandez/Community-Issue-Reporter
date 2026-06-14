@@ -12,6 +12,7 @@ enum CommonIntercommunicationErrors: Error {
     case timedOut
     case removed
     case notFound
+    case invalidPetition(String)
     case serverError(String)
     case notAuthorized
     case networkError(String)
@@ -21,8 +22,6 @@ enum CommonIntercommunicationErrors: Error {
 
 typealias MapExplorerReports = [MapExplorerReport]
 typealias MapExplorerReportComplete = @Sendable (MapExplorerReports) -> Void
-
-// typealias UserNameCompletion = (Result<String, UserError> ) -> Void
 
 typealias MapExplorerReportDetail = @Sendable (Result<MapExplorerReport, CommonIntercommunicationErrors>) -> Void
 
@@ -54,6 +53,8 @@ final class MapExplorerRepository {
             let result = try await service.report(id, h: headers)
             
             completion(.success(result))
+        } catch ServiceError.badRequest(let result) {
+            completion(.failure(.invalidPetition(result.message)))
         } catch ServiceError.notFound {
             completion(.failure(.notFound))
         } catch ServiceError.serverError(let message) {

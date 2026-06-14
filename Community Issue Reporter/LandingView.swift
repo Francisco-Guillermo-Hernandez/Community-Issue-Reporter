@@ -63,7 +63,7 @@ struct LandingView: View {
                 }
             }
         }
-        .onAppear {
+        .task {
             if let savedCity = appState.selectedCity {
                 self.selectedCity = savedCity
             }

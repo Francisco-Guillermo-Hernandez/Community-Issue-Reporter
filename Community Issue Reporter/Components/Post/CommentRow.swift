@@ -87,6 +87,9 @@ struct CommentRow: View {
     NavigationStack {
         ScrollView(showsIndicators: false) {
             CommentRow(comment: comment)
+            CommentRow(comment: comment)
+            CommentRow(comment: comment)
+            
         }
         .padding()
         .background(Color.theme.background)

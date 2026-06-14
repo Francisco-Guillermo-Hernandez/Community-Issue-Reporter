@@ -14,7 +14,7 @@ import SwiftUI
 struct AvatarOption: Identifiable, Hashable {
     var id: String = UUID().uuidString
     var title: String
-    var associatedView: CurrentView
+    var associatedView: AvatarCreatedFrom
 }
 
 // MARK: - Options
@@ -32,7 +32,7 @@ struct UserAvatarPersonalizationSheet: View {
     var animation: Animation
     @ObservedObject var viewModel: ProfileDataModel
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
-    @State private var currentView: CurrentView = .optionsSelector
+    @State private var currentView: AvatarCreatedFrom = .optionsSelector
     @State private var duration: String = ""
     @State var orientation = UIDevice.current.orientation
 
@@ -83,6 +83,9 @@ struct UserAvatarPersonalizationSheet: View {
 
                 case .GoogleAuth:
                     Text("Google auth")
+                    
+                case .Memoji:
+                    Text("Memoji")
                 }
             }
             .geometryGroup()
@@ -355,7 +358,7 @@ struct UserAvatarPersonalizationSheet: View {
         Task {
             if let image = view.asImage() {
                
-                viewModel.uploadProfilePicture(image)
+                viewModel.uploadProfilePicture(image, from: options == .initials ? .initials : .monogram)
                 try? await Task.sleep(for: .milliseconds(128))
                 dismiss()
                 
@@ -374,7 +377,8 @@ struct UserAvatarPersonalizationSheet: View {
 
     private func onSelect(_ image: UIImage) {
         Task {
-            viewModel.uploadProfilePicture(image)
+            viewModel.uploadProfilePicture(image, from: .photo)
+            /// Lets wait to hide the sheet correctly
             try? await Task.sleep(for: .milliseconds(128))
             dismiss()
         }
@@ -476,5 +480,9 @@ struct ProfileImage: View {
     @Previewable
     @ObservedObject var profile = ProfileDataModel()
 
-    ProfileImage(viewModel: profile)
+    VStack {
+        ProfileImage(viewModel: profile)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(Color.theme.cardBackground)
 }

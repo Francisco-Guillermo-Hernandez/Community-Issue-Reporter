@@ -26,41 +26,34 @@ struct DrawSignature: View {
         NavigationStack {
             VStack {
                 Canvas { context, size in
-                            // Draw all completed strokes
-                            for stroke in strokes {
-                                var path = Path()
-                                path.addLines(stroke.points)
-                                context.stroke(path, with: .color(.primary), lineWidth: 3.0)
-                            }
-                            // Draw the line actively being drawn
-                            var currentPath = Path()
-                            currentPath.addLines(currentStroke.points)
-                            context.stroke(currentPath, with: .color(.primary), lineWidth: 3.0)
-                        }
-                        .background(Color(.systemBackground))
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { value in
-                                    let newPoint = value.location
-                                    currentStroke.points.append(newPoint)
-                                }
-                                .onEnded { _ in
-                                    if !currentStroke.points.isEmpty {
-                                        strokes.append(currentStroke)
-                                        currentStroke = SignatureLine() // Reset for next stroke
-                                    }
-                                }
-                        )
+                    // Draw all completed strokes
+                    for stroke in strokes {
+                        var path = Path()
+                        path.addLines(stroke.points)
+                        context.stroke(path, with: .color(.primary), lineWidth: 3.0)
                     }
+                    // Draw the line actively being drawn
+                    var currentPath = Path()
+                    currentPath.addLines(currentStroke.points)
+                    context.stroke(currentPath, with: .color(.primary), lineWidth: 3.0)
+                }
+                .background(Color(.systemBackground))
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            let newPoint = value.location
+                            currentStroke.points.append(newPoint)
+                        }
+                        .onEnded { _ in
+                            if !currentStroke.points.isEmpty {
+                                strokes.append(currentStroke)
+                                currentStroke = SignatureLine() // Reset for next stroke
+                            }
+                        }
+                )
+            }
             
-//            .safeAreaInset(edge: .bottom, spacing: 0) {
-//                ZStack {
-//                    RoundedRectangle(cornerRadius: .themeRadius * 4, style: .continuous)
-//                        .fill(.thinMaterial)
-//                        .padding(.horizontal)
-//                        .frame(height: 150)
-//                }
-//            }
+       
             
             .toolbar {
                 
@@ -75,10 +68,7 @@ struct DrawSignature: View {
                     }
                 }
                 
-//                ToolbarItem(placement: .bottomBar) {
-//                    
-//                }
-                
+        
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel) {
                         dismiss()
@@ -95,11 +85,11 @@ struct DrawSignature: View {
                     }
                 }
             }
-
-            }
-           
-    }
+            
+        }
         
+    }
+    
     
 }
 
@@ -118,7 +108,7 @@ struct SignatureAnimatedPlayer: View {
                 .stroke(Color.blue, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
             }
         }
-        .onAppear {
+        .task {
             // Replay the signature animation smoothly when the view presents
             withAnimation(.easeInOut(duration: 1.8)) {
                 drawingProgress = 1.0
@@ -144,73 +134,68 @@ struct SignatureAnimatedPlayer: View {
 }
 
 struct PreviewSignatureView: View {
+    var petitionName: String
     @State var strokes: [SignatureLine] = []
     @State private var isCreating: Bool = false
     @State private var tempStrokes: [SignatureLine] = []
     
     var onSignature: () -> Void
     var body: some View {
-        VStack(alignment: .leading) {
-            
-            VStack(alignment: .leading) {
-                Text("Saved signature")
-                    .font(Font.headline.bold())
-                
-                HStack(spacing: .themeSpacing * 2) {
-//                   RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-//                        .fill(Color.theme.cardBackground)
-//                        .frame(width: 100, height: 100)
-//                        .overlay {
-//                            if !strokes.isEmpty {
-//                                SignatureAnimatedPlayer(strokes: strokes)
-//                                    .padding(8)
-//                            } else {
-//                                Text("No signature")
-//                                    .font(.caption)
-//                                    .foregroundColor(.secondary)
-//                            }
-//                        }
-//                        .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+       NavigationStack {
+           VStack(alignment: .leading) {
+               
+               VStack(alignment: .leading) {
+                   Text("Saved signature")
+                       .font(Font.headline.bold())
                    
-                    Button {
-                        tempStrokes = strokes
-                        isCreating.toggle()
-                    } label: {
-                        RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-                            .frame(width: 100, height: 100)
-                            .overlay {
-                                Image(systemName: strokes.isEmpty ? "plus" : "pencil")
-                                    .font(.system(size: 40))
-                                    .foregroundStyle(Color.theme.primary)
-                            }
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .sheet(isPresented: $isCreating, onDismiss: {
-                loadSignature()
-            }) {
-                DrawSignature(strokes: $tempStrokes)
-            }
-//            .frame(maxWidth: .infinity, Alignment: .leading)
-            
-            if !strokes.isEmpty {
-                SignatureAnimatedPlayer(strokes: strokes)
-//                    .frame(maxWidth: .infinity, height: 300)
-                    .background(Color.theme.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
-                    .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
-                    .padding(.top, 20)
-            }
-            
-//            Spacer()
-            
-            ThemedButton(message: "Sign", action: onSignature, type: .primary, style: .prominent)
-                .padding(.top, .themePadding)
-        }
-        .padding()
-        .onAppear {
-            loadSignature()
+                   HStack(spacing: .themeSpacing * 2) {
+                       
+                       Button {
+                           tempStrokes = strokes
+                           isCreating.toggle()
+                       } label: {
+                           RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
+                               .frame(width: 100, height: 100)
+                               .overlay {
+                                   Image(systemName: strokes.isEmpty ? "plus" : "pencil")
+                                       .font(.system(size: 40))
+                                       .foregroundStyle(Color.theme.primary)
+                               }
+                       }
+                       .buttonStyle(.plain)
+                   }
+               }
+   //            .sheet(isPresented: $isCreating, onDismiss: {
+   //                loadSignature()
+   //            }) {
+   //                DrawSignature(strokes: $tempStrokes)
+   //            }
+               
+               if !strokes.isEmpty {
+                   SignatureAnimatedPlayer(strokes: strokes)
+                       .background(Color.theme.cardBackground)
+                       .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+                       .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+                       .padding(.top, 20)
+               }
+               
+               ThemedButton(message: "Sign", action: onSignature, type: .primary, style: .prominent)
+                   .padding(.top, .themePadding)
+           }
+           .padding()
+           .toolbar {
+               ToolbarItem(placement: .cancellationAction) {
+                   Button(role: .close) {
+                       
+                   }
+               }
+           }
+           .navigationSubtitle(petitionName)
+           .navigationTitle(String(localized: "Petition to sign"))
+           .navigationBarTitleDisplayMode(.inline)
+           .task {
+               loadSignature()
+           }
         }
     }
     
@@ -226,9 +211,13 @@ struct PreviewSignatureView: View {
 
 #Preview("Preview signature") {
     NavigationStack {
-        PreviewSignatureView() {
-            
-        }
+        
+        Text("Hello")
+            .sheet(isPresented: .constant(true)) {
+                PreviewSignatureView(petitionName: "Installation of new lamps") {
+                    
+                }
+            }
     }
 }
 

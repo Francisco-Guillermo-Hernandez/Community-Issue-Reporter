@@ -45,7 +45,7 @@ struct MiniMapLocator: View {
                 Map(position: $cameraPosition) {
                     UserAnnotation()
                 }
-                .onAppear {
+                .task {
                     /// Request the location permissions to the user
                     locationManager.requestAuthorization()
                 }

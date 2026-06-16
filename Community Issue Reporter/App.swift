@@ -13,17 +13,20 @@ import WidgetKit
 @main
 struct Community_Issue_ReporterApp: App {
     
-    // Inject auth viewmodel to persist data related with Google auth
+    // Inject auth view model to persist data related with Google auth
     @StateObject private var authViewModel = AuthViewModel()
     
     // Inject settings store
-    @State private var store = SettingsStore.shared
+    @StateObject private var settingsStore = SettingsStore()
     
     // Inject the AppDelegate lifecycle adaptor
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     // Reference the manager state
     @StateObject private var notificationManager = AppDelegate.sharedNotificationManager
+    
+    // Router
+    @StateObject private var router = DeepLinkRouter()
     
     init() {
         copyDatabaseIfNeeded()
@@ -33,14 +36,15 @@ struct Community_Issue_ReporterApp: App {
     var body: some Scene {
         WindowGroup {
             WelcomeView()
+                .environmentObject(router)
                 .environmentObject(authViewModel)
-                .environment(\.mySettings, store)
+                .environmentObject(settingsStore)
                 .environmentObject(notificationManager)
-                .environment(\.locale, .init(identifier: store.selectedLanguageCode))
+                .environment(\.locale, .init(identifier: settingsStore.selectedLanguageCode))
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
+                    router.handleIncomingURL(url)
                 }
         }
     }
-    
 }

@@ -63,8 +63,9 @@ class KeychainService {
 enum TokenType: String {
     case mutation = "mutationActionsToken"
     case query = "queryActionsToken"
-    case landingPageComplete
-    case deviceId
+    case landingPageComplete = "landingPageComplete"
+    case sessionStateVerification = "sessionStateVerification"
+    case deviceId = "deviceId"
 }
 
 extension KeychainService {

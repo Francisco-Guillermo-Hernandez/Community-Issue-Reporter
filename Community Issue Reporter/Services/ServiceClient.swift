@@ -129,27 +129,36 @@ struct ServiceClient {
             throw ServiceError.invalidResponse
         }
 
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Error Response Body: \(jsonString)")
-            }
-            
-            print("statusCode")
-            print(httpResponse.statusCode)
-            print("request headers:")
-            dump(request.allHTTPHeaderFields)
-            print("respose headers", httpResponse.allHeaderFields)
-            throw ServiceError.httpStatus(httpResponse.statusCode)
-        }
-        
-        
-        print("status code \(httpResponse.statusCode)")
+        try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
         
         return try decode(T.self, from: data)
     }
     
-    func HTTPErrorHandler(for httpResponse: HTTPURLResponse, with data: Data, request: URLRequest) throws {
+    private func genericResponseDecoder(_ data: Data, request: URLRequest, _ url: URL) -> GenericResponse {
+        let decoder = JSONDecoder()
+        
+        guard let body = request.httpBody else {
+            return GenericResponse(id: "", message: "", code: "NO_CONTENT")
+        }
+        if let jsonString = String(data: body, encoding: .utf8) {
+            print("URL: \(url) Error Response Body: \(jsonString)")
+        }
+        
+        do {
+            return try decoder.decode(GenericResponse.self, from: data)
+        } catch {
+            return GenericResponse(id: "", message: "", code: "NO_BODY")
+        }
+    }
+    
+    private func HTTPErrorHandler(for httpResponse: HTTPURLResponse, with data: Data, request: URLRequest, _ url: URL) throws {
        
+        print("[DEBUG] HTTPErrorHandler: current url: \(url)")
+        print("[DEBUG] HTTPErrorHandler: current response: \(httpResponse.statusCode)")
+        print("[DEBUG] HTTPErrorHandler: current request: \(request.httpMethod!)")
+        
+        let genericResponse = genericResponseDecoder(data, request: request, url)
+        
         switch httpResponse.statusCode {
         case 200...299:
             break
@@ -160,16 +169,9 @@ struct ServiceClient {
         case 305...399:
             throw ServiceError.httpStatus(httpResponse.statusCode)
         case 400:
-            let decoder = JSONDecoder()
-            
-            if let jsonString = String(data: request.httpBody!, encoding: .utf8) {
-                print("Error Response Body: \(jsonString)")
-            }
-            
-            let genericResponse = try decoder.decode(GenericResponse.self, from: data)
             throw ServiceError.badRequest(genericResponse)
         case 401:
-            throw ServiceError.unauthorized("Please login")
+            throw ServiceError.unauthorized(genericResponse.code)
         case 403:
             throw ServiceError.forbidden
         case 404:
@@ -187,11 +189,10 @@ struct ServiceClient {
         case 451:
             throw ServiceError.unavailableForLegalReasons
         case 500...599:
-            throw ServiceError.serverError("Server Error")
+            throw ServiceError.serverError(genericResponse.code)
         default:
             throw ServiceError.httpStatus(httpResponse.statusCode)
         }
-
     }
     
     func post<T: Encodable, V: Decodable>(
@@ -243,7 +244,7 @@ struct ServiceClient {
             throw ServiceError.invalidResponse
         }
         
-        try HTTPErrorHandler(for: httpResponse, with: data, request: request)
+        try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
         
         return try decode(V.self, from: data)
     }
@@ -379,7 +380,7 @@ struct ServiceClient {
             throw ServiceError.invalidResponse
         }
 
-       try HTTPErrorHandler(for: httpResponse, with: data, request: request)
+       try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
 
         return try decode(V.self, from: data)
     }

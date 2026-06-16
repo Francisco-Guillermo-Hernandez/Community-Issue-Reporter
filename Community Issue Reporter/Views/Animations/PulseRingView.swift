@@ -36,7 +36,7 @@ struct PulseRingView: View {
                 resetAnimation()
             }
         }
-        .onAppear {
+        .task {
             showView = true
             startAnimation()
         }

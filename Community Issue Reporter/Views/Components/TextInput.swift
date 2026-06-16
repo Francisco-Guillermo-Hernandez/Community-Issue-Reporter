@@ -52,14 +52,6 @@ struct TailwindInputModifier: ViewModifier {
                         lineWidth: 1
                     )
             )
-//            .background(
-//                shapeMask
-//                    .stroke(
-//                        isInvalid ? Color.theme.destructive.opacity(0.2) : (isFocused ? Color.theme.inputRing.opacity(0.5) : Color.clear),
-//                        lineWidth: 3
-//                    )
-////                    .padding(-1.5) // Half of line width to grow outwards
-//            )
             .opacity(isDisabled ? 0.5 : 1.0)
             .animation(.easeOut(duration: 0.2), value: isFocused)
             .animation(.easeOut(duration: 0.2), value: isInvalid)
@@ -165,7 +157,7 @@ struct TextInput: View {
             }
         }
         .padding(.vertical, 4)
-        .onAppear {
+        .task {
             validate(value)
         }
     }

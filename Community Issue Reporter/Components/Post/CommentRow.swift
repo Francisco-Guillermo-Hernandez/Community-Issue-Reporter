@@ -38,8 +38,7 @@ struct CommentRow: View {
                     HStack(spacing: 4) {
                         Text(comment.name)
                             .font(.subheadline)
-                            .fontWeight(.bold)
-                        
+                            .fontWeight(.semibold)
                     }
                     
                     Text(userAlias(comment.userName))
@@ -52,7 +51,6 @@ struct CommentRow: View {
                 Text(formatRelativeDate(from: comment.createdAt))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                
             }
             
             Text(comment.message)
@@ -79,7 +77,7 @@ struct CommentRow: View {
         profilePicture: "https://development-api.reportamelo.app/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg?v=192929292",
         commentFor: .report,
         resourceId: "",
-        message: "We have problems with potholes in the road",
+        message: "We have problems with potholes in the road, please help us to fix it.",
         createdAt: Date(),
         updatedAt: Date()
     )

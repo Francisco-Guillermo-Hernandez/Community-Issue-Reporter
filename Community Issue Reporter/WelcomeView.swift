@@ -8,22 +8,23 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    @EnvironmentObject var appState: AuthViewModel
-    @State private var isGuest: Bool = false
+    @StateObject var controller: LandingController = .init()
+    @EnvironmentObject var settings: SettingsStore
     
     var body: some View {
         ZStack {
             
-            if appState.isCheckingStatus {
-                LoadingView()
-            } else if appState.isLoggedIn || isGuest {
+            if controller.isLoggedIn || controller.isGuest {
                 TabBarView()
+                    .environmentObject(controller)
             } else {
-                LandingView(isGuest: $isGuest)
+                LandingView()
+                    .environmentObject(controller)
             }
         }
         .task {
-            self.appState.checkStatus()
+            self.controller.inject(self.settings)
+            self.controller.checkStatus()
         }
     }
 }
@@ -31,4 +32,5 @@ struct WelcomeView: View {
 #Preview {
     WelcomeView()
         .environmentObject(AuthViewModel())
+        .environmentObject(LandingController())
 }

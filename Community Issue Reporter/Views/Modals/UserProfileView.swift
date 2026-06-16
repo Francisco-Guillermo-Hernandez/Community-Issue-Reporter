@@ -18,12 +18,13 @@ struct ProfileOption: Identifiable, Hashable {
 struct UserProfileView: View {
     @State private var navigationPath: [InsightsNavigation] = []
     @State private var sheetSizePreference = "normal"
+    @State private var show: Bool = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.mySettings) private var settings
     @State private var showSheet = false
     @State private var selectedOption: String = ""
-    @EnvironmentObject var appState: AuthViewModel
+    @EnvironmentObject var controller: LandingController
     @ObservedObject var profile = ProfileDataModel()
     
     init () {
@@ -74,6 +75,7 @@ struct UserProfileView: View {
 //                    
                     ProfileImage(viewModel: profile)
                         .padding(.bottom, 8)
+                        .disabled(controller.isGuest)
                     
                     Text(UserRepository.shared.getName())
                         .font(.title3)
@@ -123,11 +125,12 @@ struct UserProfileView: View {
             .overlay {
                 if profile.showPicker {
                     CustomBlurryOverlay(show: $profile.showPicker)
+                        
                 }
             }
             .safeAreaInset(edge: .bottom) {
                 Button(role: .destructive) {
-                    appState.logout()
+                    controller.logout()
                     dismiss()
                 } label: {
                     Text(String(localized: "Log Out"))
@@ -192,6 +195,7 @@ struct UserProfileView: View {
 #Preview {
     UserProfileView()
         .environmentObject(AuthViewModel())
+        .environmentObject(LandingController())
 }
 
 

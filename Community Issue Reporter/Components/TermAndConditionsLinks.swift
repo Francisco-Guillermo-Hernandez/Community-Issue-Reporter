@@ -30,10 +30,9 @@ struct LinksView: View {
     var body: some View {
         Text(underlinedMarkdown)
             .font(.footnote)
-//            .font(.custom("Lora", size: 14, relativeTo: .footnote))
             .foregroundColor(.secondary)
             .tint(Color.theme.primary.mix(with: .white, by: 0.1))
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center)
             .kerning(-0.2)
     }
 }

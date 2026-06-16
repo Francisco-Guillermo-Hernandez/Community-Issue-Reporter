@@ -17,14 +17,17 @@ final class CommentsRepository {
         self.commentsService = CommentsService()
     }
     
-    func list(_ reportId: String, page: Int, limit: Int = 3, onError: ErrorHandler) async -> Comments  {
+    func list(_ reportId: String, page: Int, limit: Int = 3) async throws -> Comments  {
       
         do {
             let query = PaginatedRequestQueryParams(page: page, limit: limit)
             return try await self.commentsService.list(reportId: reportId, q: query)
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.genericError("Unauthorized")
+        } catch ServiceError.serverError(let code) {
+            throw CommonIntercommunicationErrors.serverError(code)
         } catch {
-            onError(error)
-            return Comments(documents: [], hasNext: false, hasPrev: false)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     

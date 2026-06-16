@@ -94,6 +94,7 @@ class AuthViewModel: ObservableObject {
             
             _ = KeychainService.deleteToken(key: .query)
             _ = KeychainService.deleteToken(key: .mutation)
+            _ = KeychainService.deleteToken(key: .sessionStateVerification)
             
 //            UserDefaults.standard.set(nil, forKey: "selected_city")
             

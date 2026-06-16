@@ -9,7 +9,7 @@
 import Foundation
 
 // MARK: - Possible states of a report
-enum ReportStates: String, Codable {
+enum ReportStates: String, Codable, CaseIterable {
     case new
     case inProgress
     case resolved

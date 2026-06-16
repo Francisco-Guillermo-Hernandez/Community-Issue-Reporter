@@ -52,6 +52,7 @@ struct Settings: Decodable {
 ///
 struct PublicUserData: Decodable {
     let userName: String
+    let names: String
     let email: String
     let profilePicture: String
     let sessionDuration: Int

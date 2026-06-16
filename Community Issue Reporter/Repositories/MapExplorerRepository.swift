@@ -7,18 +7,6 @@
 
 import Foundation
 
-enum CommonIntercommunicationErrors: Error {
-    case delayed
-    case timedOut
-    case removed
-    case notFound
-    case invalidPetition(String)
-    case serverError(String)
-    case notAuthorized
-    case networkError(String)
-    case genericError(String)
-    case notImplemented
-}
 
 typealias MapExplorerReports = [MapExplorerReport]
 typealias MapExplorerReportComplete = @Sendable (MapExplorerReports) -> Void
@@ -37,9 +25,8 @@ final class MapExplorerRepository {
     func report(
         _ id: String,
         countryCode: CountryCode,
-        cityId: String,
-        completion: MapExplorerReportDetail,
-    ) async {
+        cityId: String
+    ) async throws -> MapExplorerReport {
         do {
             let headers = [
                 HTTPHeader(name: "countryCode", content: countryCode.rawValue),
@@ -50,27 +37,25 @@ final class MapExplorerRepository {
                 ),
             ]
             
-            let result = try await service.report(id, h: headers)
-            
-            completion(.success(result))
+            return try await service.report(id, h: headers)
         } catch ServiceError.badRequest(let result) {
-            completion(.failure(.invalidPetition(result.message)))
+            throw CommonIntercommunicationErrors.invalidPetition(result.message)
         } catch ServiceError.notFound {
-            completion(.failure(.notFound))
-        } catch ServiceError.serverError(let message) {
-            completion(.failure(.serverError(message)))
+            throw CommonIntercommunicationErrors.notFound
+        } catch ServiceError.serverError(let code) {
+            throw CommonIntercommunicationErrors.serverError(code)
         } catch {
-            completion(.failure(.genericError(error.localizedDescription)))
+            print("ReportError: ")
+            print(error.localizedDescription)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
     func listReports(
         for q: MapExplorerQueryParams,
         countryCode: CountryCode,
-        cityId: String,
-        onComplete: MapExplorerReportComplete,
-        onError: ErrorHandler
-    ) async {
+        cityId: String
+    ) async throws -> MapExplorerReports {
         do {
             let headers = [
                 HTTPHeader(name: "countryCode", content: countryCode.rawValue),
@@ -81,16 +66,16 @@ final class MapExplorerRepository {
                 ),
             ]
 
-            let result = try await service.reports(q: q, h: headers)
-        
-
-            onComplete(result)
+            return try await service.reports(q: q, h: headers)
             
-//            return result
-            
+        } catch ServiceError.badRequest(let result) {
+            throw CommonIntercommunicationErrors.invalidPetition(result.code)
+        } catch ServiceError.notFound {
+            throw CommonIntercommunicationErrors.notFound
+        } catch ServiceError.serverError(let code) {
+          throw CommonIntercommunicationErrors.serverError(code)
         } catch {
-            onError(error)
-//            return []
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
 
     }

@@ -47,3 +47,17 @@ enum UserType: String, Codable {
     case citizen
     case government
 }
+
+// MARK: - personalized error handler
+enum CommonIntercommunicationErrors: Error {
+    case delayed
+    case timedOut
+    case removed
+    case notFound
+    case invalidPetition(String)
+    case serverError(String)
+    case notAuthorized
+    case networkError(String)
+    case genericError(String)
+    case notImplemented
+}

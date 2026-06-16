@@ -11,7 +11,7 @@ enum IssueTypes: String, CaseIterable, Identifiable {
     case all = "asterisk.circle"
     case road = "road.lanes"
     case publicSpace = "tree"
-    case building = "building"
+    case building = "building.2"
     case other = "ellipsis"
     
     var id: String { self.rawValue }

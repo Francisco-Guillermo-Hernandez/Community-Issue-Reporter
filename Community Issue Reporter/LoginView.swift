@@ -26,18 +26,18 @@ struct LoginView: View {
             
             VStack(spacing: .themeSpacing * 5) {
                 
-                VStack(alignment: .leading) {
+                VStack(alignment: .center) {
                     Text("Repórtamelo")
                         .font(.custom("Lora", size: 24, relativeTo: .title))
                         .padding(.top, 16)
-                        .kerning(0.1)
+                        .kerning(0.6)
                     
                     Text("Report your problems and improve your community")
                         .foregroundStyle(.secondary)
                         .font(.footnote)
                         .kerning(-0.1)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .center)
                 
                 
                 GooglePillButton(action: loginWithGoogle)
@@ -57,8 +57,6 @@ struct LoginView: View {
                 
                 ///
                 LinksView()
-                
-
             }
             .padding(.horizontal, .themeSpacing * 8)
             .padding(.top, .themeSpacing * 4)
@@ -84,29 +82,24 @@ struct LoginView: View {
         .ignoresSafeArea(edges: .bottom)
     }
     
-    func performLogin() {
+    func performLoginActions() {
         disableLoginButtons.toggle()
         enableBorderBeam.toggle()
     }
     
     func loginAsGuest() {
         Task {
-            performLogin()
-            await UserRepository.shared.loginAsGuest(
-                onSuccess: { state, sessionId in
-                    self.userOAuthState = state
-                    onTokenReceived(sessionId, .guest)
-                }, onError: { error in
-                    print(error)
-                    performLogin()
-                }
-            )
+            performLoginActions()
+            let (state, sessionId) = try await UserRepository.shared.loginAsGuest()
+            self.userOAuthState = state
+            onTokenReceived(sessionId, .guest)
+            performLoginActions()
         }
     }
     
     func loginWithGoogle() {
         // Find the current window scene.
-        performLogin()
+        performLoginActions()
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
             print("There is no active window scene")
             return
@@ -125,13 +118,12 @@ struct LoginView: View {
         GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { signInResult, error in
             
             guard let result = signInResult else {
-                performLogin()
+                performLoginActions()
                 // Inspect error
                 print("Error signing in: \(error?.localizedDescription ?? "No error description")")
                 return
             }
             
-//            performLogin()
             onTokenReceived(result.user.idToken?.tokenString ?? "", .user)
         }
     }

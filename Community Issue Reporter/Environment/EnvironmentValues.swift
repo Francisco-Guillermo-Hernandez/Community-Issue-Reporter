@@ -6,81 +6,84 @@
 //
 
 import SwiftUI
-
-@Observable
-final class SettingsStore {
+internal import Combine
+final class SettingsStore: ObservableObject {
     
     static let shared = SettingsStore()
 
-    var geographicalRegion: Int {
+    @Published var geographicalRegion: Int {
         didSet { UserDefaults.standard.set(geographicalRegion, forKey: "geographicalRegion") }
     }
     
-    var selectedCountry: Int {
+    @Published var selectedCountry: Int {
         didSet { UserDefaults.standard.set(selectedCountry, forKey: "selectedCountry") }
     }
     
-    var countryCode: String {
+    @Published var countryCode: String {
         didSet { UserDefaults.standard.set(countryCode, forKey: "countryCode") }
     }
     
-    var cityId: String {
+    @Published var cityId: String {
         didSet { UserDefaults.standard.set(cityId, forKey: "cityId") }
     }
     
-    var selectedState: Int {
+    @Published var selectedState: Int {
         didSet { UserDefaults.standard.set(selectedState, forKey: "selectedState") }
     }
     
-    var selectedCity: Int {
+    @Published var selectedCity: Int {
         didSet { UserDefaults.standard.set(selectedCity, forKey: "selectedCity") }
     }
     
-    var enableBackgroundSync: Bool {
+    @Published var enableBackgroundSync: Bool {
         didSet { UserDefaults.standard.set(enableBackgroundSync, forKey: "enableBackgroundSync") }
     }
     
-    var enableAnonymousTelemetry: Bool {
+    @Published var enableAnonymousTelemetry: Bool {
         didSet { UserDefaults.standard.set(enableAnonymousTelemetry, forKey: "enableAnonymousTelemetry") }
     }
     
-    var selectedLanguageID: Int {
+    @Published var selectedLanguageID: Int {
         didSet { UserDefaults.standard.set(selectedLanguageID, forKey: "selectedLanguageID") }
     }
     
-    var selectedLanguageCode: String {
+    @Published var selectedLanguageCode: String {
         didSet { UserDefaults.standard.set(selectedLanguageCode, forKey: "selectedLanguageCode") }
     }
     
-    var enableAutomaticIdentification: Bool {
+    @Published var enableAutomaticIdentification: Bool {
         didSet { UserDefaults.standard.set(enableAutomaticIdentification, forKey: "enableAutomaticIdentification") }
     }
     
-    var enableNotifications: Bool {
+    @Published var enableNotifications: Bool {
         didSet { UserDefaults.standard.set(enableNotifications, forKey: "enableNotifications") }
     }
     
-    var enablePushNotifications: Bool {
+    @Published var enablePushNotifications: Bool {
         didSet { UserDefaults.standard.set(enablePushNotifications, forKey: "enablePushNotifications") }
     }
     
-    var enableEmailNotifications: Bool {
+    @Published var enableEmailNotifications: Bool {
         didSet { UserDefaults.standard.set(enableEmailNotifications, forKey: "enableEmailNotifications") }
     }
     
-    var saveLastLocation: Bool {
+    @Published var enableWebNotifications: Bool {
+        didSet { UserDefaults.standard.set(enableWebNotifications, forKey: "enableEmailNotifications") }
+    }
+    
+    @Published var saveLastLocation: Bool {
         didSet { UserDefaults.standard.set(saveLastLocation, forKey: "saveLastLocation") }
     }
   
-    var useMyCurrentLocation: Bool {
+    @Published var useMyCurrentLocation: Bool {
         didSet { UserDefaults.standard.set(useMyCurrentLocation, forKey: "useMyCurrentLocation") }
     }
     
-    var showMyProfile: Bool {
+    @Published var showMyProfile: Bool {
         didSet { UserDefaults.standard.set(showMyProfile, forKey: "showMyProfile") }
     }
     
-    var showMyUseNameWhenShare: Bool {
+    @Published var showMyUseNameWhenShare: Bool {
         didSet { UserDefaults.standard.set(showMyUseNameWhenShare, forKey: "showMyUseNameWhenShare") }
     }
     
@@ -104,6 +107,7 @@ final class SettingsStore {
         self.useMyCurrentLocation = UserDefaults.standard.bool(forKey: "useMyCurrentLocation")
         self.showMyProfile = UserDefaults.standard.bool(forKey: "showMyProfile")
         self.showMyUseNameWhenShare = UserDefaults.standard.bool(forKey: "showMyUseNameWhenShare")
+        self.enableWebNotifications = UserDefaults.standard.bool(forKey: "enableWebNotifications")
         
         UserDefaults.standard.register(defaults: [
             "geographicalRegion": 2,
@@ -116,6 +120,7 @@ final class SettingsStore {
             "selectedLanguageCode": "es-419",
             "enableAutomaticIdentification": false,
             "enableNotifications": false,
+            "enableWebNotifications": false,
             "enablePushNotifications": false,
             "enableEmailNotifications": true,
             "saveLastLocation": false,
@@ -132,6 +137,10 @@ final class SettingsStore {
     
     var country: Country? {
         return region.countries.first(where: { $0.id == selectedCountry })
+    }
+    
+    var countryCodeIso: CountryCode {
+        return CountryCode.allCases.first(where: { $0.rawValue == countryCode }) ?? .SV
     }
 }
 

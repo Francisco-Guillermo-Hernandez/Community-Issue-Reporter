@@ -28,14 +28,14 @@ struct SettingsGroup<Content: View>: View {
     let title: String
     let footerText: String?
     let content: Content
-
+    
     // @ViewBuilder allows the closure to construct views implicitly
     init(title: String, footerText: String? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
         self.footerText = footerText
         self.content = content()
     }
-
+    
     var body: some View {
         Group {
             VStack(spacing: .themeSpacing * 1.5) {
@@ -46,8 +46,6 @@ struct SettingsGroup<Content: View>: View {
                         content
                     }
                     .padding()
-//                    .padding(.bottom, 8)
-//                    .padding(.top, 8)
                 }
                 .customCardStyle()
                 
@@ -69,18 +67,18 @@ import MapKit
 import SwiftUI
 
 struct SettingsSubView: View {
-
-    @Environment(\.mySettings) private var settings
+    
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var settings: SettingsStore
     @EnvironmentObject var appState: AuthViewModel
-
+    
     @State private var geographicalRegion: Int = 1
     @State private var selectedCountry: Int = 0
     @State private var enableBackgroundSync: Bool = false
     @State private var enableAnonymousTelemetry: Bool = true
     @State private var selectedLanguage: Int = 1
     @State private var enableAutomaticIdentification: Bool = true
-
+    
     @State private var countries: [Country] = []
     @State private var regions: [Region] = []
     @State private var cities: [FriendlyCityDistribution] = []
@@ -95,9 +93,7 @@ struct SettingsSubView: View {
     @State private var textToCopy = "Hello, World!"
     @State private var showCopiedMessage = false
     
-    @State var notifications: Notifications = .init(app: false, email: true, web: false)
-    @State var privacySettings: PrivacySettings = .init(showMyProfile: true, showMyUseNameWhenShare: true)
-
+    
     @State private var selectedCity: FriendlyCityDistribution = .init(
         cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
         firstLevel: "El Salvador",
@@ -113,7 +109,7 @@ struct SettingsSubView: View {
     init(subViewName: String) {
         self.subViewName = subViewName
     }
-
+    
     var subViewName: String
     var body: some View {
         NavigationStack {
@@ -123,250 +119,77 @@ struct SettingsSubView: View {
                 VStack(spacing: .themeSpacing * 8) {
                     /// Location group
                     SettingsGroup(title: "Location") {
-//                        HStack {
-//                            Text("Region")
-//                            Spacer()
-//                            Picker("Region", selection: $geographicalRegion) {
-//                                ForEach(geographicalRegions, id: \.id) { item in
-//                                    Text(item.name).tag(item.id)
-//                                }
-//                            }
-//                            
-//                            .onChange(of: geographicalRegion) { _, newValue in
-//                                if settings.geographicalRegion != newValue {
-//                                    selectedCountry = 0
-//                                }
-//
-//                                countries = getCountries(geographicalRegion: newValue)
-//                                settings.geographicalRegion = newValue
-//                            }
-//    //                        .disabled(true)
-//                        }
-//
-
-                        ///
-//                        HStack {
-//                            Text("Country")
-//                            Spacer()
-//                            Picker("Country", selection: $selectedCountry) {
-//                                ForEach(countries, id: \.id) { item in
-//                                    Text(item.name).tag(item.id)
-//                                }
-//                            }
-//                            .onChange(of: selectedCountry) { _, newValue in
-//
-//                                regions = getRegion(countryId: newValue)
-//                                settings.selectedCountry = newValue
-//                            }
-//    //                        .disabled(true)
-//                        }
-//                        .hidden()
-
+                        
                         NavigationLink(destination: selectCityView()) {
                             HStack {
                                 Text("City")
                                     .foregroundStyle(Color.theme.inputText)
-                                   
+                                
                                 Spacer()
                                 HStack(spacing: 4) {
                                     Text(selectedCity.thirdLevel)
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 12))
                                 }
-//                                .padding(.trailing, 14)
-//                                    .foregroundStyle(Color.secondary)
                             }
                         }
                     }
                     
                     SettingsGroup(title: "Privacy", footerText: "") {
-                        Toggle("Show my profile", isOn: $privacySettings.showMyProfile)
+                        Toggle("Show my profile", isOn: $settings.showMyProfile)
                             .foregroundStyle(Color.theme.inputText)
-                            .onChange(of: privacySettings.showMyProfile) { oldValue, newValue in
-                                if oldValue != newValue {
-                                    settings.showMyProfile = newValue
-                                    updatePrivacySettings()
-                                }
+                            .onChange(of: settings.showMyProfile) { oldValue, newValue in
+                                updatePrivacySettings()
                             }
                         
-                        Toggle("Show my profiles when I share", isOn: $privacySettings.showMyUseNameWhenShare)
+                        Toggle("Show my user name when I share", isOn: $settings.showMyUseNameWhenShare)
                             .foregroundStyle(Color.theme.inputText)
-                            .onChange(of: privacySettings.showMyUseNameWhenShare) { oldValue, newValue in
-                                if oldValue != newValue {
-                                    settings.showMyUseNameWhenShare = newValue
-                                    updatePrivacySettings()
-                                }
+                            .onChange(of: settings.showMyUseNameWhenShare) { oldValue, newValue in
+                                updatePrivacySettings()
                             }
                     }
                     
                     /// Notifications group
                     SettingsGroup(title: "Notifications") {
-                        Toggle("Push notifications", isOn: $notifications.app)
+                        Toggle("Push notifications", isOn: $settings.enablePushNotifications)
                             .foregroundStyle(Color.theme.inputText)
-                            .onChange(of: notifications.app) { oldValue, newValue in
-                                if oldValue != newValue {
-                                    settings.enablePushNotifications = newValue
-                                    updateNotificationSettings()
-                                    
+                            .onChange(of: settings.enablePushNotifications) { oldValue, newValue in
+                                updateNotificationSettings()
+                                
+                                if !notificationManager.isPermissionGranted {
+                                    notificationManager.requestAuthorization()
+                                }
+                                
+                            }
+                            .onChange(of: notificationManager.isPermissionGranted) { oldValue, newValue in
+                                if oldValue != newValue && !notificationManager.deviceToken.isEmpty {
+                                    updateDeviceToken()
                                 }
                             }
                         
-                        Toggle("Email notifications", isOn: $notifications.email)
+                        Toggle("Email notifications", isOn: $settings.enableEmailNotifications)
                             .foregroundStyle(Color.theme.inputText)
-                            .onChange(of: notifications.email) { oldValue, newValue in
-                                if oldValue != newValue {
-                                    settings.enableEmailNotifications = newValue
-                                    updateNotificationSettings()
-                                }
+                            .onChange(of: settings.enableEmailNotifications) { oldValue, newValue in
+                                updateNotificationSettings()
                             }
                     }
                     
                     SettingsGroup(title: "App settings") {
                         
-                        Toggle("Save last location", isOn: $saveLastLocation)
+                        Toggle("Save last location", isOn: $settings.saveLastLocation)
                             .foregroundStyle(Color.theme.inputText)
-                            .onChange(of: saveLastLocation) { _, newValue in
-                                settings.saveLastLocation = newValue
-                            }
                         
-                        Toggle("Use my current location", isOn: $useMyCurrentLocation)
-                            .foregroundStyle(Color.theme.inputText)
-                            .onChange(of: useMyCurrentLocation) { _, newValue in
-                                settings.useMyCurrentLocation = newValue
-                            }
                         
-                        Toggle("Anonymous telemetry", isOn: $enableAnonymousTelemetry)
+                        Toggle("Use my current location", isOn: $settings.useMyCurrentLocation)
                             .foregroundStyle(Color.theme.inputText)
-                            .onChange(of: enableAnonymousTelemetry) { _, newValue in
-                                settings.enableAnonymousTelemetry = newValue
-                            }
+                        
+                        Toggle("Anonymous telemetry", isOn: $settings.enableAnonymousTelemetry)
+                            .foregroundStyle(Color.theme.inputText)
+                        
                     }
-                    
-                    
-                    Button(action: {
-                                        
-                                        textToCopy = notificationManager.isPermissionGranted ? notificationManager.deviceToken : ""
-                                                   // 1. Copy the text string to the system clipboard
-                                                   UIPasteboard.general.string = textToCopy
-                                                   
-                                                   // 2. Provide visual feedback
-                                                   withAnimation {
-                                                       showCopiedMessage = true
-                                                   }
-                                                   
-                                                   // Hide feedback after 2 seconds
-                                                   DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                       withAnimation {
-                                                           showCopiedMessage = false
-                                                       }
-                                                   }
-                                               }) {
-                                                   Label("Copy to Clipboard", systemImage: "doc.on.doc")
-                                               }
-                                               .buttonStyle(.borderedProminent)
-
-                                               if showCopiedMessage {
-                                                   Text("Copied! 🎉")
-                                                       .foregroundColor(.green)
-                                                       .transition(.opacity)
-                                               }
-                    
-                    Button("Enable") {
-                                       notificationManager.requestAuthorization()
-                                   }
-                                   
-                                   VStack(spacing: 20) {
-                                            Text(notificationManager.isPermissionGranted ? "Notifications Enabled ✅" : "Notifications Disabled ❌")
-                                            
-                                            if !notificationManager.deviceToken.isEmpty {
-                                                Text("Your APNs Device Token:")
-                                                    .font(.caption)
-                                                Text(notificationManager.deviceToken)
-                                                    .font(.system(.caption2, design: .monospaced))
-                                                    .padding()
-                                                    .background(Color(.systemGray6))
-                                            }
-                                        }
-                                        .padding()
                 }
-                
             }
             .padding(.horizontal)
-            
-//            List {
-//                Section {
-//                    ///
-
-//
-//                } header: {
-//                    Text("Where I from?")
-//                } footer: {
-//                    Text(
-//                        "It's important to know where you are from in order to show and report issues to the right people "
-//                    )
-//                }
-//                
-//                
-//
-//                
-//                Section {
-//                   
-//                } header: {
-//                    Text(String(localized: "Notifications"))
-//                } footer: {
-//                    Text("")
-//                }
-//                
-//           
-////                .padding()
-//                
-//                Section {
-//
-//                    Picker("Language", selection: $selectedLanguage) {
-//                        ForEach(langs, id: \.id) { item in
-//                            Text(item.name).tag(item.id)
-//                        }
-//                    }
-//                    .onChange(of: selectedLanguage) { _, newValue in
-//                        settings.selectedLanguageID = newValue
-//                        if let lang = langs.first(where: { $0.id == newValue }) {
-//                            settings.selectedLanguageCode = lang.code
-//                        }
-//                    }
-//
-//
-//
-//                    Toggle("Background sync", isOn: $enableBackgroundSync)
-//                        .disabled(true)
-//                        .onChange(of: enableBackgroundSync) { _, newValue in
-//                            settings.enableBackgroundSync = newValue
-//                        }
-//
-//
-//
-//                    Toggle("Automatic identification", isOn: $enableAutomaticIdentification)
-//                    .disabled(true)
-//                    .onChange(of: enableAutomaticIdentification) {
-//                        _,
-//                        newValue in
-//                        settings.enableAutomaticIdentification = newValue
-//                    }
-//
-//                    Toggle("Notifications", isOn: $enableNotifications)
-//                        .onChange(of: enableNotifications) { _, newValue in
-//
-//                        }
-//
-//                } header: {
-//                    Text("App settings")
-//                } footer: {
-//                    Text("")
-//                }
-//                
-//                
-//
-//            }
-//            .listStyle(.plain)
             .background(Color.theme.background)
             .task {
                 guard let documents = CitiesRepository.shared.loadLocalCities(of: .SV).documents
@@ -380,46 +203,27 @@ struct SettingsSubView: View {
             .toolbarTitleDisplayMode(.inline)
             .navigationTitle(subViewName)
             .task {
-                geographicalRegion = settings.geographicalRegion
-                selectedCountry = settings.selectedCountry
-                //                selectedCity = settings.selectedCity
-                enableBackgroundSync = settings.enableBackgroundSync
-                enableAnonymousTelemetry = settings.enableAnonymousTelemetry
-                selectedLanguage = settings.selectedLanguageID
-                enableAutomaticIdentification =
-                    settings.enableAutomaticIdentification
-                enableNotifications = settings.enableNotifications
-                saveLastLocation = settings.saveLastLocation
-                useMyCurrentLocation = settings.useMyCurrentLocation
-                
-                privacySettings.showMyProfile = settings.showMyProfile
-                privacySettings.showMyUseNameWhenShare = settings.showMyUseNameWhenShare
                 
                 if let savedCity = appState.selectedCity {
                     self.selectedCity = savedCity
                 }
-
-                countries = getCountries(geographicalRegion: geographicalRegion)
-                
-                notifications.email = settings.enableEmailNotifications
-                notifications.app = settings.enablePushNotifications
             }
         }
-
+        
         .background(Color.theme.background)
         .interactiveDismissDisabled(true)
-
+        
     }
-
+    
     func getCountries(geographicalRegion: Int) -> [Country] {
         return geographicalRegions.first(where: { $0.id == geographicalRegion }
         )?.countries ?? []
     }
-
+    
     func getRegion(countryId: Int) -> [Region] {
         return countries.first(where: { $0.id == countryId })?.regions ?? []
     }
-
+    
     @ViewBuilder
     private func selectCityView() -> some View {
         CitySelectionView(
@@ -428,25 +232,25 @@ struct SettingsSubView: View {
             selectedCity: $selectedCity,
             nextStep: {
                 appState.selectedCity = selectedCity
-
+                
                 let latDelta = UserDefaults.standard.double(
                     forKey: "map_latitude_delta"
                 )
                 let lonDelta = UserDefaults.standard.double(
                     forKey: "map_longitude_delta"
                 )
-
+                
                 let span =
-                    (latDelta != 0 && lonDelta != 0)
-                    ? MKCoordinateSpan(
-                        latitudeDelta: latDelta,
-                        longitudeDelta: lonDelta
-                    )
-                    : MKCoordinateSpan(
-                        latitudeDelta: 0.016837009321045926,
-                        longitudeDelta: 0.016440700713786782
-                    )
-
+                (latDelta != 0 && lonDelta != 0)
+                ? MKCoordinateSpan(
+                    latitudeDelta: latDelta,
+                    longitudeDelta: lonDelta
+                )
+                : MKCoordinateSpan(
+                    latitudeDelta: 0.016837009321045926,
+                    longitudeDelta: 0.016440700713786782
+                )
+                
                 appState.cameraPosition = .region(
                     MKCoordinateRegion(
                         center: CLLocationCoordinate2D(
@@ -456,39 +260,59 @@ struct SettingsSubView: View {
                         span: span
                     )
                 )
-
+                
                 dismiss()
             }
         )
     }
-
+    
     func updatePrivacySettings() {
         Task {
             print("update privacy settings")
-            try? await Task.sleep(for: .milliseconds(550))
-            await UserRepository.shared.privacy(settings: privacySettings, completion: {
-              print("privacy settings updated")
-            })
+            do {
+                /// Debouncing
+                try await Task.sleep(for: .milliseconds(550))
+                try await UserRepository.shared.privacy(
+                    settings: .init(
+                        showMyProfile: settings.showMyProfile,
+                        showMyUseNameWhenShare: settings.showMyUseNameWhenShare
+                    )
+                )
+            } catch {
+                
+            }
         }
     }
     
     func updateNotificationSettings() {
         
-            print("updating")
-            Task {
-                try? await Task.sleep(for: .milliseconds(550))
-                await UserRepository.shared.modify(notifications, completion: { (result: Result<String, Error>) in
-                    switch result {
-                        case .success(let message):
-                            print(message)
-                        
-                        case .failure(let error):
-                            print(error)
+        print("updating")
+        Task {
+            try? await Task.sleep(for: .milliseconds(550))
+            await UserRepository.shared.modify(.init(app: settings.enablePushNotifications, email: settings.enableEmailNotifications, web: settings.enableWebNotifications), completion: { (result: Result<String, Error>) in
+                switch result {
+                case .success(let message):
+                    print(message)
                     
-                    }
-                })
+                case .failure(let error):
+                    print(error)
+                    
+                }
+            })
+        }
+    }
+    
+    func updateDeviceToken() {
+        
+        Task {
+            
+            do {
+                _ = try await UserRepository.shared.sendDevice(notificationManager.deviceToken)
+            } catch {
+                print(error)
             }
         }
+    }
 }
 
 #Preview {

@@ -88,28 +88,11 @@ struct DetailView: View {
     @State private var message: String = ""
     @State private var type: AlertType = .success
     @State private var paginatedResult: PaginatedResponse<Comment>
-    @State private var comments: [Comment] = []
+    @State private var comments: Comments = .init(documents: [], hasNext: false, hasPrev: false)
 
     init(report: MapExplorerReport) {
         self.report = report
         self.color = self.report.status.color
-        self.comments = [
-            Comment(
-                commentFor: .report, 
-                resourceId: "",
-                message: "We have problems with potholes in this area."
-            ),
-            Comment(
-                commentFor: .report,
-                resourceId: "",
-                message: "My car is getting damages because of the potholes."
-            ),
-            Comment(
-                commentFor: .report,
-                resourceId: "",
-                message: "We have problems with potholes in this area."
-            )
-        ]
         self.paginatedResult = PaginatedResponse<Comment>(
             total: 0,
             page: 0,
@@ -188,7 +171,7 @@ struct DetailView: View {
         Group {
             SectionHeader(title: String(localized: "Latest Comments"))
             LazyVStack(spacing: .themeSpacing * 4) {
-                ForEach(comments) { c in
+                ForEach(comments.documents ?? []) { c in
                     CommentRow(comment: c)
                 }
             }
@@ -242,13 +225,12 @@ struct DetailView: View {
             }
             .task {
                 guard !Task.isCancelled else { return }
-                let result = await CommentsRepository.shared.list(
-                    report.id,
-                    page: 1,
-                    onError: { _ in }
-                )
-
-                print(result)
+                do {
+                    self.comments = try await CommentsRepository.shared.list(report.id, page: 1)
+                    
+                } catch {
+                    
+                }
             }
             .safeAreaInset(edge: .bottom) {
                 if activeDetent == .large {

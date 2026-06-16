@@ -16,6 +16,11 @@ enum UserOAuthResultState {
     case unowned 
 }
 
+enum SuccessfulResult {
+    case done
+    case updated
+}
+
 typealias UserNameCompletion = (Result<String, UserError> ) -> Void
 typealias UserCompletion = (Result<String, Error> ) -> Void
 
@@ -23,11 +28,9 @@ final class UserRepository {
     
     static var shared: UserRepository = .init()
     var service: UserService
-    var settings: SettingsStore
     var headers: [HTTPHeader]
     private init () {
         self.service = UserService()
-        self.settings = .init()
         self.headers = [
             HTTPHeader(name: "Client-Type", content: "Mobile-App"),
             HTTPHeader(name: "CountryCode", content: "SV"),
@@ -35,43 +38,41 @@ final class UserRepository {
         ]
     }
     
-    func login(
-        _ token: String,
-        onSuccess: @escaping (UserOAuthResultState, String, PublicUserData) -> Void,
-        onError: @escaping (_ error: Error) -> Void
-    ) async -> Void {
+    
+    func login(_ token: String) async throws -> (UserOAuthResultState, String, PublicUserData)  {
         do {
         
             let result = try await self.service.login(payload: OAuthSignInPayload(token: token), headers: headers)
             
             if result.code == "TOKEN_GENERATED" {
-                onSuccess(.existing, result.authSessionId, result.publicUserData)
+                return (.existing, result.authSessionId, result.publicUserData)
+            } else if result.code == "USER_CREATED_WITH_TOKEN" {
+                return (.firstLogin, result.authSessionId, result.publicUserData)
+            } else {
+                throw CommonIntercommunicationErrors.invalidPetition(result.code)
             }
-            
-            if result.code == "USER_CREATED_WITH_TOKEN" {
-                onSuccess(.firstLogin, result.authSessionId, result.publicUserData)
-            }
+        } catch ServiceError.badRequest(let response) {
+            throw CommonIntercommunicationErrors.invalidPetition(response.code)
+        } catch ServiceError.serverError(let message) {
+          throw CommonIntercommunicationErrors.serverError(message)
         } catch {
-            onError(error)
-            
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
-    func loginAsGuest(
-        onSuccess: @escaping (UserOAuthResultState, String) -> Void,
-        onError: @escaping (_ error: Error) -> Void
-    ) async -> Void {
+    
+    func loginAsGuest() async throws -> (UserOAuthResultState, String) {
         do {
         
             let result = try await self.service.loginAsGuest(headers)
             
             if result.code == "GUEST_SESSION_CREATED" {
-                onSuccess(.inexistent, result.authSessionId)
+                return (.inexistent, result.authSessionId)
             } else {
-                
+                throw CommonIntercommunicationErrors.genericError(result.code)
             }
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
@@ -89,11 +90,19 @@ final class UserRepository {
         return profile.imageURL(withDimension: 200)
     }
     
+    func getNames() -> String {
+        UserDefaults.standard.string(forKey: "names") ?? "guest"
+    }
+    
     func getName() -> String {
         guard let user = GIDSignIn.sharedInstance.currentUser,
-              let profile = user.profile else { return "Guest" }
+              let profile = user.profile else {  return getNames() }
         
         return profile.name
+    }
+    
+    func setNames(_ names: String) -> Void {
+        UserDefaults.standard.set(names, forKey: "names")
     }
     
     func getUsername() -> String {
@@ -104,7 +113,7 @@ final class UserRepository {
         UserDefaults.standard.set(username, forKey: "user_name")
     }
     
-    func setAvatar(url: String, _ createdFrom: AvatarCreatedFrom) -> Void {
+    func setAvatar(url: String) -> Void {
         UserDefaults.standard.set(url, forKey: "avatar_url")
     }
     
@@ -143,7 +152,7 @@ final class UserRepository {
            
             let avatarUrl = result.data.avatarUrl
             
-            setAvatar(url: avatarUrl, from)
+            setAvatar(url: avatarUrl)
             return avatarUrl
             
         } else {
@@ -226,7 +235,7 @@ final class UserRepository {
     
     /// Send device identifier in order to send push notifications
     /// Isn't stored device type or model only a hash 
-    func sendDevice(_ token: String, completion: @escaping () -> Void) async {
+    func sendDevice(_ token: String) async throws -> SuccessfulResult {
         do {
             
             let deviceId = DeviceService.shared.getDeviceId()
@@ -235,10 +244,12 @@ final class UserRepository {
             
             let result = try await self.service.send(deviceToken, headers)
             if result.code == "DEVICE_TOKEN_UPDATED" {
-                completion()
+                return .done
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.code)
             }
         } catch {
-            print(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
@@ -247,34 +258,27 @@ final class UserRepository {
         return token.contains("completion:state:successfully")
     }
     
-    func setSettingsFromAuthenticatedUser(with data: PublicUserData) -> Void {
-        
-        /// Personalization settings
-        setUsername(data.userName)
-        setAvatar(url: data.profilePicture, data.settings.avatarCreatedFrom)
-        
-        /// Notification settings
-        settings.enableEmailNotifications = data.settings.notifications.email
-        
-        /// Privacy settings
-        settings.showMyProfile = data.settings.privacySettings.showMyProfile
-        settings.showMyUseNameWhenShare = data.settings.privacySettings.showMyUseNameWhenShare
-        
-        /// Reporting settings
-        settings.countryCode = data.settings.reportLocatorSettings.countryCode
-        settings.cityId = data.settings.reportLocatorSettings.cityId
+    func isSessionValid() -> Bool {
+        let token = KeychainService.getToken(.sessionStateVerification)
+        return !token.isEmpty && token.contains("session:state:valid")
     }
     
-    func privacy(settings: PrivacySettings, completion: @escaping () -> Void) async {
+    func privacy(settings: PrivacySettings) async throws {
         do {
             
             let result = try await self.service.privacy(settings, headers)
 
             if result.code == "PRIVACY_SETTINGS_UPDATED" {
-                completion()
+                throw CommonIntercommunicationErrors.genericError(result.code)
             }
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
         } catch {
-            print(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     

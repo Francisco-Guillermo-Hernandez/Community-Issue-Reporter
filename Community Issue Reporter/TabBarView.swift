@@ -12,7 +12,6 @@ struct TabBarView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.mySettings) var settings
     @State private var model = ReportDataModel.shared
-    @State private var selectedTab: Int = 1
     @State private var presentSheetOnDeepLink: Bool = false
     @AppStorage("openReportFromShortcut") private var openReportFromShortcut = false
     @State private var showShortcutReport: Bool = false
@@ -70,8 +69,7 @@ struct TabBarView: View {
                 model.setMatterToSolve(mattersToResolve.first!)
             }
         }
-        .sensoryFeedback(.selection, trigger: selectedTab)
-        
+        .sensoryFeedback(.selection, trigger: router.activeTab)
     }
 }
 

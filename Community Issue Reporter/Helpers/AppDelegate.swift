@@ -24,9 +24,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         Task {
             
-            await UserRepository.shared.sendDevice(token, completion: {
-                print("sent")
-            })
+            do {
+               _ = try await UserRepository.shared.sendDevice(token)
+            } catch {
+                print(error)
+            }
         }
         
         DispatchQueue.main.async {

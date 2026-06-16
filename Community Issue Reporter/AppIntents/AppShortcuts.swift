@@ -23,6 +23,7 @@ struct CreateReportAppIntent: AppIntent {
 }
 
 struct AppShortcuts: AppShortcutsProvider {
+    @AppShortcutsBuilder
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: CreateReportAppIntent(),

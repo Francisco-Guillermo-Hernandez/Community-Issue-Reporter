@@ -88,7 +88,7 @@ struct CameraView: View {
             .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
                 orientation = UIDevice.current.orientation
             }
-            .onAppear {
+            .task {
                 orientation = UIDevice.current.orientation
             }
             .navigationTitle("Camera")

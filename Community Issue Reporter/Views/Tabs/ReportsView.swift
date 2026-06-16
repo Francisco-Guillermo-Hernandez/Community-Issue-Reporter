@@ -42,7 +42,9 @@ struct ReportsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var reports: [MapExplorerReport] = []
     
-    @EnvironmentObject var handler: ReportDetailsHandler
+//    @EnvironmentObject var handler: ReportDetailsHandler
+    
+    @EnvironmentObject var router: DeepLinkRouter
     
     
     
@@ -142,9 +144,9 @@ struct ReportsView: View {
         .sheet(item: $expandedItem) { report in
             DetailView(report: report)
         }
-        .sheet(isPresented: $handler.isPresented) {
-            DetailView(report: handler.report)
-                .skeleton(isRedacted: handler.isLoading)
+        .sheet(isPresented: $router.isPresented) {
+            DetailView(report: router.report)
+                .skeleton(isRedacted: router.isLoading)
         }
         .overlay {
             /// customized overlay to show the list of places into a List
@@ -172,19 +174,15 @@ struct ReportsView: View {
                 statusIds: [1]
             )
             
-        await MapExplorerRepository.shared.listReports(
-                for: query,
-                countryCode: .SV,
-                cityId: appState.selectedCity?.cityId ?? "1",
-                onComplete: { reports in
-                    self.reports = reports
-                },
-                onError: {
-                    error in
-                    print("error at reportsView")
-                    print(error)
-                }
-            )
+            do {
+                self.reports = try await MapExplorerRepository.shared.listReports(
+                    for: query,
+                    countryCode: .SV,
+                    cityId: appState.selectedCity?.cityId ?? "1"
+                )
+            } catch {
+                print(error)
+            }
         }
     }
     
@@ -518,7 +516,9 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
 #Preview {
     NavigationStack {
         ReportsView()
+            .environmentObject(LandingController())
             .environmentObject(AuthViewModel())
             .environmentObject(ReportDetailsHandler())
+            .environmentObject(DeepLinkRouter())
     }
 }

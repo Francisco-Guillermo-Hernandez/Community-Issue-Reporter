@@ -32,21 +32,21 @@ struct CreateReportView: View {
         NavigationStack {
             ScrollView(.vertical) {
                 LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 3) {
-//                    ForEach(filteredMatters, id: \.id) { matter in
-//                        Button {
-//                            model.setMatterToSolve(matter)
-//                            showWizard = true
-//                        } label: {
-//                            CardView(matter: matter)
-//                        }
-//                        .buttonStyle(.plain)
-//                    }
-                    
                     ForEach(filteredMatters, id: \.id) { matter in
-                                            NavigationLink(destination: report(matter: matter)) {
-                                                CardView(matter: matter)
-                                            }
-                                        }
+                        Button {
+                            model.setMatterToSolve(matter)
+                            showWizard = true
+                        } label: {
+                            CardView(matter: matter)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    
+//                    ForEach(filteredMatters, id: \.id) { matter in
+//                                            NavigationLink(destination: report(matter: matter)) {
+//                                                CardView(matter: matter)
+//                                            }
+//                                        }
                 }
             }
             .overlay(alignment: .bottom) {
@@ -104,21 +104,6 @@ struct CreateReportView: View {
     /// Open report view with type of matter chosen
     @ViewBuilder
     private func report(matter: MatterToSolve) -> some View {
-//        ReportView(model: model, onCompletion: { incomingMessage, alertType in
-//            message = incomingMessage
-//            type = alertType
-//            show = true
-//            
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
-//                self.show = false
-//                
-//            }
-//        })
-//        .toolbar(.hidden, for: .tabBar)
-//        .onAppear {
-//            model.setMatterToSolve(matter)
-//        }
-        
         ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
             message = incomingMessage
             type = alertType
@@ -126,12 +111,26 @@ struct CreateReportView: View {
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
                 self.show = false
+                
             }
         })
-        
         .task {
-                   model.setMatterToSolve(matter)
-               }
+            model.setMatterToSolve(matter)
+        }
+        
+//        ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
+//            message = incomingMessage
+//            type = alertType
+//            show = true
+//            
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+//                self.show = false
+//            }
+//        })
+//        
+//        .task {
+//                   model.setMatterToSolve(matter)
+//               }
     }
     
     

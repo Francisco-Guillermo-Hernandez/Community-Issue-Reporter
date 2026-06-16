@@ -85,16 +85,19 @@ struct CommentsSectionView: View {
             self.isLoading = true
             guard !Task.isCancelled else { return }
             
-            let result = await CommentsRepository.shared.list(
-                resourceId,
-                page: currentPage,
-                limit: self.limit,
-                onError: { _ in
-                    print("error")
-                }
-            )
-            self.paginatedResult = result
-            self.comments.append(contentsOf: result.documents ?? [])
+            do {
+                let result = try await CommentsRepository.shared.list(
+                    resourceId,
+                    page: currentPage,
+                    limit: self.limit
+                )
+                
+                self.paginatedResult = result
+                self.comments.append(contentsOf: result.documents ?? [])
+            } catch {
+                
+            }
+            
             
             self.isLoading = false
         }
@@ -205,21 +208,22 @@ struct CommentsSectionView: View {
         guard !Task.isCancelled else { return }
         self.isLoading = true
         
-        let result = await CommentsRepository.shared.list(
-            resourceId,
-            page: self.currentPage,
-            limit: self.limit,
-            onError: { _ in
-                print("error")
-            }
-        )
-        
-        if let comments = result.documents {
-//            self.currentPage += 1
-//            self.comments.append(contentsOf: result.documents)
-//            self.canLoadMore = result.hasNext
+        do {
+            let result = try await CommentsRepository.shared.list(
+                resourceId,
+                page: self.currentPage,
+                limit: self.limit
+            )
             
-            print("load more")
+            if let comments = result.documents {
+    //            self.currentPage += 1
+    //            self.comments.append(contentsOf: result.documents)
+    //            self.canLoadMore = result.hasNext
+                
+                print("load more")
+            }
+        } catch {
+          
         }
         
         isLoading = false

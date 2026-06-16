@@ -66,7 +66,7 @@ struct MapPickerView: View {
                         selectedCoordinate = context.camera.centerCoordinate
                         handleMapMovement(center: context.camera.centerCoordinate)
                     }
-                    .onAppear {
+                    .task {
                         self.isSearchFocused = false
                     }
                     .onChange(of: locationManager.lastLocation) { _, newLocation in

@@ -62,7 +62,7 @@ struct UploadProgressView: View {
                         .transition(.move(edge: .bottom))
                 }
             }
-            .onAppear {
+            .task {
                 setupAndStartUpload()
             }
             .interactiveDismissDisabled(isProcessing)

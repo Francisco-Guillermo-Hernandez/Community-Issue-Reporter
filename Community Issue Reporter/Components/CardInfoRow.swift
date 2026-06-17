@@ -85,64 +85,48 @@ struct StatCard: View {
     var displayFooter: Bool = true
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading) {
             
             
             
-            // Header
-            VStack(alignment: .leading, spacing: 8) { // gap-2
-                
-               
-                
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.theme.foreground.opacity(0.6)) // text-muted-foreground
-                Text(title)
-                    .font(.system(size: 30, weight: .semibold)) // text-3xl font-semibold
-                    .foregroundStyle(foregroundColor)
-                    .fontWidth(.condensed)
-                
-                
-            }
-            .padding(.horizontal, 24) // px-6
-            
-            if displayFooter {
-                // Footer
-                VStack(alignment: .leading, spacing: 4) { // gap-1
-                    Text(trend)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color.theme.inputText)
+            VStack(alignment: .leading) {
+                // Header
+                HStack(alignment: .center, spacing: .themeSpacing * 4) { // gap-2
                     
-//                    Text(timeframe)
-//                        .font(.subheadline)
-//                        .foregroundStyle(Color.theme.foreground.opacity(0.6)) // text-muted-foreground
+                    VStack(alignment: .leading) {
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundStyle(Color.theme.foreground.opacity(0.9)) // text-muted-foreground
+                            .fontWidth(.condensed)
+                            .fontWeight(.medium)
+                        
+                        Text(trend)
+                            .font(.footnote)
+                            .fontWidth(.condensed)
+                            .foregroundStyle(Color.theme.foreground.opacity(0.6))
+                       
+                    }
+                    .frame(maxWidth: .infinity, alignment: .init(horizontal: .leading, vertical: .center))
+                    
+                    Text(title)
+                        .font(.system(size: 30, weight: .semibold)) // text-3xl font-semibold
+                        .foregroundStyle(foregroundColor)
+                        .fontWidth(.condensed)
+                        .fixedSize(horizontal: true, vertical: true)
                 }
-                .padding(.horizontal, 24) // px-6
             }
+            .padding(.horizontal)
+            .padding(.vertical, .themePadding * 1.25)
         }
-        .padding(.vertical, 24) // py-6
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            LinearGradient(
-                stops: [
-                    .init(color: Color.theme.cardBackground, location: 0),
-                    .init(color: Color.theme.primary.opacity(0.05), location: 1)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-        .cornerRadius(16) // rounded-xl
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.theme.border, lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1) // shadow-sm
+        .background(Color.theme.cardBackground)
+        .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+        .glassEffect( in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
     }
     
     var foregroundColor: Color {
-        colorScheme == .light ?  Color.init(hex: "#38271F") : Color.init(hex: "#8a8a8a")
+        colorScheme == .light ?  Color.init(hex: "#38271F") : Color.primary
     }
 }
 
@@ -151,18 +135,44 @@ struct StatCard: View {
 }
 
 #Preview("StatCard") {
-    StatCard(
-        action: {  } ,
-        description: "I've Reported",
-        title: "50",
-        trend: "Incidents this month",
-        timeframe: "for the last 6 months"
-    )
-    StatCard(
-        action: {  },
-        description: "I've Created Petitions",
-        title: "5",
-        trend: "Trending up this month",
-        timeframe: "for the last 6 months"
-    )
+    ScrollView {
+        VStack {
+            HStack {
+                StatCard(
+                    action: {  } ,
+                    description: "I've Reported",
+                    title: "50",
+                    trend: "Incidents this month",
+                    timeframe: "Hello"
+                )
+                StatCard(
+                    action: {  },
+                    description: "I've Created Petitions",
+                    title: "5",
+                    trend: "Hello",
+                    timeframe: "for the last 6 months"
+                )
+            }
+
+            HStack {
+                StatCard(
+                    action: {  } ,
+                    description: "I've Reported",
+                    title: "50",
+                    trend: "Incidents this month",
+                    timeframe: "Hello"
+                )
+                StatCard(
+                    action: {  },
+                    description: "I've Created Petitions",
+                    title: "5",
+                    trend: "Hello",
+                    timeframe: "for the last 6 months"
+                )
+            }
+           
+        }
+        .padding()
+    }
+    .background(Color.theme.background)
 }

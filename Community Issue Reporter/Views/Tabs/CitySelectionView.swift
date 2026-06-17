@@ -52,41 +52,35 @@ struct CityCellView: View {
 // MARK: - View
 struct CitySelectionView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var page: Int = 1
-    @State private var friendlyCities: FriendlyCities = .init(
-        documents: [],
-        hasNext: false,
-        hasPrev: false
-    )
-    @State private var searchText: String = ""
-    @State private var isLoading: Bool = false
-    @State private var isSearchActive: Bool = false
-    @State private var searchOptionsSelection: CityFilter = .city
-
-    @State private var triggerFeedBack: Bool = false
+    @StateObject private var controller: CitySelectionController
     
-    var countryCode: CountryCode
     var mode: CitySelectionMode = .step
     @Binding var selectedCity: FriendlyCityDistribution
     var nextStep: () -> Void
 
+    init(countryCode: CountryCode, mode: CitySelectionMode = .step, selectedCity: Binding<FriendlyCityDistribution>, nextStep: @escaping () -> Void) {
+        self.mode = mode
+        self._selectedCity = selectedCity
+        self.nextStep = nextStep
+        self._controller = StateObject(wrappedValue: CitySelectionController(countryCode: countryCode))
+    }
 
     var body: some View {
         VStack {
             ScrollView(.vertical) {
                 LazyVStack(spacing: .themeSpacing * 4) {
 
-                    if isLoading {
+                    if controller.isLoading {
                         ProgressView()
                             .containerRelativeFrame(.vertical)
                     }
 
-                    if cities.isEmpty && !isLoading {
+                    if controller.cities.isEmpty && !controller.isLoading {
                         /// No content state
                         noContent
                     } else {
                         
-                        ForEach(cities,id: \.self.cityId) { city in
+                        ForEach(controller.cities, id: \.self.cityId) { city in
                             Button {
                                 selectedCity = city
                             } label: {
@@ -115,8 +109,8 @@ struct CitySelectionView: View {
             .navigationTitle("Select a city")
             .background(Color.theme.background)
             .searchable(
-                text: $searchText,
-                isPresented: $isSearchActive,
+                text: $controller.searchText,
+                isPresented: $controller.isSearchActive,
                 placement: .navigationBarDrawer,
                 prompt: String(localized: "Search a city")
             )
@@ -141,7 +135,7 @@ struct CitySelectionView: View {
                         ThemedButton(
                             message: buttonMessage,
                             action: {
-                                triggerFeedBack.toggle()
+                                controller.triggerFeedBack.toggle()
                                 nextStep()
                                 
                                 if mode == .modify {
@@ -160,43 +154,25 @@ struct CitySelectionView: View {
             }
             .sensoryFeedback(
                 .impact(weight: .medium),
-                trigger: triggerFeedBack
+                trigger: controller.triggerFeedBack
             )
             .task {
-                // Invoke the repository at first
-                isLoading = true
-                friendlyCities = CitiesRepository.shared.loadLocalCities(
-                    of: countryCode,
-                )
-                isLoading = false
+                controller.loadLocalCities()
             }
-            .onChange(of: searchText) {
+            .onChange(of: controller.searchText) {
                 Task {
-                    try? await Task.sleep(for: .milliseconds(450))
-                    if searchOptionsSelection == .legal { await fetchCitiesByGroupingName() }
-                    if searchOptionsSelection == .city  { await fetchByCityName() }
-                    if searchOptionsSelection == .state { await fetchCitiesByStateName() }
+                    await controller.performSearch()
                 }
             }
-            .onChange(of: searchOptionsSelection) { oldValue, newValue in
-
-                if oldValue != newValue {
-                    if newValue.rawValue == "legal" {
-                        searchText = "Municipio de "
-                    } else {
-                        searchText = ""
-                    }
-
-                    isSearchActive = true
-
-                }
+            .onChange(of: controller.searchOptionsSelection) { oldValue, newValue in
+                controller.handleSearchOptionsSelectionChange(from: oldValue, to: newValue)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     
                     // Menu to filter cities by its options
                     Menu {
-                        Picker("Options", selection: $searchOptionsSelection) {
+                        Picker("Options", selection: $controller.searchOptionsSelection) {
 
                             ForEach(CityFilter.allCases, id: \.self) { filter in
                                 Text(filter.text).tag(filter)
@@ -227,53 +203,6 @@ struct CitySelectionView: View {
         }
     }
 
-    private var cities: [FriendlyCityDistribution] {
-        guard  let friendlyCities = friendlyCities.documents else { return [] }
-        let result = friendlyCities.sorted { $0.isCapitalCity ?? 0 > $1.isCapitalCity ?? 0 }
-        return result
-    }
-
-
-    private func fetchCitiesByGroupingName() async {
-        isLoading = true
-        friendlyCities =
-            await CitiesRepository
-            .shared
-            .filter(
-                countryCode: countryCode.rawValue,
-                page: page,
-                groupingName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-            )
-
-        isLoading = false
-    }
-
-    private func fetchCitiesByStateName() async {
-        isLoading = true
-        friendlyCities =
-            await CitiesRepository
-            .shared
-            .filter(
-                countryCode: countryCode.rawValue,
-                page: page,
-                stateName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-            )
-        isLoading = false
-    }
-
-    private func fetchByCityName() async {
-        isLoading = true
-        friendlyCities =
-            await CitiesRepository
-            .shared
-            .filter(
-                countryCode: countryCode.rawValue,
-                page: page,
-                cityName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-            )
-        isLoading = false
-    }
-    
     let noContent: some View = ContentUnavailableView {
         Label(
             "There are no cities that match with your search.",

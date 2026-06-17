@@ -91,7 +91,7 @@ final class UserRepository {
     }
     
     func getNames() -> String {
-        UserDefaults.standard.string(forKey: "names") ?? "guest"
+        UserDefaults.standard.string(forKey: "names") ?? "Guest"
     }
     
     func getName() -> String {

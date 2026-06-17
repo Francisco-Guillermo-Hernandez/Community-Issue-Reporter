@@ -27,41 +27,58 @@ struct InsightsView: View {
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            VStack {
-                ScrollView(.vertical) {
-                    StatsCardsView(path: $navigationPath, nameSpace: insightsNamespace)
-                        .padding(.bottom, 48)
-                       
-                    InsightsCalendarView(path: $navigationPath, activityData: activityData)
-                }
-            }
-            .navigationDestination(for: InsightsNavigation.self) { destination in
-                switch destination {
-                case .myReports:
-                    MyReportsSubView(path: $navigationPath, subViewName: "My reports")
-                        .navigationTransition(.zoom(sourceID: "transition:myReports", in: insightsNamespace))
-                case .myPetitions:
-                    MyPetitionsSubView(path: $navigationPath, subViewName: "My petitions")
-                        .navigationTransition(.zoom(sourceID: "transition:myPetitions", in: insightsNamespace))
-                case .activity(let date):
-                    SimpleView(
-                        title: "ActivityListView",
-                        selectedDay: activityData[date],
-                        dateFormatter: date
-                    )
-                case .noActivity:
-                    SimpleView(title: "NoActivityView")
-                case .report(let report):
-                    SimpleView(title: report.title)
-                case .petition(let petition):
-                    SimpleView(title: petition.title)
+            ZStack(alignment: .top) {
                 
+                Color.theme.background
+                    .ignoresSafeArea()
+                
+                Color.orange.opacity(0.321)
+                    .frame(height: 280)
+                    .mask(
+                        LinearGradient(
+                            colors: [.white, .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .blur(radius: 70)
+                    .ignoresSafeArea()
+                
+                VStack {
+                    ScrollView(.vertical) {
+                        StatsCardsView(path: $navigationPath, nameSpace: insightsNamespace)
+                            .padding(.bottom, 48)
+                           
+                        InsightsCalendarView(path: $navigationPath, activityData: activityData)
+                    }
                 }
+                .navigationDestination(for: InsightsNavigation.self) { destination in
+                    switch destination {
+                    case .myReports:
+                        MyReportsSubView(path: $navigationPath, subViewName: "My reports")
+                            .navigationTransition(.zoom(sourceID: "transition:myReports", in: insightsNamespace))
+                    case .myPetitions:
+                        MyPetitionsSubView(path: $navigationPath, subViewName: "My petitions")
+                            .navigationTransition(.zoom(sourceID: "transition:myPetitions", in: insightsNamespace))
+                    case .activity(let date):
+                        SimpleView(
+                            title: "ActivityListView",
+                            selectedDay: activityData[date],
+                            dateFormatter: date
+                        )
+                    case .noActivity:
+                        SimpleView(title: "NoActivityView")
+                    case .report(let report):
+                        SimpleView(title: report.title)
+                    case .petition(let petition):
+                        SimpleView(title: petition.title)
+                    
+                    }
+                }
+                .scrollContentBackground(.hidden)
+                .navigationTitle("Insights")
+                .toolbarTitleDisplayMode(.inlineLarge)
             }
-            .background(Color.theme.background)
-            .scrollContentBackground(.hidden)
-            .navigationTitle("Insights")
-            .toolbarTitleDisplayMode(.inlineLarge)
         }
     }
 }

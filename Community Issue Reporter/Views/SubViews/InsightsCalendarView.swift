@@ -48,60 +48,80 @@ struct SimpleView: View {
     var dateFormatter: String = ""
     
    var body: some View {
-       Group {
-           VStack {
-               if title == "NoActivityView" {
-                   ContentUnavailableView {
-                       Label("No activity", systemImage: "calendar.badge.exclamationmark")
-                           .symbolRenderingMode(.palette)
-                           .foregroundStyle(
-                                Color.theme.foreground.opacity(0.7),
-                                Color.theme.primary,
-                                Color.theme.foreground.opacity(0.7)
-                           )
-                   } description: {
-                       Text("You didn't create any reports on this day.")
-                           .foregroundStyle(Color.theme.primary)
-                   } actions: {
-                     
-                   }
-                   .background(Color.theme.background)
-               } else {
-                   if selectedDay != nil {
-                       
-                       List {
-                           Section(header: Text("Reports")) {
-                               if let reports = selectedDay?.reports, !reports.isEmpty {
-                                   ForEach(reports, id: \.id) { report in
-                                       Text(report.id)
-                                           .cellStyle()
-                                   }
-                               } else {
-                                   Text("No reports available")
-                                       .foregroundColor(.secondary)
-                               }
-                           }
-                           
-                           Section(header: Text("Signatures")) {
-                               if let signatures = selectedDay?.signatures, !signatures.isEmpty {
-                                   ForEach(signatures, id: \.id) { signature in
-                                       Text(signature.id)
-                                           .cellStyle()
-                                   }
-                               } else {
-                                   Text("No signatures available")
-                                       .foregroundColor(.secondary)
-                               }
-                           }
+       
+       ZStack(alignment: .top) {
+           
+           Color.theme.background
+               .ignoresSafeArea()
+           
+           Color.orange.opacity(0.121)
+               .frame(height: 180)
+               .mask(
+                LinearGradient(
+                    colors: [.white, .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+               )
+               .blur(radius: 70)
+               .ignoresSafeArea()
+           
+           Group {
+               VStack {
+                   if title == "NoActivityView" {
+                       ContentUnavailableView {
+                           Label("No activity", systemImage: "calendar.badge.exclamationmark")
+                               .symbolRenderingMode(.palette)
+                               .foregroundStyle(
+                                    Color.theme.foreground.opacity(0.7),
+                                    Color.theme.primary,
+                                    Color.theme.foreground.opacity(0.7)
+                               )
+                       } description: {
+                           Text("You didn't create any reports on this day.")
+                               .foregroundStyle(Color.theme.primary)
+                       } actions: {
+                         
                        }
-                       .listStyle(.insetGrouped)
-                       
-                       
+//                       .background(Color.theme.background)
+                   } else {
+                       if selectedDay != nil {
+                           
+                           List {
+                               Section(header: Text("Reports")) {
+                                   if let reports = selectedDay?.reports, !reports.isEmpty {
+                                       ForEach(reports, id: \.id) { report in
+                                           Text(report.id)
+                                               .cellStyle()
+                                       }
+                                   } else {
+                                       Text("No reports available")
+                                           .foregroundColor(.secondary)
+                                   }
+                               }
+                               
+                               Section(header: Text("Signatures")) {
+                                   if let signatures = selectedDay?.signatures, !signatures.isEmpty {
+                                       ForEach(signatures, id: \.id) { signature in
+                                           Text(signature.id)
+                                               .cellStyle()
+                                       }
+                                   } else {
+                                       Text("No signatures available")
+                                           .foregroundColor(.secondary)
+                                   }
+                               }
+                           }
+                           .listStyle(.insetGrouped)
+                           
+                           
+                       }
                    }
                }
            }
        }
-       .background(Color.theme.background)
+      
+//       .background(Color.theme.background)
        .scrollContentBackground(.hidden)
        .toolbarTitleDisplayMode(.inline)
        .navigationBarTitle(title == "NoActivityView" ? "No Activity" : dateFormatter)

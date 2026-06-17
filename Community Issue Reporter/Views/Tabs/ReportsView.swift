@@ -123,6 +123,8 @@ struct ReportsView: View {
             searchCompleter.update(query: newValue, region: currentRegion(c: appState.cameraPosition))
         }
         .task {
+            
+            await appState.checkStatus()
 //            locationManager.requestAuthorization()
             
         }

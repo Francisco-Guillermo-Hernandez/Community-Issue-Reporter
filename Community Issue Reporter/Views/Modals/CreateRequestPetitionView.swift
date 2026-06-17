@@ -101,8 +101,13 @@ struct CreateRequestPetitionView: View {
                             stepperAction = "Decrease"
                         }
                     }
-                    .sensoryFeedback(.increase, trigger: (model.petition.targetSignatures != 0) && stepperAction == "Increase")
-                    .sensoryFeedback(.decrease, trigger: (model.petition.targetSignatures != 0) && stepperAction == "Decrease")
+                    .sensoryFeedback(.increase, trigger: model.petition.targetSignatures) { oldValue, newValue in
+                        return newValue > oldValue
+                    }
+                    .sensoryFeedback(.decrease, trigger: model.petition.targetSignatures) { oldValue, newValue in
+                        return newValue < oldValue
+                    }
+                    
                 } header: {
                     Text("Set the amount of signatures needed")
                 } footer: {

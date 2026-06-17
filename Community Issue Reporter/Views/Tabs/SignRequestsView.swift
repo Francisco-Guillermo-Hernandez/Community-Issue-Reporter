@@ -269,25 +269,45 @@ struct SignRequestsView: View {
     
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            ScrollView {
-                posts()
-                    .navigationDestination(for: SignRequestsViewsDestinations.self) { destination in
-                        switch destination {
-                        case .comments(let id):
-                            CommentsSectionView(for: .petition, with: id)
-                                .toolbar(.hidden, for: .tabBar)
-                                
-                            
-                        case .postDetail(let petition):
-                            PetitionDetailView(petition: petition)
-                                .toolbar(.hidden, for: .tabBar)
-                        }
-                    }
+            
+            ZStack(alignment: .top) {
+    
+                Color.theme.background
+                    .ignoresSafeArea()
                 
+                Color.orange.opacity(0.12)
+                    .frame(height: 280)
+                    .mask(
+                        LinearGradient(
+                            colors: [.white, .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .blur(radius: 60)
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    posts()
+                        .navigationDestination(for: SignRequestsViewsDestinations.self) { destination in
+                            switch destination {
+                            case .comments(let id):
+                                CommentsSectionView(for: .petition, with: id)
+                                    .toolbar(.hidden, for: .tabBar)
+                                    
+                                
+                            case .postDetail(let petition):
+                                PetitionDetailView(petition: petition)
+                                    .toolbar(.hidden, for: .tabBar)
+                            }
+                        }
+                    
+                }
+                .toolbar(navigationPath.isEmpty ? .visible : .hidden, for: .tabBar)
+                .animation(.easeInOut(duration: 0.35), value: navigationPath.isEmpty)
             }
-            .background(Color.theme.background)
-            .toolbar(navigationPath.isEmpty ? .visible : .hidden, for: .tabBar)
-            .animation(.easeInOut(duration: 0.35), value: navigationPath.isEmpty)
+            
+           
 //            .scrollContentBackground(.hidden)
 //            .refreshable {
 //                await fetchPetitions(reset: true)
@@ -355,7 +375,7 @@ struct SignRequestsView: View {
     @ViewBuilder
     func EventsOnDay(petition: Petition, selectedIndex: Int) -> some View {
         
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: .themeSpacing * 4) {
             VStack(alignment: .leading) {
                 Text(petition.title)
                     .font(.title2)
@@ -457,7 +477,7 @@ struct SignRequestsView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .foregroundColor(.theme.foreground)
-//        .background(Color.theme.cardBackground)
+        .background(Color.theme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))

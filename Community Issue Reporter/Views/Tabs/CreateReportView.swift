@@ -30,81 +30,92 @@ struct CreateReportView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView(.vertical) {
-                LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 3) {
-                    ForEach(filteredMatters, id: \.id) { matter in
-                        Button {
-                            model.setMatterToSolve(matter)
-                            showWizard = true
+            
+            ZStack(alignment: .top) {
+                Color.theme.background
+                    .ignoresSafeArea()
+                
+                Color.orange
+                    .opacity(0.12)
+                    .frame(height: 280)
+                    .mask(
+                        LinearGradient(
+                            colors: [.white, .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .blur(radius: 60)
+                    .ignoresSafeArea()
+                
+                ScrollView(.vertical) {
+                    LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 3) {
+                        
+                        ForEach(filteredMatters, id: \.id) { matter in
+                            NavigationLink(destination: report(matter: matter)) {
+                                CardView(matter: matter)
+                            }
+                        }
+                    }
+                }
+                .overlay(alignment: .bottom) {
+                    if show {
+                        Group {
+                            if #available(iOS 26, *) {
+                                customAlert(message: message, type: type)
+                                    .transition(.asymmetric(insertion: .identity, removal: .opacity))
+                                    .optionalGlassEffect(colorScheme, cornerRadius: 16)
+                            }
+                        }
+                        .offset(x: 0, y: -62)
+                    }
+                }
+                .toolbar {
+                    ToolbarItem(placement: .automatic) {
+                        Menu {
+                            Picker("Issue Type", selection: $issueType) {
+                                ForEach(IssueTypes.allCases, id: \.self) { issueType in
+                                    Text(issueType.title).tag(issueType.title)
+                                }
+                            }
+                            Picker("Severity", selection: $severity) {
+                                ForEach(Severity.allCases, id: \.self) { severity in
+                                    Text(severity.title).tag(severity.title)
+                                }
+                            }
                         } label: {
-                            CardView(matter: matter)
+                            Label("Options", systemImage: "line.3.horizontal.decrease")
                         }
-                        .buttonStyle(.plain)
-                    }
-                    
-//                    ForEach(filteredMatters, id: \.id) { matter in
-//                                            NavigationLink(destination: report(matter: matter)) {
-//                                                CardView(matter: matter)
-//                                            }
-//                                        }
-                }
-            }
-            .overlay(alignment: .bottom) {
-                if show {
-                    Group {
-                        if #available(iOS 26, *) {
-                            customAlert(message: message, type: type)
-                                .transition(.asymmetric(insertion: .identity, removal: .opacity))
-                                .optionalGlassEffect(colorScheme, cornerRadius: 16)
-                        }
-                    }
-                    .offset(x: 0, y: -62)
-                }
-            }
-            .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Menu {
-                        Picker("Issue Type", selection: $issueType) {
-                            ForEach(IssueTypes.allCases, id: \.self) { issueType in
-                                Text(issueType.title).tag(issueType.title)
-                            }
-                        }
-                        Picker("Severity", selection: $severity) {
-                            ForEach(Severity.allCases, id: \.self) { severity in
-                                Text(severity.title).tag(severity.title)
-                            }
-                        }
-                    } label: {
-                        Label("Options", systemImage: "line.3.horizontal.decrease")
                     }
                 }
+                .padding(.horizontal)
+                .searchable(text: $searchText, prompt: "Search")
+                .toolbar(.visible, for: .tabBar)
+                .toolbarTitleDisplayMode(.inlineLarge)
+                .navigationTitle("Report")
+                .navigationSubtitle("what do you want to report?")
+                .scrollContentBackground(.hidden)
+                .sheet(isPresented: $showWizard) {
+                    ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
+                        message = incomingMessage
+                        type = alertType
+                        show = true
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+                            self.show = false
+                        }
+                    })
+                }
             }
-            .padding(.horizontal)
-            .searchable(text: $searchText, prompt: "Search")
-            .toolbar(.visible, for: .tabBar)
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .navigationTitle("Report")
-            .navigationSubtitle("what do you want to report?")
-            .background(Color.theme.background)
-            .scrollContentBackground(.hidden)
-            .sheet(isPresented: $showWizard) {
-                ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
-                    message = incomingMessage
-                    type = alertType
-                    show = true
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
-                        self.show = false
-                    }
-                })
-            }
+            
+           
         }
     }
     
     /// Open report view with type of matter chosen
     @ViewBuilder
     private func report(matter: MatterToSolve) -> some View {
-        ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
+        ReportWizardContainer(model: model, onCompletion: { incomingMessage, alertType in
             message = incomingMessage
             type = alertType
             show = true
@@ -117,20 +128,6 @@ struct CreateReportView: View {
         .task {
             model.setMatterToSolve(matter)
         }
-        
-//        ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
-//            message = incomingMessage
-//            type = alertType
-//            show = true
-//            
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
-//                self.show = false
-//            }
-//        })
-//        
-//        .task {
-//                   model.setMatterToSolve(matter)
-//               }
     }
     
     

@@ -64,7 +64,6 @@ struct UserProfileView: View {
         ),
 
     ]
-//    @ObservedObject var viewModel: ProfileModel
 
     var body: some View {
         NavigationStack {
@@ -105,17 +104,11 @@ struct UserProfileView: View {
                             
                             Text(option.title)
                                 
-                           
-                           
                         }
-//                        .cellStyle()
                         
                     }
                 }
-//                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-//                .listStyle(.plain)
-//                .listSectionSpacing(32)
+//                .listRowBackground(Color.clear)
                 .frame(height: 500)
                 .scrollContentBackground(.hidden)
                 .scrollDisabled(true)
@@ -145,6 +138,14 @@ struct UserProfileView: View {
                 .padding()
                 .padding(.top, 0)
                
+            }
+            .toolbar(profile.showPicker ? .hidden : .visible, for: .navigationBar)
+            .task {
+                profile.isGuest = controller.isGuest
+                profile.userName = UserRepository.shared.getName()
+                
+                print("user name:")
+                print(profile.userName)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

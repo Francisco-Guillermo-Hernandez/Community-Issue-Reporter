@@ -175,19 +175,21 @@ struct UserPersonalizationView: View {
         .background(Color.theme.background)
         .task {
             user = UserRepository.shared.getPublicInformation()
-            if let user = user {
-               if let email = user.email {
-                   self.email = email
-                }
-                
-                if let name = user.username {
-                    self.name = name
-                    self.userName = name
-                        .lowercased()
-                        .split(separator: " ")
-                        .joined(separator: ".")
-                }
-            }
+            
+            guard let user = user else { return }
+            
+            if let email = user.email {
+                self.email = email
+             }
+             
+             if let name = user.username {
+                 self.name = name
+                 profile.userName = name
+                 self.userName = name
+                     .lowercased()
+                     .split(separator: " ")
+                     .joined(separator: ".")
+             }
         }
         .safeAreaInset(edge: .bottom) {
 

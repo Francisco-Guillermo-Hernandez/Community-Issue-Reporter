@@ -142,10 +142,7 @@ struct UserProfileView: View {
             .toolbar(profile.showPicker ? .hidden : .visible, for: .navigationBar)
             .task {
                 profile.isGuest = controller.isGuest
-                profile.userName = UserRepository.shared.getName()
-                
-                print("user name:")
-                print(profile.userName)
+                profile.setUserName(UserRepository.shared.getName())
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

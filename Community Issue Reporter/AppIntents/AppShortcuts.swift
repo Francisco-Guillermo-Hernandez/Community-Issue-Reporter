@@ -11,8 +11,8 @@ import AppIntents
 
 struct CreateReportAppIntent: AppIntent {
    
-    static var title: LocalizedStringResource = "Shortcuts"
-    static var description = IntentDescription("Create a shortcuts to report issues")
+    static var title: LocalizedStringResource = "Create Report"
+    static var description = IntentDescription("Create a shortcut to report issues")
     static var openAppWhenRun: Bool = true
     
     @MainActor
@@ -23,11 +23,13 @@ struct CreateReportAppIntent: AppIntent {
 }
 
 struct AppShortcuts: AppShortcutsProvider {
+    static var shortcutTileColor: ShortcutTileColor = .orange
+
     @AppShortcutsBuilder
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: CreateReportAppIntent(),
-            phrases: ["Create a report on \(.applicationName)", "Report an issue on\(.applicationName)"],
+            phrases: ["Create a report on \(.applicationName)", "Report an issue on \(.applicationName)"],
             shortTitle: "Create a report",
             systemImageName: "plus"
         )

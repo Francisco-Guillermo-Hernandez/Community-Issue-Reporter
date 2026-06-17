@@ -62,8 +62,9 @@ struct TabBarView: View {
             }
         }
         .sheet(isPresented: $showShortcutReport) {
-            ReportWizardView(model: model, onCompletion: { _, _ in
-                
+            ReportWizardView(model: model, onCompletion: { incomingMessage, _ in
+                router.message = incomingMessage
+                router.presentAlert = true
             }, showCancelButton: true)
             .task {
                 model.setMatterToSolve(mattersToResolve.first!)

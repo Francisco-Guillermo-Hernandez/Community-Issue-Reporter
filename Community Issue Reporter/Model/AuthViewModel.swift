@@ -70,17 +70,22 @@ class AuthViewModel: ObservableObject {
         }
     }
 
-    func checkStatus() {
-        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
-           DispatchQueue.main.async {
-               self.isCheckingStatus = false
-               if let user = user {
-                   self.user = user
-                   self.isLoggedIn = true
-               } else {
-                   self.user = nil
-               }
-            }
+    @MainActor
+    func checkStatus() async {
+        isCheckingStatus = true 
+        
+        defer {
+            isCheckingStatus = false
+        }
+        
+        do {
+            /// GIDSignIn throws an error if the sign-in can't be restored
+            let user = try await GIDSignIn.sharedInstance.restorePreviousSignIn()
+            self.user = user
+            self.isLoggedIn = true
+        } catch {
+            self.user = nil
+            self.isLoggedIn = false
         }
     }
     

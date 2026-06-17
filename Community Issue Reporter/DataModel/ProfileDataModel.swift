@@ -59,7 +59,7 @@ final class ProfileDataModel: ObservableObject {
         let savedOption = UserDefaults.standard.string(forKey: selectedOptionKey) ?? AvatarCreatedFrom.GoogleAuth.rawValue
         self.selectedAvatarOptionView = AvatarCreatedFrom(rawValue: savedOption) ?? .GoogleAuth
         
-        let savedColorHex = UserDefaults.standard.string(forKey: selectedColorKey) ?? "FFA500" // Default orange
+        let savedColorHex = UserDefaults.standard.string(forKey: selectedColorKey) ?? "ec9458" // Default orange
         self.selectedAvatarColor = Color(hex: savedColorHex)
         
         if selectedAvatarOptionView == .GoogleAuth, let url = UserRepository.shared.getProfilePictureURL() {
@@ -120,10 +120,13 @@ final class ProfileDataModel: ObservableObject {
         }
     }
     
+    @MainActor
     func getMonogram() -> String {
+        print(userName)
         return String(userName.prefix(1)).uppercased()
     }
     
+    @MainActor
     func getInitials() -> String {
         let components = userName.components(separatedBy: " ")
         if components.count >= 2 {
@@ -132,6 +135,11 @@ final class ProfileDataModel: ObservableObject {
             return "\(first)\(second)".uppercased()
         }
         return String(userName.prefix(2)).uppercased()
+    }
+    
+    @MainActor
+    func setUserName(_ name: String) {
+        userName = name
     }
 }
 

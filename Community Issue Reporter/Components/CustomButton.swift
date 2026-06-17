@@ -22,12 +22,17 @@ enum ThemedButtonStyle {
 // MARK: -Custom button
 struct ThemedButton: View {
     var message: String = ""
-    var action: () -> Void = { }
+    var action: () -> Void
     var type: ThemedButtonType = .secondary
     var style: ThemedButtonStyle = .prominent
+    var icon: String?
     var body: some View {
         Button(action: action) {
             HStack {
+                if icon != nil {
+                    Image(systemName: icon!)
+                }
+                
                 Text(message)
             }
             .padding(.themeSpacing * 3)
@@ -72,45 +77,26 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
-//            .foregroundStyle(Color.init(hex: "1a181b"))
-//            .foregroundStyle(Color.init(hex: "FEE8D0"))
-        
-//            .foregroundStyle(colorScheme == .dark ? Color.theme.cardBackground : Color.white)
-//            .background(isEnabled ? Color.theme.primary : Color.theme.primary.opacity(0.5))
-        
             .background(backgroundColor(isPressed: configuration.isPressed))
-                       .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
-        
+             .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
             .contentShape(Capsule())
             .clipShape(Capsule())
-        
-//            .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
-//            .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
-        
             .font(Font.body.bold())
             .overlay {
                 Capsule()
                     .stroke(borderColor, lineWidth: isEnabled ? 1 : 0)
             }
             .opacity(isEnabled ? 1.0 : 0.51) // disabled:opacity-50
-//            .overlay {
-//                RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
-//                    .stroke(Color.theme.primary.mix(with: .white, by: 0.3), lineWidth: 1)
-//            }
             .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
             .animation(.easeOut(duration: 0.2), value: isEnabled)
             .glassEffect(.regular, in: Capsule())
             .modifier(GlassBounceModifier(isPressed: configuration.isPressed))
-        //.glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
     }
     
     private func backgroundColor(isPressed: Bool) -> Color {
         if colorScheme == .dark {
-            // dark:bg-input/30 dark:hover:bg-input/50
-            return isPressed ? Color.theme.primary.opacity(0.86) : Color.theme.primary //Color.theme.inputBackground.mix(with: .white, by: 0.67).opacity(isPressed ? 0.2 : 0.1)
+            return isPressed ? Color.theme.primary.opacity(0.86) : Color.theme.primary
         } else {
-            // bg-background hover:bg-accent
-//            return isPressed ? Color.theme.accent : Color.theme.background
             return isPressed ? Color.theme.primary.opacity(0.75) : Color.theme.primary
         }
     }
@@ -119,17 +105,14 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
         if colorScheme == .dark {
             return isPressed ? Color(hex: "#fed4a0") : Color.white  //Color.theme.cardBackground
         } else {
-            // hover:text-accent-foreground
             return isPressed ? Color.init(hex: "#f2ebdd") : Color.white
         }
     }
     
     private var borderColor: Color {
         if colorScheme == .dark {
-            // dark:border-input
             return Color.theme.primary.mix(with: .white, by: 0.1)
         } else {
-            // border
             return Color.theme.primary.mix(with: .white, by: 0.4)
         }
     }
@@ -159,10 +142,7 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(style == .normal ? .system(size: 14, weight: .regular) : Font.body.bold()) // style == .prominent ? Font.body.bold() : Font.body
-            //.font(.system(size: 14, weight: .medium)) // text-sm font-medium
-//            .frame(height: 36) // h-9
-//            .padding(.horizontal, 12) // px-3
+            .font(style == .normal ? .system(size: 14, weight: .regular) : Font.body.bold())
            
             .background(backgroundColor(isPressed: configuration.isPressed))
             .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
@@ -181,11 +161,8 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
     
     private func backgroundColor(isPressed: Bool) -> Color {
         if colorScheme == .dark {
-            // dark:bg-input/30 dark:hover:bg-input/50
             return Color.theme.inputBackground.mix(with: .white, by: 0.67).opacity(isPressed ? 0.2 : 0.1)
         } else {
-            // bg-background hover:bg-accent
-//            return isPressed ? Color.theme.accent : Color.theme.background
             return isPressed ? Color.theme.accent : Color.white
         }
     }
@@ -195,7 +172,7 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
             return Color.theme.foreground
         } else {
             // hover:text-accent-foreground
-            return isPressed ? Color.theme.foreground : Color.theme.foreground
+            return isPressed ? Color.theme.foreground.mix(with: .black, by: 0.67) : Color.theme.foreground
         }
     }
     
@@ -233,7 +210,7 @@ struct LinkButtonStyle: ButtonStyle {
         
         ThemedButton(message: "Get Started", action: {}, type: .outline)
         
-        ThemedButton(message: "Get Started", action: {}, type: .outline, style: .normal)
+        ThemedButton(message: "Take a photo", action: {}, type: .outline, style: .normal, icon: "camera")
         
         ThemedButton(message: "Get Started", action: {}, type: .outline).disabled(true)
         Spacer()

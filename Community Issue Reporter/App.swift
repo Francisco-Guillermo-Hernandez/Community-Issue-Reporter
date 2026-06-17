@@ -19,6 +19,9 @@ struct Community_Issue_ReporterApp: App {
     // Inject settings store
     @StateObject private var settingsStore = SettingsStore()
     
+    // Inject network monitor
+    @StateObject private var networkMonitor = NetworkMonitor()
+    
     // Inject the AppDelegate lifecycle adaptor
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
@@ -40,6 +43,7 @@ struct Community_Issue_ReporterApp: App {
                 .environmentObject(authViewModel)
                 .environmentObject(settingsStore)
                 .environmentObject(notificationManager)
+                .environmentObject(networkMonitor)
                 .environment(\.locale, .init(identifier: settingsStore.selectedLanguageCode))
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)

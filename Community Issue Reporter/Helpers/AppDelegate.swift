@@ -23,6 +23,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         
         Task {
+            AppDelegate.sharedNotificationManager.deviceToken = token
+            print("Successfully registered device token: \(token)")
             
             do {
                _ = try await UserRepository.shared.sendDevice(token)
@@ -31,10 +33,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             }
         }
         
-        DispatchQueue.main.async {
-            AppDelegate.sharedNotificationManager.deviceToken = token
-            print("Successfully registered device token: \(token)")
-        }
     }
 
     // Failure: APNs registration failed (e.g. simulator error or network block)

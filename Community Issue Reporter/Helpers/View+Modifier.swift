@@ -18,7 +18,6 @@ struct CellViewModifier: ViewModifier {
                 RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
                     .stroke(Color.theme.border, lineWidth: 1)
             )
-            .cornerRadius(.themeRadius * 2)
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(
@@ -29,6 +28,8 @@ struct CellViewModifier: ViewModifier {
                     trailing: 16
                 )
             )
+            .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
             .glassEffect( in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
     }
 }

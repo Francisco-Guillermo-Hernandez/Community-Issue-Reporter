@@ -20,13 +20,17 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate, Observabl
     }
     
     // Request permissions
+    @MainActor
     func requestAuthorization() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            DispatchQueue.main.async {
+        Task {
+            do {
+                let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
                 self.isPermissionGranted = granted
                 if granted {
                     UIApplication.shared.registerForRemoteNotifications()
                 }
+            } catch {
+                print(error)
             }
         }
     }

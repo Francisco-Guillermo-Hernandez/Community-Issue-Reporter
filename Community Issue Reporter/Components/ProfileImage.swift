@@ -224,12 +224,19 @@ struct UserAvatarPersonalizationSheet: View {
                                 .onChange(of: selectedPhotoItems) { _, newItems in
                                     guard !newItems.isEmpty else { return }
                                     viewModel.selectedAvatarOptionView = option.associatedView
-                                    loadSelectedImages(from: newItems) { image in
-                                        if let avatar = image {
-                                            onSelect(avatar)
+                                    
+                                    Task {
+                                        do {
+                                            let image = try await loadSelectedImages(from: newItems)
+                                                if let avatar = image {
+                                                    onSelect(avatar)
+                                                }
+                                        } catch {
+                                                /// TODO: error handiing
                                         }
-                                       
                                     }
+                                       
+                                    
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
@@ -384,19 +391,16 @@ struct UserAvatarPersonalizationSheet: View {
         }
     }
     
-    private func loadSelectedImages(from items: [PhotosPickerItem], onComplete: @escaping (UIImage?) -> Void) {
-        Task {
+    private func loadSelectedImages(from items: [PhotosPickerItem]) async throws -> UIImage? {
+        
             var image: UIImage?
            
             /// To UIImage
-            if let data = try? await items[0].loadTransferable(type: Data.self) {
+            if let data = try await items[0].loadTransferable(type: Data.self) {
                 image = UIImage(data: data)
             }
 
-            await MainActor.run {
-                onComplete(image)
-            }
-        }
+            return image
     }
 }
 

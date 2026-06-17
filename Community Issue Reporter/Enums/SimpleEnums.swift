@@ -61,3 +61,9 @@ enum CommonIntercommunicationErrors: Error {
     case genericError(String)
     case notImplemented
 }
+
+// MARK: - 
+enum SuccessfulResult {
+    case done
+    case updated
+}

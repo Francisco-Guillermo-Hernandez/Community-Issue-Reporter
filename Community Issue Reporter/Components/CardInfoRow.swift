@@ -87,8 +87,6 @@ struct StatCard: View {
     var body: some View {
         VStack(alignment: .leading) {
             
-            
-            
             VStack(alignment: .leading) {
                 // Header
                 HStack(alignment: .center, spacing: .themeSpacing * 4) { // gap-2

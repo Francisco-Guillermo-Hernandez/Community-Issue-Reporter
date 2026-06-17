@@ -107,8 +107,7 @@ struct UserAvatarPersonalizationSheet: View {
             
              
             MonogramView(
-                text: option == .initials
-                    ? viewModel.getInitials() : viewModel.getMonogram(),
+                text: option == .initials ? viewModel.getInitials() : viewModel.getMonogram(),
                 backgroundColor: viewModel.selectedAvatarColor
             )
 
@@ -254,6 +253,7 @@ struct UserAvatarPersonalizationSheet: View {
                                         text: viewModel.getInitials(),
                                         backgroundColor: preselectedColor
                                     )
+                                    .id(viewModel.userName)
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
@@ -271,6 +271,7 @@ struct UserAvatarPersonalizationSheet: View {
                                         text: viewModel.getMonogram(),
                                         backgroundColor: preselectedColor
                                     )
+                                    .id(viewModel.userName)
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
@@ -357,10 +358,9 @@ struct UserAvatarPersonalizationSheet: View {
 
         let view = MonogramView(
             mode: .send,
-            text: options == .initials
-                ? viewModel.getInitials() : viewModel.getMonogram(),
+            text: options == .initials ? viewModel.getInitials() : viewModel.getMonogram(),
             backgroundColor: color
-        )
+        ).id(viewModel.userName)
         
         Task {
             if let image = view.asImage() {

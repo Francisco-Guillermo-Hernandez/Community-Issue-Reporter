@@ -30,7 +30,7 @@ struct MoreInformationView: View {
                     Button {
                         UIPasteboard.general.string = report.id
                     } label: {
-                        Label("Copy ID", systemImage: "doc.on.doc")
+                        Label("Copy ID", systemImage: "document.on.document")
                     }
                 }
                 

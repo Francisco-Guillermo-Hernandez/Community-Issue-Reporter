@@ -53,7 +53,7 @@ final class ReportRepository {
         }
     }
     
-    func listByUser(page: Int, onComplete: @escaping (Reports) -> Void, onError: ErrorHandler) async {
+    func listByUser(page: Int) async throws -> Reports {
         do {
             let result = try await self.reportsService.fetchReportByUser(
                 q: PaginatedRequestQueryParams(
@@ -62,29 +62,30 @@ final class ReportRepository {
                 )
             )
             
-            onComplete(result)
+           return result
     
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
-    func delete(_ reportId: String, onComplete: @escaping (GenericResponse) -> Void, onError: ErrorHandler) async {
+    func delete(_ reportId: String) async throws -> SuccessfulResult {
         do {
             
             let result = try await self.reportsService.deleteReport(by: reportId)
-            onComplete(result)
+            if result.code == "REPORT_DELETED_SUCCESSFULLY" {
+               return .deleted
+            } else {
+                throw CommonIntercommunicationErrors.genericError("Error deleting report")
+            }
             
         } catch {
-            onError(error)
+           throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
     func create(report: Report, locator: Locator, onError: ErrorHandler) async  -> String {
         do {
-            
-            print("locator")
-            dump(locator)
             let response = try await self.reportsService.createReport(
                 report: report,
                 headers: [

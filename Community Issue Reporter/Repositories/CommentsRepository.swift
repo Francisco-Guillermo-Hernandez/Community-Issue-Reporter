@@ -18,7 +18,7 @@ final class CommentsRepository {
     }
     
     func list(_ reportId: String, page: Int, limit: Int = 3) async throws -> Comments  {
-      
+        
         do {
             let query = PaginatedRequestQueryParams(page: page, limit: limit)
             return try await self.commentsService.list(reportId: reportId, q: query)
@@ -31,17 +31,19 @@ final class CommentsRepository {
         }
     }
     
-    func listByUser(page: Int, onComplete: @escaping (Comments) -> Void, onError: ErrorHandler) async {
+    func listByUser(page: Int) async throws -> Comments {
         do {
-            let result = try await self.commentsService.listByUser(q: PaginatedRequestQueryParams(page: page, limit: 20))
-            onComplete(result)
-           
+            return try await self.commentsService.listByUser(q: PaginatedRequestQueryParams(page: page, limit: 20))
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.genericError("Unauthorized")
+        } catch ServiceError.serverError(let code) {
+            throw CommonIntercommunicationErrors.serverError(code)
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
-    func post(_ comment: Comment, onComplete: @escaping () -> Void, onError: ErrorHandler) async {
+    func post(_ comment: Comment) async throws -> SuccessfulResult {
         do {
             let headers: Array<HTTPHeader> = [
                 HTTPHeader(name: "country", content: "country"),
@@ -50,31 +52,46 @@ final class CommentsRepository {
             let result = try await self.commentsService.post(comment: comment, headers: headers)
             
             if result.code == "COMMENT_CREATED" {
-                onComplete()
+                return .done
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.code)
             }
             
-           
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
-    func update(_ comment: Comment, onComplete: @escaping () -> Void, onError: ErrorHandler) async {
+    func update(_ comment: Comment) async throws -> SuccessfulResult {
         do {
-            _ = try await self.commentsService.update(comment: comment)
-            onComplete()
+            let result = try await self.commentsService.update(comment: comment)
+            if result.code == "COMMENT_UPDATED" {
+                return .updated
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.code)
+            }
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
-    //
-    func delete(_ id: String, onComplete: @escaping () -> Void, onError: ErrorHandler) async {
+    /// Delete a comment of a user using it's ID
+    func delete(_ id: String) async throws -> SuccessfulResult {
         do {
-            _ = try await self.commentsService.delete(id: id)
-            onComplete()
+            let result = try await self.commentsService.delete(id: id)
+            if result.code == "COMMENT_DELETED" {
+                return .deleted
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.code)
+            }
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
 }

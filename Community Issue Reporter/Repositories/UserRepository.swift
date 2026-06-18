@@ -16,11 +16,6 @@ enum UserOAuthResultState {
     case unowned 
 }
 
-enum SuccessfulResult {
-    case done
-    case updated
-}
-
 typealias UserNameCompletion = (Result<String, UserError> ) -> Void
 typealias UserCompletion = (Result<String, Error> ) -> Void
 
@@ -130,7 +125,8 @@ final class UserRepository {
        return UserProfile(
             username: username,
             avatar: profile.imageURL(withDimension: 200),
-            email: email
+            email: email,
+            profileId: ""
            
         )
     }

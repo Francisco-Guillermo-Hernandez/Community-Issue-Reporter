@@ -7,26 +7,35 @@
 
 import Foundation
 
-class NetworkManager {
+final class NetworkManager {
     static let shared = NetworkManager()
     private let session: URLSession
     
     init() {
-        let config = URLSessionConfiguration.default
-        // Specify a disk capacity of 50MB and memory capacity of 10MB
+        let configuration = URLSessionConfiguration.default
         
+        /// Time to wait for additional data to arrive (Default is 60)
+        configuration.timeoutIntervalForRequest = 16.0
+
+        /// Time to wait for the whole resource to download (Optional)
+        configuration.timeoutIntervalForResource = 30.0
+       
+        /// Specify a disk capacity of 200MB and memory capacity of 10MB
         let memoryCapacity = 10 * 1024 * 1024
-        let diskCapacity = 75 * 1024 * 1024
-        config.urlCache = URLCache(memoryCapacity: memoryCapacity, diskCapacity: diskCapacity, diskPath: "reportamelo_app_cache")
-        // Use default protocol cache policy
-        config.requestCachePolicy = .useProtocolCachePolicy
+        let diskCapacity = 200 * 1024 * 1024
         
-        self.session = URLSession(configuration: config)
+        /// Defining the cache
+        configuration.urlCache = URLCache(memoryCapacity: memoryCapacity, diskCapacity: diskCapacity, diskPath: "reportamelo_app_cache")
+        
+        /// Use default protocol cache policy
+        configuration.requestCachePolicy = .useProtocolCachePolicy
+        
+        self.session = URLSession(configuration: configuration)
     }
     
-    func fetchData(request: URLRequest) async throws -> (Data, URLResponse) {
+    /// A wrapper for session data
+    func fetch(for request: URLRequest) async throws -> (Data, URLResponse) {
         return try await session.data(for: request)
     }
-    
 }
 

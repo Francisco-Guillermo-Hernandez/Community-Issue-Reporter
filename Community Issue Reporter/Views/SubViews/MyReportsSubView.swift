@@ -123,25 +123,18 @@ struct ReportCellView: View {
 
 // MARK: - sub view
 struct MyReportsSubView: View {
-    
-    @State private var reports: [Report] = []
-    @State private var showDeleteAlert: Bool = false
-    @State private var elementToDelete: IndexSet = []
-    @State private var reportToDelete: Report? = nil
-    @State private var model: ReportDataModel = ReportDataModel.shared
-    @State private var refreshID = UUID()
-    @State private var isLoading: Bool = false
-
+    @StateObject private var controller = MyReportsController()
     @Binding var path: [InsightsNavigation]
     var subViewName: String
+    
     var body: some View {
         Group {
-            if isLoading {
+            if controller.isLoading {
                 /// Show in the middle of the screen
                 LoadingView()
             }
 
-            if reports.isEmpty && !isLoading {
+            if controller.reports.isEmpty && !controller.isLoading {
                 // Empty state
                 ContentUnavailableView {
                     Label(
@@ -162,7 +155,7 @@ struct MyReportsSubView: View {
                 .containerRelativeFrame(.vertical)
             } else {
                 List {
-                    ForEach(reports, id: \.id) { report in
+                    ForEach(controller.reports, id: \.id) { report in
                         ReportCellView(report: report)
                             .cellStyle()
                     }
@@ -174,72 +167,26 @@ struct MyReportsSubView: View {
       
         .background(Color.theme.background)
         .scrollContentBackground(.hidden)
-        .alert("Delete report", isPresented: $showDeleteAlert) {
+        .alert("Delete report", isPresented: $controller.showDeleteAlert) {
             Button("Delete", role: .destructive) {
-                delete(report: reportToDelete)
+                controller.delete(report: controller.reportToDelete)
             }
             Button("Cancel", role: .cancel) {
-                self.reportToDelete = nil
+                controller.reportToDelete = nil
             }
         } message: {
             Text("Are you sure you want to delete ? This action cannot be undone.")
         }
-        .task(id: refreshID) {
+        .task(id: controller.refreshID) {
             guard !Task.isCancelled else { return }
-            await  fetchReports()
+            await controller.fetchReports()
         }
-//        .refreshable {
-//            refreshID = UUID()
-//        }
-//       
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)
-    }
-    
-    private func fetchReports() async {
-        isLoading = true
-        await ReportRepository.shared.listByUser(
-            page: 1,
-            onComplete: { result in
-                guard let reports = result.documents else { return }
-                self.reports = reports
-                isLoading = false
-            },
-            onError: { error in
-                print(error)
-                isLoading = false
-            }
-        )
-    }
-
-    
-    
-    private func confirmDeletion(of id: String) {
-        withAnimation {
-            reports.removeAll { $0.id == id }
-        }
-        reportToDelete = nil
-    }
-    
-    private func delete(report id: Report? = nil) {
-        Task {
-            guard let id = id?.id else { return }
-            await ReportRepository.shared.delete(
-                id,
-                onComplete: { result in
-                    print(result)
-                    confirmDeletion(of: id)
-                },
-                onError: { error in
-                    print(error)
-                }
-            )
-        }
     }
 }
 
 // MARK: - Preview
-
 #Preview {
     @Previewable
     @State var path: [InsightsNavigation] = []
@@ -247,4 +194,3 @@ struct MyReportsSubView: View {
         MyReportsSubView(path: $path, subViewName: "My Reports")
     }
 }
-

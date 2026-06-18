@@ -25,7 +25,7 @@ struct UserProfileView: View {
     @State private var showSheet = false
     @State private var selectedOption: String = ""
     @EnvironmentObject var controller: LandingController
-    @ObservedObject var profile = ProfileDataModel()
+    @StateObject private var profile = ProfileDataModel()
     
     init () {
         

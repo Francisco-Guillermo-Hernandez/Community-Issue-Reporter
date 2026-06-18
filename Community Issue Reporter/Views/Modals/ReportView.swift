@@ -100,12 +100,7 @@ struct AddInformationView: View {
                         value: $model.report.address
                     )
              
-                    TextInput(
-                        name: "Title",
-                        label: String(localized: "Title of the issue", comment: "ReportView: Title of the issue"),
-                        isValid: .constant(true),
-                        value: $model.report.title
-                    )
+                    
                 }
                 .padding()
             }

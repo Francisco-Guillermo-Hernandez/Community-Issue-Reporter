@@ -80,19 +80,17 @@ struct CommentsSubView: View {
         .task {
             isLoading = true
             guard !Task.isCancelled else { return }
-            await CommentsRepository.shared.listByUser(
-                page: 1,
-                onComplete: { result in
-                    guard let documents = result.documents else { return }
-                    
-                    self.comments.append(contentsOf: documents)
-                    isLoading = false
-                },
-                onError: { error in
-                    print(error)
-                    isLoading = false
-                }
-            )
+            
+            do {
+                let result = try await CommentsRepository.shared.listByUser(page: 1)
+                guard let documents = result.documents else { return }
+                
+                self.comments.append(contentsOf: documents)
+            } catch {
+                
+            }
+            
+            isLoading = false
         }
         .background(Color.theme.background)
         .scrollContentBackground(.hidden)

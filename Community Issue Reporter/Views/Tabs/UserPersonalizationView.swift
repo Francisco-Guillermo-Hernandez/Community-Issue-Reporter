@@ -35,7 +35,7 @@ enum UserNameAvailabilityStatus {
 struct UserPersonalizationView: View {
     @Environment(\.dismiss) var dismiss
     @FocusState private var isInputFocused: Bool
-    @ObservedObject var profile = ProfileDataModel()
+    @StateObject private var profile = ProfileDataModel()
     @State private var isPresented: Bool = false
     @State private var triggerFeedBack: Bool = false
     @State private var userName: String = ""

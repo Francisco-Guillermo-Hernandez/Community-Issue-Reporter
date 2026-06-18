@@ -152,7 +152,9 @@ struct SectionHeader: View {
         Text(title)
             .font(.headline)
 //            .padding(.top, 16)
+//            .kerning(0.6)
             .fontWeight(.bold)
+//            .fontWidth(.condensed)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
@@ -173,7 +175,9 @@ struct SectionHeader: View {
         disabled: false,
         createdAt: Date(),
         updatedAt: Date(),
-        reportsIds: []
+        reportsIds: [],
+        postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
+        postPublisher: .init(username: "", avatar: "", profileId: "")
     )
 
     NavigationStack {

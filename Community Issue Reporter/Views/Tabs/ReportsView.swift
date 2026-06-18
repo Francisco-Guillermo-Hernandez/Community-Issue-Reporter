@@ -42,11 +42,7 @@ struct ReportsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var reports: [MapExplorerReport] = []
     
-//    @EnvironmentObject var handler: ReportDetailsHandler
-    
     @EnvironmentObject var router: DeepLinkRouter
-    
-    
     
     private let animation = Animation.easeInOut(duration: 0.25)
     
@@ -54,10 +50,6 @@ struct ReportsView: View {
     var progress: CGFloat {
         return max(min(offsetY / 100, 1), 0)
     }
-    
-//    private var filteredIssues: [IssueMarker] {
-//        issues.filter { selectedStatuses.contains($0.status) }
-//    }
     
     var body: some View {
         MapReader { proxy in
@@ -124,7 +116,7 @@ struct ReportsView: View {
         }
         .task {
             
-            await appState.checkStatus()
+//            await appState.checkStatus()
 //            locationManager.requestAuthorization()
             
         }

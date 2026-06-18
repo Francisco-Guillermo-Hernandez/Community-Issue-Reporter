@@ -40,9 +40,9 @@ struct SignRequestsView: View {
     @State var strokes: [SignatureLine] = []
     
     @State private var users: [User] = [
-        User(username: "janeDoe", avatar: "user"),
-        User(username: "mayDoe", avatar: "user"),
-        User(username: "mperez", avatar: "user"),
+        User(username: "janeDoe", avatar: "user", profileId: ""),
+        User(username: "mayDoe", avatar: "user", profileId: ""),
+        User(username: "mperez", avatar: "user", profileId: ""),
     ]
     
     @Sendable
@@ -95,8 +95,11 @@ struct SignRequestsView: View {
                     "e6e67b15-15d7-4523-a85b-cd199d32117e",
                     "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
                     "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ]
+                ],
+                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
+                postPublisher: .init(username: "", avatar: "", profileId: "")
             ),
+            
             Petition(
                 id: "2",
                 title: "Un semaforo no esta funcionando en la avenida",
@@ -118,7 +121,9 @@ struct SignRequestsView: View {
                     "e6e67b15-15d7-4523-a85b-cd199d32117e",
                     "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
                     "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ]
+                ],
+                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
+                postPublisher: .init(username: "", avatar: "", profileId: "")
             ),
             Petition(
                 id: "3",
@@ -141,7 +146,9 @@ struct SignRequestsView: View {
                     "e6e67b15-15d7-4523-a85b-cd199d32117e",
                     "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
                     "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ]
+                ],
+                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
+                postPublisher: .init(username: "", avatar: "", profileId: "")
             ),
         ]
         

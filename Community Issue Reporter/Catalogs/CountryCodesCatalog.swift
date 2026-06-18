@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum CountryCode: String, CaseIterable {
+enum CountryCode: String, Codable, CaseIterable {
     case SV = "SV"
     case US = "US"
     case GT = "GT"

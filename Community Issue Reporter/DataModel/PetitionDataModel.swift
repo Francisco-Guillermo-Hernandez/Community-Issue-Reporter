@@ -9,11 +9,8 @@ import Foundation
 import SwiftUI
 internal import Combine
 
-//@Observable
- class PetitionDataModel: ObservableObject {
+class PetitionDataModel: ObservableObject {
     
-    
-//    static let shared = PetitionDataModel()
 
     @Published var petition: Petition = .init(
         id: "",
@@ -28,6 +25,10 @@ internal import Combine
         createdAt: Date(),
         updatedAt: Date(),
         reportsIds: [],
+        attachments: [],
+        postMetadata: .init(audience: "", visibility: .published, countryCode: .SV, language: "es", shareLink: ""),
+        postPublisher: .init(username: "", avatar: "", profileId: ""),
+        reportsMetadata: []
     )
      
     

@@ -11,17 +11,18 @@ struct UserProfile {
     let username: String?
     let avatar: URL?
     let email: String?
+    let profileId: String
 }
 
-struct User: Identifiable {
-    let id: String?
+struct User: Codable {
     let username: String
     let avatar: String
+    let profileId: String
     
-    init(id: String? = nil, username: String, avatar: String) {
-        self.id = UUID().uuidString as String?
+    init(username: String, avatar: String, profileId: String) {
         self.username = username
         self.avatar = avatar
+        self.profileId = profileId
     }
 }
 
@@ -40,7 +41,7 @@ struct Signatories: View {
     var users: [User]
     var body: some View {
         HStack(spacing: -.themeSpacing * 3) {
-            ForEach(users) { user in
+            ForEach(users, id: \.profileId) { user in
                 AvatarView(user: user)
                     .overlay(
                         Circle().stroke(Color.theme.border, lineWidth: 1)

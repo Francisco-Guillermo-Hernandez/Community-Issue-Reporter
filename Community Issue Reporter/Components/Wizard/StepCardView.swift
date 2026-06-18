@@ -16,23 +16,33 @@ struct StepCardView<Content: View>: View {
     @ViewBuilder let content: Content
     
     var body: some View {
-        VStack(alignment: .leading, spacing: .themeSpacing * 3) {
+        VStack(alignment: .leading, spacing: .themeSpacing * 1) {
             if step == currentStep {
                 /// Active State (Expanded)
                 VStack(alignment: .leading, spacing: .themeSpacing * 2) {
-                    Image(systemName: metadata?.icon ?? "")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(step.color)
-                        .padding(.bottom, 2)
+                    HStack(alignment: .center, spacing: .themeSpacing * 2) {
+                        Image(systemName: metadata?.icon ?? "")
+                            .font(.system(size: 26, weight: .bold))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(
+                                Color.theme.primary,
+                                Color.theme.foreground.opacity(0.8),
+                                Color.theme.foreground.opacity(0.8)
+                            )
+                            .offset(y: 6)
+
+                        VStack(alignment: .leading) {
+                            Text(metadata?.title ?? "")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            
+                            Text(metadata?.description ?? "")
+                                .font(.subheadline)
+                                .foregroundColor(Color.theme.foreground.opacity(0.8))
+                        }
+                    }
                     
-                    Text(metadata?.title ?? "")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Text(metadata?.description ?? "")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
                     
                     content
                         .padding(.top, 6)
@@ -47,12 +57,12 @@ struct StepCardView<Content: View>: View {
                 HStack(spacing: .themeSpacing * 2) {
                     Image(systemName: metadata?.icon ?? "")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(step < currentStep ? Color.theme.foreground : Color.theme.foreground.opacity(0.6))
+                        .foregroundColor(step < currentStep ? Color.theme.foreground : Color.theme.foreground.opacity(0.7))
                         .frame(width: 24, height: 24)
                     
                     Text(metadata?.title ?? "")
                         .font(.headline)
-                        .foregroundColor(step < currentStep ? Color.theme.foreground : Color.theme.foreground.opacity(0.6))
+                        .foregroundColor(step < currentStep ? Color.theme.foreground : Color.theme.foreground.opacity(0.7))
                     
                     Spacer()
                     
@@ -76,7 +86,7 @@ struct StepCardView<Content: View>: View {
 #Preview {
     
     
-    StepCardView(step: .details, currentStep: .confirmation, metadata: stepsMetadata["Details"]) {
+    StepCardView(step: .confirmation, currentStep: .confirmation, metadata: stepsMetadata["Details"]) {
         
     }
 }

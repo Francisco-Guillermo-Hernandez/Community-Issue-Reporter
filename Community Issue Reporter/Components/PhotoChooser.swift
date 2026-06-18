@@ -56,25 +56,18 @@ struct PhotoChooser: View {
         VStack {
             VStack {
                 HStack(spacing: 16) {
-                    Button {
-                        takePhotoUsingCamera { images in
-                            handleSelectedImages(images)
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "camera")
-                            Text("Take Photo")
-                                .font(.callout.bold())
-                        }
-                        .foregroundStyle(Color.theme.foreground)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            Capsule()
-                                .fill(Color.theme.muted)
-                        )
-                    }
-                    .buttonStyle(.borderless)
+                
+                    ThemedButton(
+                        message: "Take Photo",
+                        action: {
+                            takePhotoUsingCamera { images in
+                                handleSelectedImages(images)
+                            }
+                        },
+                        type: .outline,
+                        style: .prominent,
+                        icon: "camera"
+                    )
                     
                     PhotosPicker(
                         selection: $selectedPhotoItems,
@@ -94,15 +87,18 @@ struct PhotoChooser: View {
                             Text("Gallery")
                                 .font(.callout.bold())
                         }
-                        .foregroundStyle(Color.theme.foreground)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(
-                            Capsule()
-                                .fill(Color.theme.muted)
-                        )
+                        .padding(.themeSpacing * 3)
+                        .frame(maxWidth: .infinity, maxHeight: 48)
+//                        .modifier(ThemedButtonOutlineStyle(style: .prominent))
+//                        .foregroundStyle(Color.theme.foreground)
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                        .background(
+//                            Capsule()
+//                                .fill(Color.theme.muted)
+//                        )
                     }
-                    .buttonStyle(.borderless)
+                    .buttonStyle(ThemedButtonOutlineStyle(style: .prominent))
                     .onChange(of: selectedPhotoItems) { _, newItems in
                         guard !newItems.isEmpty else { return }
                         loadSelectedImages(from: newItems) { images in
@@ -251,12 +247,12 @@ struct PhotoChooser: View {
     }
 }
 
-#Preview {
-    PhotoChooser(
-        onSelect: { _ in },
-        onDelete: { _ in }
-    )
-}
+//#Preview {
+//    PhotoChooser(
+//        onSelect: { _ in },
+//        onDelete: { _ in }
+//    )
+//}
 
 struct ImagePicker: UIViewControllerRepresentable {
     let sourceType: UIImagePickerController.SourceType
@@ -277,7 +273,7 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 
-    final class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         private let onImagePicked: (MediaResources?) -> Void
 
         init(onImagePicked: @escaping (MediaResources?) -> Void) {

@@ -13,8 +13,8 @@ struct CommentRow: View {
     var body: some View {
         
         VStack(alignment: .leading, spacing: .themeSpacing * 2) {
+            
             HStack(spacing: .themeSpacing * 3) {
-                
                 
                 Group {
                     if let URL = urlFromString(comment.profilePicture) {
@@ -39,6 +39,7 @@ struct CommentRow: View {
                         Text(comment.name)
                             .font(.subheadline)
                             .fontWeight(.semibold)
+                            .opacity(0.88)
                     }
                     
                     Text(userAlias(comment.userName))
@@ -60,10 +61,11 @@ struct CommentRow: View {
             
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.bottom, 4)
+        .padding(.bottom, .themePadding / 4)
         
         Divider()
             .opacity(0.65)
+            .padding(.bottom, .themePadding / 4)
     }
 }
 
@@ -77,8 +79,8 @@ struct CommentRow: View {
         profilePicture: "https://development-api.reportamelo.app/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg?v=192929292",
         commentFor: .report,
         resourceId: "",
-        message: "We have problems with potholes in the road, please help us to fix it.",
-        createdAt: Date(),
+        message: "We have problems with potholes in the road, please help us to fix it. We have problems with potholes in the road, please help us to fix it. We have problems with potholes in the road, please help us to fix it.",
+        createdAt: parsePostgresDate("2026-05-01T00:00:00.000Z")!,
         updatedAt: Date()
     )
     

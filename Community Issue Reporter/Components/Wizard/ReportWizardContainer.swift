@@ -21,7 +21,6 @@ struct ReportWizardContainer: View {
     @State private var detailsName: String = ""
     @State private var detailsEmail: String = ""
     @State private var detailsDescription: String = ""
-    
     @State private var doneTrigger: Bool = false
     
     
@@ -36,11 +35,11 @@ struct ReportWizardContainer: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            // Screen Background
+            /// Screen Background
             Color.theme.background
                 .ignoresSafeArea()
-            
-            // Top Glow Gradient representing the active step color
+           
+            /// Top Glow Gradient representing the active step color
             currentStep.color
                 .opacity(0.12)
                 .frame(height: 280)
@@ -55,11 +54,11 @@ struct ReportWizardContainer: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // FIXED HEADER
+                /// FIXED HEADER
                 wizardHeader()
                     .padding()
                 
-                // STEP FLOW
+                /// STEP FLOW
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 20) {
@@ -109,27 +108,25 @@ struct ReportWizardContainer: View {
                     .padding()
             }
         }
-        .background(Color.theme.background)
         /// Smoothly animate the transitions of layout changes and background gradient
         .animation(.snappy(duration: 0.45, extraBounce: 0.08), value: currentStep)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: currentStep) { oldValue, newValue in
             return newValue > oldValue
         }
-        .sensoryFeedback(.success, trigger: doneTrigger) 
+        .toolbarTitleDisplayMode(.inline)
+        .toolbarVisibility(.hidden, for: .navigationBar)
+        .sensoryFeedback(.success, trigger: doneTrigger)
     }
     
     // MARK: - Subviews
     @ViewBuilder
     private func wizardHeader() -> some View {
         VStack(spacing: .themeSpacing * 3) {
+            
             HStack {
-                Spacer()
-                
                 Text("Step \(currentStep.rawValue) of 4")
-                    .font(.subheadline)
+                    .font(.headline)
                     .foregroundColor(Color.theme.foreground)
-                
-                Spacer()
             }
             
             ProgressView(value: Double(currentStep.rawValue), total: 4)
@@ -187,11 +184,12 @@ struct ReportWizardContainer: View {
 }
 
 
-
 #Preview() {
     let model: ReportDataModel = ReportDataModel.shared
     model.setMatterToSolve(mattersToResolve.first!)
-    return ReportWizardContainer(model: model, onCompletion: { data, type in
-        
-    }, showCancelButton: true)
+    return NavigationStack {
+        ReportWizardContainer(model: model, onCompletion: { data, type in
+            
+        }, showCancelButton: true)
+    }
 }

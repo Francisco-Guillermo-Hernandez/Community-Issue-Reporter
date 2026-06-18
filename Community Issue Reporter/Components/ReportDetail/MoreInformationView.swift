@@ -20,7 +20,8 @@ struct MoreInformationView: View {
                 HStack {
                     Text("Report Id:")
                         .font(.caption)
-                        
+                        .foregroundStyle(Color.secondary)
+                        .fontWeight(.medium)
                     Spacer()
                     Text(report.id)
                         .fontWeight(.semibold)
@@ -37,6 +38,8 @@ struct MoreInformationView: View {
                 HStack {
                     Text("Reported by:")
                         .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                        .fontWeight(.medium)
                         
                     Spacer()
                     Text(report.reportedBy)
@@ -44,10 +47,24 @@ struct MoreInformationView: View {
                         .fontWeight(.semibold)
                 }
                 
+                
+                HStack {
+                    Text("Created on:")
+                        .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                        .fontWeight(.medium)
+                       
+                    Spacer()
+                    Text(report.createdDate)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
             
                 HStack {
                     Text("Last update:")
                         .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                        .fontWeight(.medium)
                        
                     Spacer()
                     Text(report.updatedDate)
@@ -58,6 +75,8 @@ struct MoreInformationView: View {
                 HStack {
                     Text("Assigned institution:")
                         .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                        .fontWeight(.medium)
                         
                     Spacer()
                     Text("MOP")
@@ -68,6 +87,8 @@ struct MoreInformationView: View {
                 HStack {
                     Text("Address:")
                         .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                        .fontWeight(.medium)
                         
                     Spacer()
                     Text(report.address)
@@ -82,6 +103,8 @@ struct MoreInformationView: View {
                     HStack {
                         Text("Coordinates:")
                             .font(.caption)
+                            .foregroundStyle(Color.secondary)
+                            .fontWeight(.medium)
                             
                         Spacer()
                         Text("\(report.lat)° *N*, \(abs(report.lng))° *W*")
@@ -118,7 +141,7 @@ struct MoreInformationView: View {
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
             .scrollClipDisabled(true)
-            .frame(height: 295)
+            .frame(height: 315)
             .contentMargins(.all, 0, for: .scrollContent)
 
         }

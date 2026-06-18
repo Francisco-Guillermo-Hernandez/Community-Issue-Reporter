@@ -28,11 +28,10 @@ struct LocationStepView: View {
                         }
                     )
                     
-                    
                 }
                 .overlay(
                     RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-                                       .stroke(Color.theme.border, lineWidth: 1)
+                    .stroke(Color.theme.border, lineWidth: 1)
                 )
                 .cornerRadius(.themeRadius * 2)
                 .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1) // shadow-sm
@@ -65,18 +64,21 @@ struct LocationStepView: View {
                         )
                     }
                 }
-                .frame(maxHeight: .infinity)
+//                .frame(maxHeight: .infinity)
+                
+//
+                TextInput(
+                    name: "Address",
+                    label: String(localized: "Please tell us where is the issue", comment: "ReportView: Please tell us where is the issue"),
+                    axis: .vertical,
+                    isValid: $model.isAddressValid,
+                    value: $model.report.address
+                )
                 
                 Spacer()
             }
             
-            TextInput(
-                name: "Address",
-                label: String(localized: "Please tell us where is the issue", comment: "ReportView: Please tell us where is the issue"),
-                axis: .vertical,
-                isValid: $model.isAddressValid,
-                value: $model.report.address
-            )
+          
         }
         .padding(.top, 4)
     }

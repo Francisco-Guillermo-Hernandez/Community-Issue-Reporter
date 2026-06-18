@@ -180,30 +180,12 @@ struct DetailView: View {
     }
 
 
-    fileprivate func headers() -> VStack<TupleView<(some View, some View)>> {
-        return VStack {
-            Text(report.title)
-                .font(.title2)
-                .bold()
-                .fontWidth(.condensed)
-                .fontWeight(.bold)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Text(report.description)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, .themePadding)
-        }
-    }
 
     var body: some View {
         NavigationStack(path: $path) {
             ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: .themeSpacing * 5) {
-                    headers()
+                    DetailsHeader(title: report.title, description: report.description)
 
                     ///
                     BasicInformationView(for: report)

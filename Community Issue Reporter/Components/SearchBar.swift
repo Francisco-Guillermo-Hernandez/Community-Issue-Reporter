@@ -15,7 +15,6 @@ struct SearchBar: View {
     @FocusState.Binding var isFocused: Bool
     let profileNamespace: Namespace.ID
     var avatarURL: URL? = nil
-    @ObservedObject var viewModel = ProfileDataModel()
 
     var body: some View {
         

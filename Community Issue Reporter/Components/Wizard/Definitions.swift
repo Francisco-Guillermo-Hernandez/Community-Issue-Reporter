@@ -45,8 +45,8 @@ struct StepsMetadata: Identifiable {
 }
 
 let stepsMetadata: [String: StepsMetadata] = [
-    "Location": StepsMetadata(title: "Location", description: "Where did it happen?", icon: "map"),
+    "Location": StepsMetadata(title: "Location", description: "Where did it happen?", icon: "location.magnifyingglass"),
     "Media": StepsMetadata(title: "Media", description: "Any photos or videos?", icon: "photo.badge.plus"),
     "Details": StepsMetadata(title: "Details", description: "What happened?", icon: "long.text.page.and.pencil"),
-    "Confirmation":  StepsMetadata(title: "Confirmation", description: "All set?", icon: "checkmark.circle.fill")
+    "Confirmation":  StepsMetadata(title: "Confirmation", description: "All set?", icon: "text.badge.checkmark")
 ]

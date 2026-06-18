@@ -113,7 +113,9 @@ struct PetitionViewPost: View {
             "e6e67b15-15d7-4523-a85b-cd199d32117e",
             "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
             "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-        ]
+        ],
+        postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
+        postPublisher: .init(username: "", avatar: "", profileId: "")
     )
     
     PetitionViewPost(petition: petition)

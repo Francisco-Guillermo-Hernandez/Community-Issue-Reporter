@@ -66,4 +66,5 @@ enum CommonIntercommunicationErrors: Error {
 enum SuccessfulResult {
     case done
     case updated
+    case deleted
 }

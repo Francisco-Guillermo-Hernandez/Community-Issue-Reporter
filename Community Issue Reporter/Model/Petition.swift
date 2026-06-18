@@ -8,6 +8,31 @@
 import Foundation
 import SwiftUI
 
+enum PostVisibility: String, Codable {
+    case hidden
+    case draft
+    case published
+}
+
+struct PostMetadata: Codable {
+    let audience: String
+    let visibility: PostVisibility
+    let countryCode: CountryCode
+    let language: String
+    let shareLink: String
+}
+
+struct ReportMetadata: Identifiable, Codable {
+    let id: String
+    let lat: Double
+    let lng: Double
+    let created: Date
+    let severityId: Int
+    let statusId: Int
+    let issueTypeId: Int
+    let matterToSolveId: Int
+}
+
 struct Petition: Identifiable, Codable, Equatable, Hashable {
     
     static func == (lhs: Petition, rhs: Petition) -> Bool {
@@ -29,6 +54,10 @@ struct Petition: Identifiable, Codable, Equatable, Hashable {
     var createdAt: Date?
     var updatedAt: Date?
     var reportsIds: [String]
+    var attachments: [Attachment]
+    let postMetadata: PostMetadata
+    let postPublisher: User
+    let reportsMetadata: [ReportMetadata]
     
     init(
         id: String?,
@@ -42,7 +71,11 @@ struct Petition: Identifiable, Codable, Equatable, Hashable {
         disabled: Bool?,
         createdAt: Date?,
         updatedAt: Date?,
-        reportsIds: [String] = []
+        reportsIds: [String] = [],
+        attachments: [Attachment] = [],
+        postMetadata: PostMetadata,
+        postPublisher: User,
+        reportsMetadata: [ReportMetadata] = []
     ) {
         self.id = id
         self.title = title
@@ -56,6 +89,10 @@ struct Petition: Identifiable, Codable, Equatable, Hashable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.reportsIds = reportsIds
+        self.attachments = attachments
+        self.postMetadata = postMetadata
+        self.postPublisher = postPublisher
+        self.reportsMetadata = reportsMetadata
     }
 }
 

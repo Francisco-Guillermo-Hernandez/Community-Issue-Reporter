@@ -42,8 +42,45 @@ struct IssueUpdate: Codable, Identifiable {
     let attachments: [Attachment]
 }
 
+enum AttachmentType: String, Codable {
+    case image
+    case video
+    case document
+}
+
+enum AttachmentValidatedBy: String, Codable {
+    case bot
+    case municipality
+    case citizen
+    case manually
+}
+
+enum ReportAttachmentState: String, Codable {
+    case confirmed
+    case pending
+    case inappropriate
+    case deleted
+}
+
 struct Attachment: Codable, Identifiable {
     let id: String
-    let type: String
+    let type: AttachmentType
+    let createdAt: Date
+    let updatedAt: Date?
+    let uploadedBy: String
+    let ValidatedAt: Date?
+    let validatedBy: AttachmentValidatedBy?
+    let state: ReportAttachmentState
+    let notes: String
+    let url: String
+    let previewUrl: String
+}
+
+struct PreviewAttachment: Codable, Identifiable {
+    let id: String
+    let type: AttachmentType
+    let createdAt: Date
+    let uploadedBy: String
+    let validatedBy: AttachmentValidatedBy?
     let url: String
 }

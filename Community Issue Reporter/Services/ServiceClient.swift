@@ -9,13 +9,32 @@ import Foundation
 import SwiftMsgpack
 
 ///
+enum HttpMethod: String {
+    case get = "GET"
+    case post = "POST"
+    case put = "PUT"
+    case delete = "DELETE"
+    case options = "OPTIONS"
+}
+
+/// Decoders to parse raw data into a known format
 enum DecoderType {
     case json(JSONDecoder)
     case messagePack(MsgPackDecoder)
 }
 
+/// Possible states of the network
+enum NetworkState<T> {
+    case idle
+    case loading
+    case success(T)
+    case failure(Error)
+}
+
+
 ///
 enum ServiceError: Error {
+    case networkError(Error)
     case baseURLMissing
     case invalidResponse
     case httpStatus(Int)
@@ -35,7 +54,6 @@ enum ServiceError: Error {
 struct ServiceClient {
   
     private let baseURL: URL?
-    private let session: URLSession
     private let decoder: DecoderType
     private let delimiter = "/"
 
@@ -46,9 +64,8 @@ struct ServiceClient {
     }
     
     /// initialize the instance by default with .json decoderType
-    init(baseURL: URL? = development, session: URLSession = .shared, decoderType: DecoderType = .json(.init())) {
+    init(baseURL: URL? = development, decoderType: DecoderType = .json(.init())) {
         self.baseURL = baseURL
-        self.session = session
         
         switch decoderType {
             case .json: self.decoder = .json(ServiceClient.makeJSONDecoder())
@@ -102,7 +119,7 @@ struct ServiceClient {
             throw ServiceError.baseURLMissing
         }
 
-        var url = baseURL.appendingPathComponent(sanitizedPath)
+        var url = baseURL.appending(path: sanitizedPath)
         
         queryBuilder(query, &url)
         
@@ -124,7 +141,14 @@ struct ServiceClient {
         }
 
         
-        let (data, response) = try await NetworkManager.shared.fetchData(request: request)
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await NetworkManager.shared.fetch(for: request)
+        } catch {
+            throw ServiceError.networkError(error)
+        }
+        
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }
@@ -207,7 +231,7 @@ struct ServiceClient {
             throw ServiceError.baseURLMissing
         }
         
-        let url = baseURL.appendingPathComponent(sanitizedPath)
+        let url = baseURL.appending(path: sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
@@ -238,7 +262,13 @@ struct ServiceClient {
             request.httpBody = try encoder.encode(body)
         }
         
-        let (data, response) = try await session.data(for: request)
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await NetworkManager.shared.fetch(for: request)
+        } catch {
+            throw ServiceError.networkError(error)
+        }
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
@@ -255,7 +285,7 @@ struct ServiceClient {
             throw ServiceError.baseURLMissing
         }
         
-        let url = baseURL.appendingPathComponent(sanitizedPath)
+        let url = baseURL.appending(path: sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
@@ -275,7 +305,14 @@ struct ServiceClient {
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(body)
         
-        let (data, response) = try await session.data(for: request)
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await NetworkManager.shared.fetch(for: request)
+        } catch {
+            throw ServiceError.networkError(error)
+        }
+        
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }
@@ -298,7 +335,7 @@ struct ServiceClient {
             throw ServiceError.baseURLMissing
         }
         
-        let url = baseURL.appendingPathComponent(sanitizedPath)
+        let url = baseURL.appending(path: sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
@@ -318,7 +355,14 @@ struct ServiceClient {
         let encoder = JSONEncoder()
         request.httpBody = try encoder.encode(body)
         
-        let (data, response) = try await session.data(for: request)
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await NetworkManager.shared.fetch(for: request)
+        } catch {
+            throw ServiceError.networkError(error)
+        }
+        
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }
@@ -345,7 +389,7 @@ struct ServiceClient {
             throw ServiceError.baseURLMissing
         }
 
-        let url = baseURL.appendingPathComponent(sanitizedPath)
+        let url = baseURL.appending(path: sanitizedPath)
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
@@ -375,7 +419,14 @@ struct ServiceClient {
             request.httpBody = try encoder.encode(body)
         }
 
-        let (data, response) = try await session.data(for: request)
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await NetworkManager.shared.fetch(for: request)
+        } catch {
+            throw ServiceError.networkError(error)
+        }
+        
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }

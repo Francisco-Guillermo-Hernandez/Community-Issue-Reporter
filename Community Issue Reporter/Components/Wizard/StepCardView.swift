@@ -29,7 +29,6 @@ struct StepCardView<Content: View>: View {
                                 Color.theme.foreground.opacity(0.8),
                                 Color.theme.foreground.opacity(0.8)
                             )
-                            .offset(y: 6)
 
                         VStack(alignment: .leading) {
                             Text(metadata?.title ?? "")
@@ -68,8 +67,14 @@ struct StepCardView<Content: View>: View {
                     
                     if step < currentStep {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                            .font(.system(size: 16))
+//                            .foregroundColor(.green)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(
+                                Color.white,
+                                Color.green,
+                                Color.green
+                            )
+                            .font(.system(size: 20))
                             .transition(.scale.combined(with: .opacity))
                     }
                 }
@@ -86,7 +91,7 @@ struct StepCardView<Content: View>: View {
 #Preview {
     
     
-    StepCardView(step: .confirmation, currentStep: .confirmation, metadata: stepsMetadata["Details"]) {
+    StepCardView(step: .details, currentStep: .confirmation, metadata: stepsMetadata["Details"]) {
         
     }
 }

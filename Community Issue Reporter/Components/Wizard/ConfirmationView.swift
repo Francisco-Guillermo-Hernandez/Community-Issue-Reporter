@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ConfirmationView: View {
+    @Binding var id: String
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.seal.fill")
@@ -24,9 +25,10 @@ struct ConfirmationView: View {
                 .padding(.horizontal, 16)
             
             HStack {
-                Text("SV-SS-20260616-cUqEVWHYJ9AmXOZ1")
+                Text(id)
                     .font(.system(.caption, design: .monospaced))
                     .kerning(0.5)
+                    .id(id)
                 
                 Button(role: .confirm) {
                     
@@ -35,10 +37,8 @@ struct ConfirmationView: View {
                         .font(.system(size: 10))
                 }
                 
-//                Image(systemName: "document.on.document")
             }
                                 .padding()
-//            .padding(.horizontal, 16)
                                 .background(Color.theme.cardBackground)
         
             .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1, style: .continuous))
@@ -51,5 +51,11 @@ struct ConfirmationView: View {
 }
 
 #Preview {
-    ConfirmationView()
+    @Previewable
+    @State var code: String = "SV-SS-20260619-ro7kMoZIYwqoD0XL"
+    
+    NavigationStack {
+        ConfirmationView(id: $code)
+    }
+    .background(Color.theme.background)
 }

@@ -8,39 +8,29 @@
 import SwiftUI
 
 struct DetailsView: View {
-    @Binding var name: String
-    @Binding var email: String
-    @Binding var description: String
+    @Bindable var model: ReportDataModel
+    
+    init(_ model: ReportDataModel) {
+        self.model = model
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            TextField("Your Name", text: $name)
-                .padding(12)
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
+            TextInput(
+                name: "Title",
+                label: String(localized: "Title of the issue", comment: "ReportView: Title of the issue"),
+                isValid: .constant(true),
+                value: $model.report.title,
+            )
             
-            TextField("Your Email", text: $email)
-                .keyboardType(.emailAddress)
-                .autocapitalization(.none)
-                .padding(12)
-                .background(Color(.systemGray6))
-                .cornerRadius(10)
-            
-            ZStack(alignment: .topLeading) {
-                TextEditor(text: $description)
-                    .frame(height: 80)
-                    .padding(6)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
+            TextInput(
+                name: "Description",
+                label: String(localized: "Please describe the issue", comment: "ReportView: Please describe the issue"),
+                axis: .vertical,
+                isValid: .constant(true),
+                value: $model.report.description,
                 
-                if description.isEmpty {
-                    Text("Describe what happened...")
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 12)
-                        .allowsHitTesting(false)
-                }
-            }
+            )
         }
         .padding(.top, 4)
     }
@@ -48,5 +38,7 @@ struct DetailsView: View {
 
 
 #Preview {
-    DetailsView(name: .constant(""), email: .constant(""), description: .constant(""))
+    let model: ReportDataModel = ReportDataModel.shared
+    model.setMatterToSolve(mattersToResolve.first!)
+    return DetailsView(model)
 }

@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct MediaStepView: View {
-    @Binding var media: [UIImage]
-    @State private var selectedImages: [MediaResources] = []
+    @Binding var selectedImages: [MediaResources]
+    
+    init(attachments: Binding<[MediaResources]>) {
+        self._selectedImages = attachments
+    }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            
-            
+        VStack(alignment: .leading, spacing: .themeSpacing * 3) {
             PhotoChooser(
                 onSelect: { images in
                     print("Selected images: \(images.count)")
@@ -31,5 +32,12 @@ struct MediaStepView: View {
 
 
 #Preview {
-    MediaStepView(media: .constant([]))
+    NavigationStack {
+        VStack {
+            MediaStepView(attachments: .constant([]))
+        }
+        .padding()
+        .background(Color.theme.background)
+    }
+    
 }

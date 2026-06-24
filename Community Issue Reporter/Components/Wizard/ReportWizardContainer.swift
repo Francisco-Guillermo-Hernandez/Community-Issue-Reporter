@@ -15,14 +15,9 @@ struct ReportWizardContainer: View {
     @State private var currentStep: ReportStep = .location
     @Environment(\.dismiss) private var dismiss
     
-    // Form Data State held at the container level
-    @State private var selectedLocation: String = ""
-    @State private var attachedMedia: [UIImage] = []
-    @State private var detailsName: String = ""
-    @State private var detailsEmail: String = ""
-    @State private var detailsDescription: String = ""
+    @State private var selectedImages: [MediaResources] = []
     @State private var doneTrigger: Bool = false
-    
+    @StateObject private var controller: ReportController
     
     var showCancelButton: Bool = false
     var onCompletion: (String, AlertType) -> Void
@@ -31,6 +26,7 @@ struct ReportWizardContainer: View {
         self.model = model
         self.onCompletion = onCompletion
         self.showCancelButton = showCancelButton
+        self._controller = StateObject(wrappedValue: ReportController())
     }
     
     var body: some View {
@@ -73,11 +69,11 @@ struct ReportWizardContainer: View {
                                         case .location:
                                             LocationStepView(model)
                                         case .media:
-                                            MediaStepView(media: $attachedMedia)
+                                            MediaStepView(attachments: $selectedImages)
                                         case .details:
-                                            DetailsView(name: $detailsName, email: $detailsEmail, description: $detailsDescription)
+                                            DetailsView(model)
                                         case .confirmation:
-                                            ConfirmationView()
+                                            ConfirmationView(id: $controller.reportId)
                                         }
                                     }
                                 }
@@ -116,6 +112,14 @@ struct ReportWizardContainer: View {
         .toolbarTitleDisplayMode(.inline)
         .toolbarVisibility(.hidden, for: .navigationBar)
         .sensoryFeedback(.success, trigger: doneTrigger)
+        .task {
+            await self.controller.startRePorting(model)
+        }
+        .alert("Status Update", isPresented: $controller.presentAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(controller.alertMessage)
+        }
     }
     
     // MARK: - Subviews
@@ -140,18 +144,27 @@ struct ReportWizardContainer: View {
     private func wizardFooter() -> some View {
         HStack {
             if currentStep < .confirmation {
-                Button(action: { goNext() }) {
-                    Text(currentStep == .details ? "Submit" : "Next")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(currentStep.color)
-                        .foregroundColor(.white)
-                        .contentShape(Capsule())
-                        .clipShape(Capsule())
-                    
-                }
+                let message = currentStep == .details ? "Submit" : "Next"
+                ThemedButton(
+                    message: message, 
+                    action: {
+                       
+                        if currentStep == .details {
+                           
+                            controller.submitReport(model)
+                            goNext()
+                           
+                        } else {
+                            goNext()
+                        }
+                        
+                    },
+                    type: .primary,
+                    style: .prominent,
+                    icon: ""
+                )
+                
+                
             } else {
                 Button(action: { doneTrigger.toggle(); dismiss() }) {
                     Text("Done")

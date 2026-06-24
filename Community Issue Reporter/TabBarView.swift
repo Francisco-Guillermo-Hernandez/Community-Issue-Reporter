@@ -79,5 +79,5 @@ struct TabBarView: View {
     TabBarView()
         .environmentObject(AuthViewModel())
         .environmentObject(DeepLinkRouter())
-        
+        .environmentObject(LandingController())
 }

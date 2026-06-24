@@ -63,8 +63,9 @@ enum CommonIntercommunicationErrors: Error {
 }
 
 // MARK: - 
-enum SuccessfulResult {
+enum SuccessfulResult: Equatable {
     case done
     case updated
     case deleted
+    case created(String)
 }

@@ -17,9 +17,14 @@ struct LoadingView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.theme.background)
         .containerRelativeFrame(.vertical)
+        .ignoresSafeArea(edges: .all)
     }
 }
 
 #Preview {
-    LoadingView()
+    NavigationStack {
+        ScrollView {
+            LoadingView()
+        }
+    }
 }

@@ -11,4 +11,6 @@ internal import Combine
 @MainActor
 class PetitionController: ObservableObject {
     
+    @Published var petitions: [Petition] = []
+    @Published var isLoading: Bool = false
 }

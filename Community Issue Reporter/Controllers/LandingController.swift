@@ -140,7 +140,7 @@ class LandingController: ObservableObject {
     }
     
     private func setAvatar(url: String, _ createdFrom: AvatarCreatedFrom) -> Void {
-        self.profile.avatarURL = urlFromString(url)
+//        self.profile.avatarURL = urlFromString(url)
         self.profile.selectedAvatarOptionView = createdFrom
     }
     
@@ -166,6 +166,7 @@ class LandingController: ObservableObject {
         UserDefaults.standard.set(nil, forKey: "map_longitude_delta")
         UserDefaults.standard.set(nil, forKey: "avatar_url")
         UserDefaults.standard.set(nil, forKey: "user_name")
+        UserDefaults.standard.set(nil, forKey: "names")
         UserDefaults.standard.set(nil, forKey: "selectedLanguageCode")
     }
     

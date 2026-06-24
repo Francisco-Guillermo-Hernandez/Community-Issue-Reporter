@@ -19,7 +19,7 @@ final class LocatorDAO {
     func findBy(cityName: String, country: String) -> Locator {
         let query = "SELECT countryCode, country, region FROM ip_locations WHERE city = ? and country = ? or countryCode = ? LIMIT 1"
         var statement: OpaquePointer? = nil
-        var locator: Locator = .init(id: "", countryCode: "", country: "", region: "", city: "", address: "")
+        var locator: Locator = .init(countryCode: "", country: "", region: "", city: "", cityId: "", cityNameSortKey: "", cityCode: "", address: "")
         
         if sqlite3_prepare(dbManager.db, query, -1, &statement, nil) == SQLITE_OK {
             sqlite3_bind_text(statement, 1, (cityName as NSString).utf8String, -1, nil)
@@ -29,12 +29,14 @@ final class LocatorDAO {
            if sqlite3_step(statement) == SQLITE_ROW {
 
                 locator = Locator(
-                    id: UUID().uuidString,
                     countryCode: String(cString: sqlite3_column_text(statement, 0)),
                     country: String(cString: sqlite3_column_text(statement, 1)),
                     region: String(cString: sqlite3_column_text(statement, 2)),
                     city: cityName,
-                    address: ""
+                    cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
+                    cityNameSortKey: "san-salvador",
+                    cityCode: "SS",
+                    address: "",
                 )
             }
         }

@@ -28,6 +28,7 @@ struct MapExplorerReport: Identifiable, Decodable, Hashable {
     let reportedBy: String
     let cityId: String
     let petitionId: String?
+    let shareUrl: String
     var clLocation: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: lat, longitude: lng)
     }

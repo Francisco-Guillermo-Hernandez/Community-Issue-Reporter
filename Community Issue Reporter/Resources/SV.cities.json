@@ -9,10 +9,11 @@
             "groupingId": "4388e6be-28d8-4f24-9b6b-801b96a92823",
             "groupingName": "Municipio de Cuscatlán Sur",
             "legalGroupName": "Distrito de Cojutepeque",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.71667,
-                "lng": -88.93333
+                "lat": 13.72141,
+                "lng": -88.9351533
             }
         },
         {
@@ -25,10 +26,11 @@
             "groupingId": "f8832a76-90f3-4e4b-97e3-0d335606d132",
             "groupingName": "Municipio de San Vicente Sur",
             "legalGroupName": "Distrito de San Vicente",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.63333,
-                "lng": -88.8
+                "lat": 13.6418712,
+                "lng": -88.7850941
             }
         },
         {
@@ -41,10 +43,11 @@
             "groupingId": "41071478-f9b1-4775-be7f-8566a7b73812",
             "groupingName": "Municipio de La Paz Este",
             "legalGroupName": "Distrito de Zacatecoluca",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.5,
-                "lng": -88.86667
+                "lat": 13.5084266,
+                "lng": -88.8700186
             }
         },
         {
@@ -57,10 +60,11 @@
             "groupingId": "f8832a76-90f3-4e4b-97e3-0d335606d132",
             "groupingName": "Municipio de Cabañas Este",
             "legalGroupName": "Distrito de Sensuntepeque",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.86667,
-                "lng": -88.63333
+                "lat": 13.8757106,
+                "lng": -88.6280371
             }
         },
         {
@@ -73,10 +77,11 @@
             "groupingId": "77b218a1-8d26-4076-a006-2581079d2b27",
             "groupingName": "Municipio de La Unión Sur",
             "legalGroupName": "Distrito de La Unión",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.33915,
-                "lng": -87.84328
+                "lat": 13.3377523,
+                "lng": -87.8423486
             }
         },
         {
@@ -105,10 +110,11 @@
             "groupingId": "03a62883-9b16-4318-971c-3c8c6f443b7f",
             "groupingName": "Municipio de Morazán Sur",
             "legalGroupName": "Distrito de San Francisco Gotera",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.688839,
-                "lng": -88.106404
+                "lat": 13.6953076,
+                "lng": -88.1085518
             }
         },
         {
@@ -124,8 +130,8 @@
             "isCapitalCity": 1,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.68935,
-                "lng": -89.18718
+                "lat": 13.6979857,
+                "lng": -89.1918083
             }
         },
         {
@@ -138,10 +144,11 @@
             "groupingId": "6f82729a-5264-4630-9774-6330072b270a",
             "groupingName": "Municipio de Usulután Este",
             "legalGroupName": "Distrito de Usulután",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.35,
-                "lng": -88.45
+                "lat": 13.3444216,
+                "lng": -88.4396629
             }
         },
         {
@@ -154,10 +161,11 @@
             "groupingId": "f242557a-0d85-45d6-b489-08a65c490a61",
             "groupingName": "Municipio de San Miguel Centro",
             "legalGroupName": "Distrito de San Miguel",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.48333,
-                "lng": -88.18333
+                "lat": 13.4817044,
+                "lng": -88.1762026
             }
         },
         {
@@ -170,10 +178,11 @@
             "groupingId": "99488a0b-f350-4228-b016-568853b01a14",
             "groupingName": "Municipio de Chalatenango Sur",
             "legalGroupName": "Distrito de Chalatenango",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 14.03333,
-                "lng": -88.93333
+                "lat": 14.0413449,
+                "lng": -88.9409603
             }
         },
         {
@@ -186,10 +195,11 @@
             "groupingId": "7e9d63fe-29c8-48d2-b9a7-534faeff3e5b",
             "groupingName": "Municipio de Ahuachapán Centro",
             "legalGroupName": "Distrito de Ahuachapán",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.92139,
-                "lng": -89.845
+                "lat": 13.9195669,
+                "lng": -89.8485353
             }
         },
         {
@@ -202,10 +212,11 @@
             "groupingId": "cc46f556-91e8-466f-998b-7033783db9f9",
             "groupingName": "Municipio de La Libertad Sur",
             "legalGroupName": "Distrito de Santa Tecla",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.67694,
-                "lng": -89.27972
+                "lat": 13.6753907,
+                "lng": -89.2916309
             }
         },
         {
@@ -218,10 +229,11 @@
             "groupingId": "36f9036c-2f95-460d-953b-e01614761cc2",
             "groupingName": "Municipio de Santa Ana Centro",
             "legalGroupName": "Distrito de Santa Ana",
+            "isCapitalCity": 0,
             "isDepartmentalCapital": 1,
             "coordinates": {
-                "lat": 13.99417,
-                "lng": -89.55972
+                "lat": 13.9947872,
+                "lng": -89.5571909
             }
         }
     ]

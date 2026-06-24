@@ -16,7 +16,7 @@ class DeepLinkRouter: ObservableObject {
     @Published var isPresented: Bool = false
     @Published var isLoading: Bool = false
     @Published var message: String = ""
-    @Published var report: MapExplorerReport = .init(id: "", lat: 0, lng: 0, address: "", title: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAtRaw: 0, cellIndex: "", createdAtRaw: 0, updatedAtRaw: 0, reportedBy: "", cityId: "", petitionId: "")
+    @Published var report: MapExplorerReport = .init(id: "", lat: 0, lng: 0, address: "", title: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAtRaw: 0, cellIndex: "", createdAtRaw: 0, updatedAtRaw: 0, reportedBy: "", cityId: "", petitionId: "", shareUrl: "")
     @Published var presentAlert: Bool = false
     @Published var isReadyToRoute: Bool = false
     
@@ -48,8 +48,8 @@ class DeepLinkRouter: ObservableObject {
         switch deepLink.type {
         case .report:
             self.activeTab = 1
-            self.activeReportID = "69f1f94e-3b43-4617-85e5-bb2207066fcc"
-            
+            self.activeReportID = deepLink.reportId
+            print("Active report ID: \(activeReportID ?? "nil")")
             guard let reportId = activeReportID else { return }
             
             retrieveAndPresentReportDetails(of: reportId)

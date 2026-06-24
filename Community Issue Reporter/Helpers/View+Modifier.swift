@@ -126,15 +126,10 @@ extension View {
             .simpleCellStyle()
         }
         .environment(\.defaultMinListRowHeight, 0)
-//        .overlay {
-//            Rectangle()
-//                .stroke(Color.black, lineWidth: 1)
-//        }
         .padding()
         .listRowBackground(Color.clear)
         .scrollDisabled(true)
         .scrollContentBackground(.hidden)
-    //    .listStyle(.insetGrouped)
         .listStyle(.plain)
         .scrollClipDisabled(true)
         .frame(height: 335)

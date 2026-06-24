@@ -7,18 +7,18 @@
 
 import Foundation
 
-enum ShareType: String {
+enum ShareType: String, Codable, CaseIterable {
     case report
     case petition
 }
 
 func buildShareURLWithComponents(for index: String, type: ShareType, slug: String) -> URL? {
-    return shareBaseURL!.appending(component: index).appending(component: type.rawValue).appending(component: slug)
+    return shareableUrl!.appending(component: index).appending(component: type.rawValue).appending(component: slug)
                 
 }
 
 func buildShareURL(for path: String) -> URL? {
-    return shareBaseURL!.appending(path: path)
+    return shareableUrl!.appending(path: path)
 }
 
 func urlFromString(_ string: String) -> URL? {

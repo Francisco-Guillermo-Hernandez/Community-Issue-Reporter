@@ -33,3 +33,18 @@ func applyFormat(_ timestamp: String?) -> String {
     
     return "Never"
 }
+
+
+enum DateFormat {
+    case dashed
+    case joined
+}
+
+func createdAtNow(format: DateFormat) -> String {
+    var verbatim: Date.FormatString = format == .joined ?  "\(year: .extended())\(month: .twoDigits)\(day: .twoDigits)" : "\(year: .extended())\(month: .twoDigits)-\(day: .twoDigits)"
+    
+     return Date()
+        .formatted(
+            .verbatim(verbatim, timeZone: .current, calendar: .current)
+    )
+}

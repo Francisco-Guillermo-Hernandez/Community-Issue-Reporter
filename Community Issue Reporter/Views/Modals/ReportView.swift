@@ -225,37 +225,38 @@ struct ReportWizardView: View {
             dump(model.locator)
             
             if model.report.reportState == .inProgress || model.report.reportState == .new {
-                model.report.id = await ReportRepository
-                    .shared
-                    .create(
-                        report: model.report,
-                        locator: model.locator,
-                        onError: { error in
-                            print("error: \(error)")
-                        }
-                    )
+                do {
+//                    let result = try await ReportRepository
+//                        .shared
+//                        .create(report: model.report, locator: model.locator)
+                    
+//                    model.report.id = result
+                    
+                } catch {
+                    print(error)
+                }
             }
             
             if model.report.reportState == .modifying {
-                await ReportRepository
-                    .shared
-                    .update(
-                        report: model.report,
-                        locator: model.locator,
-                        onComplete: { result in
-                            print(result)
-                        },
-                        onError: { error in
-                            print("error: \(error)")
-                        }
-                    )
+                do {
+                    let result = try await ReportRepository
+                        .shared
+                        .update(report: model.report,
+                            locator: model.locator)
+                    
+                    if result == .updated {
+                        print("report updated")
+                    }
+                } catch {
+                    print(error.localizedDescription)
+                }
             }
             
             if selectedImages.count > 0 {
-                await ImageEncoderService().prepareAndSend(
-                    reportId: model.report.id!,
-                    images: selectedImages
-                )
+//                await ImageEncoderService().prepareAndSend(
+//                    reportId: model.report.id!,
+//                    images: selectedImages
+//                )
             }
             
             await MainActor.run {

@@ -116,7 +116,7 @@ struct ReportsView: View {
         }
         .task {
             
-//            await appState.checkStatus()
+            await appState.checkStatus()
 //            locationManager.requestAuthorization()
             
         }

@@ -128,7 +128,7 @@ struct MyReportsSubView: View {
     var subViewName: String
     
     var body: some View {
-        Group {
+        ZStack {
             if controller.isLoading {
                 /// Show in the middle of the screen
                 LoadingView()
@@ -164,7 +164,7 @@ struct MyReportsSubView: View {
             }
 
         }
-      
+//        .ignoresSafeArea(edges: .all)
         .background(Color.theme.background)
         .scrollContentBackground(.hidden)
         .alert("Delete report", isPresented: $controller.showDeleteAlert) {

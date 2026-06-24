@@ -127,13 +127,14 @@ struct CreateRequestPetitionView: View {
 //                }
                 
                 // list reports for the creation of the petition
-                await ReportRepository.shared.listByUser(page: 1, onComplete: { result in
+                do {
+                    let result = try await ReportRepository.shared.listByUser(page: 1)
                     guard let reports = result.documents else { return }
                     self.reports = reports
-                }, onError: { error in
-                    print(error)
-                })
-                
+                    
+                } catch {
+                    print(error.localizedDescription)
+                }
         
             }
             .background(Color.theme.background)

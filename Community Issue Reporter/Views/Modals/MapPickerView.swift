@@ -301,7 +301,7 @@ func getLocation(c coordinate: Coordinate) -> CLLocationCoordinate2D {
 
 #Preview {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
-    @Previewable @State var locator: Locator = .init(id: "", countryCode: "", country: "", region: "", city: "", address: "")
+    @Previewable @State var locator: Locator = .init(countryCode: "", country: "", region: "", city: "", cityId: "", cityNameSortKey: "", cityCode: "SS", address: "")
     MapPickerView(coordinate: $coordinate, locator: $locator)
 
 }

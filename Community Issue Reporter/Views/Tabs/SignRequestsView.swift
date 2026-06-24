@@ -64,20 +64,23 @@ struct SignRequestsView: View {
             ordering: orderFilter
         )
         
-        // In a real app, this locator might come from a location service
+       
         let locator = Locator(
-            countryCode: "ES",
-            country: "Spain",
-            region: "Andalusia",
-            city: "Seville",
-            address: "Calle Falsa 123"
+            countryCode: "SV",
+            country: "El Salvador",
+            region: "San Salvador",
+            city: "San Salvador",
+            cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
+            cityNameSortKey: "san-salvador",
+            cityCode: "SS",
+            address: "Paseo General Escalón &, Alameda Franklin Delano Roosevelt, San Salvador, El Salvador"
         )
         
         self.petitions = [
             Petition(
                 id: "1",
-                title: "Hay un bache en la calle",
-                description: "un bache esta causando que los carros se dañen",
+                title: "Recarpet of big potholes on the road  ",
+                description: "Several potholes must be recarpeted",
                 targetSignatures: 22,
                 currentSignatures: 0,
                 categoryId: 4,
@@ -299,7 +302,7 @@ struct SignRequestsView: View {
                         .navigationDestination(for: SignRequestsViewsDestinations.self) { destination in
                             switch destination {
                             case .comments(let id):
-                                CommentsSectionView(for: .petition, with: id)
+                                CommentsSectionView(for: .petition, with: id, title: "", subtitle: "")
                                     .toolbar(.hidden, for: .tabBar)
                                     
                                 
@@ -390,6 +393,7 @@ struct SignRequestsView: View {
                     .fontWeight(.black)
                     .fontWidth(.condensed)
                     .lineLimit(1)
+                    .padding(.top, .themePadding / 2)
                     .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
                         content
                             .opacity(activeSubtitleIndex == selectedIndex ? 0 : 1)
@@ -484,7 +488,7 @@ struct SignRequestsView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .foregroundColor(.theme.foreground)
-        .background(Color.theme.cardBackground)
+//        .background(Color.theme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))

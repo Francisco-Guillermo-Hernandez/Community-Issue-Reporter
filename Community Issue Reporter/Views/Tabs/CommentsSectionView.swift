@@ -13,9 +13,14 @@ struct CommentsSectionView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @FocusState private var isTextFieldFocused: Bool
+    @State private var title: String
+    @State private var subtitle: String
     
-    init(for commentFor: CommentForType, with resourceId: String) {
+    init(for commentFor: CommentForType, with resourceId: String, title: String, subtitle: String) {
         _controller = StateObject(wrappedValue: CommentsController(commentFor: commentFor, resourceId: resourceId))
+        
+        self.title = title
+        self.subtitle = subtitle
     }
     
     var body: some View {
@@ -67,7 +72,8 @@ struct CommentsSectionView: View {
             await controller.fetchComments()
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTitle("Comments")
+        .navigationTitle("Comments for: \(title)")
+        .navigationSubtitle(subtitle)
         .interactiveDismissDisabled(isTextFieldFocused && !controller.commentInput.isEmpty)
         .safeAreaInset(edge: .bottom) {
             inputBar
@@ -134,6 +140,6 @@ struct CommentsSectionView: View {
 
 #Preview {
     NavigationStack {
-        CommentsSectionView(for: .report, with: "")
+        CommentsSectionView(for: .report, with: "", title: "", subtitle: "")
     }
 }

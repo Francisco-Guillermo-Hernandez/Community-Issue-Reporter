@@ -75,15 +75,15 @@ struct UploadProgressView: View {
         self.uploadStates = images.map { ImageUploadState(image: $0) }
         self.isProcessing = true
         
-        Task {
-            await ImageEncoderService().prepareAndSend(
-                reportId: reportId,
-                states: $uploadStates
-            ) {
-                self.isProcessing = false
-                self.showFinalMessage = true
-            }
-        }
+//        Task {
+//            await ImageEncoderService().prepareAndSend(
+//                reportId: reportId,
+//                states: $uploadStates
+//            ) {
+//                self.isProcessing = false
+//                self.showFinalMessage = true
+//            }
+//        }
     }
     
     private func statusLabel(for status: UploadStatus) -> String {

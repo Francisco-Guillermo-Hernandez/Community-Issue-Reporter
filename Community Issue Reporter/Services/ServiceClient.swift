@@ -279,6 +279,66 @@ struct ServiceClient {
         return try decode(V.self, from: data)
     }
     
+    func upload<T: Encodable, V: Decodable>(
+        path: String,
+        body: T,
+        headers: Array<HTTPHeader> = [],
+        formFiles: [MultipartFormFile] = [],
+        withOAuth: Bool = false
+    ) async throws -> V {
+        let sanitizedPath = path.hasPrefix(delimiter) ? String(path.dropFirst()) : path
+        guard let baseURL else {
+            throw ServiceError.baseURLMissing
+        }
+        
+        let url = baseURL.appending(path: sanitizedPath)
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
+        
+        if formFiles.isEmpty {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        } else {
+            let boundary = "Boundary-\(UUID().uuidString)"
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            let fields = try makeFormFields(from: body)
+            request.httpBody = makeMultipartBody(fields: fields, files: formFiles, boundary: boundary)
+        }
+        
+        if withOAuth {
+            let oAuthHeader = getOAuthHeader()
+            request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
+        }
+
+        if headers.count > 0 {
+            for header in headers {
+                request.setValue(header.content, forHTTPHeaderField: header.name)
+            }
+        }
+        
+        
+        if formFiles.isEmpty {
+            let encoder = JSONEncoder()
+            request.httpBody = try encoder.encode(body)
+        }
+        
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await NetworkManager.shared.fetch(for: request)
+        } catch {
+            throw ServiceError.networkError(error)
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ServiceError.invalidResponse
+        }
+        
+        try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
+        
+        return try decode(V.self, from: data)
+    }
+    
     func delete<T: Encodable, V: Decodable>(path: String, body: T, headers: Array<HTTPHeader> = [], withOAuth: Bool = false) async throws -> V {
         let sanitizedPath = path.hasPrefix(delimiter) ? String(path.dropFirst()) : path
         guard let baseURL else {
@@ -465,7 +525,7 @@ struct ServiceClient {
         return payload.isEmpty ? [:] : ["payload": payload]
     }
 
-    private func makeMultipartBody(
+    func makeMultipartBody(
         fields: [String: String],
         files: [MultipartFormFile],
         boundary: String
@@ -536,7 +596,7 @@ struct ServiceClient {
 
 struct EmptyQuery: Encodable {}
 
-private extension Data {
+extension Data {
     mutating func appendString(_ string: String) {
         if let data = string.data(using: .utf8) {
             append(data)

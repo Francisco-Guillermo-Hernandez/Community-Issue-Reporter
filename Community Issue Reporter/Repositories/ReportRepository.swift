@@ -18,38 +18,25 @@ final class ReportRepository {
         reportsService = ReportsService()
     }
     
-    func list(onError: ErrorHandler) async -> [IssueMarker] {
-        do {
-            let reports: [Report] = try await self.reportsService.fetchReports()
 
-            return reports.compactMap { report in
-                return IssueMarker(
-                    id: report.id!,
-                    title: report.title,
-                    description: report.description,
-                    status: report.statusId,
-                    coordinate:  CLLocationCoordinate2D(
-                        latitude: report.coordinate.lat,
-                        longitude: report.coordinate.lng
-                    ),
-                    issueType: report.issueTypeId,
-                    severity: report.severityId,
-                    matterToSolveId: report.matterToSolveId,
-                    address: report.address
-                )
-            }
+    func start() async throws -> StartReportResponse {
+        do {
+            return try await self.reportsService.start(
+                headers: [
+                    HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+                    HTTPHeader(name: "CountryCode", content: "SV"),
+                ]
+            )
         } catch {
-            onError(error)
-            return []
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
-    func listReports(onError: ErrorHandler) async -> [Report] {
+    func listReports(onError: ErrorHandler) async throws -> [Report] {
         do {
             return try await self.reportsService.fetchReports()
         } catch {
-            onError(error)
-            return []
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
@@ -84,40 +71,59 @@ final class ReportRepository {
         }
     }
     
-    func create(report: Report, locator: Locator, onError: ErrorHandler) async  -> String {
+    func create(using model: ReportDataModel) async throws -> String {
         do {
             let response = try await self.reportsService.createReport(
-                report: report,
+                report: model.report,
                 headers: [
-                    HTTPHeader(name: "Country", content: locator.country),
-                    HTTPHeader(name: "Region", content: locator.region),
-                    HTTPHeader(name: "City", content: locator.city),
+                    HTTPHeader(name: "CountryCode", content: model.locator.countryCode),
+                    HTTPHeader(name: "CityId", content: model.locator.cityId),
+                    HTTPHeader(name: "CityNameSortKey", content: model.locator.cityNameSortKey),
+                    HTTPHeader(name: "ShareIndexHash", content: model.reportSession.shareIndexHash),
+                    HTTPHeader(name: "CreationDate", content: model.reportSession.reportCreationOn),
+                    HTTPHeader(name: "ReportContainer", content: model.reportSession.reportContainer),
                 ]
             )
-            return response.id
+        
+            if response.code == "REPORT_CREATED" {
+                return response.id
+            } else {
+                throw CommonIntercommunicationErrors.genericError("Error creating report")
+            }
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        } catch ServiceError.badRequest(let response) {
+            throw CommonIntercommunicationErrors.invalidPetition(response.code)
+        } catch ServiceError.serverError(let code) {
+            throw CommonIntercommunicationErrors.serverError(code)
         } catch {
-            onError(error)
-            return "-1"
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     
-    func update(report: Report,locator: Locator, onComplete: @escaping (GenericResponse) -> Void, onError: ErrorHandler) async {
+    func update(report: Report,locator: Locator) async throws -> SuccessfulResult {
         do {
             
             guard let id = report.id as String? else {
-                onError(CustomError.missingId)
-                return
+                
+                throw CommonIntercommunicationErrors.genericError("No report id")
             }
             
             if report.reportState == .modifying {
                 let response = try await self.reportsService.updateReport(reportId: id, report: report, headers: [])
-                onComplete(response)
+                
+                if response.code == "REPORT_UPDATED" {
+                    return .updated
+                } else {
+                    throw CommonIntercommunicationErrors.genericError("Error updating report")
+                }
+                
             } else {
-                onError(CustomError.missingId)
+                throw CommonIntercommunicationErrors.genericError("Error updating report")
             }
             
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
             
         }
     }

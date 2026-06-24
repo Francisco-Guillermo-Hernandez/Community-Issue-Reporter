@@ -18,21 +18,33 @@ final class ReportDataModel {
     private let settings = SettingsStore.shared
    
     var isAddressValid: Bool = false
+    var reportSession: ReportSessionResponse
     private init() {
-        // Let's initialize the locator for the report
-        self.locator = Locator(id: "", countryCode: "", country: "", region: "", city: "", address: "")
+        self.reportSession = .init(reportContainer: "", createdAt: Date(), shareIndexHash: "", reportCreationOn: "")
+        
+        /// Let's initialize the locator for the report
+        self.locator = Locator(
+            countryCode: "SV",
+            country: "El Salvador",
+            region: "San Salvador",
+            city: "San Salvador",
+            cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
+            cityNameSortKey: "san-salvador",
+            cityCode: "SS",
+            address: "Paseo General Escalón &, Alameda Franklin Delano Roosevelt, San Salvador"
+        )
         
         let appState = AuthViewModel()
-        var lat: Double =  13.701270
-        var lng: Double = -89.224432
+        var lat: Double =  13.7159815
+        var lng: Double = -89.1801214
     
-        // lets get the coordinates that were set at the landing process or settings view
+        /// lets get the coordinates that were set at the landing process or settings view
         if let selectedCity = appState.selectedCity {
             lat = selectedCity.coordinates.lat
             lng = selectedCity.coordinates.lng
         }
 
-        // Initialize the report template with some basic information
+        /// Initialize the report template with some basic information
         self.report = Report(
             coordinate: .init(lat, lng),
             address: "",
@@ -47,13 +59,6 @@ final class ReportDataModel {
             updatedAt: Date(),
             reportState: .new,
         )
-        
-        print("report")
-        dump(report)
-        
-        
-        print("selected country")
-        print(settings.country?.name ?? "no country")
     }
     
     func setMatterToSolve(_ matter: MatterToSolve) {
@@ -64,6 +69,10 @@ final class ReportDataModel {
         report.description = matter.description
         report.suggestedTitle = matter.title
         report.suggestedDescription = matter.description
+    }
+    
+    func updateReportSession(_ reportSession: ReportSessionResponse) {
+        self.reportSession = reportSession
     }
     
     func updateCoordinate(_ coordinate: Coordinate) {
@@ -78,8 +87,6 @@ final class ReportDataModel {
     func prepareForModification(_ report: Report) {
         self.report = report
         self.report.reportState = .modifying
-        
-        dump(self.report)
     }
     
     func clear() {
@@ -97,5 +104,9 @@ final class ReportDataModel {
             updatedAt: Date(),
             reportState: .new,
         )
+    }
+    
+    func buildReportId() -> String {
+        return "\(locator.countryCode)-\(locator.cityCode)-\(self.reportSession.reportCreationOn)-\(self.reportSession.shareIndexHash)"
     }
 }

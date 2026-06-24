@@ -21,6 +21,7 @@ struct FollowUpSectionView: View {
                          
                   }
               }
+                .listRowBackground(Color.clear)
             }
             .scrollDisabled(true)
             .scrollContentBackground(.hidden)
@@ -33,5 +34,8 @@ struct FollowUpSectionView: View {
 }
 
 #Preview {
-    FollowUpSectionView()
+    ScrollView {
+        FollowUpSectionView()
+    }
+    .background(Color.theme.background)
 }

@@ -220,7 +220,9 @@ struct DetailView: View {
                         commentAction: {
                             path.append(DetailNavigationDestination.comment(self.report.id))
                         },
-                        addPhotoAction: {},
+                        addPhotoAction: {
+                            path.append(DetailNavigationDestination.moreEvidences(self.report.id))
+                        },
                         affectedAction: { status in
                             type = .info
                             status
@@ -247,7 +249,7 @@ struct DetailView: View {
             .navigationDestination(for: DetailNavigationDestination.self) { destination in
                 switch destination {
                 case .comment(let id):
-                    CommentsSectionView(for: .report, with: id)
+                    CommentsSectionView(for: .report, with: id, title: report.title, subtitle: report.description)
                 case .reportFollowUp(let report):
                     ReportFollowUpView(report: report)
                 case .moreEvidences(let id):
@@ -289,7 +291,7 @@ struct DetailView: View {
                 }
 
                 ToolbarItem(placement: .automatic) {
-                    ShareLink(item: buildShareURL(for: "7BTheYpPwK1L/report/traffic-light-ou")!) {
+                    ShareLink(item: buildShareURL(for: report.shareUrl)!) {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
                 }
@@ -344,12 +346,12 @@ func getMatterToSolve(id: Int) -> String {
                     reportedBy: "John Doe",
                     cityId: "",
                     petitionId: "",
+                    shareUrl: "",
 //                    updatedAt
                 )
 
                 DetailView(report: report)
                     .skeleton(isRedacted: isLoading)
-//                    .redacted(reason: isLoading ? .placeholder : [])
                     
             }
     }

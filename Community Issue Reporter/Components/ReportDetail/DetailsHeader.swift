@@ -24,7 +24,7 @@ struct DetailsHeader: View {
 
            Text(description)
                .font(.subheadline)
-               .foregroundStyle(.secondary)
+               .opacity(0.85)
                .lineLimit(1)
                .frame(maxWidth: .infinity, alignment: .leading)
                .padding(.leading, .themePadding)

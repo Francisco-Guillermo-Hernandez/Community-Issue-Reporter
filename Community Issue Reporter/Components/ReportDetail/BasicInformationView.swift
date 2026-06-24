@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BasicInformationView: View {
     var report: MapExplorerReport
+    private var opacity: Double = 0.85
     init(for report: MapExplorerReport) { self.report = report }
     var body: some View {
         HStack(spacing: .themeSpacing * 4) {
@@ -18,7 +19,7 @@ struct BasicInformationView: View {
                 VStack {
                     Text("Reported at")
                         .font(.caption)
-                        .foregroundStyle(Color.gray)
+                        .opacity(opacity)
                         
 
                     Text(report.reportedDate)
@@ -30,7 +31,7 @@ struct BasicInformationView: View {
                 VStack {
                     Text("Issue Type")
                         .font(.caption)
-                        .foregroundStyle(.gray)
+                        .opacity(opacity)
 
                     Text(report.issueType.title)
                         .font(.caption)
@@ -40,8 +41,7 @@ struct BasicInformationView: View {
                 VStack {
                     Text("Severity")
                         .font(.caption)
-                        .foregroundStyle(.gray)
-                        
+                        .opacity(opacity)
 
                     Text(report.severity.title)
                         .font(.caption)
@@ -51,7 +51,7 @@ struct BasicInformationView: View {
                 VStack {
                     Text("Status")
                         .font(.caption)
-                        .foregroundStyle(.gray)
+                        .opacity(opacity)
 
                     Text(report.status.title)
                         .font(.caption)
@@ -84,6 +84,7 @@ struct BasicInformationView: View {
         reportedBy: "John Doe",
         cityId: "",
         petitionId: "",
+        shareUrl: "",
 //                    updatedAt
     )
     BasicInformationView(for: report)

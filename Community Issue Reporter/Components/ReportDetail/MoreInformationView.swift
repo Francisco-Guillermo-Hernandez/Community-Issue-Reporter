@@ -10,6 +10,7 @@ import SwiftUI
 
 struct MoreInformationView: View {
     @State private var openInMaps: Bool = false
+    @State private var opacity: Double = 0.85
     var report: MapExplorerReport
     var body: some View {
         VStack {
@@ -20,7 +21,7 @@ struct MoreInformationView: View {
                 HStack {
                     Text("Report Id:")
                         .font(.caption)
-                        .foregroundStyle(Color.secondary)
+                        .opacity(opacity)
                         .fontWeight(.medium)
                     Spacer()
                     Text(report.id)
@@ -34,24 +35,26 @@ struct MoreInformationView: View {
                         Label("Copy ID", systemImage: "document.on.document")
                     }
                 }
+                .listRowBackground(Color.clear)
                 
                 HStack {
                     Text("Reported by:")
                         .font(.caption)
-                        .foregroundStyle(Color.secondary)
+                        .opacity(opacity)
                         .fontWeight(.medium)
                         
                     Spacer()
-                    Text(report.reportedBy)
+                    Text("@\(report.reportedBy)")
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
+                .listRowBackground(Color.clear)
                 
                 
                 HStack {
                     Text("Created on:")
                         .font(.caption)
-                        .foregroundStyle(Color.secondary)
+                        .opacity(opacity)
                         .fontWeight(.medium)
                        
                     Spacer()
@@ -59,11 +62,12 @@ struct MoreInformationView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
+                .listRowBackground(Color.clear)
             
                 HStack {
                     Text("Last update:")
                         .font(.caption)
-                        .foregroundStyle(Color.secondary)
+                        .opacity(opacity)
                         .fontWeight(.medium)
                        
                     Spacer()
@@ -71,11 +75,12 @@ struct MoreInformationView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
+                .listRowBackground(Color.clear)
 
                 HStack {
                     Text("Assigned institution:")
                         .font(.caption)
-                        .foregroundStyle(Color.secondary)
+                        .opacity(opacity)
                         .fontWeight(.medium)
                         
                     Spacer()
@@ -83,11 +88,12 @@ struct MoreInformationView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
+                .listRowBackground(Color.clear)
                 
                 HStack {
                     Text("Address:")
                         .font(.caption)
-                        .foregroundStyle(Color.secondary)
+                        .opacity(opacity)
                         .fontWeight(.medium)
                         
                     Spacer()
@@ -96,6 +102,7 @@ struct MoreInformationView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
+                .listRowBackground(Color.clear)
 
                 Button {
                     self.openInMaps.toggle()
@@ -103,7 +110,7 @@ struct MoreInformationView: View {
                     HStack {
                         Text("Coordinates:")
                             .font(.caption)
-                            .foregroundStyle(Color.secondary)
+                            .opacity(opacity)
                             .fontWeight(.medium)
                             
                         Spacer()
@@ -118,6 +125,7 @@ struct MoreInformationView: View {
                             .background(Color.black.opacity(0.001))
                     }
                 }
+                .listRowBackground(Color.clear)
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
                 .confirmationDialog(
@@ -137,11 +145,13 @@ struct MoreInformationView: View {
 
             }
             .listRowBackground(Color.clear)
+            .scrollContentBackground(.hidden)
+            .listRowBackground(Color.clear)
             .scrollDisabled(true)
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
             .scrollClipDisabled(true)
-            .frame(height: 315)
+            .frame(height: 345)
             .contentMargins(.all, 0, for: .scrollContent)
 
         }
@@ -174,13 +184,15 @@ struct MoreInformationView: View {
         cellIndex: "",
         createdAtRaw: 1780036575602,
         updatedAtRaw: 1780036575602,
-        reportedBy: "John Doe",
+        reportedBy: "john.doe",
         cityId: "",
         petitionId: "",
+        shareUrl: "",
 //                    updatedAt
     )
 
     ScrollView {
         MoreInformationView(report: report)
     }
+    .background(Color.theme.background)
 }

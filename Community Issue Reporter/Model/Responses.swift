@@ -24,6 +24,13 @@ struct AvatarResponse: Decodable {
     let avatarUrl: String
 }
 
+struct ReportSessionResponse: Codable {
+    let reportContainer: String
+    let createdAt: Date
+    let shareIndexHash: String
+    let reportCreationOn: String
+}
+
 struct GenericResponse: Identifiable, Codable {
     var id: String
     var message: String

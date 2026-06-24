@@ -165,11 +165,11 @@ struct PreviewSignatureView: View {
                        .buttonStyle(.plain)
                    }
                }
-   //            .sheet(isPresented: $isCreating, onDismiss: {
-   //                loadSignature()
-   //            }) {
-   //                DrawSignature(strokes: $tempStrokes)
-   //            }
+               .sheet(isPresented: $isCreating, onDismiss: {
+                   loadSignature()
+               }) {
+                   DrawSignature(strokes: $tempStrokes)
+               }
                
                if !strokes.isEmpty {
                    SignatureAnimatedPlayer(strokes: strokes)

@@ -41,6 +41,11 @@ struct PhotoChooser: View {
     @State private var isImagePreviewPresented: Bool
     @State var orientation = UIDevice.current.orientation
     
+    @State private var uploadTrackers: [PhotoUploadTracker] = []
+    var isReadyToContinue: Bool {
+        !uploadTrackers.isEmpty && uploadTrackers.allSatisfy { $0.phase == .success }
+    }
+    
     var onSelect: ([MediaResources]) -> Void
     var onDelete: (Int) -> Void
     
@@ -55,8 +60,8 @@ struct PhotoChooser: View {
     var body: some View {
         VStack {
             VStack {
-                HStack(spacing: 16) {
-                
+                HStack(spacing: .themeSpacing * 4) {
+                    
                     ThemedButton(
                         message: "Take Photo",
                         action: {
@@ -89,40 +94,34 @@ struct PhotoChooser: View {
                         }
                         .padding(.themeSpacing * 3)
                         .frame(maxWidth: .infinity, maxHeight: 48)
-//                        .modifier(ThemedButtonOutlineStyle(style: .prominent))
-//                        .foregroundStyle(Color.theme.foreground)
-//                        .frame(maxWidth: .infinity)
-//                        .padding()
-//                        .background(
-//                            Capsule()
-//                                .fill(Color.theme.muted)
-//                        )
                     }
                     .buttonStyle(ThemedButtonOutlineStyle(style: .prominent))
                     .onChange(of: selectedPhotoItems) { _, newItems in
                         guard !newItems.isEmpty else { return }
-                        loadSelectedImages(from: newItems) { images in
+                        
+                        Task {
+                            let images = await loadSelectedImages(from: newItems)
                             handleSelectedImages(images)
                             selectedPhotoItems = []
                         }
                     }
                 }
                 
-                Divider()
-                    .padding(.vertical, 8)
-                
-                ScrollView(.horizontal, showsIndicators: true) {
-                    LazyHStack(spacing: .themeSpacing * 4) {
+                ScrollView(.vertical, showsIndicators: true) {
+                    Divider()
+                        .padding(.top, 16)
+                        .opacity(0.67)
+                    
+                    LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 4) {
                         ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, resource in
-                            ZStack(alignment: .topLeading) {
+                            ZStack(alignment: .topTrailing) {
                                 if let imageData = resource.data {
                                     Image(uiImage: imageData)
                                         .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: 80, height: 80)
+                                        .aspectRatio(1, contentMode: .fill)
                                         .clipped()
-                                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                                        .contentShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                                        .clipShape(RoundedRectangle(cornerRadius: .themeRadius / 2, style: .continuous))
+                                        .contentShape(RoundedRectangle(cornerRadius: .themeRadius / 2, style: .continuous))
                                         .onTapGesture {
                                             showPreview(for: resource)
                                         }
@@ -141,14 +140,14 @@ struct PhotoChooser: View {
                                         .symbolRenderingMode(.multicolor)
                                         .font(Font.headline.bold())
                                 }
-                                .offset(x: -16, y: -16)
+                                .offset(x: 12, y: -12)
                                 .padding(4)
                             }
-                            .aspectRatio(3/2, contentMode: .fill)
                         }
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 16)
+                    
                 }
             }
             .sheet(isPresented: $isCameraPresented) {
@@ -192,17 +191,33 @@ struct PhotoChooser: View {
         }
     }
     
+    
+    
+    
     private func takePhotoUsingCamera(onComplete: @escaping ([MediaResources]) -> Void) {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else { return }
         cameraCompletion = onComplete
         isCameraPresented = true
     }
     
-    private func handleSelectedImages(_ images: [MediaResources]) {
-        selectedImages.append(contentsOf: images)
-        onSelect(selectedImages)
-    }
+//    private func handleSelectedImages(_ images: [MediaResources]) {
+//        selectedImages.append(contentsOf: images)
+//        onSelect(selectedImages)
+//    }
 
+    
+    private func handleSelectedImages(_ images: [MediaResources]) {
+           for image in images {
+               let tracker = PhotoUploadTracker(localResource: image)
+               uploadTrackers.append(tracker)
+               
+               // Immediately start processing and uploading
+               Task {
+                   await ImageEncoderService().processAndUpload(reportId: "REPORT_ID", tracker: tracker)
+               }
+           }
+       }
+    
     private func deleteImage(at index: Int) {
         guard selectedImages.indices.contains(index) else { return }
         selectedImages.remove(at: index)
@@ -228,23 +243,25 @@ struct PhotoChooser: View {
         generator.impactOccurred()
     }
 
-    private func loadSelectedImages(from items: [PhotosPickerItem], onComplete: @escaping ([MediaResources]) -> Void) {
-        Task {
-            var images: [MediaResources] = []
-            images.reserveCapacity(items.count)
+    private func loadSelectedImages(from items: [PhotosPickerItem]) async -> [MediaResources] {
+        var images: [MediaResources] = []
+        images.reserveCapacity(items.count)
 
-            for item in items {
-                if let data = try? await item.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    images.append(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isPortrait ? .portrait : .landscape)))
-                }
-            }
-
-            await MainActor.run {
-                onComplete(images)
+        for item in items {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let image = UIImage(data: data) {
+                images.append(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isPortrait ? .portrait : .landscape)))
             }
         }
+
+        return images
     }
+    
+    private static let gridColumns: [GridItem] = [
+        GridItem(.flexible(), spacing: .themeSpacing * 3),
+        GridItem(.flexible(), spacing: .themeSpacing * 3),
+        GridItem(.flexible(), spacing: .themeSpacing * 3),
+    ]
 }
 
 //#Preview {

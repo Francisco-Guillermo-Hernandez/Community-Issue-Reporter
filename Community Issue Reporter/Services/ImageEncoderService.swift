@@ -12,92 +12,52 @@ import SwiftUI
 
 struct ImageEncoderService {
     
-    func prepareAndSend(reportId: String, images: [MediaResources]) async {
-            do {
-                let webPData = try await withThrowingTaskGroup(of: Data.self) { group in
-                    for image in images {
-                        print(image.metadata)
-                        print(image.type)
-                        if let data = image.data {
-                            group.addTask(priority: .high) {
-                                
-                                
-                                    
-                                    try autoreleasepool {
-                                        return try WebPEncoder().encode(
-                                            data,
-                                            config: .preset(.picture, quality: 80),
-                                            width: Int(data.size.width / 1.5) ,
-                                            height: Int(data.size.height / 1.5),
-                                        
-                                            
-                                        )
-                                    }
-                                
-                                
-                               
-                            }
-                        }
-                       
-                    }
-                    
-                    var results: [Data] = []
-                    for try await data in group {
-                        results.append(data)
-                    }
-                    return results
-                }
-                
-                
-                // Upload the results
-                _ = try await ReportsService().attachPicture(reportId: reportId, imagesData: webPData)
-            } catch {
-                print(error)
-            }
+    func processAndUpload(reportId: String, tracker: PhotoUploadTracker) async {
+        guard let data = tracker.localResource.data else {
+            setPhase(tracker, to: .failure)
+            return
         }
+        
+        do {
+            /// Optimizing Phase
+            setPhase(tracker, to: .optimizing)
+            
+            let webPData = try await Task.detached(priority: .userInitiated) {
+                return try autoreleasepool {
+                    try WebPEncoder().encode(
+                        data,
+                        config: .preset(.picture, quality: 80),
+                        width: Int(data.size.width / 1.5),
+                        height: Int(data.size.height / 1.5)
+                    )
+                }
+            }.value
+            
+            /// Uploading Phase
+            setPhase(tracker, to: .uploading)
+            
+            /// Update ReportsService to upload a single image and accept the delegate
+            let remoteId = try await ReportsService().uploadSinglePicture(
+                reportId: reportId,
+                imageData: webPData,
+                onProgress: { progress in
+                    tracker.uploadProgress = progress
+                }
+            )
+            
+            /// Success Phase
+            tracker.remoteUUID = remoteId
+            tracker.uploadProgress = 1.0
+            setPhase(tracker, to: .success)
+            
+        } catch {
+            print("Failed to process/upload image: \(error)")
+            setPhase(tracker, to: .failure)
+        }
+    }
     
-    // ReportsService instance (Assuming it exists based on your snippet)
-    private let reportsService = ReportsService()
-//
-    func prepareAndSend(
-        reportId: String,
-        states: Binding<[ImageUploadState]>,
-        onComplete: @escaping () -> Void
-    ) async {
-//        await withThrowingTaskGroup(of: (Int, Bool).self) { group in
-//            for index in states.indices {
-//                group.addTask(priority: .userInitiated) {
-//                    do {
-//                        // 1. Encoding Step
-//                        await MainActor.run { states[index].wrappedValue.status = .encoding }
-//                        
-//                        let data = try autoreleasepool {
-//                            try WebPEncoder().encode(states[index].wrappedValue.image, config: .preset(.picture, quality: 80))
-//                        }
-//                        
-//                        // 2. Uploading Step
-//                        await MainActor.run { states[index].wrappedValue.status = .uploading }
-//                        try await reportsService.attachPicture(reportId: reportId, imagesData: [data])
-//                        
-//                        return (index, true)
-//                    } catch {
-//                        return (index, false)
-//                    }
-//                }
-//            }
-//            
-//            for try await (index, success) in group {
-//                await MainActor.run {
-//                    states[index].wrappedValue.status = success ? .success : .failure
-//                }
-//            }
-//        }
-//        
-//        // Final closure trigger
-//        await MainActor.run {
-//            if states.wrappedValue.allSatisfy({ $0.status == .success }) {
-//                onComplete()
-//            }
-//        }
+    @MainActor
+    private func setPhase(_ tracker: PhotoUploadTracker, to phase: ImagePhase) {
+        tracker.phase = phase
     }
 }

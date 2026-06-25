@@ -133,3 +133,9 @@ struct PrivacySettings: Encodable, Decodable {
     var showMyProfile: Bool
     var showMyUseNameWhenShare: Bool
 }
+
+struct AttachMediaResponse: Decodable {
+    let name: String
+    let status: String
+    let key: String
+}

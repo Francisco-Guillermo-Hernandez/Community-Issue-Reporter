@@ -7,16 +7,16 @@
 
 import Foundation
 import SwiftUI
-import Observation // Use @Observable if targeting iOS 17+, otherwise use ObservableObject
+import Observation
 
 @Observable
 class PhotoUploadTracker: Identifiable {
-    let id = UUID()
+    var key: String = ""
     let localResource: MediaResources
     
     var phase: ImagePhase = .optimizing
     var uploadProgress: Float = 0.0
-    var remoteUUID: String? = nil // Store the backend ID here for deletion
+    var remoteUUID: String? = nil
     
     init(localResource: MediaResources) {
         self.localResource = localResource

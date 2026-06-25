@@ -37,5 +37,10 @@ final class NetworkManager {
     func fetch(for request: URLRequest) async throws -> (Data, URLResponse) {
         return try await session.data(for: request)
     }
+    
+    /// A wrapper for session upload
+    func upload(using request: URLRequest, contentOf body: Data, with delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Data, URLResponse) {
+        return try await session.upload(for: request, from: body, delegate: delegate)
+    }
 }
 

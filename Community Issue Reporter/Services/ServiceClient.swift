@@ -279,9 +279,9 @@ struct ServiceClient {
         return try decode(V.self, from: data)
     }
     
-    func upload<T: Encodable, V: Decodable>(
+    func upload< V: Decodable>(
         path: String,
-        body: T,
+        onProgress: @escaping (Float) -> Void,
         headers: Array<HTTPHeader> = [],
         formFiles: [MultipartFormFile] = [],
         withOAuth: Bool = false
@@ -295,15 +295,7 @@ struct ServiceClient {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
-        
-        if formFiles.isEmpty {
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        } else {
-            let boundary = "Boundary-\(UUID().uuidString)"
-            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-            let fields = try makeFormFields(from: body)
-            request.httpBody = makeMultipartBody(fields: fields, files: formFiles, boundary: boundary)
-        }
+     
         
         if withOAuth {
             let oAuthHeader = getOAuthHeader()
@@ -316,16 +308,16 @@ struct ServiceClient {
             }
         }
         
-        
-        if formFiles.isEmpty {
-            let encoder = JSONEncoder()
-            request.httpBody = try encoder.encode(body)
-        }
-        
+       
         let data: Data
         let response: URLResponse
         do {
-            (data, response) = try await NetworkManager.shared.fetch(for: request)
+            let boundary = "Boundary-\(UUID().uuidString)"
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            let body = makeMultipartBody(fields: [:], files: formFiles, boundary: boundary)
+            let delegate = UploadProgressDelegate(onProgress: onProgress)
+            (data, response) = try await NetworkManager.shared.upload(using: request, contentOf: body, with: delegate)
+            
         } catch {
             throw ServiceError.networkError(error)
         }

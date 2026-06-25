@@ -116,40 +116,22 @@ struct CitySelectionView: View {
             )
             .safeAreaInset(edge: .bottom, spacing: 0) {
 
-                ZStack {
-                    Rectangle()
-                        .fill(.ultraThinMaterial)
-                        .mask {
-                            LinearGradient(
-                                stops: [
-                                    .init(color: .black, location: 0),
-                                    .init(color: .clear, location: 1),
-                                ],
-                                startPoint: .bottom,
-                                endPoint: .top
-                            )
-                        }
-                        .ignoresSafeArea()
-
-                    VStack {
-                        ThemedButton(
-                            message: buttonMessage,
-                            action: {
-                                controller.triggerFeedBack.toggle()
-                                nextStep()
-                                
-                                if mode == .modify {
-                                    dismiss()
-                                }
-                            },
-                            type: .primary
-                        )
-                        .padding()
-                        .padding(.top, 0)
-                    }
-                    .frame(maxWidth: .infinity)
+                BottomFadedView {
+                    ThemedButton(
+                        message: buttonMessage,
+                        action: {
+                            controller.triggerFeedBack.toggle()
+                            nextStep()
+                            
+                            if mode == .modify {
+                                dismiss()
+                            }
+                        },
+                        type: .primary
+                    )
+                    .padding()
+                    .padding(.top, 0)
                 }
-                .fixedSize(horizontal: false, vertical: true)
 
             }
             .sensoryFeedback(
@@ -243,5 +225,38 @@ struct CitySelectionView: View {
         CitySelectionView(countryCode: countryCode, selectedCity: $sanSalvador, nextStep: {
             
         })
+    }
+}
+
+struct BottomFadedView<Content: View>: View {
+    
+    let content: Content
+    init (@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        
+        ZStack {
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .mask {
+                    LinearGradient(
+                        stops: [
+                            .init(color: .black, location: 0),
+                            .init(color: .clear, location: 1),
+                        ],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                }
+                .ignoresSafeArea()
+
+            VStack {
+                content
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

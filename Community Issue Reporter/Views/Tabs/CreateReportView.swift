@@ -27,6 +27,7 @@ struct CreateReportView: View {
     @State private var severity: Severity = .all
     @State private var model = ReportDataModel.shared
     @State private var showWizard = false
+    @State private var feedbackTrigger = false
     
     var body: some View {
         NavigationStack {
@@ -55,9 +56,13 @@ struct CreateReportView: View {
                             NavigationLink(destination: report(matter: matter)) {
                                 CardView(matter: matter)
                             }
+                            .simultaneousGesture(TapGesture().onEnded {
+                                feedbackTrigger.toggle()
+                            })
                         }
                     }
                 }
+                .sensoryFeedback(.selection, trigger: feedbackTrigger)
                 .overlay(alignment: .bottom) {
                     if show {
                         Group {

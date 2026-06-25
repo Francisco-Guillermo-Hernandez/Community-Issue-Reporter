@@ -33,7 +33,6 @@ struct MediaResources: Identifiable {
 struct PhotoChooser: View {
     @Namespace private var nameSpace
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
-    @State private var selectedImages: [MediaResources] = []
     @State private var isCameraPresented: Bool
     @State private var cameraCompletion: (([MediaResources]) -> Void)?
     @State private var previewImage: UIImage?
@@ -41,17 +40,16 @@ struct PhotoChooser: View {
     @State private var isImagePreviewPresented: Bool
     @State var orientation = UIDevice.current.orientation
     
-    @State private var uploadTrackers: [PhotoUploadTracker] = []
+    var reportContainer: String
+    @Binding var uploadTrackers: [PhotoUploadTracker]
     var isReadyToContinue: Bool {
         !uploadTrackers.isEmpty && uploadTrackers.allSatisfy { $0.phase == .success }
     }
     
-    var onSelect: ([MediaResources]) -> Void
-    var onDelete: (Int) -> Void
     
-    init(onSelect: @escaping ([MediaResources]) -> Void, onDelete: @escaping (Int) -> Void) {
-        self.onSelect = onSelect
-        self.onDelete = onDelete
+    init(reportContainer: String, uploadTrackers: Binding<[PhotoUploadTracker]>) {
+        self.reportContainer = reportContainer
+        self._uploadTrackers = uploadTrackers
         self.isCameraPresented = false
         self.isImagePreviewPresented = false
         self.previewID = nil
@@ -79,8 +77,9 @@ struct PhotoChooser: View {
                         maxSelectionCount: 6,
                         matching: .any(
                             of: [
-                                .images, .panoramas,
-                                .videos,
+                                .images,
+                                .panoramas,
+                                .not(.videos),
                                 .not(.screenshots),
                                 .not(.screenRecordings),
                                 .not(.spatialMedia),
@@ -102,51 +101,35 @@ struct PhotoChooser: View {
                         Task {
                             let images = await loadSelectedImages(from: newItems)
                             handleSelectedImages(images)
-                            selectedPhotoItems = []
                         }
                     }
                 }
                 
                 ScrollView(.vertical, showsIndicators: true) {
                     Divider()
-                        .padding(.top, 16)
+                        .padding(.vertical, 8)
                         .opacity(0.67)
                     
                     LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 4) {
-                        ForEach(Array(selectedImages.enumerated()), id: \.element.id) { index, resource in
-                            ZStack(alignment: .topTrailing) {
-                                if let imageData = resource.data {
-                                    Image(uiImage: imageData)
-                                        .resizable()
-                                        .aspectRatio(1, contentMode: .fill)
-                                        .clipped()
-                                        .clipShape(RoundedRectangle(cornerRadius: .themeRadius / 2, style: .continuous))
-                                        .contentShape(RoundedRectangle(cornerRadius: .themeRadius / 2, style: .continuous))
-                                        .onTapGesture {
-                                            showPreview(for: resource)
-                                        }
-                                        .onLongPressGesture(minimumDuration: 0.4) {
-                                            triggerHaptic()
-                                            showPreview(for: resource)
-                                        }
-                                        .matchedTransitionSource(id: resource.id, in: nameSpace)
-                                        .sensoryFeedback(.impact(weight: .medium), trigger: isImagePreviewPresented)
+                        ForEach(uploadTrackers) { tracker in
+                            PreviewImageToUpload(
+                                id: "",
+                                phase: tracker.phase,
+                                data: tracker.localResource.data,
+                                currentValue: Binding(
+                                    get: { tracker.uploadProgress },
+                                    set: { _ in }
+                                ),
+                                total: 1.0,
+                                cancel: { _ in
+                                    
+                                },
+                                retry: { _ in
+                                    
                                 }
-                                
-                                Button {
-                                    deleteImage(at: index)
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .symbolRenderingMode(.multicolor)
-                                        .font(Font.headline.bold())
-                                }
-                                .offset(x: 12, y: -12)
-                                .padding(4)
-                            }
+                            )
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
                     
                 }
             }
@@ -200,76 +183,68 @@ struct PhotoChooser: View {
         isCameraPresented = true
     }
     
-//    private func handleSelectedImages(_ images: [MediaResources]) {
-//        selectedImages.append(contentsOf: images)
-//        onSelect(selectedImages)
-//    }
-
+    
     
     private func handleSelectedImages(_ images: [MediaResources]) {
-           for image in images {
-               let tracker = PhotoUploadTracker(localResource: image)
-               uploadTrackers.append(tracker)
-               
-               // Immediately start processing and uploading
-               Task {
-                   await ImageEncoderService().processAndUpload(reportId: "REPORT_ID", tracker: tracker)
-               }
-           }
-       }
+        for image in images {
+            let tracker = PhotoUploadTracker(localResource: image)
+            uploadTrackers.append(tracker)
+            
+            /// Immediately start processing and uploading
+            Task {
+                await ImageEncoderService().processAndUpload(using: reportContainer, tracker: tracker)
+            }
+        }
+    }
     
     private func deleteImage(at index: Int) {
-        guard selectedImages.indices.contains(index) else { return }
-        selectedImages.remove(at: index)
-        onDelete(index)
-    }
 
+    }
+    
     private func showPreview(for resource: MediaResources) {
         guard let data = resource.data else { return }
         previewImage = data
         previewID = resource.id
         isImagePreviewPresented = true
     }
-
+    
     private func dismissPreview() {
         isImagePreviewPresented = false
         previewImage = nil
         previewID = nil
     }
-
+    
     private func triggerHaptic() {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.prepare()
         generator.impactOccurred()
     }
-
+    
     private func loadSelectedImages(from items: [PhotosPickerItem]) async -> [MediaResources] {
         var images: [MediaResources] = []
         images.reserveCapacity(items.count)
-
+        
         for item in items {
             if let data = try? await item.loadTransferable(type: Data.self),
                let image = UIImage(data: data) {
                 images.append(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isPortrait ? .portrait : .landscape)))
             }
         }
-
+        
         return images
     }
     
     private static let gridColumns: [GridItem] = [
         GridItem(.flexible(), spacing: .themeSpacing * 3),
         GridItem(.flexible(), spacing: .themeSpacing * 3),
-        GridItem(.flexible(), spacing: .themeSpacing * 3),
     ]
 }
 
-//#Preview {
-//    PhotoChooser(
-//        onSelect: { _ in },
-//        onDelete: { _ in }
-//    )
-//}
+#Preview {
+    //    PhotoChooser(
+    //
+    //    )
+}
 
 struct ImagePicker: UIViewControllerRepresentable {
     let sourceType: UIImagePickerController.SourceType
@@ -278,7 +253,7 @@ struct ImagePicker: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator(onImagePicked: onImagePicked)
     }
-
+    
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.sourceType = sourceType
@@ -287,20 +262,20 @@ struct ImagePicker: UIViewControllerRepresentable {
         picker.modalPresentationStyle = .fullScreen
         return picker
     }
-
+    
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-
+    
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         private let onImagePicked: (MediaResources?) -> Void
-
+        
         init(onImagePicked: @escaping (MediaResources?) -> Void) {
             self.onImagePicked = onImagePicked
         }
-
+        
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             onImagePicked(nil)
         }
-
+        
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             let image = info[.originalImage] as? UIImage
             let orientation = UIDevice.current.orientation

@@ -12,7 +12,7 @@ import SwiftUI
 
 struct ImageEncoderService {
     
-    func processAndUpload(reportId: String, tracker: PhotoUploadTracker) async {
+    func processAndUpload(using reportContainer: String, tracker: PhotoUploadTracker) async {
         guard let data = tracker.localResource.data else {
             setPhase(tracker, to: .failure)
             return
@@ -37,16 +37,17 @@ struct ImageEncoderService {
             setPhase(tracker, to: .uploading)
             
             /// Update ReportsService to upload a single image and accept the delegate
-            let remoteId = try await ReportsService().uploadSinglePicture(
-                reportId: reportId,
+            let response = try await ReportsService().uploadSinglePicture(
+                reportContainer: reportContainer,
                 imageData: webPData,
                 onProgress: { progress in
                     tracker.uploadProgress = progress
                 }
             )
             
+            
             /// Success Phase
-            tracker.remoteUUID = remoteId
+            tracker.key = response.data.key
             tracker.uploadProgress = 1.0
             setPhase(tracker, to: .success)
             

@@ -9,6 +9,7 @@ import SwiftUI
 import PhotosUI
 import CoreTransferable
 internal import Combine
+import Observation
 
 
 enum AvatarSource {
@@ -20,13 +21,14 @@ enum AvatarSource {
     case initials(String, Color)
 }
 
-final class ProfileDataModel: ObservableObject {
-    @Published var profileImage: UIImage?
-    @Published var userName: String = "Demo User"
-    @Published var isUploading: Bool = false
-    @Published var showPicker: Bool = false
-    @Published var isGuest: Bool = false
-    @Published var avatarURL: URL?
+@Observable
+final class ProfileDataModel {
+    var profileImage: UIImage?
+    var userName: String = "Demo User"
+    var isUploading: Bool = false
+    var showPicker: Bool = false
+    var isGuest: Bool = false
+    var avatarURL: URL?
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -34,13 +36,13 @@ final class ProfileDataModel: ObservableObject {
     private let selectedOptionKey = "selected_avatar_option"
     private let selectedColorKey = "selected_avatar_color"
 
-    @Published var selectedAvatarOptionView: AvatarCreatedFrom {
+    var selectedAvatarOptionView: AvatarCreatedFrom {
         didSet {
             UserDefaults.standard.set(selectedAvatarOptionView.rawValue, forKey: selectedOptionKey)
         }
     }
 
-    @Published var selectedAvatarColor: Color {
+    var selectedAvatarColor: Color {
         didSet {
             if let hex = selectedAvatarColor.toHex() {
                 UserDefaults.standard.set(hex, forKey: selectedColorKey)
@@ -72,7 +74,10 @@ final class ProfileDataModel: ObservableObject {
             .map { _ in UserDefaults.standard.string(forKey: "avatar_url").flatMap(URL.init(string:)) }
             .removeDuplicates()
             .receive(on: RunLoop.main)
-            .assign(to: &$avatarURL)
+            .sink { [weak self] url in
+                self?.avatarURL = url
+            }
+            .store(in: &cancellables)
     }
     
     func applyGoogleAvatar(completion: @escaping () -> Void) {

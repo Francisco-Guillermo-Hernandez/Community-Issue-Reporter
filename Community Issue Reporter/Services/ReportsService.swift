@@ -55,6 +55,10 @@ struct ReportsService {
             withOAuth: true
         )
     }
+    
+    func deleteTemporalPicture(_ key: String, headers: Array<HTTPHeader>) async throws -> GenericResponse {
+        return try await client.delete(path: "attach-media/\(key)", body: [String: String](), headers: headers, withOAuth: true)
+    }
         
     func fetchReportByUser(q: PaginatedRequestQueryParams) async throws -> PaginatedResponse<Report> {
         return try await client.get(path: "reports/byUser", query: q, headers: [], withOAuth: true,)

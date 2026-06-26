@@ -10,7 +10,7 @@ import Foundation
 struct CityService {
     
     private let client: ServiceClient
-    init(client: ServiceClient =  ServiceClient(baseURL: development)) {
+    init(client: ServiceClient =  ServiceClient(baseURL: Endpoints.baseURL)) {
         self.client = client
     }
     

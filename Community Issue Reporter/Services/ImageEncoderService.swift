@@ -48,6 +48,7 @@ struct ImageEncoderService {
             
             /// Success Phase
             tracker.key = response.data.key
+            tracker.name = response.data.name
             tracker.uploadProgress = 1.0
             setPhase(tracker, to: .success)
             

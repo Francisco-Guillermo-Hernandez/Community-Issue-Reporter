@@ -10,7 +10,7 @@ import Foundation
 struct ShareService {
     
     private let client: ServiceClient
-    init(client: ServiceClient = ServiceClient(baseURL: shareableUrl)) {
+    init(client: ServiceClient = ServiceClient(baseURL: Endpoints.shareableURL)) {
         self.client = client
     }
     

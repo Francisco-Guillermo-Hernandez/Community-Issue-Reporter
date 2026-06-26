@@ -64,7 +64,7 @@ struct ServiceClient {
     }
     
     /// initialize the instance by default with .json decoderType
-    init(baseURL: URL? = development, decoderType: DecoderType = .json(.init())) {
+    init(baseURL: URL? = Endpoints.baseURL, decoderType: DecoderType = .json(.init())) {
         self.baseURL = baseURL
         
         switch decoderType {
@@ -368,11 +368,9 @@ struct ServiceClient {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }
-        
-        guard (200...299).contains(httpResponse.statusCode) else {
-            throw ServiceError.httpStatus(httpResponse.statusCode)
-        }
-        
+       
+        try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
+       
         return try decode(V.self, from: data)
     }
     
@@ -419,12 +417,14 @@ struct ServiceClient {
             throw ServiceError.invalidResponse
         }
         
-        guard (200...299).contains(httpResponse.statusCode) else {
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("Error Response Body: \(jsonString)")
-            }
-            throw ServiceError.httpStatus(httpResponse.statusCode)
-        }
+        try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
+        
+//        guard (200...299).contains(httpResponse.statusCode) else {
+//            if let jsonString = String(data: data, encoding: .utf8) {
+//                print("Error Response Body: \(jsonString)")
+//            }
+//            throw ServiceError.httpStatus(httpResponse.statusCode)
+//        }
         
         return try decode(V.self, from: data)
     }

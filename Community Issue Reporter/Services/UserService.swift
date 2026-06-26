@@ -10,7 +10,7 @@ import Foundation
 struct UserService {
     private let client: ServiceClient
     
-    init(client: ServiceClient = ServiceClient(baseURL: authService)) {
+    init(client: ServiceClient = ServiceClient(baseURL: Endpoints.baseURL)) {
         self.client = client
     }
     

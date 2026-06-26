@@ -32,6 +32,24 @@ final class ReportRepository {
         }
     }
     
+    func deleteTemporalPicture(_ reportContainer: String, _ key: String) async throws -> SuccessfulResult {
+        do {
+            let result = try await self.reportsService.deleteTemporalPicture(key, headers: [
+                HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+                HTTPHeader(name: "CountryCode", content: "SV"),
+                HTTPHeader(name: "Report-Container", content: reportContainer),
+            ])
+            
+            if result.code == "MEDIA_DELETED_SUCCESSFULLY" {
+                return .deleted
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.message)
+            }
+        } catch {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        }
+    }
+    
     func listReports(onError: ErrorHandler) async throws -> [Report] {
         do {
             return try await self.reportsService.fetchReports()

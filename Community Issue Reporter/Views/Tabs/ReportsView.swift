@@ -19,7 +19,7 @@ struct ReportsView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
     @EnvironmentObject var appState: AuthViewModel
-    @StateObject private var profile = ProfileDataModel()
+    @State private var profile = ProfileDataModel()
     
     @State private var hasCenteredOnUser = false
     @State private var searchText: String = ""

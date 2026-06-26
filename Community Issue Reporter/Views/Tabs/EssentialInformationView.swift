@@ -64,46 +64,26 @@ struct EssentialInformationView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
 
-            ZStack {
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .mask {
-                        LinearGradient(
-                            stops: [
-                                .init(color: .black, location: 0),
-                                .init(color: .clear, location: 1),
-                            ],
-                            startPoint: .bottom,
-                            endPoint: .top
-                        )
-                    }
-                    .ignoresSafeArea()
-
-                VStack {
-                    ThemedButton(
-                        message: String(localized: "Report Problems"),
-                        action: {
-                            triggerFeedBack.toggle()
-                            
-                            completeLandingPage()
-                            finalStep()
-                         
-                        },
-                        type: .primary
-                    )
-                    .padding()
-                    .padding(.top, 0)
-                }
-                .frame(maxWidth: .infinity)
+            BottomFadedView {
+                ThemedButton(
+                    message: String(localized: "Report Problems"),
+                    action: {
+                        triggerFeedBack.toggle()
+                        
+                        completeLandingPage()
+                        finalStep()
+                     
+                    },
+                    type: .primary
+                )
+                .padding()
+                .padding(.top, 0)
             }
-            .fixedSize(horizontal: false, vertical: true)
-
         }
         .sensoryFeedback(
             .impact(weight: .medium),
             trigger: triggerFeedBack
         )
-        
     }
     
     func completeLandingPage() -> Void {

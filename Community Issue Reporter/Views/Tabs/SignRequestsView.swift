@@ -231,7 +231,9 @@ struct SignRequestsView: View {
             isPrimaryActionVisible: isPrimaryActionVisible,
             title: title,
             subtitle: subtitle
-        ) {} trailing: {
+        ) {
+            EmptyView()
+        } trailing: {
             
             HStack(spacing: 16) {
                 
@@ -274,6 +276,7 @@ struct SignRequestsView: View {
             }
             .padding(.horizontal, 4)
         } primaryAction: {
+            EmptyView()
         }
     }
     
@@ -413,7 +416,8 @@ struct SignRequestsView: View {
                 Text(petition.description)
                     .font(.caption)
                     .lineLimit(1)
-                    .foregroundStyle(.secondary)
+                    .opacity(0.85)
+//                    .foregroundStyle(.secondary)
                 
                   
             }
@@ -421,24 +425,16 @@ struct SignRequestsView: View {
             
             PostPublisher()
             
-            /// Go to detail 
-//            NavigationLink(destination: PetitionDetailView(petition: petition)) {
-//                
-//                VStack(spacing: .themeSpacing) {
-//                    PetitionViewPost(petition: petition)
-//                        .scrollClipDisabled(true)
-//                }
-//            }
             
             Button {
                 navigationPath.append(SignRequestsViewsDestinations.postDetail(of: petition))
             } label: {
+                /// Images of the post
                 PetitionViewPost(petition: petition)
-//                    .scrollClipDisabled(true)
             }
             
             Divider()
-                .opacity(0.6)
+                .opacity(0.67)
             
             Gauge(value: value, in: 0...100) {
                 Text(String(localized: "Signatures", comment: "Signatures text at the bottom of the gauge"))
@@ -461,7 +457,7 @@ struct SignRequestsView: View {
                 .padding(.bottom, .themeSpacing * 2)
                 
                 Divider()
-                    .opacity(0.6)
+                    .opacity(0.67)
                 
                 PostInteractions(
                     sign: {
@@ -479,7 +475,6 @@ struct SignRequestsView: View {
                     PreviewSignatureView(petitionName: "") {
                         
                     }
-//                        .presentationSizing(.fitted)
                 }
                 
             }
@@ -488,13 +483,10 @@ struct SignRequestsView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .foregroundColor(.theme.foreground)
-//        .background(Color.theme.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
         .padding(.bottom, .themePadding / 2)
-
-        
     }
 }
 

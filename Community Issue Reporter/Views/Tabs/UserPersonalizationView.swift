@@ -35,7 +35,7 @@ enum UserNameAvailabilityStatus {
 struct UserPersonalizationView: View {
     @Environment(\.dismiss) var dismiss
     @FocusState private var isInputFocused: Bool
-    @StateObject private var profile = ProfileDataModel()
+    @State private var profile = ProfileDataModel()
     @State private var isPresented: Bool = false
     @State private var triggerFeedBack: Bool = false
     @State private var userName: String = ""
@@ -192,39 +192,19 @@ struct UserPersonalizationView: View {
              }
         }
         .safeAreaInset(edge: .bottom) {
-
-            ZStack {
-                Rectangle()
-                    .fill(.ultraThinMaterial)
-                    .mask {
-                        LinearGradient(
-                            stops: [
-                                .init(color: .black, location: 0),
-                                .init(color: .clear, location: 1),
-                            ],
-                            startPoint: .bottom,
-                            endPoint: .top
-                        )
-                    }
-                    .ignoresSafeArea()
-
-                VStack {
-                    ThemedButton(
-                        message: String(localized: "Next Step"),
-                        action: {
-                            triggerFeedBack.toggle()
-                            updateUsername()
-                        },
-                        type: .primary
-                    )
-                    .disabled(!isFormValid)
-                    .padding()
-                    .padding(.top, 0)
-                }
-                .frame(maxWidth: .infinity)
+            BottomFadedView {
+                ThemedButton(
+                    message: String(localized: "Next Step"),
+                    action: {
+                        triggerFeedBack.toggle()
+                        updateUsername()
+                    },
+                    type: .primary
+                )
+                .disabled(!isFormValid)
+                .padding()
+                .padding(.top, 0)
             }
-            .fixedSize(horizontal: false, vertical: true)
-
         }
         .sensoryFeedback(
             .impact(weight: .medium),

@@ -143,7 +143,6 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(style == .normal ? .system(size: 14, weight: .regular) : Font.body.bold())
-           
             .background(backgroundColor(isPressed: configuration.isPressed))
             .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
             .contentShape(Capsule())
@@ -216,13 +215,6 @@ struct LinkButtonStyle: ButtonStyle {
         Spacer()
     }
     .padding()
-//    .background(Color.theme.background.mix(with: Color.black, by: 0.01999))
-//    .background(Color.init(hex: "#f0eee9"))
-//    .background(Color.init(hex: "#FBF8F6")) <--
-//    .background(Color.init(hex: "#F5F4E9"))
     .background(Color.theme.background)
-//    .background(Color.init(hex: "F3F4F4"))
-    
-//    .background(Color.theme.background.mix(with: Color.black, by: 0.49))
     .frame(height: .infinity)
 }

@@ -103,6 +103,9 @@ struct PhotoChooser: View {
                             handleSelectedImages(images)
                         }
                     }
+                    .onChange(of: isReadyToContinue) { _, newValue in
+                        selectedPhotoItems.removeAll()
+                    }
                 }
                 
                 ScrollView(.vertical, showsIndicators: true) {
@@ -121,8 +124,8 @@ struct PhotoChooser: View {
                                     set: { _ in }
                                 ),
                                 total: 1.0,
-                                cancel: { _ in
-                                    
+                                delete: { key in
+                                    deleteImage(using: key)
                                 },
                                 retry: { _ in
                                     
@@ -175,7 +178,20 @@ struct PhotoChooser: View {
     }
     
     
-    
+    private func deleteImage(using key: String) {
+        Task {
+            do {
+                let result = try await ReportRepository.shared.deleteTemporalPicture(reportContainer, key)
+                if result == .deleted {
+                    /// TODO: delete
+                    ///
+                    print("deleted")
+                }
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
     
     private func takePhotoUsingCamera(onComplete: @escaping ([MediaResources]) -> Void) {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else { return }

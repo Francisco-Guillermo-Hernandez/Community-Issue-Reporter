@@ -17,7 +17,6 @@ struct ColorGrid: View {
         LazyVGrid(columns: columns, spacing: .themeSpacing * 4) {
             ForEach(colors, id: \.self) { color in
                 Circle()
-//                    .fill(selectedColor == color ? color : color.mix(with: .white, by: 0.4))
                     .fill(color.opacity(isSelected(color) ? 1 : 0.75))
                     .scaleEffect(isSelected(color) ? 1.15 : 1)
                     .frame(width: 40, height: 40)
@@ -78,6 +77,6 @@ struct MonogramView: View {
 
 #Preview {
     @Previewable
-    @ObservedObject var profile = ProfileDataModel()
-    ColorGrid(selectedColor: .constant(.blue), colors: profile.backgroundColors)
+    @State var profile = ProfileDataModel()
+    ColorGrid(selectedColor: .constant(.orange), colors: profile.backgroundColors)
 }

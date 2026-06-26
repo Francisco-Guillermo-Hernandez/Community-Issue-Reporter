@@ -8,22 +8,19 @@
 import SwiftUI
 
 struct MediaStepView: View {
-    @Binding var selectedImages: [MediaResources]
+    @Bindable var model: ReportDataModel
+    @Binding var uploadTrackers: [PhotoUploadTracker]
     
-    init(attachments: Binding<[MediaResources]>) {
-        self._selectedImages = attachments
+    init(_ model: ReportDataModel, _ uploadTrackers: Binding<[PhotoUploadTracker]>) {
+        self.model = model
+        self._uploadTrackers = uploadTrackers
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: .themeSpacing * 3) {
             PhotoChooser(
-                onSelect: { images in
-                    print("Selected images: \(images.count)")
-                    self.selectedImages = images
-                },
-                onDelete: { index in
-                    self.selectedImages.remove(at: index)
-                }
+                reportContainer: model.reportSession.reportContainer,
+                uploadTrackers: $uploadTrackers
             )
         }
         .padding(.top, 4)
@@ -32,9 +29,11 @@ struct MediaStepView: View {
 
 
 #Preview {
+    
+    @Previewable @State var model = ReportDataModel.shared
     NavigationStack {
         VStack {
-            MediaStepView(attachments: .constant([]))
+            MediaStepView(model, .constant([]))
         }
         .padding()
         .background(Color.theme.background)

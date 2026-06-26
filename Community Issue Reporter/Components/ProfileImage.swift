@@ -9,6 +9,7 @@ import AVFoundation
 import Photos
 import PhotosUI
 import SwiftUI
+import Observation
 
 // MARK: - Struct definition
 struct AvatarOption: Identifiable, Hashable {
@@ -30,7 +31,7 @@ let options: [AvatarOption] = [
 // MARK: - sheet
 struct UserAvatarPersonalizationSheet: View {
     var animation: Animation
-    @ObservedObject var viewModel: ProfileDataModel
+    @Bindable var viewModel: ProfileDataModel
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var currentView: AvatarCreatedFrom = .optionsSelector
     @State private var duration: String = ""
@@ -120,6 +121,7 @@ struct UserAvatarPersonalizationSheet: View {
                 message: String(localized: "Save"),
                 action: {
                     applyTextBasedAvatar(option, viewModel.selectedAvatarColor)
+                    viewModel.selectedAvatarOptionView = option == .initials ? .initials : .monogram
                 },
                 type: .outline
             )
@@ -186,10 +188,10 @@ struct UserAvatarPersonalizationSheet: View {
                                         if let resource, let avatar = resource.data {
                                            
                                             onSelect(avatar)
+                                            cameraCompletion = nil
+                                            isCameraPresented = false
                                         }
                                         
-                                        cameraCompletion = nil
-                                        isCameraPresented = false
                                     })
                                     .edgesIgnoringSafeArea(.all)
                                 }
@@ -222,12 +224,13 @@ struct UserAvatarPersonalizationSheet: View {
                                 }
                                 .onChange(of: selectedPhotoItems) { _, newItems in
                                     guard !newItems.isEmpty else { return }
-                                    viewModel.selectedAvatarOptionView = option.associatedView
+                                    
                                     
                                     Task {
                                         do {
                                             let image = try await loadSelectedImages(from: newItems)
                                                 if let avatar = image {
+                                                    viewModel.selectedAvatarOptionView = option.associatedView
                                                     onSelect(avatar)
                                                 }
                                         } catch {
@@ -243,7 +246,6 @@ struct UserAvatarPersonalizationSheet: View {
 
                             if option.associatedView == .initials {
                                 Button {
-                                    viewModel.selectedAvatarOptionView = option.associatedView
                                     
                                     withAnimation(animation) {
                                         currentView = .initials
@@ -262,7 +264,6 @@ struct UserAvatarPersonalizationSheet: View {
 
                             if option.associatedView == .monogram {
                                 Button {
-                                    viewModel.selectedAvatarOptionView = option.associatedView
                                     withAnimation(animation) {
                                         currentView = .monogram
                                     }
@@ -393,20 +394,20 @@ struct UserAvatarPersonalizationSheet: View {
     
     private func loadSelectedImages(from items: [PhotosPickerItem]) async throws -> UIImage? {
         
-            var image: UIImage?
-           
-            /// To UIImage
-            if let data = try await items[0].loadTransferable(type: Data.self) {
-                image = UIImage(data: data)
-            }
-
-            return image
+        var image: UIImage?
+        
+        /// To UIImage
+        if let data = try await items[0].loadTransferable(type: Data.self) {
+            image = UIImage(data: data)
+        }
+        
+        return image
     }
 }
 
 struct ProfileImage: View {
 
-    @ObservedObject var viewModel: ProfileDataModel
+    @Bindable var viewModel: ProfileDataModel
     var body: some View {
         
         Group {
@@ -482,7 +483,7 @@ struct ProfileImage: View {
 
 #Preview {
     @Previewable
-    @ObservedObject var profile = ProfileDataModel()
+    @State var profile = ProfileDataModel()
 
     VStack {
         ProfileImage(viewModel: profile)

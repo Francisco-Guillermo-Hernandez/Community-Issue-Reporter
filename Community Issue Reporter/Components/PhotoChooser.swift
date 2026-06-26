@@ -116,7 +116,7 @@ struct PhotoChooser: View {
                     LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 4) {
                         ForEach(uploadTrackers) { tracker in
                             PreviewImageToUpload(
-                                id: "",
+                                name: tracker.name,
                                 phase: tracker.phase,
                                 data: tracker.localResource.data,
                                 currentValue: Binding(
@@ -124,12 +124,10 @@ struct PhotoChooser: View {
                                     set: { _ in }
                                 ),
                                 total: 1.0,
-                                delete: { key in
-                                    deleteImage(using: key)
+                                delete: { name in
+                                    deleteImage(using: name)
                                 },
-                                retry: { _ in
-                                    
-                                }
+                                retry: { _ in }
                             )
                         }
                     }
@@ -256,11 +254,11 @@ struct PhotoChooser: View {
     ]
 }
 
-#Preview {
+//#Preview {
     //    PhotoChooser(
     //
     //    )
-}
+//}
 
 struct ImagePicker: UIViewControllerRepresentable {
     let sourceType: UIImagePickerController.SourceType

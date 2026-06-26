@@ -15,7 +15,8 @@ struct ReportWizardContainer: View {
     @State private var currentStep: ReportStep = .location
     @Environment(\.dismiss) private var dismiss
     
-    @State private var selectedImages: [MediaResources] = []
+    
+    @State private var uploadTrackers: [PhotoUploadTracker] = []
     @State private var doneTrigger: Bool = false
     @StateObject private var controller: ReportController
     
@@ -69,7 +70,7 @@ struct ReportWizardContainer: View {
                                         case .location:
                                             LocationStepView(model)
                                         case .media:
-                                            MediaStepView(attachments: $selectedImages)
+                                            MediaStepView(model, $uploadTrackers)
                                         case .details:
                                             DetailsView(model)
                                         case .confirmation:
@@ -96,10 +97,12 @@ struct ReportWizardContainer: View {
                         }
                     }
                 }
-                
-                Spacer()
-                
-                /// FIXED FOOTER
+            
+            }
+            .ignoresSafeArea(edges: .init(arrayLiteral: .bottom) )
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            BottomFadedView {
                 wizardFooter()
                     .padding()
             }
@@ -140,13 +143,13 @@ struct ReportWizardContainer: View {
         }
     }
     
-    
+    @ViewBuilder
     private func wizardFooter() -> some View {
         HStack {
             if currentStep < .confirmation {
                 let message = currentStep == .details ? "Submit" : "Next"
                 ThemedButton(
-                    message: message, 
+                    message: message,
                     action: {
                        
                         if currentStep == .details {
@@ -164,7 +167,6 @@ struct ReportWizardContainer: View {
                     icon: ""
                 )
                 
-                
             } else {
                 Button(action: { doneTrigger.toggle(); dismiss() }) {
                     Text("Done")
@@ -178,6 +180,7 @@ struct ReportWizardContainer: View {
                         .clipShape(Capsule())
                     
                 }
+               
             }
         }
     }

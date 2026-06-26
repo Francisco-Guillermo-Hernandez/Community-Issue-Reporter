@@ -35,7 +35,7 @@ struct PetitionViewPost: View {
                 VStack(alignment: .leading) {
                     Text(String(localized: "Category", comment: "Category text at petition list"))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .opacity(0.85)
                     
                     Text(getCategoryName(id: petition.categoryId))
                         .font(.caption)
@@ -46,7 +46,7 @@ struct PetitionViewPost: View {
                 VStack(alignment: .leading) {
                     Text(String(localized: "Status", comment: "Status text at petition list"))
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .opacity(0.85)
                     
                     Text(petition.status.title)
                         .font(.caption)

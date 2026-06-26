@@ -77,7 +77,7 @@ struct PostPublisher: View {
                     
                     Text("Yesterday at 20:20 - San Salvador, SV")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .opacity(0.85)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

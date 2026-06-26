@@ -9,72 +9,77 @@ import SwiftUI
 import Foundation
 
 struct PreviewImageToUpload: View {
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    var name: String
     var phase: ImagePhase
-    var photo: PhotoSample
+    var data: UIImage?
     @Binding var currentValue: Float
     var total: Float
-    var cancel: (String) -> Void
-    var rety: (String) -> Void
+    var delete: (String) -> Void
+    var retry: (String) -> Void
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            Image(photo.photo)
-                .resizable()
-                .aspectRatio(1, contentMode: .fill)
-                .blur(radius: completed ? 0 : 4)
-                .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .overlay {
-                   
-                  
-                    
-                    ZStack(alignment: .bottomLeading) {
-                        
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        
-                            .fill(
-                                LinearGradient(
-                                    stops: [
-                                        .init(color: .black.opacity(0.75), location: 0),
-                                        .init(color: .black.opacity(0.2), location: 0.5),
-                                        .init(color: .clear, location: 1)
-                                    ],
-                                    startPoint: .bottom,
-                                    endPoint: .top
+            
+            if let imageData = data {
+                Image(uiImage: imageData)
+                    .resizable()
+                    .aspectRatio(1, contentMode: .fill)
+                    .blur(radius: completed ? 0 : 4)
+                    .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .overlay {
+                       
+                        ZStack(alignment: .bottomLeading) {
+                            
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            
+                                .fill(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .black.opacity(0.75), location: 0),
+                                            .init(color: .black.opacity(0.2), location: 0.5),
+                                            .init(color: .clear, location: 1)
+                                        ],
+                                        startPoint: .bottom,
+                                        endPoint: .top
+                                    )
                                 )
-                            )
-                        
-                        VStack(alignment: .leading, spacing: 2) {
+                            
+                            VStack(alignment: .leading, spacing: 2) {
 
-                            Text(phase.description)
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white.opacity(0.85))
-                                .padding(.bottom, 4)
-                            
-                            
-                            if !completed && phase != .success {
-                                ProgressView(value: currentValue, total: total)
-                                    .shimmering()
+                                Text(phase.description)
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.white.opacity(0.85))
+                                    .padding(.bottom, 4)
+                                
+                                
+                                if !completed && phase != .success {
+                                    ProgressView(value: currentValue, total: total)
+                                        .shimmering()
+                                }
+                                
                             }
-                            
+                            .padding()
                         }
-                        .padding()
                     }
-                }
+            }
+            
+            
             
             if phase != .failure {
                 Button {
-                    cancel(photo.id)
+                    delete(name)
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: "xmark")
                         .symbolRenderingMode(.multicolor)
-                        .font(.title2)
-                        .opacity(0.86)
                 }
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glass)
                 .padding(8)
             } else {
                 Button {
-                    rety(photo.id)
+                    retry(name)
                 } label: {
                     Image(systemName: "arrow.clockwise.circle.fill")
                         .symbolRenderingMode(.multicolor)
@@ -88,6 +93,16 @@ struct PreviewImageToUpload: View {
     
     var completed : Bool {
         currentValue == total
+    }
+    
+    private var borderColor: Color {
+        if colorScheme == .dark {
+            // dark:border-input
+            return Color.theme.inputBorder
+        } else {
+            // border
+            return Color.theme.border
+        }
     }
 }
 

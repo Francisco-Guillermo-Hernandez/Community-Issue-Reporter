@@ -16,7 +16,7 @@ class PhotoUploadTracker: Identifiable {
     
     var phase: ImagePhase = .optimizing
     var uploadProgress: Float = 0.0
-    var remoteUUID: String? = nil
+    var name: String = ""
     
     init(localResource: MediaResources) {
         self.localResource = localResource

@@ -13,12 +13,12 @@ enum ShareType: String, Codable, CaseIterable {
 }
 
 func buildShareURLWithComponents(for index: String, type: ShareType, slug: String) -> URL? {
-    return shareableUrl!.appending(component: index).appending(component: type.rawValue).appending(component: slug)
+    return Endpoints.shareableURL.appending(component: index).appending(component: type.rawValue).appending(component: slug)
                 
 }
 
 func buildShareURL(for path: String) -> URL? {
-    return shareableUrl!.appending(path: path)
+    return Endpoints.shareableURL.appending(path: path)
 }
 
 func urlFromString(_ string: String) -> URL? {

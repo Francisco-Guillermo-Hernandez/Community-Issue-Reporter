@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		561FED2E2FEE03AE00335F73 /* Development.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 561FED2D2FEE03AE00335F73 /* Development.xcconfig */; };
+		561FED302FEE03D500335F73 /* Production.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 561FED2F2FEE03D500335F73 /* Production.xcconfig */; };
 		5695C3F82F4D571000755B0E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */; };
 		569E2F452F739EB200B8C9DE /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 569E2F442F739EB200B8C9DE /* GoogleSignIn */; };
 		569E2F472F739EB200B8C9DE /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 569E2F462F739EB200B8C9DE /* GoogleSignInSwift */; };
@@ -32,6 +34,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		561FED2D2FEE03AE00335F73 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
+		561FED2F2FEE03D500335F73 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
 		5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		56E42B502F46BC8C00AC84C7 /* Community Issue Reporter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Community Issue Reporter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56E42B5D2F46BC8D00AC84C7 /* Community Issue ReporterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Community Issue ReporterTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -91,6 +95,8 @@
 		56E42B472F46BC8C00AC84C7 = {
 			isa = PBXGroup;
 			children = (
+				561FED2F2FEE03D500335F73 /* Production.xcconfig */,
+				561FED2D2FEE03AE00335F73 /* Development.xcconfig */,
 				5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */,
 				56E42B522F46BC8C00AC84C7 /* Community Issue Reporter */,
 				56E42B602F46BC8D00AC84C7 /* Community Issue ReporterTests */,
@@ -195,7 +201,7 @@
 					New,
 				);
 				LastSwiftUpdateCheck = 2630;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					56E42B4F2F46BC8C00AC84C7 = {
 						CreatedOnToolsVersion = 26.3;
@@ -211,7 +217,7 @@
 				};
 			};
 			buildConfigurationList = 56E42B4B2F46BC8C00AC84C7 /* Build configuration list for PBXProject "Community Issue Reporter" */;
-			developmentRegion = en;
+			developmentRegion = "es-419";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -246,6 +252,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				5695C3F82F4D571000755B0E /* PrivacyInfo.xcprivacy in Resources */,
+				561FED2E2FEE03AE00335F73 /* Development.xcconfig in Resources */,
+				561FED302FEE03D500335F73 /* Production.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -305,6 +313,7 @@
 /* Begin XCBuildConfiguration section */
 		56E42B6F2F46BC8D00AC84C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 561FED2D2FEE03AE00335F73 /* Development.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -370,6 +379,7 @@
 		};
 		56E42B702F46BC8D00AC84C7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 561FED2F2FEE03D500335F73 /* Production.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -439,6 +449,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Community-Issue-Reporter-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Repórtamelo";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				INFOPLIST_KEY_NSCameraUsageDescription = "I need this permission because you can attach photos to a report";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "I need this permission because of the location";
@@ -449,7 +460,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -483,6 +494,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Community-Issue-Reporter-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Repórtamelo";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				INFOPLIST_KEY_NSCameraUsageDescription = "I need this permission because you can attach photos to a report";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "I need this permission because of the location";
@@ -493,7 +505,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

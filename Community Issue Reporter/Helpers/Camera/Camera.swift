@@ -7,7 +7,7 @@ An object that manages the app's camera capture features.
 
 import CoreImage
 import os.log
-import Photos
+@preconcurrency import Photos
 import SwiftUI
 import UIKit
 import VideoToolbox
@@ -386,6 +386,7 @@ class Camera: NSObject {
     }
     
     // A function to capture a photo on the photo output.
+    @MainActor
     func takePhoto() {
         guard let photoOutput else { return }
         
@@ -399,39 +400,36 @@ class Camera: NSObject {
         // button's availability and appearance to include this request.
         photoOutputReadinessCoordinator.startTrackingCaptureRequest(using: photoSettings)
         
-        sessionQueue.async {
+        // Set the flash mode.
+        photoSettings.flashMode = self.flashEnabled ? .on : .off
+        
+        if self.constantColorSupported {
+            // Enable the constant color in the photo settings.
+            photoSettings.isConstantColorEnabled = self.constantColorEnabled
             
-            // Set the flash mode.
-            photoSettings.flashMode = self.flashEnabled ? .on : .off
-            
-           if self.constantColorSupported {
-                // Enable the constant color in the photo settings.
-                photoSettings.isConstantColorEnabled = self.constantColorEnabled
-                
-                // Enabled fallback photo delivery in the photo settings.
-                photoSettings.isConstantColorFallbackPhotoDeliveryEnabled = self.fallBackPhotoDeliveryEnabled
-           }
-            
-            // Set the max photo dimensions in the photo settings.
-            photoSettings.maxPhotoDimensions = photoOutput.maxPhotoDimensions
-            
-            // Set the preview photo format in the photo settings.
-            if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
-                photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
-            }
-            
-            // Set the photo quality prioritization in the photo settings.
-            photoSettings.photoQualityPrioritization = .balanced
-            
-            photoOutput.connection(with: .video)?.videoRotationAngle = 90
-            self.videoOutput?.connection(with: .video)?.videoRotationAngle = 90
-            
-            // Capture the photo on the photo output.
-            photoOutput.capturePhoto(with: photoSettings, delegate: self)
-            
-            // Stop tracking the capture request which has now been handed off to the photo output.
-            self.photoOutputReadinessCoordinator.stopTrackingCaptureRequest(using: photoSettings.uniqueID)
+            // Enabled fallback photo delivery in the photo settings.
+            photoSettings.isConstantColorFallbackPhotoDeliveryEnabled = self.fallBackPhotoDeliveryEnabled
         }
+        
+        // Set the max photo dimensions in the photo settings.
+        photoSettings.maxPhotoDimensions = photoOutput.maxPhotoDimensions
+        
+        // Set the preview photo format in the photo settings.
+        if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
+            photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
+        }
+        
+        // Set the photo quality prioritization in the photo settings.
+        photoSettings.photoQualityPrioritization = .balanced
+        
+        photoOutput.connection(with: .video)?.videoRotationAngle = 90
+        self.videoOutput?.connection(with: .video)?.videoRotationAngle = 90
+        
+        // Capture the photo on the photo output.
+        photoOutput.capturePhoto(with: photoSettings, delegate: self)
+        
+        // Stop tracking the capture request which has now been handed off to the photo output.
+        self.photoOutputReadinessCoordinator.stopTrackingCaptureRequest(using: photoSettings.uniqueID)
     }
     
     func save(photo: AVCapturePhoto) {
@@ -451,6 +449,7 @@ class Camera: NSObject {
     }
 }
 
+@MainActor
 extension Camera: AVCapturePhotoOutputReadinessCoordinatorDelegate {
     func readinessCoordinator(_ coordinator: AVCapturePhotoOutputReadinessCoordinator, captureReadinessDidChange captureReadiness: AVCapturePhotoOutput.CaptureReadiness) {
             // The shutter button's appearance can be customized based on the captureReadiness value.
@@ -459,6 +458,7 @@ extension Camera: AVCapturePhotoOutputReadinessCoordinatorDelegate {
         }
 }
 
+@MainActor
 extension Camera: AVCapturePhotoCaptureDelegate {
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         
@@ -516,4 +516,3 @@ extension UIImage {
         return newImage
     }
 }
-

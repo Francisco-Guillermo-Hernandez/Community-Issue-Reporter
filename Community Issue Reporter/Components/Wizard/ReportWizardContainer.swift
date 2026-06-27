@@ -147,11 +147,16 @@ struct ReportWizardContainer: View {
     private func wizardFooter() -> some View {
         HStack {
             if currentStep < .confirmation {
-                let message = currentStep == .details ? "Submit" : "Next"
+                
                 ThemedButton(
-                    message: message,
+                    message: buttonMessage,
                     action: {
                        
+                        if currentStep == .media && isReadyToContinue {
+                            controller.submitGroupedAttachments(attachments: uploadTrackers, using: model)
+                            goNext()
+                        }
+                        
                         if currentStep == .details {
                            
                             controller.submitReport(model)
@@ -166,6 +171,7 @@ struct ReportWizardContainer: View {
                     style: .prominent,
                     icon: ""
                 )
+                .disabled(disableButton)
                 
             } else {
                 Button(action: { doneTrigger.toggle(); dismiss() }) {
@@ -184,8 +190,21 @@ struct ReportWizardContainer: View {
             }
         }
     }
+  
     
     // MARK: - Logic
+    private var disableButton: Bool {
+        switch currentStep {
+            case .media: return !isReadyToContinue
+            default: return false
+        }
+    }
+    
+    private var isReadyToContinue: Bool {
+        !uploadTrackers.isEmpty && uploadTrackers.allSatisfy { $0.phase == .success }
+    }
+    
+  
     private func goNext() {
         if let next = ReportStep(rawValue: currentStep.rawValue + 1) {
             currentStep = next
@@ -196,6 +215,10 @@ struct ReportWizardContainer: View {
         if let prev = ReportStep(rawValue: currentStep.rawValue - 1) {
             currentStep = prev
         }
+    }
+    
+    private var buttonMessage: String {
+        currentStep == .details ? String(localized: "Submit") : String(localized: "Next")
     }
 }
 

@@ -21,7 +21,7 @@ enum ReportStep: Int, CaseIterable, Comparable {
     var metadataKey: String {
         switch self {
         case .location: return "Location"
-        case .media: return "Media"
+        case .media: return "Attachments"
         case .details: return "Details"
         case .confirmation: return "Confirmation"
         }
@@ -45,8 +45,24 @@ struct StepsMetadata: Identifiable {
 }
 
 let stepsMetadata: [String: StepsMetadata] = [
-    "Location": StepsMetadata(title: "Location", description: "Where did it happen?", icon: "location.magnifyingglass"),
-    "Media": StepsMetadata(title: "Media", description: "Any photos or videos?", icon: "photo.badge.plus"),
-    "Details": StepsMetadata(title: "Details", description: "What happened?", icon: "long.text.page.and.pencil"),
-    "Confirmation":  StepsMetadata(title: "Confirmation", description: "All set?", icon: "text.badge.checkmark")
+    "Location": StepsMetadata(
+        title: String(localized: "Location"),
+        description: String(localized: "Where did it happen?"),
+        icon: "location.magnifyingglass"
+    ),
+    "Attachments": StepsMetadata(
+        title: String(localized: "Attachments"),
+        description: String(localized: "Add photos or videos"),
+        icon: "photo.badge.plus"
+    ),
+    "Details": StepsMetadata(
+        title: String(localized: "Details"),
+        description: String(localized: "What happened?"),
+        icon: "long.text.page.and.pencil"
+    ),
+    "Confirmation": StepsMetadata(
+        title: String(localized: "Confirmation"),
+        description: String(localized: "Everything looks correct?"),
+        icon: "text.badge.checkmark"
+    ),
 ]

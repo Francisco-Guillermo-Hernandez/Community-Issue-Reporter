@@ -66,7 +66,7 @@ struct BasicInformationView: View {
 }
 
 #Preview {
-    var report = MapExplorerReport(
+    let report = MapExplorerReport(
         id: "SV-SS-260601-aXWsaxls",
         lat: 13.701270,
         lng: -89.224432,

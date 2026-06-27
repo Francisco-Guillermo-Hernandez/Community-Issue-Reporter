@@ -61,7 +61,7 @@ struct PhotoChooser: View {
                 HStack(spacing: .themeSpacing * 4) {
                     
                     ThemedButton(
-                        message: "Take Photo",
+                        message: String(localized: "Take Photo"),
                         action: {
                             takePhotoUsingCamera { images in
                                 handleSelectedImages(images)
@@ -134,7 +134,7 @@ struct PhotoChooser: View {
                     
                 }
             }
-            .sheet(isPresented: $isCameraPresented) {
+            .fullScreenCover(isPresented: $isCameraPresented) {
                 ImagePicker(sourceType: .camera) { resource in
                     if let resource {
                         cameraCompletion?([resource])

@@ -73,28 +73,28 @@ struct IssueTimelineView: View {
 //                    .foregroundStyle(.secondary)
 //                    .padding(.bottom, 20)
                 
-                // 1. Reported
+                /// 1. Reported
                 TimelineNode(status: .reported) {
-                    MilestoneHeader(title: "Reported", date: report.history.reported?.date)
+                    MilestoneHeader(title: String(localized: "Reported"), date: report.history.reported?.date)
                     Text("By \(report.history.reported?.by ?? "Unknown")")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 
-                // 2. Confirmed
+                /// 2. Confirmed
                 if let confirmed = report.history.confirmed {
                     TimelineNode(status: .confirmed) {
-                        MilestoneHeader(title: "Confirmed", date: confirmed.date ?? confirmed.computedConfirmationDate)
+                        MilestoneHeader(title: String(localized: "Confirmed"), date: confirmed.date ?? confirmed.computedConfirmationDate)
                         Text("Issue verified by the community").font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                 }
                 
-                // 3. In Progress (Expanded Sub-tasks)
+                /// 3. In Progress (Expanded Sub-tasks)
                 if let inProgress = report.history.inProgress {
                     TimelineNode(status: .inProgress) {
                         VStack(alignment: .leading, spacing: .themeSpacing * 3) {
-                            MilestoneHeader(title: "In Progress", date: nil)
+                            MilestoneHeader(title: String(localized: "In Progress"), date: nil)
                             Text(inProgress.assignedInstitution)
                                 .font(.headline)
                                 .foregroundColor(.orange)
@@ -126,12 +126,12 @@ struct IssueTimelineView: View {
                     }
                 }
                 
-                // 4. Fixed
+                /// 4. Fixed
                 if let fixed = report.history.fixed {
                     TimelineNode(status: .fixed, isLast: true) {
                         VStack(alignment: .leading) {
-                            MilestoneHeader(title: "Fixed", date: fixed.date)
-                            Text(fixed.comments ?? "Repair finalized")
+                            MilestoneHeader(title: String(localized: "Fixed"), date: fixed.date)
+                            Text(fixed.comments ?? String(localized: "Repair finalized"))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                             
@@ -139,7 +139,7 @@ struct IssueTimelineView: View {
                                 NavigationLink(destination: AttachmentDetailView(attachments: attachments)) {
                                     HStack {
                                         Image(systemName: "checkmark.seal.fill")
-                                        Text("View Final Evidence")
+                                        Text(String(localized: "View Final Evidence"))
                                         
                                     }
                                     .font(.system(size: 14, weight: .bold))

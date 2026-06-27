@@ -317,11 +317,8 @@ func getMatterToSolve(id: Int) -> String {
 
 #Preview {
     
-    @Previewable
-    @State var isPresented: Bool = true
-    
-//    @Previewable
-    @State var isLoading: Bool = false
+    @Previewable @State var isPresented: Bool = true
+    @Previewable @State var isLoading: Bool = false
     
     NavigationStack {
         Button("Open"){

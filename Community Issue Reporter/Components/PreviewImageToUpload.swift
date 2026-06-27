@@ -23,7 +23,9 @@ struct PreviewImageToUpload: View {
             if let imageData = data {
                 Image(uiImage: imageData)
                     .resizable()
-                    .aspectRatio(1, contentMode: .fill)
+                    .clipped()
+                    .scaledToFit()
+//                    .aspectRatio(1, contentMode: .fill)
                     .blur(radius: completed ? 0 : 4)
                     .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                     .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -52,6 +54,7 @@ struct PreviewImageToUpload: View {
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white.opacity(0.85))
                                     .padding(.bottom, 4)
+                                    .animatedDots(animate: animateDots)
                                 
                                 
                                 if !completed && phase != .success {
@@ -77,6 +80,7 @@ struct PreviewImageToUpload: View {
                 .buttonBorderShape(.circle)
                 .buttonStyle(.glass)
                 .padding(8)
+                .disabled(phase == .deleting)
             } else {
                 Button {
                     retry(name)
@@ -91,7 +95,11 @@ struct PreviewImageToUpload: View {
         }
     }
     
-    var completed : Bool {
+    private var animateDots: Bool {
+        phase == .uploading || phase == .deleting
+    }
+    
+    private var completed: Bool {
         currentValue == total
     }
     

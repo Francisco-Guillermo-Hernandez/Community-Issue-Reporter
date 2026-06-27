@@ -13,7 +13,7 @@ import SwiftUI
 struct ImageEncoderService {
     
     func processAndUpload(using reportContainer: String, tracker: PhotoUploadTracker) async {
-        guard let data = tracker.localResource.data else {
+        guard let rawImage = tracker.localResource.data else {
             setPhase(tracker, to: .failure)
             return
         }
@@ -21,6 +21,8 @@ struct ImageEncoderService {
         do {
             /// Optimizing Phase
             setPhase(tracker, to: .optimizing)
+            
+            let data = rawImage.fixedOrientation()
             
             let webPData = try await Task.detached(priority: .userInitiated) {
                 return try autoreleasepool {
@@ -45,7 +47,6 @@ struct ImageEncoderService {
                 }
             )
             
-            
             /// Success Phase
             tracker.key = response.data.key
             tracker.name = response.data.name
@@ -61,5 +62,19 @@ struct ImageEncoderService {
     @MainActor
     private func setPhase(_ tracker: PhotoUploadTracker, to phase: ImagePhase) {
         tracker.phase = phase
+    }
+}
+
+// MARK: - fix orientation issues when photos are taken because iOS flips 
+extension UIImage {
+    func fixedOrientation() -> UIImage {
+        if imageOrientation == .up {
+            return self
+        }
+        
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { _ in
+            draw(in: CGRect(origin: .zero, size: size))
+        }
     }
 }

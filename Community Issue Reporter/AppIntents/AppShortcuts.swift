@@ -11,9 +11,9 @@ import AppIntents
 
 struct CreateReportAppIntent: AppIntent {
    
-    static var title: LocalizedStringResource = "Create Report"
-    static var description = IntentDescription("Create a shortcut to report issues")
-    static var openAppWhenRun: Bool = true
+    static let title: LocalizedStringResource = "Create Report"
+    static let description = IntentDescription("Create a shortcut to report issues")
+    static let openAppWhenRun: Bool = true
     
     @MainActor
     func perform() async throws -> some IntentResult {
@@ -23,7 +23,7 @@ struct CreateReportAppIntent: AppIntent {
 }
 
 struct AppShortcuts: AppShortcutsProvider {
-    static var shortcutTileColor: ShortcutTileColor = .orange
+    static let shortcutTileColor: ShortcutTileColor = .orange
 
     @AppShortcutsBuilder
     static var appShortcuts: [AppShortcut] {

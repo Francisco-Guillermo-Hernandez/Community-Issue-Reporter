@@ -29,6 +29,7 @@ enum ImagePhase: String, CaseIterable {
     case uploading
     case success
     case failure
+    case deleting
     
     var description: String {
         switch self {
@@ -38,7 +39,8 @@ enum ImagePhase: String, CaseIterable {
             return String(localized: "Uploading")
         case .success:
             return String(localized: "Uploaded")
-            
+        case .deleting:
+            return String(localized: "Deleting")
         case .failure:
             return String(localized: "Failed")
         }
@@ -55,7 +57,7 @@ class UploadProgressDelegate: NSObject, URLSessionTaskDelegate {
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didSendBodyData bytesSent: Int64, totalBytesSent: Int64, totalBytesExpectedToSend: Int64) {
         let progress = Float(totalBytesSent) / Float(totalBytesExpectedToSend)
-        // Ensure UI updates happen on the Main Actor
+        /// Ensure UI updates happen on the Main Actor
         DispatchQueue.main.async {
             self.onProgress?(progress)
         }

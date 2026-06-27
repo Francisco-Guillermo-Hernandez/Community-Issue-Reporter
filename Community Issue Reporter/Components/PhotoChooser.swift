@@ -113,23 +113,23 @@ struct PhotoChooser: View {
                         .padding(.vertical, 8)
                         .opacity(0.67)
                     
-                    LazyVGrid(columns: Self.gridColumns, spacing: .themeSpacing * 4) {
-                        ForEach(uploadTrackers) { tracker in
-                            PreviewImageToUpload(
-                                name: tracker.name,
-                                phase: tracker.phase,
-                                data: tracker.localResource.data,
-                                currentValue: Binding(
-                                    get: { tracker.uploadProgress },
-                                    set: { _ in }
-                                ),
-                                total: 1.0,
-                                delete: { name in
-                                    deleteImage(using: name)
-                                },
-                                retry: { _ in }
-                            )
-                        }
+                    /// Use a masonry grid to present images 
+                    MasonryGrid(columns: 2, spacing: 8, data: uploadTrackers) { tracker in
+                        
+                        PreviewImageToUpload(
+                            name: tracker.name,
+                            phase: tracker.phase,
+                            data: tracker.localResource.data,
+                            currentValue: Binding(
+                                get: { tracker.uploadProgress },
+                                set: { _ in }
+                            ),
+                            total: 1.0,
+                            delete: { name in
+                                deleteImage(using: name, tracker)
+                            },
+                            retry: { _ in }
+                        )
                     }
                     
                 }
@@ -176,14 +176,17 @@ struct PhotoChooser: View {
     }
     
     
-    private func deleteImage(using key: String) {
+    private func deleteImage(using key: String, _ tracker: PhotoUploadTracker) {
         Task {
             do {
+                tracker.phase = .deleting
                 let result = try await ReportRepository.shared.deleteTemporalPicture(reportContainer, key)
                 if result == .deleted {
-                    /// TODO: delete
-                    ///
-                    print("deleted")
+                    await MainActor.run {
+                        withAnimation {
+                            uploadTrackers.removeAll { $0.name == key }
+                        }
+                    }
                 }
             } catch {
                 print(error.localizedDescription)
@@ -274,6 +277,11 @@ struct ImagePicker: UIViewControllerRepresentable {
         picker.allowsEditing = false
         picker.delegate = context.coordinator
         picker.modalPresentationStyle = .fullScreen
+        
+        picker.view.contentMode = .scaleAspectFit
+        picker.view.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        picker.view.setContentHuggingPriority(.defaultLow, for: .vertical)
+        
         return picker
     }
     
@@ -292,6 +300,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             let image = info[.originalImage] as? UIImage
+
             let orientation = UIDevice.current.orientation
             onImagePicked(MediaResources(type: .photo, data: image, metadata: BasicMetadata(deviceOrientation: orientation.isLandscape ? .landscape : .portrait)))
         }

@@ -47,10 +47,19 @@
 		<string>MKDirectionsModePedestrian</string>
 		<string>MKDirectionsModeStreetCar</string>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Lora.ttf</string>
+		<string>Lora-Italic.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>processing</string>
 		<string>fetch</string>
 	</array>
+	<key>BASE_URL</key>
+	<string>$(BASE_URL)</string>
+	<key>SHARE_URL</key>
+	<string>$(SHARE_URL)</string>
 </dict>
 </plist>

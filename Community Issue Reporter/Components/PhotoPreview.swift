@@ -8,43 +8,58 @@
 import SwiftUI
 
 @ViewBuilder
-func photoPreview(_ photo: PhotoSample) -> some View  {
-    Image(photo.photo)
-        .resizable()
-        .aspectRatio(1, contentMode: .fill)
-        .cornerRadius(16)
-        .overlay {
-            ZStack(alignment: .bottomLeading) {
-                
-                RoundedRectangle(cornerRadius: 16)
-                
-                    .fill(
-                        LinearGradient(
-                            stops: [
-                                .init(color: .black.opacity(0.8), location: 0),
-                                .init(color: .black.opacity(0.4), location: 0.5),
-                                .init(color: .clear, location: 1)
-                            ],
-                            startPoint: .bottom,
-                            endPoint: .top
-                        )
-                    )
-                
-                    .cornerRadius(16)
-                
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(photo.user)
-                        .font(.subheadline)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                    
-                    Text(photo.published.formatted(date: .numeric, time: .omitted))
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white.opacity(0.8))
+func photoPreview(_ attachment: PreviewAttachment) -> some View  {
+    
+    if let url = attachment.url {
+        CachedAsyncImage(url: url) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 160, height: 160, alignment: .top)
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+                .overlay {
+                    ZStack(alignment: .bottomLeading) {
+                        
+                        RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous)
+                        
+                            .fill(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .black.opacity(0.8), location: 0),
+                                        .init(color: .black.opacity(0.4), location: 0.5),
+                                        .init(color: .clear, location: 1)
+                                    ],
+                                    startPoint: .bottom,
+                                    endPoint: .top
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+                            .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+                        
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(attachment.uploaderUserName)
+                                .font(.subheadline)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                            
+                            Text(attachment.createdAt.formatted(date: .numeric, time: .omitted))
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        .padding()
+                    }
                 }
-                .padding()
-            }
+        } placeholder: {
+            ProgressView()
+                .frame(width: 160, height: 160)
         }
+//        .frame(width: 48, height: 48)
+//        .clipShape(Circle())
+        .id(url)
+    }
+       
 }

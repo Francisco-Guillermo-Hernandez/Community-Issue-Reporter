@@ -13,27 +13,30 @@ import WidgetKit
 @main
 struct Community_Issue_ReporterApp: App {
     
-    // Inject auth view model to persist data related with Google auth
+    /// Inject auth view model to persist data related with Google auth
     @StateObject private var authViewModel = AuthViewModel()
     
-    // Inject settings store
+    /// Inject settings store
     @StateObject private var settingsStore = SettingsStore()
     
-    // Inject network monitor
+    /// Inject network monitor
     @StateObject private var networkMonitor = NetworkMonitor()
     
-    // Inject the AppDelegate lifecycle adaptor
+    /// Inject the AppDelegate lifecycle adaptor
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-    // Reference the manager state
+    /// Reference the manager state
     @StateObject private var notificationManager = AppDelegate.sharedNotificationManager
     
-    // Router
+    /// Router
     @StateObject private var router = DeepLinkRouter()
     
     init() {
         copyDatabaseIfNeeded()
-        AppShortcuts.updateAppShortcutParameters()
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] != "1" &&
+           ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PLAYGROUNDS"] != "1" {
+            AppShortcuts.updateAppShortcutParameters()
+        }
     }
     
     var body: some Scene {

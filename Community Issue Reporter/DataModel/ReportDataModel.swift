@@ -20,7 +20,12 @@ final class ReportDataModel {
     var isAddressValid: Bool = false
     var reportSession: ReportSessionResponse
     private init() {
-        self.reportSession = .init(reportContainer: "", createdAt: Date(), shareIndexHash: "", reportCreationOn: "")
+        self.reportSession = .init(
+            reportContainer: "", 
+            createdAt: Date(),
+            shareIndexHash: "",
+            reportCreationOn: ""
+        )
         
         /// Let's initialize the locator for the report
         self.locator = Locator(
@@ -58,6 +63,7 @@ final class ReportDataModel {
             createdAt: Date(),
             updatedAt: Date(),
             reportState: .new,
+            attachments: [],
         )
     }
     
@@ -87,6 +93,23 @@ final class ReportDataModel {
     func prepareForModification(_ report: Report) {
         self.report = report
         self.report.reportState = .modifying
+    }
+    
+    func addAttachments(_ attachments: [PhotoUploadTracker]) {
+        let payload = attachments.map { attachment in
+            PreviewAttachmentRequest(
+                fileName: attachment.name,
+                type: .image,
+                key: attachment.key,
+                notes: ""
+            )
+        }
+        
+        self.report.attachments.append(contentsOf: payload)
+    }
+    
+    func removeAttachments() {
+        self.report.attachments.removeAll()
     }
     
     func clear() {

@@ -9,7 +9,7 @@ import OSLog
 import Foundation
 
 extension Logger {
-    private static var subsystem = Bundle.main.bundleIdentifier!
+    private static var subsystem = Bundle.main.bundleIdentifier ?? "dev.FranciscoHernandez.Comunity-Issues"
     static let viewCycle = Logger(subsystem: subsystem, category: "viewcycle")
     static let statistics = Logger(subsystem: subsystem, category: "statistics")
 }

@@ -41,7 +41,7 @@ enum DateFormat {
 }
 
 func createdAtNow(format: DateFormat) -> String {
-    var verbatim: Date.FormatString = format == .joined ?  "\(year: .extended())\(month: .twoDigits)\(day: .twoDigits)" : "\(year: .extended())\(month: .twoDigits)-\(day: .twoDigits)"
+    let verbatim: Date.FormatString = format == .joined ?  "\(year: .extended())\(month: .twoDigits)\(day: .twoDigits)" : "\(year: .extended())\(month: .twoDigits)-\(day: .twoDigits)"
     
      return Date()
         .formatted(

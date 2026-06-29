@@ -21,6 +21,35 @@ func buildShareURL(for path: String) -> URL? {
     return Endpoints.shareableURL.appending(path: path)
 }
 
+
+func buildPreviewAttachmentURL(_ reportContainer: String, _ fileName: String, _ state: ReportAttachmentState, _ updatedAtRaw: Int64? = nil) -> URL? {
+    
+    if state == .inappropriate || state == .deleted {
+        return nil
+    }
+    
+    var fragment: String = ""
+    switch state {
+        case .pending:
+            fragment = "review"
+        case .confirmed:
+            fragment = "validated"
+        default:
+            break
+    }
+    
+    let params: [URLQueryItem] = [
+        URLQueryItem(name: "v", value: String(updatedAtRaw ?? 1))
+    ]
+    
+    return Endpoints.baseURL
+        .appending(component: "attachments")
+        .appending(component: fragment)
+        .appending(component: reportContainer)
+        .appending(component: fileName)
+        .appending(queryItems: params)
+}
+
 func urlFromString(_ string: String) -> URL? {
     return URL(string: string)
 }

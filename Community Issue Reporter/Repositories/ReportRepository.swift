@@ -89,6 +89,7 @@ final class ReportRepository {
         }
     }
     
+    /// Creates a new report using model
     func create(using model: ReportDataModel) async throws -> String {
         do {
             let response = try await self.reportsService.createReport(
@@ -98,16 +99,16 @@ final class ReportRepository {
                     HTTPHeader(name: "CityId", content: model.locator.cityId),
                     HTTPHeader(name: "CityNameSortKey", content: model.locator.cityNameSortKey),
                     HTTPHeader(name: "ShareIndexHash", content: model.reportSession.shareIndexHash),
-                    HTTPHeader(name: "CreationDate", content: model.reportSession.reportCreationOn),
                     HTTPHeader(name: "ReportContainer", content: model.reportSession.reportContainer),
                 ]
             )
-        
+            
             if response.code == "REPORT_CREATED" {
                 return response.id
             } else {
                 throw CommonIntercommunicationErrors.genericError("Error creating report")
             }
+            
         } catch ServiceError.networkError(let error) {
             throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch ServiceError.badRequest(let response) {
@@ -119,7 +120,7 @@ final class ReportRepository {
         }
     }
     
-    func update(report: Report,locator: Locator) async throws -> SuccessfulResult {
+    func update(report: Report, locator: Locator) async throws -> SuccessfulResult {
         do {
             
             guard let id = report.id as String? else {
@@ -143,6 +144,33 @@ final class ReportRepository {
         } catch {
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
             
+        }
+    }
+
+    func submitGroupedAttachments(attachments: [GroupedAttachmentPayload]) async throws -> SuccessfulResult {
+        do {
+            let response = try await self.reportsService.submitGroupedAttachments(
+                attachments: attachments,
+                headers: [
+                    HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+                    HTTPHeader(name: "CountryCode", content: "SV"),
+                ]
+            )
+            
+            if response.code == "ATTACHMENTS_SAVED" {
+                return .created
+            } else {
+                throw CommonIntercommunicationErrors.genericError("Error submitting report attachments")
+            }
+            
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        } catch ServiceError.badRequest(let response) {
+            throw CommonIntercommunicationErrors.invalidPetition(response.code)
+        } catch ServiceError.serverError(let code) {
+            throw CommonIntercommunicationErrors.serverError(code)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
 }

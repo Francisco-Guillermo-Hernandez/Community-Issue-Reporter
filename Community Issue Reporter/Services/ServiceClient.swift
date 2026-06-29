@@ -64,7 +64,7 @@ struct ServiceClient {
     }
     
     /// initialize the instance by default with .json decoderType
-    init(baseURL: URL? = Endpoints.baseURL, decoderType: DecoderType = .json(.init())) {
+    init(baseURL: URL? = Endpoints.apiV1, decoderType: DecoderType = .json(.init())) {
         self.baseURL = baseURL
         
         switch decoderType {
@@ -558,17 +558,17 @@ struct ServiceClient {
     private static func makeJSONDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
         
-        // Formatter with fractional seconds (e.g., 2026-05-22T20:55:00.000Z)
-        let fractionalFormatter = ISO8601DateFormatter()
-        fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        
-        // Formatter without fractional seconds (e.g., 1970-01-01T00:00:00Z)
-        let standardFormatter = ISO8601DateFormatter()
-        standardFormatter.formatOptions = [.withInternetDateTime]
-        
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
             let value = try container.decode(String.self)
+            
+            // Formatter with fractional seconds (e.g., 2026-05-22T20:55:00.000Z)
+            let fractionalFormatter = ISO8601DateFormatter()
+            fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            
+            // Formatter without fractional seconds (e.g., 1970-01-01T00:00:00Z)
+            let standardFormatter = ISO8601DateFormatter()
+            standardFormatter.formatOptions = [.withInternetDateTime]
             
             // Fractional seconds
             if let date = fractionalFormatter.date(from: value) {

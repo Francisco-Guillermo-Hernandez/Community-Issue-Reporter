@@ -37,6 +37,8 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
         self.scale = scale
         self.content = content
         self.placeholder = placeholder
+        
+        print("url: \(url)")
     }
 
     var body: some View {

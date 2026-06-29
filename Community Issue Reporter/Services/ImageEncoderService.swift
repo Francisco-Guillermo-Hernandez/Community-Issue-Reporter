@@ -28,9 +28,9 @@ struct ImageEncoderService {
                 return try autoreleasepool {
                     try WebPEncoder().encode(
                         data,
-                        config: .preset(.picture, quality: 80),
+                        config: .preset(.photo, quality: 80), /// optimize the raw data using photo preset
                         width: Int(data.size.width / 1.5),
-                        height: Int(data.size.height / 1.5)
+                        height: Int(data.size.height / 1.5) /// scale down
                     )
                 }
             }.value

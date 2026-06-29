@@ -11,7 +11,7 @@ import SwiftMsgpack
 struct MapExplorerService {
     
     private let client: ServiceClient
-    init(client: ServiceClient =  ServiceClient(baseURL: Endpoints.baseURL, decoderType: .messagePack(MsgPackDecoder()))) {
+    init(client: ServiceClient =  ServiceClient(decoderType: .messagePack(MsgPackDecoder()))) {
         self.client = client
     }
     

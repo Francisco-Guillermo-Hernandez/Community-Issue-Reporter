@@ -98,14 +98,14 @@ struct LoginView: View {
     }
     
     func loginWithGoogle() {
-        // Find the current window scene.
+        /// Find the current window scene.
         performLoginActions()
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
             print("There is no active window scene")
             return
         }
         
-        // Get the root view controller from the window scene.
+        /// Get the root view controller from the window scene.
         guard
             let rootViewController = windowScene.windows.first(where: { $0.isKeyWindow })?
                 .rootViewController
@@ -114,17 +114,23 @@ struct LoginView: View {
             return
         }
         
-        // Start the sign-in process.
+        /// Start the sign-in process.
         GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { signInResult, error in
+            /// Extract the Sendable values safely in the caller's context
+            let hasResult = signInResult != nil
+            let tokenString = signInResult?.user.idToken?.tokenString
+            let errorDescription = error?.localizedDescription
             
-            guard let result = signInResult else {
-                performLoginActions()
-                // Inspect error
-                print("Error signing in: \(error?.localizedDescription ?? "No error description")")
-                return
+            Task { @MainActor in
+                guard hasResult, let tokenString = tokenString else {
+                    performLoginActions()
+                    /// Inspect error
+                    print("Error signing in: \(errorDescription ?? "No error description")")
+                    return
+                }
+                
+                onTokenReceived(tokenString, .user)
             }
-            
-            onTokenReceived(result.user.idToken?.tokenString ?? "", .user)
         }
     }
 

@@ -26,18 +26,9 @@ class ReportController: ObservableObject {
         }
     }
     
-    func submitAttachments(attachments: [Attachment]) async {
-        do {
-            
-        } catch CommonIntercommunicationErrors.networkError(let error) {
-            showAlert(message: error)
-        } catch CommonIntercommunicationErrors.serverError {
-            showAlert(message: "Something went wrong, please try again later")
-        }
-    }
-    
     func createShareableLink(_ model: ReportDataModel) async {
         do {
+           
             let url = try await ShareRepository.shared.createShareableLink(using: model)
             shareableLink = url
         }  catch CommonIntercommunicationErrors.invalidPetition(let code) {
@@ -51,9 +42,10 @@ class ReportController: ObservableObject {
         }
     }
     
-    func createReport(_ model: ReportDataModel) async {
+    func createReport(with attachments: [PhotoUploadTracker], using model: ReportDataModel) async {
         do {
             isLoading = true
+            
             let result = try await ReportRepository.shared.create(using: model)
             
             model.report.id = result
@@ -72,11 +64,47 @@ class ReportController: ObservableObject {
         isLoading = false
     }
     
-    func submitReport(_ model: ReportDataModel) {
+    func submitGroupedAttachments(with attachments: [PhotoUploadTracker], using model: ReportDataModel) async {
+        do {
+      
+            isLoading = true
+            let payload = attachments.map { tracker in
+                GroupedAttachmentPayload(
+                    attachmentContainer: model.reportSession.reportContainer,
+                    key: tracker.key,
+                    previewFileName: "preview_\(tracker.name)",
+                    fileName: tracker.name,
+                    reportId: model.buildReportId(),
+                    notes: ""
+                )
+            }
+            
+            let result = try await ReportRepository.shared.submitGroupedAttachments(attachments: payload)
+            
+            if result == .created {
+                print("created")
+            }
+        } catch CommonIntercommunicationErrors.invalidPetition(let code) {
+            showAlert(message: code)
+        } catch CommonIntercommunicationErrors.networkError(let error) {
+            showAlert(message: error)
+        } catch CommonIntercommunicationErrors.serverError {
+            showAlert(message: "Something went wrong, please try again later")
+        } catch {
+            showAlert(message: error.localizedDescription)
+        }
+        isLoading = false
+    }
+    
+    func submitReport(_ model: ReportDataModel, attachments: [PhotoUploadTracker]) {
         Task {
-            await createReport(model)
-            await createShareableLink(model)
-//            await submit
+            async let a = createShareableLink(model)
+            async let b = createReport(with: attachments, using: model)
+            async let c = submitGroupedAttachments(with: attachments, using: model)
+            
+            _ = await (a, b, c)
+            
+            model.removeAttachments()
         }
      }
      

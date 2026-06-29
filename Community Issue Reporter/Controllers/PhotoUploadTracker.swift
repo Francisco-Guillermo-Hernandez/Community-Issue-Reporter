@@ -24,7 +24,7 @@ class PhotoUploadTracker: Identifiable {
 }
 
 
-enum ImagePhase: String, CaseIterable {
+enum ImagePhase: String, CaseIterable, Equatable {
     case optimizing
     case uploading
     case success
@@ -48,7 +48,7 @@ enum ImagePhase: String, CaseIterable {
 }
 
 
-class UploadProgressDelegate: NSObject, URLSessionTaskDelegate {
+final class UploadProgressDelegate: NSObject, URLSessionTaskDelegate {
     var onProgress: ((Float) -> Void)?
     
     init(onProgress: @escaping (Float) -> Void) {

@@ -76,11 +76,57 @@ struct Attachment: Codable, Identifiable {
     let previewUrl: String
 }
 
-struct PreviewAttachment: Codable, Identifiable {
+struct GroupedAttachmentPayload: Codable {
+    let attachmentContainer: String
+    let key: String
+    let previewFileName: String
+    let fileName: String
+    let reportId: String
+    let notes: String
+}
+
+struct PreviewAttachment: Decodable, Identifiable, Equatable, Hashable {
     let id: String
     let type: AttachmentType
-    let createdAt: Date
-    let uploadedBy: String
+    let createdAtRaw: Int64
+    let updatedAtRaw: Int64?
+    let uploaderUserName: String
     let validatedBy: AttachmentValidatedBy?
-    let url: String
+    let state: ReportAttachmentState
+    let fileName: String
+    let reportContainer: String
+    var createdAt: Date { Date(timeIntervalSince1970: Double(createdAtRaw) / miliSeconds) }
+    var updatedAt: Date? {
+        guard let updatedAtRaw else { return nil }
+        return Date(timeIntervalSince1970: Double(updatedAtRaw) / miliSeconds)
+    }
+    var url: URL? {
+        get {
+            if !reportContainer.isEmpty && !fileName.isEmpty {
+                return buildPreviewAttachmentURL(reportContainer, fileName, state, updatedAtRaw)
+            }
+            
+            return nil
+        }
+    }
+    
+    var more: Bool {
+        get {
+            return false
+        }
+        
+        set {
+            if self.id == "placeholder" {
+                self.more = true
+            }
+        }
+    }
+}
+
+
+struct PreviewAttachmentRequest: Codable {
+    let fileName: String
+    let type: AttachmentType
+    let key: String
+    let notes: String
 }

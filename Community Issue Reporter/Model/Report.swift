@@ -46,6 +46,7 @@ struct Report: Identifiable, Codable, Hashable {
     var suggestedTitle: String?
     var suggestedDescription: String?
     var reportState: ReportStates?
+    var attachments: [PreviewAttachmentRequest]
     init(
             id: String? = nil,
             coordinate: Coordinate,
@@ -64,7 +65,8 @@ struct Report: Identifiable, Codable, Hashable {
             reportedBy: String? = nil,
             suggestedTitle: String? = nil,
             suggestedDescription: String? = nil,
-            reportState: ReportStates? = .new
+            reportState: ReportStates? = .new,
+            attachments: [PreviewAttachmentRequest] = []
         ) {
             self.id = id
             self.coordinate = coordinate
@@ -84,6 +86,7 @@ struct Report: Identifiable, Codable, Hashable {
             self.suggestedTitle = suggestedTitle
             self.suggestedDescription = suggestedDescription
             self.reportState = reportState
+            self.attachments = attachments
         }
 }
 

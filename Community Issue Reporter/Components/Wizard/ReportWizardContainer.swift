@@ -131,7 +131,7 @@ struct ReportWizardContainer: View {
         VStack(spacing: .themeSpacing * 3) {
             
             HStack {
-                Text("Step \(currentStep.rawValue) of 4")
+                Text(String(localized: "Step \(currentStep.rawValue) of 4"))
                     .font(.headline)
                     .foregroundColor(Color.theme.foreground)
             }
@@ -150,23 +150,7 @@ struct ReportWizardContainer: View {
                 
                 ThemedButton(
                     message: buttonMessage,
-                    action: {
-                       
-                        if currentStep == .media && isReadyToContinue {
-                            controller.submitGroupedAttachments(attachments: uploadTrackers, using: model)
-                            goNext()
-                        }
-                        
-                        if currentStep == .details {
-                           
-                            controller.submitReport(model)
-                            goNext()
-                           
-                        } else {
-                            goNext()
-                        }
-                        
-                    },
+                    action: submitReport,
                     type: .primary,
                     style: .prominent,
                     icon: ""
@@ -193,6 +177,22 @@ struct ReportWizardContainer: View {
   
     
     // MARK: - Logic
+    
+    private func submitReport() -> Void {
+        if currentStep == .media && isReadyToContinue {
+            goNext()
+        }
+        
+        if currentStep == .details {
+           
+            controller.submitReport(model, attachments: uploadTrackers)
+            goNext()
+           
+        } else {
+            goNext()
+        }
+    }
+    
     private var disableButton: Bool {
         switch currentStep {
             case .media: return !isReadyToContinue

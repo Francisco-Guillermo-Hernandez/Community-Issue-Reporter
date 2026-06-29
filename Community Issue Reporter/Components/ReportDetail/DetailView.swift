@@ -50,31 +50,7 @@ struct DetailView: View {
     @ScaledMetric var adaptiveSpacing: CGFloat = 20
     @Environment(\.horizontalSizeClass) var sizeClass
     @State private var showMoreEvidences: Bool = false
-    @State private var photos: [PhotoSample] = [
-        PhotoSample(id: "1", photo: "a", published: Date(), user: "Jane Doe"),
-        PhotoSample(id: "2", photo: "b", published: Date(), user: "John Smith"),
-        PhotoSample(
-            id: "3",
-            photo: "c",
-            published: Date(),
-            user: "Michael Brown"
-        ),
-        PhotoSample(
-            id: "4",
-            photo: "d",
-            published: Date(),
-            user: "Emily Davis"
-        ),
-        PhotoSample(
-            id: "5",
-            photo: "",
-            published: Date(),
-            user: "",
-            more: true
-        ),
-    ]
-
-    //    var issue: IssueMarker
+    @State private var attachments: [PreviewAttachment] = []
     var report: MapExplorerReport
     @State private var color: Color
     @State private var path = NavigationPath()
@@ -112,60 +88,6 @@ struct DetailView: View {
         }
     }
 
-
-    fileprivate func evidenceOfTheIssues() -> Group<TupleView<(SectionHeader, some View)>> {
-        return Group {
-            SectionHeader(title: String(localized: "Evidence of the report"))
-            ScrollView(.horizontal, showsIndicators: true) {
-                LazyHGrid(rows: gridColumns, spacing: .themeSpacing * 2) {
-                    ForEach(photos, id: \.id) { photo in
-
-                        if photo.more {
-                           
-                            
-                            NavigationLink(value: DetailNavigationDestination.moreEvidences(report.id)) {
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(Color.theme.primary, lineWidth: 2)
-                                    .frame(width: 160, height: 160)
-                                    .foregroundStyle(
-                                        Color(uiColor: .systemGray6)
-                                    )
-                                    .overlay {
-                                        VStack(spacing: 8) {
-                                            Image(systemName: "photo.stack")
-                                                .foregroundStyle(
-                                                    Color.theme.foreground
-                                                )
-                                                .font(.largeTitle)
-
-                                            HStack {
-                                                Text(String(localized: "More Evidences..."))
-                                                    .font(.caption)
-                                                    .fontWeight(.black)
-                                                  
-                                                    .foregroundStyle(
-                                                        Color.theme.foreground
-                                                    )
-                                            }
-                                        }
-                                    }
-                                    .padding(.trailing, 16)
-                            }
-
-                        } else {
-
-                            photoPreview(photo)
-                                .frame(width: 160, height: 160)
-                        }
-                    }
-                }
-            }
-            .padding(.leading, .themePadding)
-            .padding(.top, .themePadding)
-            .scrollClipDisabled()
-        }
-    }
-
     @ViewBuilder
     func lastComments() -> some View {
         Group {
@@ -191,7 +113,7 @@ struct DetailView: View {
                     BasicInformationView(for: report)
 
                     ///
-                    EvidenceOfTheIssuesView(photos: photos, id: report.id)
+                    EvidenceOfTheReportView(report.attachments, id: report.id)
 
                     ///
                     FollowUpSectionView()
@@ -325,7 +247,7 @@ func getMatterToSolve(id: Int) -> String {
             isPresented.toggle()
         }
             .sheet(isPresented: $isPresented) {
-                var report = MapExplorerReport(
+                let report = MapExplorerReport(
                     id: "SV-SS-260601-aXWsaxls",
                     lat: 13.701270,
                     lng: -89.224432,
@@ -344,6 +266,7 @@ func getMatterToSolve(id: Int) -> String {
                     cityId: "",
                     petitionId: "",
                     shareUrl: "",
+                    attachments: [],
 //                    updatedAt
                 )
 

@@ -7,17 +7,26 @@
 
 import SwiftUI
 
-struct EvidenceOfTheIssuesView: View {
-    var photos: [PhotoSample]
+struct EvidenceOfTheReportView: View {
+    var attachments: [PreviewAttachment]
     var id: String
+    
+    init(_ attachments: [PreviewAttachment], id: String) {
+        self.attachments = attachments
+        self.id = id
+//        self.attachments.append(
+//            PreviewAttachment(id: "placeholder", type: .image, createdAtRaw: 0, updatedAtRaw: nil, uploaderUserName: "", validatedBy: .manually, state: .confirmed, fileName: "", reportContainer: "")
+//        )
+    }
+    
     var body: some View {
         VStack {
             SectionHeader(title: String(localized: "Evidence of the report"))
             ScrollView(.horizontal, showsIndicators: true) {
                 LazyHGrid(rows: gridColumns, spacing: .themeSpacing * 2) {
-                    ForEach(photos, id: \.id) { photo in
+                    ForEach(attachments, id: \.id) { attachment in
                         
-                        if photo.more {
+                        if attachment.more {
                             
                             NavigationLink(value: DetailNavigationDestination.moreEvidences(id)) {
                                 RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -50,8 +59,8 @@ struct EvidenceOfTheIssuesView: View {
                             
                         } else {
                             
-                            photoPreview(photo)
-                                .frame(width: 160, height: 160)
+                            photoPreview(attachment)
+                                
                         }
                     }
                 }

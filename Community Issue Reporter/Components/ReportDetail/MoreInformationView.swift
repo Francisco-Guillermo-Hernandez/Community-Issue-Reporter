@@ -188,6 +188,7 @@ struct MoreInformationView: View {
         cityId: "",
         petitionId: "",
         shareUrl: "",
+        attachments: [],
 //                    updatedAt
     )
 

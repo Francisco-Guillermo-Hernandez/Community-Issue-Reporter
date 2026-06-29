@@ -85,6 +85,7 @@ struct BasicInformationView: View {
         cityId: "",
         petitionId: "",
         shareUrl: "",
+        attachments: [],
 //                    updatedAt
     )
     BasicInformationView(for: report)

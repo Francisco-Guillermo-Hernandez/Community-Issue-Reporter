@@ -62,3 +62,5 @@ fastlane/screenshots/**/*.png
 fastlane/test_output
 
 examples/*
+.agents/*
+skills-lock.json

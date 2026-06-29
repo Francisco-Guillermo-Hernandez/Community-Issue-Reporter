@@ -64,6 +64,9 @@ struct SignRequestsView: View {
             ordering: orderFilter
         )
         
+        
+        print(query)
+        
        
         let locator = Locator(
             countryCode: "SV",
@@ -75,6 +78,8 @@ struct SignRequestsView: View {
             cityCode: "SS",
             address: "Paseo General Escalón &, Alameda Franklin Delano Roosevelt, San Salvador, El Salvador"
         )
+        
+        print(locator)
         
         self.petitions = [
             Petition(

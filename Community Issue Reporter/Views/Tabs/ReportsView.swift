@@ -512,7 +512,6 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         ReportsView()
             .environmentObject(LandingController())
             .environmentObject(AuthViewModel())
-            .environmentObject(ReportDetailsHandler())
             .environmentObject(DeepLinkRouter())
     }
 }

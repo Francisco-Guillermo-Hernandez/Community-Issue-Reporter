@@ -37,19 +37,19 @@ struct EvidencesView: View {
     
     var body: some View {
         ScrollView(.vertical) {
-            LazyVGrid(columns: gridColumns, spacing: 4) {
-                ForEach(photos, id: \.id) { photo in
-                    NavigationLink(value: photo) {
-                        photoPreview(photo)
-                            .matchedTransitionSource(id: photo.id, in: nameSpace)
-                    }
-                    .buttonStyle(.plain)
-                    .simultaneousGesture(TapGesture().onEnded {
-                        previewID = photo.id
-                    })
-                }
-            }
-            .padding(.horizontal, .themePadding)
+//            LazyVGrid(columns: gridColumns, spacing: 4) {
+//                ForEach(photos, id: \.id) { photo in
+//                    NavigationLink(value: photo) {
+//                        photoPreview(photo)
+//                            .matchedTransitionSource(id: photo.id, in: nameSpace)
+//                    }
+//                    .buttonStyle(.plain)
+//                    .simultaneousGesture(TapGesture().onEnded {
+//                        previewID = photo.id
+//                    })
+//                }
+//            }
+//            .padding(.horizontal, .themePadding)
         }
         .navigationDestination(for: PhotoSample.self) { photo in
             PhotoDetailView(photos: photos, previewID: $previewID, nameSpace: nameSpace)

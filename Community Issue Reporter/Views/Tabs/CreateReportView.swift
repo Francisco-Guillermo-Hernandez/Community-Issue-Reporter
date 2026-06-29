@@ -26,7 +26,6 @@ struct CreateReportView: View {
     @State private var issueType: IssueTypes = .all
     @State private var severity: Severity = .all
     @State private var model = ReportDataModel.shared
-    @State private var showWizard = false
     @State private var feedbackTrigger = false
     
     var body: some View {
@@ -100,17 +99,7 @@ struct CreateReportView: View {
                 .navigationTitle("Report")
                 .navigationSubtitle("what do you want to report?")
                 .scrollContentBackground(.hidden)
-                .sheet(isPresented: $showWizard) {
-                    ReportWizardView(model: model, onCompletion: { incomingMessage, alertType in
-                        message = incomingMessage
-                        type = alertType
-                        show = true
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
-                            self.show = false
-                        }
-                    })
-                }
+             
             }
             
            

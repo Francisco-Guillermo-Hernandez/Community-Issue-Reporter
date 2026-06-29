@@ -14,7 +14,7 @@ enum ViewOptions: String {
 }
 
 // MARK: - Login options presented in the LoginView page
-enum LoginType {
+enum LoginType: Sendable {
     case guest
     case user
 }
@@ -67,5 +67,5 @@ enum SuccessfulResult: Equatable {
     case done
     case updated
     case deleted
-    case created(String)
+    case created
 }

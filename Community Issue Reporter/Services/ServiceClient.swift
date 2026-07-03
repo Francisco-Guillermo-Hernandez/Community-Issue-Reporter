@@ -91,13 +91,13 @@ struct ServiceClient {
         var queryItems: [URLQueryItem] = []
         
         for (key, value) in dict {
-            // Check if the value is an array
+            /// Check if the value is an array
             if let arrayValue = value as? [Any] {
-                // Create a query item for EACH item in the array
+                /// Create a query item for EACH item in the array
                 let items = arrayValue.map { URLQueryItem(name: key, value: "\($0)") }
                 queryItems.append(contentsOf: items)
             } else {
-                // Handle regular primitive values (String, Int, Bool, etc.)
+                /// Handle regular primitive values (String, Int, Bool, etc.)
                 queryItems.append(URLQueryItem(name: key, value: "\(value)"))
             }
         }
@@ -562,19 +562,19 @@ struct ServiceClient {
             let container = try decoder.singleValueContainer()
             let value = try container.decode(String.self)
             
-            // Formatter with fractional seconds (e.g., 2026-05-22T20:55:00.000Z)
+            /// Formatter with fractional seconds (e.g., 2026-05-22T20:55:00.000Z)
             let fractionalFormatter = ISO8601DateFormatter()
             fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
             
-            // Formatter without fractional seconds (e.g., 1970-01-01T00:00:00Z)
+            /// Formatter without fractional seconds (e.g., 1970-01-01T00:00:00Z)
             let standardFormatter = ISO8601DateFormatter()
             standardFormatter.formatOptions = [.withInternetDateTime]
             
-            // Fractional seconds
+            /// Fractional seconds
             if let date = fractionalFormatter.date(from: value) {
                 return date
             }
-            // Fallback to standard ISO8601
+            /// Fallback to standard ISO8601
             if let date = standardFormatter.date(from: value) {
                 return date
             }

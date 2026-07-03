@@ -61,7 +61,7 @@ struct TabBarView: View {
                 showShortcutReport = true
             }
         }
-        .sheet(isPresented: $showShortcutReport) {
+        .fullScreenCover(isPresented: $showShortcutReport) {
            
             ReportWizardContainer(model: model, onCompletion: { incomingMessage, alertType in
                 router.message = incomingMessage

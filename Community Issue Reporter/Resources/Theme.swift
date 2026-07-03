@@ -13,9 +13,11 @@ struct AppTheme {
         light: Color,
         dark: Color
     ) -> Color {
+        let uiLight = UIColor(light)
+        let uiDark = UIColor(dark)
         return Color(
             UIColor { traitCollection in
-                return traitCollection.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
+                return traitCollection.userInterfaceStyle == .dark ? uiDark : uiLight
             }
         )
     }

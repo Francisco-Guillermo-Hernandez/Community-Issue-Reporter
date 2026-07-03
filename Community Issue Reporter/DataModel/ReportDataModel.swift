@@ -26,22 +26,32 @@ final class ReportDataModel {
             shareIndexHash: "",
             reportCreationOn: ""
         )
-        
-        /// Let's initialize the locator for the report
-        self.locator = Locator(
-            countryCode: "SV",
-            country: "El Salvador",
-            region: "San Salvador",
-            city: "San Salvador",
-            cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
-            cityNameSortKey: "san-salvador",
-            cityCode: "SS",
-            address: "Paseo General Escalón &, Alameda Franklin Delano Roosevelt, San Salvador"
-        )
+    
         
         let appState = AuthViewModel()
         var lat: Double =  13.7159815
         var lng: Double = -89.1801214
+    
+        
+        /// Let's initialize the locator for the report
+        self.locator = .init(
+            countryCode: "SV",
+            firstLevel: "El Salvador",
+            secondLevel: "San Salvador",
+            thirdLevel: "San Salvador",
+            groupingId: "f30b2834-12ee-4b0c-85eb-660ee7b08ed4",
+            cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
+            groupingName: "Municipio de San Salvador Centro",
+            groupingNameCode: "SSC",
+            lat: lat,
+            lng: lng,
+            geoCode: "0614",
+            zipCode: "1101",
+            isCapitalCityRaw: 1,
+            isDepartmentalCapitalRaw: 1,
+            cityNameSortKey: "san-salvador",
+            address: "Paseo General Escalón &, Alameda Franklin Delano Roosevelt, San Salvador"
+        )
     
         /// lets get the coordinates that were set at the landing process or settings view
         if let selectedCity = appState.selectedCity {
@@ -130,6 +140,6 @@ final class ReportDataModel {
     }
     
     func buildReportId() -> String {
-        return "\(locator.countryCode)-\(locator.cityCode)-\(self.reportSession.reportCreationOn)-\(self.reportSession.shareIndexHash)"
+        return "\(locator.countryCode)-\(locator.groupingNameCode)-\(self.reportSession.reportCreationOn)-\(self.reportSession.shareIndexHash)"
     }
 }

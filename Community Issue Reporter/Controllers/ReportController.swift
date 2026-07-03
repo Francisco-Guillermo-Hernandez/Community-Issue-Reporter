@@ -42,12 +42,9 @@ class ReportController: ObservableObject {
         }
     }
     
-    func createReport(with attachments: [PhotoUploadTracker], using model: ReportDataModel) async {
+    func createReport(using model: ReportDataModel) async {
         do {
-            isLoading = true
-            
             let result = try await ReportRepository.shared.create(using: model)
-            
             model.report.id = result
             reportId = result
             
@@ -60,14 +57,11 @@ class ReportController: ObservableObject {
         } catch {
             print(error)
         }
-        
-        isLoading = false
     }
     
     func submitGroupedAttachments(with attachments: [PhotoUploadTracker], using model: ReportDataModel) async {
         do {
       
-            isLoading = true
             let payload = attachments.map { tracker in
                 GroupedAttachmentPayload(
                     attachmentContainer: model.reportSession.reportContainer,
@@ -93,18 +87,21 @@ class ReportController: ObservableObject {
         } catch {
             showAlert(message: error.localizedDescription)
         }
-        isLoading = false
     }
     
     func submitReport(_ model: ReportDataModel, attachments: [PhotoUploadTracker]) {
         Task {
+            isLoading = true
+            model.addAttachments(attachments)
+            
             async let a = createShareableLink(model)
-            async let b = createReport(with: attachments, using: model)
+            async let b = createReport(using: model)
             async let c = submitGroupedAttachments(with: attachments, using: model)
             
             _ = await (a, b, c)
             
             model.removeAttachments()
+            isLoading = false
         }
      }
      

@@ -12,18 +12,20 @@ class DatabaseManager {
     
     var db: OpaquePointer?
     init () {
+        copyDatabaseIfNeeded()
         db = open()
     }
     
     func open() -> OpaquePointer? {
-        
-        let fileManager = FileManager.default
-        let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let dbURL = appSupportURL.appendingPathComponent("ip_locations.db")
+        let dbURL = URL.applicationSupportDirectory.appending(path: "districts.db")
         
         var db: OpaquePointer? = nil
         
-        if sqlite3_open(dbURL.path, &db) != SQLITE_OK {
+        let openResult = dbURL.withUnsafeFileSystemRepresentation { fileSystemPath in
+            sqlite3_open(fileSystemPath, &db)
+        }
+        
+        if openResult != SQLITE_OK {
             print("error opening database")
             return nil
         }

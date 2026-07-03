@@ -152,15 +152,11 @@ struct MiniMapLocator: View {
               guard let mapItem = mapItems?.first else { return }
               
               let address = mapItem.address?.fullAddress ??  mapItem.address?.shortAddress ?? "Unknown"
-              
-              let country = mapItem.addressRepresentations?.region?.identifier
-              ?? mapItem.addressRepresentations?.regionName
-              ?? "-1"
+              let countryCode = mapItem.addressRepresentations?.region?.identifier ?? "SV"
               
               let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
-              self.locator = LocatorDAO.shared.findBy(cityName: cityName, country: country)
+              self.locator = LocatorDAO.shared.findBy(countryCode: countryCode, cityName: cityName)
               self.locator.address = address
-              
               ReportDataModel.shared.updateLocator(with: locator)
           }
       }
@@ -168,7 +164,7 @@ struct MiniMapLocator: View {
 
 #Preview("Minimap") {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
-    @Previewable @State var locator: Locator = .init(countryCode: "", country: "", region: "", city: "", cityId: "", cityNameSortKey: "", cityCode: "", address: "")
+    @Previewable @State var locator: Locator = .init()
     MiniMapLocator(
         coordinate: $coordinate,
         locator: $locator,
@@ -180,6 +176,6 @@ struct MiniMapLocator: View {
 
 #Preview {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
-    @Previewable @State var locator: Locator = .init(countryCode: "", country: "", region: "", city: "", cityId: "", cityNameSortKey: "", cityCode: "", address: "")
+    @Previewable @State var locator: Locator = .init()
     MapPickerView(coordinate: $coordinate, locator: $locator)
 }

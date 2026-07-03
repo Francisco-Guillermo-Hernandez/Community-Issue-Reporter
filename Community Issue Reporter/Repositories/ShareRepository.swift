@@ -27,8 +27,8 @@ final class ShareRepository {
             let payload: ReportToShare = .init(
                 reportId: reportId,
                 title: model.report.title,
-                city: model.locator.city,
-                country: model.locator.country,
+                city: model.locator.thirdLevel,
+                country: model.locator.firstLevel,
                 description: model.report.description,
                 severity: model.report.severity.title,
                 issueType: model.report.issueType.title,

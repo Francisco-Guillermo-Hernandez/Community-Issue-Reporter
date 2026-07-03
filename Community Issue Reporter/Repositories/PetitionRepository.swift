@@ -24,9 +24,9 @@ final class PetitionRepository {
         do {
 
             let l = LocatorHeaders(headers: [
-                HTTPHeader(name: "Country", content: locator.countryCode),
-                HTTPHeader(name: "Region", content: locator.region),
-                HTTPHeader(name: "City", content: locator.city),
+                HTTPHeader(name: "CountryCode", content: locator.countryCode),
+                HTTPHeader(name: "SecondLevel", content: locator.secondLevel),
+                HTTPHeader(name: "ThirdLevel", content: locator.thirdLevel),
             ])
             
             let result = try await self.service.fetchPetitions(q, l)

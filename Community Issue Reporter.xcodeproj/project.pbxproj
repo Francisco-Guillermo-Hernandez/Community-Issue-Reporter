@@ -13,6 +13,8 @@
 		569E2F452F739EB200B8C9DE /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 569E2F442F739EB200B8C9DE /* GoogleSignIn */; };
 		569E2F472F739EB200B8C9DE /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 569E2F462F739EB200B8C9DE /* GoogleSignInSwift */; };
 		56AC7B4D2FCA72DA0015122D /* SwiftMsgpack in Frameworks */ = {isa = PBXBuildFile; productRef = 56AC7B4C2FCA72DA0015122D /* SwiftMsgpack */; };
+		56B934502FF4C2300079C44B /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 56B9344F2FF4C2300079C44B /* AsyncAlgorithms */; };
+		56B934522FF4C2300079C44B /* AsyncStreaming in Frameworks */ = {isa = PBXBuildFile; productRef = 56B934512FF4C2300079C44B /* AsyncStreaming */; };
 		56D5D99D2F65284500183FCE /* WebP in Frameworks */ = {isa = PBXBuildFile; productRef = 56D5D99C2F65284500183FCE /* WebP */; };
 /* End PBXBuildFile section */
 
@@ -45,9 +47,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		56E42B522F46BC8C00AC84C7 /* Community Issue Reporter */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			explicitFolders = (
-				Licenses,
-			);
 			path = "Community Issue Reporter";
 			sourceTree = "<group>";
 		};
@@ -70,8 +69,10 @@
 			files = (
 				569E2F472F739EB200B8C9DE /* GoogleSignInSwift in Frameworks */,
 				56D5D99D2F65284500183FCE /* WebP in Frameworks */,
+				56B934522FF4C2300079C44B /* AsyncStreaming in Frameworks */,
 				569E2F452F739EB200B8C9DE /* GoogleSignIn in Frameworks */,
 				56AC7B4D2FCA72DA0015122D /* SwiftMsgpack in Frameworks */,
+				56B934502FF4C2300079C44B /* AsyncAlgorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +140,8 @@
 				569E2F442F739EB200B8C9DE /* GoogleSignIn */,
 				569E2F462F739EB200B8C9DE /* GoogleSignInSwift */,
 				56AC7B4C2FCA72DA0015122D /* SwiftMsgpack */,
+				56B9344F2FF4C2300079C44B /* AsyncAlgorithms */,
+				56B934512FF4C2300079C44B /* AsyncStreaming */,
 			);
 			productName = "Community Issue Reporter";
 			productReference = 56E42B502F46BC8C00AC84C7 /* Community Issue Reporter.app */;
@@ -233,6 +236,7 @@
 				56D5D99B2F65284500183FCE /* XCRemoteSwiftPackageReference "Swift-WebP" */,
 				569E2F432F739EB200B8C9DE /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				56AC7B4B2FCA72DA0015122D /* XCRemoteSwiftPackageReference "swift-msgpack" */,
+				56B9344E2FF4C2300079C44B /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56E42B512F46BC8C00AC84C7 /* Products */;
@@ -668,6 +672,14 @@
 				minimumVersion = 1.1.0;
 			};
 		};
+		56B9344E2FF4C2300079C44B /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.5;
+			};
+		};
 		56D5D99B2F65284500183FCE /* XCRemoteSwiftPackageReference "Swift-WebP" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ainame/Swift-WebP";
@@ -693,6 +705,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 56AC7B4B2FCA72DA0015122D /* XCRemoteSwiftPackageReference "swift-msgpack" */;
 			productName = SwiftMsgpack;
+		};
+		56B9344F2FF4C2300079C44B /* AsyncAlgorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56B9344E2FF4C2300079C44B /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
+			productName = AsyncAlgorithms;
+		};
+		56B934512FF4C2300079C44B /* AsyncStreaming */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56B9344E2FF4C2300079C44B /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
+			productName = AsyncStreaming;
 		};
 		56D5D99C2F65284500183FCE /* WebP */ = {
 			isa = XCSwiftPackageProductDependency;

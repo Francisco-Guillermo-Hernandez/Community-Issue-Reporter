@@ -19,7 +19,7 @@ struct LocatorView: View {
     }
     
     private func findByCity() {
-        let details = LocatorDAO.shared.findBy(cityName: "San Salvador", country: "El Salvador")
+        let details = LocatorDAO.shared.findBy(countryCode: "SV", cityName: "San Salvador")
         print(details)
     }
 }

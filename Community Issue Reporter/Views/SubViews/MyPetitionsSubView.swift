@@ -94,16 +94,8 @@ struct MyPetitionsSubView: View {
     private func fetchPetitions() async {
         isLoading = true
 
-        let locator = Locator(
-            countryCode: "",
-            country: "",
-            region: "",
-            city: "",
-            cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
-            cityNameSortKey: "san-salvador",
-            cityCode: "SS",
-            address: ""
-        )
+        let locator: Locator = .init()
+        
         let query = PaginatedRequestQueryParams(page: 1, limit: 16)
         await PetitionRepository.share.list(
             q: query,

@@ -265,12 +265,10 @@ struct MapPickerView: View {
               
               let address = mapItem.address?.fullAddress ??  mapItem.address?.shortAddress ?? "Unknown"
               
-              let country = mapItem.addressRepresentations?.region?.identifier
-              ?? mapItem.addressRepresentations?.regionName
-              ?? "-1"
+              let country = mapItem.addressRepresentations?.region?.identifier ?? "SV"
               
               let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
-              self.locator = LocatorDAO.shared.findBy(cityName: cityName, country: country)
+              self.locator = LocatorDAO.shared.findBy(countryCode: country, cityName: cityName )
               self.locator.address = address
               ReportDataModel.shared.updateLocator(with: locator)
           }
@@ -301,7 +299,7 @@ func getLocation(c coordinate: Coordinate) -> CLLocationCoordinate2D {
 
 #Preview {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
-    @Previewable @State var locator: Locator = .init(countryCode: "", country: "", region: "", city: "", cityId: "", cityNameSortKey: "", cityCode: "SS", address: "")
+    @Previewable @State var locator: Locator = .init()
     MapPickerView(coordinate: $coordinate, locator: $locator)
 
 }

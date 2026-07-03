@@ -1,5 +1,5 @@
 //
-//  LicencesSubView.swift
+//  LicensesSubView.swift
 //  Community Issue Reporter
 //
 //  Created by Francisco Hernandez on 21/3/26.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct License: Identifiable {
-    let id: String
+    let id = UUID().uuidString
     let library: String
     let text: String
 }
@@ -21,21 +21,18 @@ struct LicensesSubView: View {
     @State private var expandedLicenseIDs: Set<String> = []
     @State private var expandAll = true
     
-    private func loadTextResource(
-        fileName: String,
-        fileExtension: String,
-        subdirectory: String? = nil
-    ) -> String {
-        guard let url = Bundle.main.url(
-            forResource: fileName,
-            withExtension: fileExtension,
-            subdirectory: subdirectory
-        ) else {
+    private func loadTextResource(fileName: String) -> String {
+        // Splits "GoogleSignIn.LICENSE" into name: "GoogleSignIn", extension: "LICENSE"
+        let components = fileName.split(separator: ".")
+        guard components.count == 2,
+              let url = Bundle.main.url(forResource: String(components[0]), withExtension: String(components[1])) else {
             return "License text not available."
         }
+        
+        print(url)
+        
         return (try? String(contentsOf: url, encoding: .utf8)) ?? "License text not available."
     }
-    
     var body: some View {
         NavigationStack {
             
@@ -71,40 +68,23 @@ struct LicensesSubView: View {
                 .task {
                     
                     let loadedLicenses = [
-                        License(id: "1", library: "Google SignIn", text: loadTextResource(
-                            fileName: "LICENSE",
-                            fileExtension: "",
-                            subdirectory: "Licenses/GoogleSignIn"
+                        License(library: "Google SignIn", text: loadTextResource(
+                            fileName: "GoogleSignIn.LICENSE"
                         )),
-                        License(id: "2", library: "IP2LOCATION LITE DB3", text: loadTextResource(
-                            fileName: "LICENSE_LITE",
-                            fileExtension: "TXT",
-                            subdirectory: "Licenses/IP2LOCATION-LITE-DB3.CSV"
+                        License(library: "Libwebp", text: loadTextResource(
+                            fileName: "libwebp.COPYING"
                         )),
-                        License(id: "3", library: "Libwebp", text: loadTextResource(
-                            fileName: "COPYING",
-                            fileExtension: "",
-                            subdirectory: "Licenses/libwebp"
+                        License(library: "Promises", text: loadTextResource(
+                            fileName: "Promises.LICENSE"
                         )),
-                        License(id: "4", library: "Promises", text: loadTextResource(
-                            fileName: "LICENSE",
-                            fileExtension: "",
-                            subdirectory: "Licenses/Promises"
+                        License(library: "WebP", text: loadTextResource(
+                            fileName: "WebP.LICENSE"
                         )),
-                        License(id: "5", library: "WebP", text: loadTextResource(
-                            fileName: "LICENSE",
-                            fileExtension: "",
-                            subdirectory: "Licenses/WebP"
+                        License(library: "AppAuth", text: loadTextResource(
+                            fileName: "LICENSE"
                         )),
-                        License(id: "6", library: "AppAuth", text: loadTextResource(
-                            fileName: "LICENSE",
-                            fileExtension: "",
-                            subdirectory: "Licenses/AppAuth"
-                        )),
-                        License(id: "7", library: "Photos from Unsplash", text: loadTextResource(
-                            fileName: "CREDITS",
-                            fileExtension: "",
-                            subdirectory: "Licenses/Unsplash"
+                        License(library: "Photos from Unsplash", text: loadTextResource(
+                            fileName: "Unsplash.CREDITS"
                         )),
                     ]
                     
@@ -154,16 +134,16 @@ struct DisclosureStyle: DisclosureGroupStyle {
         VStack {
             Button {
                 withAnimation {
-//                    configuration.isExpanded.toggle()
+                    configuration.isExpanded.toggle()
                 }
             } label: {
                 HStack(alignment: .firstTextBaseline) {
                     configuration.label
                     Spacer()
-//                    Text(configuration.isExpanded ? "hide" : "show")
-//                        .foregroundColor(.accentColor)
-//                       .font(.caption.lowercaseSmallCaps())
-//                        .animation(nil, value: configuration.isExpanded)
+                    Text(configuration.isExpanded ? "hide" : "show")
+                        .foregroundColor(.accentColor)
+                       .font(.caption.lowercaseSmallCaps())
+                        .animation(nil, value: configuration.isExpanded)
                 }
                 .contentShape(Rectangle())
                 .padding(.vertical, 8)

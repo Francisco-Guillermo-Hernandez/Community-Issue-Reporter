@@ -68,16 +68,8 @@ struct SignRequestsView: View {
         print(query)
         
        
-        let locator = Locator(
-            countryCode: "SV",
-            country: "El Salvador",
-            region: "San Salvador",
-            city: "San Salvador",
-            cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
-            cityNameSortKey: "san-salvador",
-            cityCode: "SS",
-            address: "Paseo General Escalón &, Alameda Franklin Delano Roosevelt, San Salvador, El Salvador"
-        )
+        let locator: Locator = .init()
+        locator.setCountryCode(.SV)
         
         print(locator)
         

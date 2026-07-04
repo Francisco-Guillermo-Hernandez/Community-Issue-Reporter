@@ -128,8 +128,17 @@ struct PhotoChooser: View {
                             delete: { name in
                                 deleteImage(using: name, tracker)
                             },
-                            retry: { _ in }
+                            retry: { _ in
+                                processAndUpload(tracker)
+                            }
                         )
+                        .onLongPressGesture(minimumDuration: 0.4) {
+                            triggerHaptic()
+                            showPreview(for: tracker.localResource)
+                        }
+                        .matchedTransitionSource(id: tracker.id, in: nameSpace)
+                        .sensoryFeedback(.impact(weight: .medium), trigger: isImagePreviewPresented)
+                        
                     }
                     
                 }
@@ -208,14 +217,17 @@ struct PhotoChooser: View {
             uploadTrackers.append(tracker)
             
             /// Immediately start processing and uploading
-            Task {
-                await ImageEncoderService().processAndUpload(using: reportContainer, tracker: tracker)
-            }
+            processAndUpload(tracker)
+            
         }
     }
     
-    private func deleteImage(at index: Int) {
-
+    /// A wrapper
+    private func processAndUpload(_ tracker: PhotoUploadTracker) -> Void {
+        Task {
+            await ImageEncoderService()
+                .processAndUpload(using: reportContainer, tracker: tracker)
+        }
     }
     
     private func showPreview(for resource: MediaResources) {
@@ -257,11 +269,10 @@ struct PhotoChooser: View {
     ]
 }
 
-//#Preview {
-    //    PhotoChooser(
-    //
-    //    )
-//}
+#Preview {
+    Text("Hello, World!")
+//        PhotoChooser
+}
 
 struct ImagePicker: UIViewControllerRepresentable {
     let sourceType: UIImagePickerController.SourceType
@@ -287,18 +298,18 @@ struct ImagePicker: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
     
-    class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+    @objc class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         private let onImagePicked: (MediaResources?) -> Void
         
         init(onImagePicked: @escaping (MediaResources?) -> Void) {
             self.onImagePicked = onImagePicked
         }
         
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        @objc func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             onImagePicked(nil)
         }
         
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+       @objc func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             let image = info[.originalImage] as? UIImage
 
             let orientation = UIDevice.current.orientation

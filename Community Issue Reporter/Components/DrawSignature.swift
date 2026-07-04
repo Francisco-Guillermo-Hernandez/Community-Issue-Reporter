@@ -134,6 +134,7 @@ struct SignatureAnimatedPlayer: View {
 }
 
 struct PreviewSignatureView: View {
+    @Environment(\.dismiss) private var dismiss
     var petitionName: String
     @State var strokes: [SignatureLine] = []
     @State private var isCreating: Bool = false
@@ -186,7 +187,7 @@ struct PreviewSignatureView: View {
            .toolbar {
                ToolbarItem(placement: .cancellationAction) {
                    Button(role: .close) {
-                       
+                       dismiss()
                    }
                }
            }

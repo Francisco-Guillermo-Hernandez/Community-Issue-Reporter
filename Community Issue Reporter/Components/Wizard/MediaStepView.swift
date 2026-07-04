@@ -18,10 +18,18 @@ struct MediaStepView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: .themeSpacing * 3) {
-            PhotoChooser(
-                reportContainer: model.reportSession.reportContainer,
-                uploadTrackers: $uploadTrackers
-            )
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                Text("Image Picker Placeholder for Preview")
+            } else {
+                PhotoChooser(
+                    reportContainer: model.reportSession.reportContainer,
+                    uploadTrackers: $uploadTrackers
+                )
+            }
+            #else
+            #endif
+            
         }
         .padding(.top, 4)
     }

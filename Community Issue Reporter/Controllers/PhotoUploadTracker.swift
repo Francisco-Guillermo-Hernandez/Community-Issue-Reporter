@@ -11,6 +11,7 @@ import Observation
 
 @Observable
 class PhotoUploadTracker: Identifiable {
+    var id: String = UUID().uuidString
     var key: String = ""
     let localResource: MediaResources
     

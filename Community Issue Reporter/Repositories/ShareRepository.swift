@@ -21,8 +21,6 @@ final class ShareRepository {
             
             let reportId = model.buildReportId()
             
-            print("Report ID: \(reportId)")
-            
             /// Lets map
             let payload: ReportToShare = .init(
                 reportId: reportId,
@@ -35,7 +33,8 @@ final class ShareRepository {
                 status: model.report.status.title,
                 coordinate: model.report.coordinate,
                 cellIndex: model.report.cellIndex,
-                openCodeLocation: model.report.olc ?? ""
+                openCodeLocation: model.report.olc ?? "",
+                attachments: model.report.attachments,
             )
 
             ///

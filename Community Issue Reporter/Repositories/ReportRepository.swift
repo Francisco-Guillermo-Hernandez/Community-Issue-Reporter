@@ -97,9 +97,9 @@ final class ReportRepository {
                 headers: [
                     HTTPHeader(name: "CountryCode", content: model.locator.countryCode),
                     HTTPHeader(name: "CityId", content: model.locator.cityId),
-                    HTTPHeader(name: "CityNameSortKey", content: model.locator.cityNameSortKey),
                     HTTPHeader(name: "ShareIndexHash", content: model.reportSession.shareIndexHash),
                     HTTPHeader(name: "ReportContainer", content: model.reportSession.reportContainer),
+                    HTTPHeader(name: "GroupingNameCode", content: model.locator.groupingNameCode),
                 ]
             )
             

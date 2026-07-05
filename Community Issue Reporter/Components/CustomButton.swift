@@ -26,11 +26,22 @@ struct ThemedButton: View {
     var type: ThemedButtonType = .secondary
     var style: ThemedButtonStyle = .prominent
     var icon: String?
+    var isLoading: Binding<Bool>? = nil
+    
     var body: some View {
-        Button(action: action) {
-            HStack {
-                if icon != nil {
-                    Image(systemName: icon!)
+        let loading = isLoading?.wrappedValue ?? false
+        Button(action: {
+            if !loading {
+                action()
+            }
+        }) {
+            HStack(spacing: 8) {
+                if loading {
+                    EmptyView()
+                        .tint(type == .outline ? Color.theme.foreground : Color.white)
+                        .scaleEffect(0.9)
+                } else if let icon = icon, !icon.isEmpty {
+                    Image(systemName: icon)
                 }
                 
                 Text(message)
@@ -39,7 +50,46 @@ struct ThemedButton: View {
             .frame(maxWidth: .infinity, maxHeight: 48)
         }
         .buttonSizing(.flexible)
-        .modifier(ButtonStyleMapper(type: type, style: style))
+        .modifier(ButtonStyleMapper(type: type, style: style, isLoading: loading))
+        .allowsHitTesting(!loading)
+    }
+}
+
+
+// MARK: - Shimmer Loading View
+struct ShimmerView: View {
+    let baseColor: Color
+    let shimmerColor: Color
+    @State private var phase: CGFloat = 0.0
+    
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            
+            ZStack(alignment: .leading) {
+                baseColor
+                
+                LinearGradient(
+                    gradient: Gradient(stops: [
+                        .init(color: .clear, location: 0.3),
+                        .init(color: shimmerColor, location: 0.5),
+                        .init(color: .clear, location: 0.7)
+                    ]),
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(width: width * 1.5)
+                .offset(x: -width * 0.75 + (width * 1.5 * phase))
+            }
+        }
+        .onAppear {
+            withAnimation(
+                Animation.linear(duration: 1.5)
+                    .repeatForever(autoreverses: false)
+            ) {
+                phase = 1.0
+            }
+        }
     }
 }
 
@@ -47,11 +97,12 @@ struct ThemedButton: View {
 struct ButtonStyleMapper: ViewModifier {
     let type: ThemedButtonType
     let style: ThemedButtonStyle
+    let isLoading: Bool
     
     func body(content: Content) -> some View {
         switch type {
         case .primary:
-            content.buttonStyle(ThemedPrimaryButtonStyle())
+            content.buttonStyle(ThemedPrimaryButtonStyle(isLoading: isLoading))
         case .secondary:
             content.buttonStyle(ThemedSecondaryButtonStyle())
         case .outline:
@@ -74,11 +125,13 @@ struct GlassBounceModifier: ViewModifier {
 struct ThemedPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) var isEnabled
     @Environment(\.colorScheme) var colorScheme
+    let isLoading: Bool
+    
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
-            .background(backgroundColor(isPressed: configuration.isPressed))
-             .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
+            .background(backgroundView(isPressed: configuration.isPressed))
+            .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
             .contentShape(Capsule())
             .clipShape(Capsule())
             .font(Font.body.bold())
@@ -91,6 +144,18 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
             .animation(.easeOut(duration: 0.2), value: isEnabled)
             .glassEffect(.regular, in: Capsule())
             .modifier(GlassBounceModifier(isPressed: configuration.isPressed))
+    }
+    
+    @ViewBuilder
+    private func backgroundView(isPressed: Bool) -> some View {
+        if isLoading {
+            ShimmerView(
+                baseColor: backgroundColor(isPressed: isPressed),
+                shimmerColor: Color.white.opacity(0.35)
+            )
+        } else {
+            backgroundColor(isPressed: isPressed)
+        }
     }
     
     private func backgroundColor(isPressed: Bool) -> Color {
@@ -203,7 +268,7 @@ struct LinkButtonStyle: ButtonStyle {
         
         ThemedButton(message: "Next Step", action: {}, type: .primary).disabled(true)
         Spacer()
-        ThemedButton(message: "Get Started", action: {}, type: .primary)
+        ThemedButton(message: "Get Started", action: {}, type: .primary, isLoading: .constant(true))
         
         ThemedButton(message: "Get Started", action: {}, type: .secondary)
         

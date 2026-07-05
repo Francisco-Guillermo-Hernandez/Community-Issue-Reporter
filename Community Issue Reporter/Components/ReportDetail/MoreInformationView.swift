@@ -76,20 +76,7 @@ struct MoreInformationView: View {
                         .fontWeight(.semibold)
                 }
                 .listRowBackground(Color.clear)
-
-                HStack {
-                    Text("Assigned institution:")
-                        .font(.caption)
-                        .opacity(opacity)
-                        .fontWeight(.medium)
-                        
-                    Spacer()
-                    Text("MOP")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                }
-                .listRowBackground(Color.clear)
-                
+ 
                 HStack {
                     Text("Address:")
                         .font(.caption)
@@ -151,7 +138,7 @@ struct MoreInformationView: View {
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
             .scrollClipDisabled(true)
-            .frame(height: 345)
+            .frame(height: 315)
             .contentMargins(.all, 0, for: .scrollContent)
 
         }

@@ -62,7 +62,7 @@ let stepsMetadata: [String: StepsMetadata] = [
     ),
     "Confirmation": StepsMetadata(
         title: String(localized: "Confirmation"),
-        description: String(localized: "Everything looks correct?"),
+        description: String(localized: "We received your report. Thanks!"),
         icon: "text.badge.checkmark"
     ),
 ]

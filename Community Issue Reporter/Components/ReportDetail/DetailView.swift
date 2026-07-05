@@ -262,11 +262,15 @@ func getMatterToSolve(id: Int) -> String {
                     cellIndex: "",
                     createdAtRaw: 1780036575602,
                     updatedAtRaw: 1780036575602,
-                    reportedBy: "John Doe",
+                    reportedBy: "john.doe",
                     cityId: "",
                     petitionId: "",
                     shareUrl: "",
-                    attachments: [],
+                    attachments: [
+                        PreviewAttachment(id: "24b93d66-07ff-4141-91ce-408b615123c3", type: .image, createdAtRaw: 0, updatedAtRaw: 0, uploaderUserName: "jhon.doe", validatedBy: .bot, state: .pending, fileName: "1783058838224-f02fb5e4-07d1-49d4-a9f5-742816b669c9.webp", reportContainer: "587d3ac3-0715-4958-8955-1d6d29a3d489"),
+                        
+                        PreviewAttachment(id: "06d3df5f-ef2a-43c0-bd40-5125a12fe284", type: .image, createdAtRaw: 0, updatedAtRaw: 0, uploaderUserName: "jhon.doe", validatedBy: .bot, state: .pending, fileName: "1783058837989-ab7a054b-7d99-4137-b9f9-ded39ce7732f.webp", reportContainer: "587d3ac3-0715-4958-8955-1d6d29a3d489")
+                    ],
 //                    updatedAt
                 )
 

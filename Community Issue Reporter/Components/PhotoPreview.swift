@@ -45,7 +45,7 @@ struct PhotoPreview: View {
                                 .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                             
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(attachment.uploaderUserName)
+                                Text(userAlias(attachment.uploaderUserName))
                                     .font(.subheadline)
                                     .fontWeight(.bold)
                                     .foregroundColor(.white)

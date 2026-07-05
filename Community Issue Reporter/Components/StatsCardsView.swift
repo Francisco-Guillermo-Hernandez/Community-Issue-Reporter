@@ -18,7 +18,6 @@ struct StatsCardsView: View {
                 NavigationLink(value: InsightsNavigation.myReports) {
 
                     StatCard(
-                        action: {},
                         description: String(localized: "I've reported"),
                         title: "50",
                         trend: String(localized: "Issues this month"),
@@ -33,7 +32,6 @@ struct StatsCardsView: View {
                 
                 NavigationLink(value: InsightsNavigation.myPetitions) {
                     StatCard(
-                        action: {},
                         description: String(localized: "I've created"),
                         title: "50",
                         trend: String(localized: "Petitions this month"),
@@ -49,7 +47,6 @@ struct StatsCardsView: View {
             
             HStack {
                 StatCard(
-                    action: {},
                     description: String(localized: "I've commented on"),
                     title: "10",
                     trend: String(localized: "Petitions"),
@@ -58,7 +55,6 @@ struct StatsCardsView: View {
                 .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
                 
                 StatCard(
-                    action: {},
                     description: String(localized: "I've signed on"),
                     title: "100",
                     trend: String(localized: "Incidents"),

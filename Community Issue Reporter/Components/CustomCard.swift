@@ -14,7 +14,9 @@ struct CustomCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: .themeSpacing * 5) {
             VStack {
-                ThemedButton(message: "Hello", action: {}, type: .outline)
+                ThemedButton(message: "Hello", action: {
+                    print("hello world")
+                }, type: .outline)
             }
         }
         .padding()

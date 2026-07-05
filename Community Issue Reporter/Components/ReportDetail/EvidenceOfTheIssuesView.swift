@@ -59,7 +59,8 @@ struct EvidenceOfTheReportView: View {
                             
                         } else {
                             
-                            photoPreview(attachment)
+                            PhotoPreview(attachment)
+                                .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
                                 
                         }
                     }

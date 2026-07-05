@@ -74,7 +74,7 @@ struct ReportWizardContainer: View {
                                         case .details:
                                             DetailsView(model)
                                         case .confirmation:
-                                            ConfirmationView(id: $controller.reportId)
+                                            ConfirmationView(id: $controller.reportId, url: $controller.shareableLink)
                                         }
                                     }
                                 }
@@ -153,13 +153,14 @@ struct ReportWizardContainer: View {
                     action: submitReport,
                     type: .primary,
                     style: .prominent,
-                    icon: ""
+                    icon: "",
+                    isLoading: $controller.isLoading
                 )
                 .disabled(disableButton)
                 
             } else {
                 Button(action: { doneTrigger.toggle(); dismiss() }) {
-                    Text("Done")
+                    Text(String(localized: "Done"))
                         .font(.headline)
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity)
@@ -168,6 +169,7 @@ struct ReportWizardContainer: View {
                         .foregroundColor(.white)
                         .contentShape(Capsule())
                         .clipShape(Capsule())
+                        .glassEffect(in: .capsule)
                     
                 }
                
@@ -179,15 +181,24 @@ struct ReportWizardContainer: View {
     // MARK: - Logic
     
     private func submitReport() -> Void {
-        if currentStep == .media && isReadyToContinue {
-            goNext()
-        }
         
+        print("currentStep")
+        print(currentStep)
+        
+//        if currentStep == .location {
+//            goNext()
+//        }
+//        
+//        if currentStep == .media && isReadyToContinue {
+//            goNext()
+//        }
+//        
         if currentStep == .details {
            
-            controller.submitReport(model, attachments: uploadTrackers)
-            goNext()
-           
+            controller.submitReport(model, attachments: uploadTrackers) {
+                goNext()
+            }
+            
         } else {
             goNext()
         }

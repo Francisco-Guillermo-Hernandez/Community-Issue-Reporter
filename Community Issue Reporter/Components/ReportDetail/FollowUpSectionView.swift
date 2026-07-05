@@ -18,16 +18,31 @@ struct FollowUpSectionView: View {
                   HStack {
                       Text("Details of the progress")
                           .font(.caption)
+                          .opacity(0.85)
+                          .fontWeight(.medium)
                          
                   }
               }
+                .listRowBackground(Color.clear)
+                
+                HStack {
+                    Text("Assigned institution:")
+                        .font(.caption)
+                        .opacity(0.85)
+                        .fontWeight(.medium)
+                        
+                    Spacer()
+                    Text("MOP")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
                 .listRowBackground(Color.clear)
             }
             .scrollDisabled(true)
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
             .scrollClipDisabled(true)
-            .frame(height: 30)
+            .frame(height: 75)
         }
         .padding(.bottom, .themePadding)
     }

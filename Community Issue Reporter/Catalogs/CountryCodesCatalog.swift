@@ -21,4 +21,13 @@ enum CountryCode: String, Codable, CaseIterable {
             case .NI: return "NIC"
         }
     }
+    
+    var countryName: String {
+        switch self {
+            case .SV: return "El Salvador"
+            case .US: return "United States"
+            case .GT: return "Guatemala"
+            case .NI: return "Nicaragua"
+        }
+    }
 }

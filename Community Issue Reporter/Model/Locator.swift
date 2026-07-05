@@ -24,8 +24,8 @@ final class Locator: Identifiable, Codable {
     var isCapitalCityRaw: Int
     var isDepartmentalCapitalRaw: Int
     var cityNameSortKey: String
+    var legalGroupName: String
     var address: String
-    
     var isCapitalCity: Bool { isCapitalCityRaw == 1 }
     var isDepartmentalCapital: Bool { isDepartmentalCapitalRaw == 1 }
     
@@ -45,6 +45,7 @@ final class Locator: Identifiable, Codable {
         isCapitalCityRaw: Int = 0,
         isDepartmentalCapitalRaw: Int = 0,
         cityNameSortKey: String = "",
+        legalGroupName: String = "",
         address: String = ""
     ) {
         self.countryCode = countryCode
@@ -62,6 +63,7 @@ final class Locator: Identifiable, Codable {
         self.isCapitalCityRaw = isCapitalCityRaw
         self.isDepartmentalCapitalRaw = isDepartmentalCapitalRaw
         self.cityNameSortKey = cityNameSortKey
+        self.legalGroupName = legalGroupName
         self.address = address
     }
     

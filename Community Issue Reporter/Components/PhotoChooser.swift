@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import TipKit
 
 enum MediaTypes: String {
     case photo
@@ -39,6 +40,7 @@ struct PhotoChooser: View {
     @State private var previewID: UUID?
     @State private var isImagePreviewPresented: Bool
     @State var orientation = UIDevice.current.orientation
+    let takeAPhotoTip = TakeAPhotoTip()
     
     var reportContainer: String
     @Binding var uploadTrackers: [PhotoUploadTracker]
@@ -71,6 +73,7 @@ struct PhotoChooser: View {
                         style: .prominent,
                         icon: "camera"
                     )
+                    .popoverTip(takeAPhotoTip, arrowEdge: .top)
                     
                     PhotosPicker(
                         selection: $selectedPhotoItems,

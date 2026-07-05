@@ -122,7 +122,7 @@ final class ReportDataModel {
         self.report.attachments.removeAll()
     }
     
-    func clear() {
+    func clear() -> Void {
         self.report = Report(
             coordinate: .init(lat: 13.68935, lng: -89.18718),
             address: "",

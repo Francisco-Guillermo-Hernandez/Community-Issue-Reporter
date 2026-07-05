@@ -38,7 +38,9 @@ struct TabBarView: View {
             }
         }
         .alert("Status Update", isPresented: $router.presentAlert) {
-            Button("OK", role: .cancel) { }
+            Button("OK", role: .cancel) {
+                router.presentAlert.toggle()
+            }
         } message: {
             Text(router.message)
         }
@@ -66,8 +68,6 @@ struct TabBarView: View {
             ReportWizardContainer(model: model, onCompletion: { incomingMessage, alertType in
                 router.message = incomingMessage
                 router.presentAlert = true
-                
-               
             }, showCancelButton: true)
             .task {
                 model.setMatterToSolve(mattersToResolve.first!)

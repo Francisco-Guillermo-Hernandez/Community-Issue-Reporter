@@ -19,6 +19,7 @@ struct ReportToShare: Codable {
     let coordinate: Coordinate
     let cellIndex: String
     let openCodeLocation: String
+    let attachments: [PreviewAttachmentRequest]
 }
 
 struct Share<T: Codable>: Codable {

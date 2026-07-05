@@ -32,11 +32,8 @@ struct SignRequestsView: View {
     @State private var showSignatureModal: Bool = false
     private let pageLimit: Int = 16
     @State private var value: Double = 20
-    
     @State private var navigationPath: [SignRequestsViewsDestinations] = []
-    
     @State private var signatureCount: Int = 125
-    
     @State var strokes: [SignatureLine] = []
     
     @State private var users: [User] = [

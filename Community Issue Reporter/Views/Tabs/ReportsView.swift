@@ -11,10 +11,6 @@ import Observation
 import SwiftUI
 internal import Combine
 
-
-
-//latitudeDelta: 0.08, longitudeDelta: 0.08
-
 struct ReportsView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
@@ -200,8 +196,6 @@ struct ReportsView: View {
     
     private func handleMapMovement(center: CLLocationCoordinate2D) {
         let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
-        
-        print("camera position")
        
         Task {
             

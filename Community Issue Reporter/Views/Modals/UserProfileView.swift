@@ -27,10 +27,6 @@ struct UserProfileView: View {
     @EnvironmentObject var controller: LandingController
     @State private var profile = ProfileDataModel()
     
-    init () {
-        
-    }
-    
     let options: [ProfileOption] = [
         ProfileOption(
             id: "op:reports",

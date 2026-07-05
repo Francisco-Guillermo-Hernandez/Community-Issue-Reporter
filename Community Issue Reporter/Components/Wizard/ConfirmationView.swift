@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ConfirmationView: View {
     @State private var showCopiedCodeMicroInteraction: Bool = false
@@ -33,6 +34,11 @@ struct ConfirmationView: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                    
+                Text(String(localized: "Response time can vary depending on the institution, severity and type of the report."))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                
                 Text(String(localized: "Meanwhile, you can copy report code or share it with others."))
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -59,24 +65,18 @@ struct ConfirmationView: View {
                 
                 HStack {
                     ThemedButton(
-                        message: "Copy report code",
-                        action: {
-                            UIPasteboard.general.string = id
-                            
-                            withAnimation {
-                              showCopiedCodeMicroInteraction = true
-                            }
-                        },
+                        message: message,
+                        action: copyToPasteboard,
                         type: .outline,
                         style: .normal,
-                        icon: "document.on.document"
+                        icon: icon
                     )
                     .accessibilityIdentifier("copy-report-code")
                     
                     ThemedButton(
                         message: "Share Report",
                         action: {
-                            shareFromClosure(item: buildShareURL(for: url)!)
+                            shareFromClosure(item: urlFromString(url)!)
                         },
                         type: .outline,
                         style: .normal,
@@ -89,6 +89,32 @@ struct ConfirmationView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
+    }
+    
+    // MARK: - Logic
+    
+    private var message: String {
+        showCopiedCodeMicroInteraction ? "Copied!" : "Copy report code"
+    }
+    
+    private var icon: String {
+        showCopiedCodeMicroInteraction ? "checkmark" : "document.on.document"
+    }
+    
+    private func copyToPasteboard() -> Void {
+        UIPasteboard.general.string = id
+        
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+          showCopiedCodeMicroInteraction = true
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+                showCopiedCodeMicroInteraction = false
+            }
+        }
     }
 }
 

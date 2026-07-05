@@ -16,11 +16,22 @@ struct LocatorView: View {
         }
         .padding()
         .buttonStyle(.bordered)
+        
+        Button("Find by city id") {
+            findCityById()
+        }
+        .padding()
+        .buttonStyle(.bordered)
     }
     
     private func findByCity() {
         let details = LocatorDAO.shared.findBy(countryCode: "SV", cityName: "San Salvador")
-        print(details)
+        print(details.cityId)
+    }
+    
+    private func findCityById() {
+        let details = LocatorDAO.shared.findBy(countryCode: "SV", cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619")
+        print(details.groupingName)
     }
 }
 

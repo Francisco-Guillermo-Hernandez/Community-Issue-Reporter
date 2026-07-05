@@ -16,8 +16,9 @@ final class LocatorDAO {
         dbManager = DatabaseManager()
     }
     
-    private func exec(statement: OpaquePointer?) -> Locator {
-        let locator: Locator = .init()
+    private func exec(_ statement: OpaquePointer?, _ locator: Locator) {
+        guard statement != nil else { return }
+        
         if sqlite3_step(statement) == SQLITE_ROW {
             locator.countryCode = string(from: statement, at: 0)
             locator.firstLevel = string(from: statement, at: 1)
@@ -34,20 +35,14 @@ final class LocatorDAO {
             locator.isCapitalCityRaw = Int(sqlite3_column_int(statement, 12))
             locator.isDepartmentalCapitalRaw = Int(sqlite3_column_int(statement, 13))
             locator.cityNameSortKey = string(from: statement, at: 14)
+            locator.legalGroupName = string(from: statement, at: 15)
         }
-        
-        return locator
     }
     
     func findBy(countryCode: String, cityName: String) -> Locator {
         
-        let query = "SELECT countryCode, firstLevel, secondLevel, thirdLevel, groupingId, cityId, groupingName, groupingNameCode, lat, lng, geoCode, zipCode, isCapitalCity, isDepartmentalCapital, cityNameSortKey FROM cities WHERE countryCode = ? AND thirdLevel = ? LIMIT 1;"
+        let query = "SELECT countryCode, firstLevel, secondLevel, thirdLevel, groupingId, cityId, groupingName, groupingNameCode, lat, lng, geoCode, zipCode, isCapitalCity, isDepartmentalCapital, cityNameSortKey, legalGroupName FROM cities WHERE countryCode = ? AND thirdLevel = ? LIMIT 1;"
         var statement: OpaquePointer? = nil
-        
-        print("cityName: \(cityName)")
-        
-        print("countryCode:")
-        print(countryCode)
         
         var locator: Locator = .init()
         let status = sqlite3_prepare(dbManager.db, query, -1, &statement, nil)
@@ -59,7 +54,7 @@ final class LocatorDAO {
             /// Bind parameter 2 (thirdLevel) -> cityName
             sqlite3_bind_text(statement, 2, (cityName as NSString).utf8String, -1, nil)
             
-            locator = exec(statement: statement)
+            exec(statement, locator)
             
         } else {
             let errorMessage = String(cString: sqlite3_errmsg(dbManager.db))
@@ -72,6 +67,36 @@ final class LocatorDAO {
     
     func findBy(countryCode: String, cityNameSortKey: String) -> Locator {
         return .init()
+    }
+    
+    func findBy(countryCode: String, cityId: String) -> Locator {
+        
+        let query = """
+            SELECT countryCode, firstLevel, secondLevel, thirdLevel, groupingId, cityId, groupingName, groupingNameCode, lat, lng, geoCode, zipCode, isCapitalCity, isDepartmentalCapital, cityNameSortKey, legalGroupName 
+            FROM cities 
+            WHERE countryCode = ? AND cityId = ? LIMIT 1;
+            """
+        var statement: OpaquePointer? = nil
+        
+        var locator: Locator = .init()
+        let status = sqlite3_prepare(dbManager.db, query, -1, &statement, nil)
+        
+        if status == SQLITE_OK {
+    
+            /// Bind parameter 1 countryCode
+            sqlite3_bind_text(statement, 1, (countryCode as NSString).utf8String, -1, nil)
+            /// Bind parameter 2 cityId
+            sqlite3_bind_text(statement, 2, (cityId as NSString).utf8String, -1, nil)
+            
+            exec(statement, locator)
+            
+        } else {
+            let errorMessage = String(cString: sqlite3_errmsg(dbManager.db))
+               print("Error preparing statement: \(errorMessage)")
+        }
+        
+        sqlite3_finalize(statement)
+        return locator
     }
     
     /// Safely unwraps and reads string fields from a SQLite statement column

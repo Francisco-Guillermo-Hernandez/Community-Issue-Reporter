@@ -89,7 +89,7 @@ class ReportController: ObservableObject {
         }
     }
     
-    func submitReport(_ model: ReportDataModel, attachments: [PhotoUploadTracker]) {
+    func submitReport(_ model: ReportDataModel, attachments: [PhotoUploadTracker], onComplete: @escaping () -> Void) {
         Task {
             isLoading = true
             model.addAttachments(attachments)
@@ -102,6 +102,8 @@ class ReportController: ObservableObject {
             
             model.removeAttachments()
             isLoading = false
+            
+            onComplete()
         }
      }
      

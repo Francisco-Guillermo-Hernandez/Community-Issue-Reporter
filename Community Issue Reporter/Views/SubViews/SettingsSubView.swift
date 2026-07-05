@@ -233,22 +233,9 @@ struct SettingsSubView: View {
             nextStep: {
                 appState.selectedCity = selectedCity
                 
-                let latDelta = UserDefaults.standard.double(
-                    forKey: "map_latitude_delta"
-                )
-                let lonDelta = UserDefaults.standard.double(
-                    forKey: "map_longitude_delta"
-                )
-                
-                let span =
-                (latDelta != 0 && lonDelta != 0)
-                ? MKCoordinateSpan(
-                    latitudeDelta: latDelta,
-                    longitudeDelta: lonDelta
-                )
-                : MKCoordinateSpan(
-                    latitudeDelta: 0.016837009321045926,
-                    longitudeDelta: 0.016440700713786782
+                let span = MKCoordinateSpan(
+                    latitudeDelta: 0.0022298826163122953,
+                    longitudeDelta: 0.0014447804127257768
                 )
                 
                 appState.cameraPosition = .region(

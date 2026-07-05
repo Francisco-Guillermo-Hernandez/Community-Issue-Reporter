@@ -48,8 +48,6 @@ struct CommentsSubView: View {
                             )
                     } description: {
                         Text("Please tell us how that problem affects you.")
-                    } actions: {
-                        
                     }
                     .containerRelativeFrame(.vertical)
                 } else {

@@ -60,8 +60,6 @@ struct MyPetitionsSubView: View {
                     Text(
                         "Please create petitions in order to accelerate the process of ..."
                     )
-                } actions: {
-
                 }
                 .containerRelativeFrame(.vertical)
             } else {

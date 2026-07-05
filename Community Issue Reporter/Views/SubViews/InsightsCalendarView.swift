@@ -80,8 +80,6 @@ struct SimpleView: View {
                        } description: {
                            Text("You didn't create any reports on this day.")
                                .foregroundStyle(Color.theme.primary)
-                       } actions: {
-                         
                        }
 //                       .background(Color.theme.background)
                    } else {

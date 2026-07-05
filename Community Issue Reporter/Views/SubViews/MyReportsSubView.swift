@@ -149,8 +149,6 @@ struct MyReportsSubView: View {
                     )
                 } description: {
                     Text("Please sent us reports.")
-                } actions: {
-
                 }
                 .containerRelativeFrame(.vertical)
             } else {

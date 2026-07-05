@@ -77,7 +77,6 @@ struct CardInfoStyle: ViewModifier {
 
 struct StatCard: View {
     @Environment(\.colorScheme) var colorScheme
-    var action: () -> Void
     let description: String
     let title: String
     let trend: String
@@ -137,14 +136,12 @@ struct StatCard: View {
         VStack {
             HStack {
                 StatCard(
-                    action: {  } ,
                     description: "I've Reported",
                     title: "50",
                     trend: "Incidents this month",
                     timeframe: "Hello"
                 )
                 StatCard(
-                    action: {  },
                     description: "I've Created Petitions",
                     title: "5",
                     trend: "Hello",
@@ -154,14 +151,12 @@ struct StatCard: View {
 
             HStack {
                 StatCard(
-                    action: {  } ,
                     description: "I've Reported",
                     title: "50",
                     trend: "Incidents this month",
                     timeframe: "Hello"
                 )
                 StatCard(
-                    action: {  },
                     description: "I've Created Petitions",
                     title: "5",
                     trend: "Hello",

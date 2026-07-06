@@ -15,52 +15,40 @@ struct ReportsView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
     @EnvironmentObject var appState: AuthViewModel
+    @EnvironmentObject var settings: SettingsStore
     @State private var profile = ProfileDataModel()
     
-    @State private var hasCenteredOnUser = false
-    @State private var searchText: String = ""
-    @State private var selectedStatuses: Set<IssueStatus> = Set(IssueStatus.allCases)
-    @State private var searchMarker: IssueMarker?
-    @State private var locationManager = LocationManager()
-    @State private var showSearchOverlay: Bool = false
-    @State private var showUserProfileOverlay: Bool = false
-    @State private var showDetailView: Bool = false
-    @State private var isPresented: Bool = false
+    @State private var controller = MapExplorerController()
     @StateObject private var searchCompleter = SearchCompleter()
     @FocusState private var isSearchFocused: Bool
     @FocusState private var isOverlaySearchFocused: Bool
     @State private var offsetY: CGFloat = 0
-    @State private var selectedPlaceID: String?
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismissSheet
     @Namespace private var animationID
-    @State private var expandedItem: MapExplorerReport?
     @Environment(\.dismiss) private var dismiss
-    @State private var reports: [MapExplorerReport] = []
-    
     @EnvironmentObject var router: DeepLinkRouter
     
     private let animation = Animation.easeInOut(duration: 0.25)
-    
     
     var progress: CGFloat {
         return max(min(offsetY / 100, 1), 0)
     }
     
     var body: some View {
+        @Bindable var controller = controller
         MapReader { proxy in
             ZStack(alignment: .bottom) {
                 Map(position: $appState.cameraPosition) {
                     UserAnnotation()
                     
-                    ForEach(reports) { report in
+                    ForEach(controller.reports) { report in
                         Annotation(report.title, coordinate: report.clLocation) {
                             annotationView(report)
                         }
-
                     }
                     
-                    if let searchMarker {
+                    if let searchMarker = controller.searchMarker {
                         Marker(searchMarker.title, coordinate: searchMarker.coordinate)
                     }
                 }
@@ -68,7 +56,7 @@ struct ReportsView: View {
                 .onMapCameraChange(frequency: .onEnd) { context in
                     print("all context")
                     dump(context)
-                    handleMapMovement(center: context.camera.centerCoordinate)
+                    controller.handleMapMovement(center: context.camera.centerCoordinate)
                     
                     // Store the span in UserDefaults when the user zooms
                     UserDefaults.standard.set(context.region.span.latitudeDelta, forKey: "map_latitude_delta")
@@ -76,62 +64,50 @@ struct ReportsView: View {
                 }
                 
                 bottom
-                
             }
         }
         .ignoresSafeArea(edges: .bottom)
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 16) {
                 SearchBar(
-                    text: $searchText,
+                    text: $controller.searchText,
                     onSubmit: {
-                        performSearch()
-                        showSearchOverlay = false
+                        controller.performSearch()
+                        controller.showSearchOverlay = false
                     },
                     onFocusChange: { isFocused in
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                showSearchOverlay = isFocused
-                            }
+                            controller.showSearchOverlay = isFocused
+                        }
                     },
                     onUserProfileTap: {
-                        showUserProfileOverlay.toggle()
+                        controller.showUserProfileOverlay.toggle()
                     },
                     isFocused: $isSearchFocused,
                     profileNamespace: profileNamespace,
                     avatarURL: profile.avatarURL
                 )
                 
-                StatusFilterRow(selectedStatuses: $selectedStatuses)
+                StatusFilterRow(selectedStatuses: $controller.selectedStatuses)
             }
             .padding(.horizontal, 16)
             .padding(.top, 10)
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
-        .onChange(of: searchText) { _, newValue in
+        .onChange(of: controller.searchText) { _, newValue in
             searchCompleter.update(query: newValue, region: currentRegion(c: appState.cameraPosition))
         }
         .task {
-            
             await appState.checkStatus()
-//            locationManager.requestAuthorization()
             
         }
-        .onChange(of: locationManager.lastLocation) { _, newLocation in
-//            guard let newLocation, !hasCenteredOnUser else { return }
-//            hasCenteredOnUser = true
-//            appState.cameraPosition = .region(
-//                MKCoordinateRegion(
-//                    center: newLocation.coordinate,
-//                    span: MKCoordinateSpan(latitudeDelta: 0.04, longitudeDelta: 0.04)
-//                )
-//            )
+        .onChange(of: controller.locationManager.lastLocation) { _, newLocation in
+            // Handled or observed if needed
         }
-        .sheet(isPresented: $showUserProfileOverlay) {
+        .sheet(isPresented: $controller.showUserProfileOverlay) {
             UserProfileView()
-//                .navigationTransition(
-//                    .zoom(sourceID: "openProfile", in: profileNamespace))
         }
-        .sheet(item: $expandedItem) { report in
+        .sheet(item: $controller.expandedItem) { report in
             DetailView(report: report)
         }
         .sheet(isPresented: $router.isPresented) {
@@ -139,40 +115,19 @@ struct ReportsView: View {
                 .skeleton(isRedacted: router.isLoading)
         }
         .overlay {
-            /// customized overlay to show the list of places into a List
-            if showSearchOverlay {
-                placesOverlay(p: profileNamespace)
+            if controller.showSearchOverlay {
+                placesOverlay(p: profileNamespace, controller: controller)
             }
-            
         }
-        .toolbar(showSearchOverlay ? .hidden : .visible, for: .tabBar)
+        .toolbar(controller.showSearchOverlay ? .hidden : .visible, for: .tabBar)
         .task {
-            showSearchOverlay = false
+//            controller.showSearchOverlay = false
         }
         .task {
-            // Let's cancel the task if the user change the View or tab
             guard !Task.isCancelled else { return }
-           
-            
-            // Let's build the query
-            let query = MapExplorerQueryParams(
-                lat: appState.selectedCity?.coordinates.lat ?? 13.868268,
-                lng: appState.selectedCity?.coordinates.lng ?? -89.850968,
-                radius: 300,
-                issueTypeIds: [1],
-                severityIds: [1],
-                statusIds: [1]
-            )
-            
-            do {
-                self.reports = try await MapExplorerRepository.shared.listReports(
-                    for: query,
-                    countryCode: .SV,
-                    cityId: appState.selectedCity?.cityId ?? "1"
-                )
-            } catch {
-                print(error)
-            }
+            controller.authViewModel = appState
+            controller.settings = settings
+            await controller.loadReports()
         }
     }
     
@@ -194,115 +149,9 @@ struct ReportsView: View {
             .allowsHitTesting(false)
     }
     
-    private func handleMapMovement(center: CLLocationCoordinate2D) {
-        let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
-       
-        Task {
-            
-            
-            
-            try? await Task.sleep(for: .milliseconds(550))
-            guard !Task.isCancelled else { return }
-            
-            print(appState.cameraPosition.region?.span.latitudeDelta ?? "")
-            print(appState.cameraPosition.region?.span.latitudeDelta ?? "")
-            
-            guard let request = MKReverseGeocodingRequest(location: location) else { return }
-            let mapItems = try? await request.mapItems
-            guard let mapItem = mapItems?.first else { return }
-            
-            let country = mapItem.addressRepresentations?.region?.identifier
-            ?? mapItem.addressRepresentations?.regionName
-            ?? "-1"
-            
-            let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
-            
-            print(country)
-            print(cityName)
-        }
-    }
-    
-    private func performSearch() {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = searchText
-        request.region = currentRegion(c: appState.cameraPosition)
-        
-        let search = MKLocalSearch(request: request)
-        search.start { response, _ in
-            guard let item = response?.mapItems.first else { return }
-            let coordinate = item.location.coordinate
-            let address = item.address?.fullAddress ??  item.address?.shortAddress ?? "Unknown"
-            searchMarker = IssueMarker(
-                id: UUID().uuidString, 
-                title: item.name ?? String(localized: "Result"),
-                description: "",
-                status: 1,
-                coordinate: coordinate,
-                issueType: 1,
-                severity: 1,
-                matterToSolveId: 1,
-                address: address
-            )
-            appState.cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
-                )
-            )
-        }
-    }
-    
-    private func performSearch(with completion: MKLocalSearchCompletion) {
-        let request = MKLocalSearch.Request(completion: completion)
-        request.region = currentRegion(c: appState.cameraPosition)
-        
-        let search = MKLocalSearch(request: request)
-        search.start { response, _ in
-            guard let item = response?.mapItems.first else { return }
-            let coordinate = item.location.coordinate
-            let address = item.address?.fullAddress ??  item.address?.shortAddress ?? "Unknown"
-            searchMarker = IssueMarker(
-                id: UUID().uuidString, 
-                title: item.name ?? String(localized: "Result"),
-                description: "",
-                status: 1,
-                coordinate: coordinate, 
-                issueType: 1,
-                severity: 1,
-                matterToSolveId: 1,
-                address: address
-            )
-            appState.cameraPosition = .region(
-                MKCoordinateRegion(
-                    center: coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
-                )
-            )
-        }
-    }
-    
-    private func applySuggestion(_ suggestion: SearchSuggestion) {
-        searchText = suggestion.title
-        performSearch(with: suggestion.completion)
-        showSearchOverlay = false
-        isOverlaySearchFocused = false
-    }
-    
-    private func centerMapOnUserLocation() {
-        locationManager.requestAuthorization()
-        guard let location = locationManager.lastLocation else { return }
-        hasCenteredOnUser = true
-        appState.cameraPosition = .region(
-            MKCoordinateRegion(
-                center: location.coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.0082, longitudeDelta: 0.0082)
-                
-            )
-        )
-    }
-    
     @ViewBuilder
-    private func placesOverlay(p profileNamespace: Namespace.ID) -> some View {
+    private func placesOverlay(p profileNamespace: Namespace.ID, controller: MapExplorerController) -> some View {
+        @Bindable var controller = controller
         Rectangle()
             .fill(.ultraThinMaterial)
             .background(.background.opacity(0.25))
@@ -310,13 +159,13 @@ struct ReportsView: View {
             .overlay {
                 VStack {
                     SearchBar(
-                        text: $searchText,
+                        text: $controller.searchText,
                         onSubmit: {
-                            performSearch()
-                            showSearchOverlay = false
+                            controller.performSearch()
+                            controller.showSearchOverlay = false
                         },
                         onFocusChange: { isFocused in
-                            showSearchOverlay = isFocused
+                            controller.showSearchOverlay = isFocused
                         },
                         onUserProfileTap: {},
                         isFocused: $isOverlaySearchFocused,
@@ -327,11 +176,12 @@ struct ReportsView: View {
                     .padding(.trailing, 16)
                     .padding(.top, 10)
                     
-                    SuggestionsResultList(searchText: $searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
-                        applySuggestion(suggestion)
+                    SuggestionsResultList(searchText: $controller.searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
+                        controller.applySuggestion(suggestion)
                     })
                 }
                 .task {
+                    try? await Task.sleep(for: .milliseconds(75))
                     isOverlaySearchFocused = true
                 }
             }
@@ -339,7 +189,7 @@ struct ReportsView: View {
     }
     
     @ViewBuilder
-    private func BottomFloatingToolBar() -> some View {
+    private func BottomFloatingToolBar(controller: MapExplorerController) -> some View {
         VStack(spacing: 35) {
             Button {
                 
@@ -348,7 +198,7 @@ struct ReportsView: View {
             }
             
             Button {
-                centerMapOnUserLocation()
+                controller.centerMapOnUserLocation()
             } label: {
                 Image(systemName: "location")
             }
@@ -359,10 +209,9 @@ struct ReportsView: View {
         .padding(.horizontal, 16)
     }
     
-    
     @ViewBuilder
     private func annotationView(_ issue: MapExplorerReport) -> some View {
-        let isSelected = issue.id == selectedPlaceID
+        let isSelected = issue.id == controller.selectedPlaceID
         
         Image(systemName: issue.issueType.iconName)
             .resizable()
@@ -383,10 +232,9 @@ struct ReportsView: View {
             }
             .contentShape(.rect)
             .onTapGesture {
-                expandedItem = issue
-//                showDetailView.toggle()
+                controller.expandedItem = issue
                 withAnimation(animation) {
-                    selectedPlaceID = issue.id
+                    controller.selectedPlaceID = issue.id
                 }
             }
     }
@@ -409,30 +257,22 @@ private struct StatusFilterRow: View {
     @State private var issueType: IssueTypes = .all
     
     var body: some View {
-        
         HStack {
-            
             Group {
-                
                 ScrollView(.horizontal, showsIndicators: false) {
-                    
                     HStack(spacing: 16) {
-                        
                         ForEach(IssueStatus.allCases) { status in
                             let isSelected = selectedStatuses.contains(status)
                             Button {
                                 toggle(status)
                             } label: {
-                                
                                 HStack {
                                     Image(systemName: status.iconName)
                                         .tint(.white)
                                     
                                     Text(LocalizedStringKey(status.title))
                                         .font(.subheadline.weight(.semibold))
-                                    
                                 }
-                                
                                 .foregroundStyle(isSelected ? Color.white : Color.primary)
                                 .padding(.vertical, 8)
                                 .padding(.horizontal, 16)
@@ -447,7 +287,6 @@ private struct StatusFilterRow: View {
                                     Capsule()
                                         .stroke(status.color.opacity(isSelected ? 0.0 : 0.7), lineWidth: 1)
                                 )
-                                
                             }
                             .sensoryFeedback(.selection, trigger: isSelected)
                         }
@@ -468,44 +307,12 @@ private struct StatusFilterRow: View {
     }
 }
 
-@Observable
-final class LocationManager: NSObject, CLLocationManagerDelegate {
-    private let manager = CLLocationManager()
-    var lastLocation: CLLocation?
-    
-    override init() {
-        super.init()
-        manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
-    }
-    
-    func requestAuthorization() {
-        manager.requestWhenInUseAuthorization()
-    }
-    
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .authorizedAlways, .authorizedWhenInUse:
-            manager.startUpdatingLocation()
-        case .denied, .restricted:
-            manager.stopUpdatingLocation()
-        case .notDetermined:
-            break
-        @unknown default:
-            break
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        lastLocation = locations.last
-    }
-}
-
 #Preview {
     NavigationStack {
         ReportsView()
             .environmentObject(LandingController())
             .environmentObject(AuthViewModel())
             .environmentObject(DeepLinkRouter())
+            .environmentObject(SettingsStore())
     }
 }

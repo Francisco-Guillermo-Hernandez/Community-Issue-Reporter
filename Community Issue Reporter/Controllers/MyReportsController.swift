@@ -22,11 +22,12 @@ final class MyReportsController: ObservableObject {
     func fetchReports() async {
         isLoading = true
         do {
-            let result = try await ReportRepository.shared.listByUser(page: 1)
-            guard let reports = result.documents else { return }
-            self.reports = reports
-        } catch {
             
+            let result = try await ReportRepository.shared.listByUser(page: 1)
+            guard let documents = result.documents else { return }
+            self.reports = documents
+        } catch {
+            print(error)
         }
         
         isLoading = false

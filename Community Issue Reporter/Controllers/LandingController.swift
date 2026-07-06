@@ -26,8 +26,6 @@ class LandingController: ObservableObject {
     init() {
         self.profile = .init()
         
-//        setReportLocatorSettings()
-        
         selectedCity = .init(
             cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
             firstLevel: "El Salvador",
@@ -43,20 +41,6 @@ class LandingController: ObservableObject {
     
     func inject(_ settings: SettingsStore) {
         self.settings = settings
-    }
-    
-    private func setReportLocatorSettings() -> Void {
-        
-        
-//        if !settings.countryCode.isEmpty {
-//            self.countryCode = settings.countryCodeIso
-//        }
-        
-//        if !settings.cityId.isEmpty {
-////            self.selectedCity.cityId = settings.cityId
-//        }
-        
-        
     }
     
     func handleLogin(for session: String, with type: LoginType) {
@@ -129,7 +113,6 @@ class LandingController: ObservableObject {
         /// Privacy settings
         settings?.showMyProfile = data.settings.privacySettings.showMyProfile
         settings?.showMyUseNameWhenShare = data.settings.privacySettings.showMyUseNameWhenShare
-        
         
         /// Reporting settings
         settings?.countryCode = data.settings.reportLocatorSettings.countryCode

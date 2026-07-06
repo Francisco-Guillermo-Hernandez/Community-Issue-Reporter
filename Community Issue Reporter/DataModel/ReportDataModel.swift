@@ -19,6 +19,7 @@ final class ReportDataModel {
    
     var isAddressValid: Bool = false
     var reportSession: ReportSessionResponse
+    var isDifferentLocation: Bool = false
     private init() {
         self.reportSession = .init(
             reportContainer: "", 

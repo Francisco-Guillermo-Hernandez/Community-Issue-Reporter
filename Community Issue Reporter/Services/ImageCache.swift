@@ -14,7 +14,7 @@ class ImageCache {
     
     init() {
         // Configure cache limits
-        ImageCache.shared.countLimit = 256 // Maximum 256 images
+        ImageCache.shared.countLimit = 500
         ImageCache.shared.totalCostLimit = 256 * 1024 * 1024 // 256MB limit
     }
 }
@@ -37,8 +37,6 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
         self.scale = scale
         self.content = content
         self.placeholder = placeholder
-        
-        print("url: \(url)")
     }
 
     var body: some View {

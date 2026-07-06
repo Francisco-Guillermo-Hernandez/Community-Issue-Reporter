@@ -53,6 +53,7 @@ struct Community_Issue_ReporterApp: App {
         
         do {
             container = try ModelContainer(for: District.self, Canton.self)
+            SwiftDataLocatorDAO.shared.container = container
             let context = container.mainContext
             Task { @MainActor in
                 DatabaseMigrator.shared.migrateIfNeeded(modelContext: context)

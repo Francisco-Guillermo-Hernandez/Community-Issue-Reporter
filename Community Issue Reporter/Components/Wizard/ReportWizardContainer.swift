@@ -181,18 +181,7 @@ struct ReportWizardContainer: View {
     // MARK: - Logic
     
     private func submitReport() -> Void {
-        
-        print("currentStep")
-        print(currentStep)
-        
-//        if currentStep == .location {
-//            goNext()
-//        }
-//        
-//        if currentStep == .media && isReadyToContinue {
-//            goNext()
-//        }
-//        
+         
         if currentStep == .details {
            
             controller.submitReport(model, attachments: uploadTrackers) {

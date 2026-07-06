@@ -118,7 +118,7 @@ struct SettingsSubView: View {
                 
                 VStack(spacing: .themeSpacing * 8) {
                     /// Location group
-                    SettingsGroup(title: "Location") {
+                    SettingsGroup(title: String(localized: "Location")) {
                         
                         NavigationLink(destination: selectCityView()) {
                             HStack {
@@ -135,14 +135,14 @@ struct SettingsSubView: View {
                         }
                     }
                     
-                    SettingsGroup(title: "Privacy", footerText: "") {
+                    SettingsGroup(title: String(localized: "Privacy"), footerText: "") {
                         Toggle("Show my profile", isOn: $settings.showMyProfile)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.showMyProfile) { oldValue, newValue in
                                 updatePrivacySettings()
                             }
                         
-                        Toggle("Show my user name when I share", isOn: $settings.showMyUseNameWhenShare)
+                        Toggle(String(localized: "Show my user name when I share"), isOn: $settings.showMyUseNameWhenShare)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.showMyUseNameWhenShare) { oldValue, newValue in
                                 updatePrivacySettings()
@@ -150,7 +150,7 @@ struct SettingsSubView: View {
                     }
                     
                     /// Notifications group
-                    SettingsGroup(title: "Notifications") {
+                    SettingsGroup(title: String(localized: "Notifications")) {
                         Toggle("Push notifications", isOn: $settings.enablePushNotifications)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enablePushNotifications) { oldValue, newValue in
@@ -174,7 +174,7 @@ struct SettingsSubView: View {
                             }
                     }
                     
-                    SettingsGroup(title: "App settings") {
+                    SettingsGroup(title: String(localized: "App settings")) {
                         
                         Toggle("Save last location", isOn: $settings.saveLastLocation)
                             .foregroundStyle(Color.theme.inputText)

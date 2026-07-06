@@ -198,7 +198,6 @@ struct CitySelectionView: View {
         )
     } description: {
         Text("Please, write a city name")
-    } actions: {
     }
     .containerRelativeFrame(.vertical)
 }

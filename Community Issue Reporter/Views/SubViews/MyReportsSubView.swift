@@ -126,7 +126,7 @@ struct MyReportsSubView: View {
     @StateObject private var controller = MyReportsController()
     @Binding var path: [InsightsNavigation]
     var subViewName: String
-    
+    var mode: ViewOptions = .list
     var body: some View {
         ZStack {
             if controller.isLoading {
@@ -135,7 +135,7 @@ struct MyReportsSubView: View {
             }
 
             if controller.reports.isEmpty && !controller.isLoading {
-                // Empty state
+                /// Empty state
                 ContentUnavailableView {
                     Label(
                         "No reports yet.",
@@ -169,6 +169,7 @@ struct MyReportsSubView: View {
             Button("Delete", role: .destructive) {
                 controller.delete(report: controller.reportToDelete)
             }
+            
             Button("Cancel", role: .cancel) {
                 controller.reportToDelete = nil
             }

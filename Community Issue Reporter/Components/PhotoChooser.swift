@@ -74,6 +74,7 @@ struct PhotoChooser: View {
                         icon: "camera"
                     )
                     .popoverTip(takeAPhotoTip, arrowEdge: .top)
+                    .disabled(disableOnMaxImagesCompleted)
                     
                     PhotosPicker(
                         selection: $selectedPhotoItems,
@@ -97,6 +98,7 @@ struct PhotoChooser: View {
                         .padding(.themeSpacing * 3)
                         .frame(maxWidth: .infinity, maxHeight: 48)
                     }
+                    .disabled(disableOnMaxImagesCompleted)
                     .buttonStyle(ThemedButtonOutlineStyle(style: .prominent))
                     .onChange(of: selectedPhotoItems) { _, newItems in
                         guard !newItems.isEmpty else { return }
@@ -187,6 +189,8 @@ struct PhotoChooser: View {
         }
     }
     
+    
+    private var disableOnMaxImagesCompleted: Bool { uploadTrackers.count == 6 }
     
     private func deleteImage(using key: String, _ tracker: PhotoUploadTracker) {
         Task {

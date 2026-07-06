@@ -44,7 +44,7 @@ final class LocatorDAO {
         let query = "SELECT countryCode, firstLevel, secondLevel, thirdLevel, groupingId, cityId, groupingName, groupingNameCode, lat, lng, geoCode, zipCode, isCapitalCity, isDepartmentalCapital, cityNameSortKey, legalGroupName FROM cities WHERE countryCode = ? AND thirdLevel = ? LIMIT 1;"
         var statement: OpaquePointer? = nil
         
-        var locator: Locator = .init()
+        let locator: Locator = .init()
         let status = sqlite3_prepare(dbManager.db, query, -1, &statement, nil)
         
         if status == SQLITE_OK {
@@ -78,7 +78,7 @@ final class LocatorDAO {
             """
         var statement: OpaquePointer? = nil
         
-        var locator: Locator = .init()
+        let locator: Locator = .init()
         let status = sqlite3_prepare(dbManager.db, query, -1, &statement, nil)
         
         if status == SQLITE_OK {

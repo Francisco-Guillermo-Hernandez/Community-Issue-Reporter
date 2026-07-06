@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 
 typealias FriendlyCities = PaginatedResponse<FriendlyCityDistribution>
 
@@ -59,27 +60,75 @@ final class CitiesRepository {
         cityName: String? = nil,
         groupingName: String? = nil
     ) async -> FriendlyCities {
-        do {
-            // Build the query to be sent to the server
-            let query = PaginatedRequestQueryParams(
-                page: page,
-                limit: 16,
-                countryCode: countryCode,
-                departmentalCapital: departmentalCapital,
-                cityName: cityName,
-                stateName: stateName,
-                groupingName: groupingName
-            )
-         
-            // Fetch the results
-            return try await self.service.filter(q: query)
-            
-        } catch {
-            return PaginatedResponse(
-                documents: [],
-                hasNext: false,
-                hasPrev: false
-            )
+        guard let container = SwiftDataLocatorDAO.shared.container else {
+            print("Error: SwiftData container is not initialized in CitiesRepository.")
+            return PaginatedResponse(documents: [], hasNext: false, hasPrev: false)
         }
+        
+        let documents = await MainActor.run { () -> [FriendlyCityDistribution] in
+            let context = container.mainContext
+            let districts: [District]
+            
+            if departmentalCapital == true {
+                districts = SwiftDataLocatorDAO.shared.findDepartmentalCapitals(
+                    countryCode: countryCode,
+                    in: context
+                )
+            } else if let groupingName = groupingName, !groupingName.isEmpty {
+                districts = SwiftDataLocatorDAO.shared.findDistrictsBy(
+                    groupingName: groupingName,
+                    countryCode: countryCode,
+                    limit: 30,
+                    in: context
+                )
+            } else if let cityName = cityName, !cityName.isEmpty {
+                districts = SwiftDataLocatorDAO.shared.findDistrictsBy(
+                    thirdLevel: cityName,
+                    countryCode: countryCode,
+                    limit: 30,
+                    in: context
+                )
+            } else if let stateName = stateName, !stateName.isEmpty {
+                districts = SwiftDataLocatorDAO.shared.findDistrictsByState(
+                    stateName: stateName,
+                    countryCode: countryCode,
+                    limit: 30,
+                    in: context
+                )
+            } else {
+                districts = SwiftDataLocatorDAO.shared.findDistrictsBy(
+                    thirdLevel: "",
+                    countryCode: countryCode,
+                    limit: 30,
+                    in: context
+                )
+            }
+            
+            return districts.map { FriendlyCityDistribution(from: $0) }
+        }
+        
+        return PaginatedResponse(
+            documents: documents,
+            hasNext: false,
+            hasPrev: false
+        )
+    }
+}
+
+extension FriendlyCityDistribution {
+    init(from district: District) {
+        self.init(
+            cityId: district.cityId,
+            firstLevel: district.firstLevel ?? "",
+            secondLevel: district.secondLevel ?? "",
+            thirdLevel: district.thirdLevel ?? "",
+            ZipCode: district.zipCode,
+            legalGroupName: district.legalGroupName ?? "",
+            coordinates: Coordinate(lat: district.lat, lng: district.lng),
+            isCapitalCity: district.isCapitalCity ? 1 : 0,
+            isDepartmentalCapital: district.isDepartmentalCapital ? 1 : 0,
+            groupingId: district.groupingId,
+            groupingName: district.groupingName
+        )
     }
 }

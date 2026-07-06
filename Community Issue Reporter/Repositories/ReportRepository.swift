@@ -60,16 +60,12 @@ final class ReportRepository {
     
     func listByUser(page: Int) async throws -> Reports {
         do {
-            let result = try await self.reportsService.fetchReportByUser(
-                q: PaginatedRequestQueryParams(
-                    page: page,
-                    limit: 5
-                )
-            )
-            
-           return result
-    
+          
+           return try await self.reportsService.fetchReportByUser(
+            q: PaginatedRequestQueryParams(page: page, limit: 5)
+           )
         } catch {
+            print(error)
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }

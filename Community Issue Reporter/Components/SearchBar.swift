@@ -84,15 +84,16 @@ struct SearchBar: View {
                                 }
                                 .frame(width: 48, height: 48)
                                 .clipShape(Circle())
+                                .glassEffect(in: .circle)
                                 .id(url)
 
-                                
                             } else {
                                 Image("user_b")
                                     .resizable()
                                     .scaledToFill()
                                     .frame(width: 48, height: 48)
                                     .clipShape(Circle())
+                                    .glassEffect(in: .circle)
 
                             }
                         }

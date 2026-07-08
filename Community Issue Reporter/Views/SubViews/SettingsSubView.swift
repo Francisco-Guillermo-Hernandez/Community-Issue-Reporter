@@ -306,4 +306,5 @@ struct SettingsSubView: View {
     SettingsSubView(subViewName: "Settings")
         .environmentObject(AuthViewModel())
         .environmentObject(NotificationManager())
+        .environmentObject(SettingsStore())
 }

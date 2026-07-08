@@ -10,7 +10,7 @@ import SwiftUI
 
 struct TabBarView: View {
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.mySettings) var settings
+    @EnvironmentObject var settings: SettingsStore
     @State private var model = ReportDataModel.shared
     @State private var presentSheetOnDeepLink: Bool = false
     @AppStorage("openReportFromShortcut") private var openReportFromShortcut = false
@@ -82,5 +82,6 @@ struct TabBarView: View {
     TabBarView()
         .environmentObject(AuthViewModel())
         .environmentObject(DeepLinkRouter())
+        .environmentObject(SettingsStore())
         .environmentObject(LandingController())
 }

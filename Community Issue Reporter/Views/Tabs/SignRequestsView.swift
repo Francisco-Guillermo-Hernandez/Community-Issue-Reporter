@@ -14,179 +14,9 @@ enum SignRequestsViewsDestinations: Hashable {
 
 struct SignRequestsView: View {
     @Namespace private var namespace
-    @State private var isPrimaryActionVisible: Bool = true
-    @State private var title: String?
-    @State private var subtitle: String?
-    @State private var activeSubtitleIndex: Int?
-    @State private var isSearchBarVisible: Bool = false
-    @State private var searchText: String = ""
-    @State private var issueType: IssueTypes = .road
-    @State private var orderFilter: OrderFilter = .ascending
-    @State private var severity: Severity = .low
-    @State private var selectedItem: Int?
-    @State private var petitions: [Petition] = []
-    @State private var showCreateRequestView: Bool = false
-    @State private var currentPage: Int = 1
-    @State private var isLoading: Bool = false
-    @State private var canLoadMore: Bool = true
-    @State private var showSignatureModal: Bool = false
-    private let pageLimit: Int = 16
-    @State private var value: Double = 20
+    @State private var controller = SignRequestController()
+    @State private var petitionController = PetitionController()
     @State private var navigationPath: [SignRequestsViewsDestinations] = []
-    @State private var signatureCount: Int = 125
-    @State var strokes: [SignatureLine] = []
-    
-    @State private var users: [User] = [
-        User(username: "janeDoe", avatar: "user", profileId: ""),
-        User(username: "mayDoe", avatar: "user", profileId: ""),
-        User(username: "mperez", avatar: "user", profileId: ""),
-    ]
-    
-    @Sendable
-    func fetchPetitions(reset: Bool = false) async {
-        if reset {
-            currentPage = 1
-            canLoadMore = true
-        }
-        
-        guard !isLoading && (canLoadMore || reset) else { return }
-        
-        isLoading = true
-        
-        let query = PaginatedRequestQueryParams(
-            page: currentPage,
-            limit: 10,
-            issueTypeId: issueType == .all ? nil : issueType.identifier,
-            severityId: severity == .all ? nil : severity.identifier,
-            ordering: orderFilter
-        )
-        
-        
-        print(query)
-        
-       
-        let locator: Locator = .init()
-        locator.setCountryCode(.SV)
-        
-        print(locator)
-        
-        self.petitions = [
-            Petition(
-                id: "1",
-                title: "Recarpet of big potholes on the road  ",
-                description: "Several potholes must be recarpeted",
-                targetSignatures: 22,
-                currentSignatures: 0,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ],
-                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(username: "", avatar: "", profileId: "")
-            ),
-            
-            Petition(
-                id: "2",
-                title: "Un semaforo no esta funcionando en la avenida",
-                description: "Un semaforo esta funcionando mal",
-                targetSignatures: 22,
-                currentSignatures: 0,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ],
-                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(username: "", avatar: "", profileId: "")
-            ),
-            Petition(
-                id: "3",
-                title: "Hay una fuga de agua en la colonia",
-                description: "",
-                targetSignatures: 22,
-                currentSignatures: 0,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ],
-                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(username: "", avatar: "", profileId: "")
-            ),
-        ]
-        
-        self.petitions.append(contentsOf: petitions)
-        
-//        await PetitionRepository.share.list(
-//            q: query,
-//            locator: locator,
-//            onComplete: { result in
-//                guard let documents = result.documents else {
-//                    canLoadMore = false
-//                    return
-//                }
-//                
-//                if reset {
-//                    self.petitions = documents
-//                } else {
-//                    let existingIds = Set(self.petitions.compactMap { $0.id })
-//                    let uniqueNewPetitions = documents.filter { doc in
-//                        guard let id = doc.id else { return true }
-//                        return !existingIds.contains(id)
-//                    }
-//                    self.petitions.append(contentsOf: uniqueNewPetitions)
-//                }
-//                
-//                self.canLoadMore = result.hasNext && self.currentPage < self.pageLimit
-//                if self.canLoadMore {
-//                    self.currentPage += 1
-//                }
-//                
-//            }, onError: { error in
-//                print(error)
-//                canLoadMore = false
-//            }
-//        )
-        
-        isLoading = false
-    }
-    
-    @State private var level: Int = 20
-    @State var model = PetitionDataModel()
     
     fileprivate func posts() -> some View {
         return LazyVStack(alignment: .leading, spacing: .themeSpacing * 4) {
@@ -195,10 +25,10 @@ struct SignRequestsView: View {
             VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 
                 
-                ForEach(petitions) { petition in
+                ForEach(controller.petitions) { petition in
                     EventsOnDay(
                         petition: petition,
-                        selectedIndex: petitions.firstIndex(where: {
+                        selectedIndex: controller.petitions.firstIndex(where: {
                             $0.id == petition.id
                         }) ?? 0
                     )
@@ -209,7 +39,7 @@ struct SignRequestsView: View {
                     //                            }
                 }
                 
-                if isLoading {
+                if controller.isLoading {
                     HStack {
                         Spacer()
                         ProgressView()
@@ -222,9 +52,9 @@ struct SignRequestsView: View {
             
         }
         .customToolBar(
-            isPrimaryActionVisible: isPrimaryActionVisible,
-            title: title,
-            subtitle: subtitle
+            isPrimaryActionVisible: controller.isPrimaryActionVisible,
+            title: controller.title,
+            subtitle: controller.subtitle
         ) {
             EmptyView()
         } trailing: {
@@ -232,28 +62,27 @@ struct SignRequestsView: View {
             HStack(spacing: 16) {
                 
                 Button("Add", systemImage: "plus") {
-                    showCreateRequestView.toggle()
+                    controller.showCreateRequestView.toggle()
                 }
                 .matchedTransitionSource(
                     id: "openCreateRequest",
                     in: namespace
                 )
                 
-                
                 Menu {
-                    Picker("Issue Type", selection: $issueType) {
+                    Picker("Issue Type", selection: $controller.issueType) {
                         ForEach(IssueTypes.allCases, id: \.self) { type in
                             Text(type.title).tag(type)
                         }
                     }
                     
-                    Picker("Severity", selection: $severity) {
+                    Picker("Severity", selection: $controller.severity) {
                         ForEach(Severity.allCases, id: \.self) { level in
                             Text(level.title).tag(level)
                         }
                     }
                     
-                    Picker("Order Filter", selection: $orderFilter) {
+                    Picker("Order Filter", selection: $controller.orderFilter) {
                         ForEach(OrderFilter.allCases, id: \.self) {
                             filter in
                             Text(filter.title).tag(filter)
@@ -314,42 +143,41 @@ struct SignRequestsView: View {
                 .animation(.easeInOut(duration: 0.35), value: navigationPath.isEmpty)
             }
             
-           
 //            .scrollContentBackground(.hidden)
 //            .refreshable {
 //                await fetchPetitions(reset: true)
 //            }
             
         }
-        .onChange(of: activeSubtitleIndex) { oldValue, newValue in
+        .onChange(of: controller.activeSubtitleIndex) { oldValue, newValue in
             if let newValue {
-                subtitle = petitions[newValue].title
+                controller.subtitle = controller.petitions[newValue].title
             } else {
-                subtitle = nil
+                controller.subtitle = nil
             }
         }
         .task {
             guard !Task.isCancelled else { return }
-            await fetchPetitions()
+            await controller.fetchPetitions()
         }
-        .onChange(of: issueType) {
-            Task { await fetchPetitions(reset: true) }
+        .onChange(of: controller.issueType) {
+            Task { await controller.fetchPetitions(reset: true) }
         }
-        .onChange(of: severity) {
-            Task { await fetchPetitions(reset: true) }
+        .onChange(of: controller.severity) {
+            Task { await controller.fetchPetitions(reset: true) }
         }
-        .onChange(of: orderFilter) {
-            Task { await fetchPetitions(reset: true) }
+        .onChange(of: controller.orderFilter) {
+            Task { await controller.fetchPetitions(reset: true) }
         }
-        .sheet(isPresented: $showCreateRequestView) {
-            CreateRequestPetitionView(model: model, onCompletion: { _, _ in
+        .sheet(isPresented: $controller.showCreateRequestView) {
+            CreateRequestPetitionView(controller: petitionController, onCompletion: { _, _ in
                 
             })
-                .navigationTransition(
-                    .zoom(sourceID: "openCreateRequest", in: namespace)
-                )
+            .navigationTransition(
+                .zoom(sourceID: "openCreateRequest", in: namespace)
+            )
         }
-        .sensoryFeedback(.selection, trigger: subtitle != nil)
+        .sensoryFeedback(.selection, trigger: controller.subtitle != nil)
         
     }
     
@@ -357,21 +185,18 @@ struct SignRequestsView: View {
     @ViewBuilder
     func headerView() -> some View {
         VStack(alignment: .leading, spacing: .themeSpacing * 4) {
-            Text("**\(petitions.count)** Petitions   **\(signatureCount)** signatories")
-//                .font(Font.headline)
+            Text("**\(controller.petitions.count)** Petitions   **\(controller.signatureCount)** signatories")
                 .font(.subheadline)
-//                .font(.custom("Lora", size: 16, relativeTo: .title))
                 .foregroundColor(.secondary)
             Text("  ")
                 .frame(height: 0)
-//                .font(.title.bold())
                 .font(.custom("Lora", size: 18, relativeTo: .title))
                 .onGeometryChange(for: Bool.self) {
                     let height = abs($0.size.height - 5)
                     let offset = $0.frame(in: .global).minY
                     return -offset > height
                 } action: { newValue in
-                    title = newValue ? "Petitions" : nil
+                    controller.title = newValue ? "Petitions" : nil
                 }
             
             
@@ -386,22 +211,21 @@ struct SignRequestsView: View {
             VStack(alignment: .leading) {
                 Text(petition.title)
                     .font(.title2)
-//                    .font(.custom("Lora", size: 16, relativeTo: .title))
                     .fontWeight(.black)
                     .fontWidth(.condensed)
                     .lineLimit(1)
                     .padding(.top, .themePadding / 2)
                     .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
                         content
-                            .opacity(activeSubtitleIndex == selectedIndex ? 0 : 1)
-                        //                        .scaleEffect(activeSubtitleIndex == index ? 0.01 : 1, anchor: .top)
+                            .opacity(controller.activeSubtitleIndex == selectedIndex ? 0 : 1)
+                            .scaleEffect(controller.activeSubtitleIndex == selectedIndex ? 0.01 : 1, anchor: .top)
                     }
                     .onGeometryChange(for: Bool.self) {
                         let offset = $0.frame(in: .scrollView).minY
                         return -offset > 25
                     } action: { newValue in
                         let previousIndex = selectedIndex - 1
-                        activeSubtitleIndex =
+                        controller.activeSubtitleIndex =
                         newValue
                         ? selectedIndex
                         : (previousIndex < 0 ? nil : previousIndex)
@@ -411,9 +235,7 @@ struct SignRequestsView: View {
                     .font(.caption)
                     .lineLimit(1)
                     .opacity(0.85)
-//                    .foregroundStyle(.secondary)
                 
-                  
             }
             
             
@@ -430,19 +252,19 @@ struct SignRequestsView: View {
             Divider()
                 .opacity(0.67)
             
-            Gauge(value: value, in: 0...100) {
+            Gauge(value: controller.value, in: 0...100) {
                 Text(String(localized: "Signatures", comment: "Signatures text at the bottom of the gauge"))
                     .font(.caption)
                     .fontWeight(.medium)
             } currentValueLabel: {
-                Text("\(Int(value)) %")
+                Text("\(Int(controller.value)) %")
             }
             .gaugeStyle(.accessoryLinearCapacity)
             
             
             VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 HStack(alignment: .top) {
-                    Signatories(users: users)
+                    Signatories(users: controller.users)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Text("125 signatories")
                         .font(.caption)
@@ -455,7 +277,7 @@ struct SignRequestsView: View {
                 
                 PostInteractions(
                     sign: {
-                        showSignatureModal.toggle()
+                        controller.showSignatureModal.toggle()
                     },
                     comment: {
                         navigationPath.append(SignRequestsViewsDestinations.comments(postId: "sample"))
@@ -465,12 +287,11 @@ struct SignRequestsView: View {
                         shareFromClosure(item: shareURL)
                     }
                 )
-                .sheet(isPresented: $showSignatureModal) {
+                .sheet(isPresented: $controller.showSignatureModal) {
                     PreviewSignatureView(petitionName: "") {
                         
                     }
                 }
-                
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }

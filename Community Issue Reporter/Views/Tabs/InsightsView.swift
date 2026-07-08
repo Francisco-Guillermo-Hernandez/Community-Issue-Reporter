@@ -7,26 +7,12 @@
 
 import SwiftUI
 
-
 struct InsightsView: View {
     @Namespace private var insightsNamespace
-    @State private var selectedDate = Date()
-    @State private var activityData: [String: DaySummary] = MockData.activityMap
-    @State private var navigationPath: [InsightsNavigation] = []
-    
-    private var dateFormatter: DateFormatter {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        return f
-    }
-    @State private var date = Date()
-    @Environment(\.colorScheme) private var colorScheme
-    @State private var selectedOption: String = "My Reports"
-    
-    let options: [String] = ["My Reports", "My Petitions", "Signed Petitions"]
-
+    @State private var controller = InsightsController()
+ 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack(path: $controller.navigationPath) {
             ZStack(alignment: .top) {
                 
                 Color.theme.background
@@ -46,34 +32,37 @@ struct InsightsView: View {
                 
                 VStack {
                     ScrollView(.vertical) {
-                        StatsCardsView(path: $navigationPath, nameSpace: insightsNamespace)
+                        StatsCardsView(path: $controller.navigationPath, nameSpace: insightsNamespace, insights: controller.insights)
                             .padding(.bottom, 48)
                            
-                        InsightsCalendarView(path: $navigationPath, activityData: activityData)
+                        InsightsCalendarView(path: $controller.navigationPath, activityData: controller.insights.recentActivity)
                     }
                 }
                 .navigationDestination(for: InsightsNavigation.self) { destination in
                     switch destination {
-                    case .myReports:
-                        MyReportsSubView(path: $navigationPath, subViewName: "My reports")
-                            .navigationTransition(.zoom(sourceID: "transition:myReports", in: insightsNamespace))
-                    case .myPetitions:
-                        MyPetitionsSubView(path: $navigationPath, subViewName: "My petitions")
-                            .navigationTransition(.zoom(sourceID: "transition:myPetitions", in: insightsNamespace))
-                    case .activity(let date):
-                        SimpleView(
-                            title: "ActivityListView",
-                            selectedDay: activityData[date],
-                            dateFormatter: date
-                        )
-                    case .noActivity:
-                        SimpleView(title: "NoActivityView")
-                    case .report(let report):
-                        SimpleView(title: report.title)
-                    case .petition(let petition):
-                        SimpleView(title: petition.title)
+                        case .myReports:
+                            MyReportsSubView(path: $controller.navigationPath, subViewName: "My reports")
+                                .navigationTransition(.zoom(sourceID: "transition:myReports", in: insightsNamespace))
+                        case .myPetitions:
+                            MyPetitionsSubView(path: $controller.navigationPath, subViewName: "My petitions")
+                                .navigationTransition(.zoom(sourceID: "transition:myPetitions", in: insightsNamespace))
+                        case .activity(let date):
+                            SimpleView(
+                                title: "ActivityListView",
+                                selectedDay: controller.insights.recentActivity[date],
+                                dateFormatter: date
+                            )
+                        case .noActivity:
+                            SimpleView(title: "NoActivityView")
+                        case .report(let report):
+                            SimpleView(title: report.title)
+                        case .petition(let petition):
+                            SimpleView(title: petition.title)
                     
                     }
+                }
+                .task {
+                    await controller.getInsights()
                 }
                 .scrollContentBackground(.hidden)
                 .navigationTitle("Insights")

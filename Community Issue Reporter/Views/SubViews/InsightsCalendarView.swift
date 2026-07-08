@@ -47,6 +47,19 @@ struct SimpleView: View {
     var selectedDay: DaySummary? = nil
     var dateFormatter: String = ""
     
+    private var localizedDateString: String {
+        let parser = DateFormatter()
+        parser.dateFormat = "yyyy-MM-dd"
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        parser.calendar = Calendar(identifier: .gregorian)
+        
+        guard let date = parser.date(from: dateFormatter) else {
+            return dateFormatter
+        }
+        
+        return date.formatted(date: .long, time: .omitted)
+    }
+    
    var body: some View {
        
        ZStack(alignment: .top) {
@@ -70,7 +83,7 @@ struct SimpleView: View {
                VStack {
                    if title == "NoActivityView" {
                        ContentUnavailableView {
-                           Label("No activity", systemImage: "calendar.badge.exclamationmark")
+                           Label(String(localized: "No activity"), systemImage: "calendar.badge.exclamationmark")
                                .symbolRenderingMode(.palette)
                                .foregroundStyle(
                                     Color.theme.foreground.opacity(0.7),
@@ -81,12 +94,13 @@ struct SimpleView: View {
                            Text("You didn't create any reports on this day.")
                                .foregroundStyle(Color.theme.primary)
                        }
-//                       .background(Color.theme.background)
+                       
                    } else {
                        if selectedDay != nil {
                            
                            List {
-                               Section(header: Text("Reports")) {
+                               
+                               Section {
                                    if let reports = selectedDay?.reports, !reports.isEmpty {
                                        ForEach(reports, id: \.id) { report in
                                            Text(report.id)
@@ -95,10 +109,14 @@ struct SimpleView: View {
                                    } else {
                                        Text("No reports available")
                                            .foregroundColor(.secondary)
+                                           .font(.caption)
+                                           .padding(.horizontal)
                                    }
+                               } header: {
+                                   Text(String(localized: "Reports"))
                                }
                                
-                               Section(header: Text("Signatures")) {
+                               Section {
                                    if let signatures = selectedDay?.signatures, !signatures.isEmpty {
                                        ForEach(signatures, id: \.id) { signature in
                                            Text(signature.id)
@@ -107,7 +125,55 @@ struct SimpleView: View {
                                    } else {
                                        Text("No signatures available")
                                            .foregroundColor(.secondary)
+                                           .font(.caption)
+                                           .padding(.horizontal)
                                    }
+                               } header: {
+                                   Text(String(localized: "Signatures"))
+                               }
+                               
+                               Section {
+                                   if let signatures = selectedDay?.petitions, !signatures.isEmpty {
+                                       ForEach(signatures, id: \.id) { signature in
+                                           VStack {
+                                               Text(signature.title)
+                                                   .font(.caption)
+                                                   .foregroundStyle(Color.secondary)
+                                                   .frame(maxWidth: .infinity, alignment: .leading)
+                                           }
+                                           .frame(maxWidth: .infinity, alignment: .leading)
+                                           .cellStyle()
+                                       }
+                                   } else {
+                                       Text("No petitions available")
+                                           .foregroundColor(.secondary)
+                                           .font(.caption)
+                                           .padding(.horizontal)
+                                   }
+                               } header: {
+                                   Text(String(localized: "Petitions"))
+                               }
+                               
+                               Section {
+                                   if let signatures = selectedDay?.comments, !signatures.isEmpty {
+                                       ForEach(signatures, id: \.id) { signature in
+                                           VStack {
+                                               Text(signature.title)
+                                                   .font(.caption)
+                                                   .foregroundStyle(Color.secondary)
+                                                   .frame(maxWidth: .infinity, alignment: .leading)
+                                           }
+                                           .frame(maxWidth: .infinity, alignment: .leading)
+                                           .cellStyle()
+                                       }
+                                   } else {
+                                       Text("No comments available")
+                                           .foregroundColor(.secondary)
+                                           .font(.caption)
+                                           .padding(.horizontal)
+                                   }
+                               } header: {
+                                   Text(String(localized: "Comments"))
                                }
                            }
                            .listStyle(.insetGrouped)
@@ -118,47 +184,43 @@ struct SimpleView: View {
                }
            }
        }
-      
-//       .background(Color.theme.background)
        .scrollContentBackground(.hidden)
        .toolbarTitleDisplayMode(.inline)
-       .navigationBarTitle(title == "NoActivityView" ? "No Activity" : dateFormatter)
+       .navigationBarTitle(dynamicTitle)
+    }
+    
+    private var dynamicTitle: String {
+        if title == "NoActivityView" {
+            return String(localized: "No Activity")
+        } else {
+            return localizedDateString
+        }
     }
 }
 
 
 struct MockData {
-//    static let sampleComment = Comment(
-//        id: "2a832de2-3379-4f21-abbd-278c477c5206",
-//        createdAt: Date(),
-//        updatedAt: Date(),
-//        name: "Francisco Hernandez",
-//        reportId: "id-1",
-//        message: "este bache es peligroso y debe de arreglarse lo mas pronto posible",
-//    )
-    
+
     static let activityMap: [String: DaySummary] = [
-        "2026-04-10": DaySummary(
-            count: 1,
+        "2026-07-07": DaySummary(
+            interactions: 1,
             reports: [
-                BasicInfo(id: "1", ids: ["id-1"])
+                BasicInfo(id: "1", title: "demo", status: "demo")
             ],
-            signatures: [
-                BasicInfo(id: "1", ids: ["id-1"])
-            ]
-        ),
+            signatures: [],
+            comments: [],
+            petitions: []
+        )
     ]
     
     // Mock for your "Cards" (Journaled/Written)
     static let stats = InsightsResponse(
         activityDays: activityMap,
         totalReports: 24,
-        totalSignatures: 12
+        totalSignatures: 12,
+        data: [:]
     )
 }
-
-
-
 
 #Preview("Insights Dashboard - Data") {
     @Previewable @Namespace var nameSpace
@@ -181,27 +243,3 @@ struct MockData {
         Text("Destination")
     }
 }
-
-#Preview("Comment Row") {
-    List {
-//        CommentRow(
-//            name: MockData.sampleComment.name ?? "User",
-//            time: Date(),
-//            message: MockData.sampleComment.message
-//        )
-    }
-    .listStyle(.plain)
-}
-
-
-extension Date {
-    func addingDays(_ days: Int) -> Date {
-        return Calendar.current.date(byAdding: .day, value: days, to: self) ?? self
-    }
-    
-    func reduceDays(_ days: Int) -> Date {
-        return Calendar.current.date(byAdding: .day, value: -days, to: self) ?? self
-    }
-}
-
-

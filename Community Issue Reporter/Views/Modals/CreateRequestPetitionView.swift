@@ -10,17 +10,8 @@ import SwiftUI
 struct CreateRequestPetitionView: View {
 
     @Environment(\.dismiss) private var dismiss
-    @State var isSubmitting: Bool = false
-    @State var minimunSignatures: Int = 10
-    @State var stepperAction: String = ""
-    @State var reports: [Report] = []
-    @State private var targetSignatureValue = 10
- 
-    @State var reportsIds: [String] = []
-    @ObservedObject var model: PetitionDataModel
-    
+    @Bindable var controller: PetitionController
     var onCompletion: (String, AlertType) -> Void
-    
     
     var body: some View {
         NavigationStack {
@@ -32,20 +23,20 @@ struct CreateRequestPetitionView: View {
                             name: String(localized: "Title"),
                             label: String(localized: "Please enter a title"),
                             validators: titleValidator,
-                            isValid: .constant(true),
-                            value: $model.petition.title
+                            isValid: $controller.isTitleValid,
+                            value: $controller.petition.title
                        )
                     
                        TextInput(
                             name: String(localized: "Description"),
                             label: String(localized: "Please enter a description"),
                             validators: descriptionValidator,
-                            isValid: .constant(true),
-                            value: $model.petition.description
+                            isValid: $controller.isDescriptionValid,
+                            value: $controller.petition.description
                        )
                     }
                     
-                    Picker("Category", selection: $model.petition.category) {
+                    Picker("Category", selection: $controller.petition.category) {
                         ForEach(Categories.allCases, id: \.self) {
                             if $0 == .all {
                                 Text("Select a category").tag(0)
@@ -56,12 +47,12 @@ struct CreateRequestPetitionView: View {
                             }
                         }
                     }
-                    .onChange(of: model.petition.category) { oldValue, newValue in
+                    .onChange(of: controller.petition.category) { oldValue, newValue in
                       
                         if oldValue != newValue {
                             let signatures = newValue.minimunAmountOfSignatures
-                               self.minimunSignatures = signatures
-                            model.petition.targetSignatures = signatures
+                               controller.minimumSignatures = signatures
+                            controller.petition.targetSignatures = signatures
                         }
                         
                     }
@@ -72,14 +63,14 @@ struct CreateRequestPetitionView: View {
                 
                 Section {
                     NavigationLink(
-                        destination: ReportsChooserView(reports: reports, selectedReports: $model.petition.reportsIds)) {
+                        destination: ReportsChooserView(reports: controller.reports, selectedReports: $controller.petition.reportsIds)) {
                       HStack {
                           Text("Choose report(s)")
                           
                           Spacer()
                           
-                          if !model.petition.reportsIds.isEmpty {
-                              SelectedDocumentsBadgeView(count: model.petition.reportsIds.count)
+                          if !controller.petition.reportsIds.isEmpty {
+                              SelectedDocumentsBadgeView(count: controller.petition.reportsIds.count)
                           } else {
                               Image(systemName: "document.badge.plus")
                           }
@@ -90,51 +81,39 @@ struct CreateRequestPetitionView: View {
                 }
                 
                 Section {
-                    Stepper(value: $model.petition.targetSignatures, in: minimunSignatures...1000, step: 1) {
-                        AnimatedText(text: "\( model.petition.targetSignatures)")
+                    Stepper(value: $controller.petition.targetSignatures, in: controller.minimumSignatures...1000, step: 1) {
+                        AnimatedText(text: "\( controller.petition.targetSignatures)")
                     }
-                    .onChange(of: model.petition.targetSignatures) { oldValue, newValue in
+                    .onChange(of: controller.petition.targetSignatures) { oldValue, newValue in
                     
                         if newValue > oldValue {
-                            stepperAction = "Increase"
+                            controller.stepperAction = "Increase"
                         } else if newValue < oldValue {
-                            stepperAction = "Decrease"
+                            controller.stepperAction = "Decrease"
                         }
                     }
-                    .sensoryFeedback(.increase, trigger: model.petition.targetSignatures) { oldValue, newValue in
+                    .sensoryFeedback(.increase, trigger: controller.petition.targetSignatures) { oldValue, newValue in
                         return newValue > oldValue
                     }
-                    .sensoryFeedback(.decrease, trigger: model.petition.targetSignatures) { oldValue, newValue in
+                    .sensoryFeedback(.decrease, trigger: controller.petition.targetSignatures) { oldValue, newValue in
                         return newValue < oldValue
                     }
-                    
+//                    
                 } header: {
                     Text("Set the amount of signatures needed")
                 } footer: {
-                    Text("The minimum amount of signatures depends of the category. For the choosen category, the minimun amount of signatures is \(minimunSignatures) ")
+                    Text("The minimum amount of signatures depends of the category. For the choosen category, the minimun amount of signatures is \(controller.minimumSignatures) ")
                 }
         
             }
             .background(Color.theme.background)
             .scrollContentBackground(.hidden)
             .task {
-                // Let's cancel the task if the user change the view
+                /// Let's cancel the task if the user change the view
                 guard !Task.isCancelled else { return }
                 
-//                self.minimunSignatures = model.petition.category.minimunAmountOfSignatures
-//                if model.petition.targetSignatures < minimunSignatures {
-//                    model.petition.targetSignatures = minimunSignatures
-//                }
-                
-                // list reports for the creation of the petition
-                do {
-                    let result = try await ReportRepository.shared.listByUser(page: 1)
-                    guard let reports = result.documents else { return }
-                    self.reports = reports
-                    
-                } catch {
-                    print(error.localizedDescription)
-                }
+                /// list reports for the creation of the petition
+                await controller.fetchReports()
         
             }
             .background(Color.theme.background)
@@ -152,14 +131,12 @@ struct CreateRequestPetitionView: View {
                 
                 ToolbarItem(placement: .confirmationAction) {
                     Button(role: .confirm) {
-                        isSubmitting.toggle()
+                        controller.isSubmitting.toggle()
                         
                         Task {
                           
-                            
-                            
                             await PetitionRepository.share.create(
-                                model.petition,
+                                controller.petition,
                                 onComplete: { result in
                                 
                                     onCompletion("Petition created", .info)
@@ -171,20 +148,18 @@ struct CreateRequestPetitionView: View {
                                     dismiss()
                                 })
                                 
-                            
-                            
-                            isSubmitting.toggle()
+                            controller.isSubmitting.toggle()
                         }
                         
                     } label: {
-                       if isSubmitting {
+                        if controller.isSubmitting {
                             ProgressView()
                                .progressViewStyle(.circular)
                        } else {
                            Label("Submit", systemImage: "checkmark")
                        }
                     }
-                    .disabled(isSubmitting)
+                    .disabled(controller.isSubmitting)
                 }
             }
             .toolbarTitleDisplayMode(.inline)
@@ -223,11 +198,11 @@ struct AnimatedText: View {
 
 #Preview {
 
-    @Previewable
-    @State var model = PetitionDataModel()
-    CreateRequestPetitionView(model: model, onCompletion: { _, _ in
+    @Previewable @State var controller = PetitionController()
+   
+    CreateRequestPetitionView(controller: controller, onCompletion: { _, _ in
         print("completed")
-        print(model.petition.title)
-        print(model.petition.targetSignatures)
+        print(controller.petition.title)
+        print(controller.petition.targetSignatures)
     })
 }

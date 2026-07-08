@@ -32,12 +32,14 @@ struct CustomCalendar: UIViewRepresentable {
         view.delegate = context.coordinator
         view.tintColor = .orange
         
-        // Disable years below 2026
-        if let startDate = calendar.date(from: DateComponents(year: 2026, month: 1, day: 1)) {
-            view.availableDateRange = DateInterval(start: startDate, end: .distantFuture)
+        /// Disable years below 2026 and dates exceeding the current month
+        let now = Date()
+        if let startDate = calendar.date(from: DateComponents(year: 2026, month: 1, day: 1)),
+           let currentMonthInterval = calendar.dateInterval(of: .month, for: now) {
+            view.availableDateRange = DateInterval(start: startDate, end: currentMonthInterval.end)
         }
 
-        // Selection behavior
+        /// Selection behavior
         let selection = UICalendarSelectionSingleDate(delegate: context.coordinator)
         view.selectionBehavior = selection
 
@@ -60,7 +62,7 @@ extension CustomCalendar {
             self.parent = parent
         }
 
-        // Convert map keys → DateComponents
+        /// Convert map keys → DateComponents
         func allDateComponents() -> [DateComponents] {
             parent.activityMap.keys.compactMap {
                 guard let date = parent.formatter.date(from: $0) else { return nil }
@@ -69,7 +71,7 @@ extension CustomCalendar {
         }
 
         func sizeThatFits(_ proposal: ProposedViewSize, uiView: UICalendarView, context: Context) -> CGSize? {
-            // Return the size the UIKit view actually wants to be
+            /// Return the size the UIKit view actually wants to be
             return uiView.systemLayoutSizeFitting(
                 CGSize(width: proposal.width ?? 300, height: UIView.layoutFittingCompressedSize.height)
             )
@@ -89,8 +91,8 @@ extension CustomCalendar {
             }
 
             // Dot size based on count (optional nice touch)
-            let size: CGFloat = summary.count >= 5 ? 8 :
-                                summary.count >= 3 ? 6 : 4
+            let size: CGFloat = summary.interactions >= 5 ? 8 :
+                                summary.interactions >= 3 ? 6 : 4
 
             let dot = UIView()
             dot.backgroundColor = UIColor.orange

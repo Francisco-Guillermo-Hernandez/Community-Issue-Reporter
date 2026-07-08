@@ -10,6 +10,7 @@ import SwiftUI
 struct StatsCardsView: View {
     @Binding var path: [InsightsNavigation]
     var nameSpace: Namespace.ID
+    var insights: MonthlyInsightsResponse
     
     var body: some View {
         VStack(spacing: .themeSpacing * 2) {
@@ -19,7 +20,7 @@ struct StatsCardsView: View {
 
                     StatCard(
                         description: String(localized: "I've reported"),
-                        title: "50",
+                        title: String(insights.totalReports),
                         trend: String(localized: "Issues this month"),
                         timeframe: ""
                     )
@@ -33,7 +34,7 @@ struct StatsCardsView: View {
                 NavigationLink(value: InsightsNavigation.myPetitions) {
                     StatCard(
                         description: String(localized: "I've created"),
-                        title: "50",
+                        title: String(insights.totalPetitions),
                         trend: String(localized: "Petitions this month"),
                         timeframe: "for the last 6 months"
                     )
@@ -48,7 +49,7 @@ struct StatsCardsView: View {
             HStack {
                 StatCard(
                     description: String(localized: "I've commented on"),
-                    title: "10",
+                    title: String(insights.totalComments),
                     trend: String(localized: "Petitions"),
                     timeframe: "for the last 6 months"
                 )
@@ -56,7 +57,7 @@ struct StatsCardsView: View {
                 
                 StatCard(
                     description: String(localized: "I've signed on"),
-                    title: "100",
+                    title: String(insights.totalSignatures),
                     trend: String(localized: "Incidents"),
                     timeframe: "for the last 6 months"
                 )
@@ -78,7 +79,17 @@ struct StatsCardsView: View {
     NavigationStack(path: $path) {
         ZStack {
             Color.theme.background
-            StatsCardsView(path: $path, nameSpace: nameSpace)
+            StatsCardsView(
+                path: $path,
+                nameSpace: nameSpace,
+                insights: MonthlyInsightsResponse(
+                    totalReports: 0,
+                    totalSignatures: 0,
+                    totalComments: 0,
+                    totalPetitions: 1,
+                    recentActivity: [:]
+                )
+            )
         }
     }
     .navigationDestination(for: InsightsNavigation.self) { destination in

@@ -108,19 +108,23 @@ struct PaginatedResponse<T: Decodable>: Decodable {
 
 struct BasicInfo: Identifiable, Decodable {
     let id: String
-    let ids: [String]
+    let title: String
+    let status: String
 }
 
 struct DaySummary: Decodable {
-    let count: Int
+    let interactions: Int
     let reports: [BasicInfo]
     let signatures: [BasicInfo]
+    let comments: [BasicInfo]
+    let petitions: [BasicInfo]
 }
 
 struct InsightsResponse: Decodable {
     let activityDays: [String: DaySummary]
     let totalReports: Int
     let totalSignatures: Int
+    let data: [String: DaySummary]
 }
 
 struct Notifications: Encodable, Decodable {
@@ -138,4 +142,17 @@ struct AttachMediaResponse: Decodable {
     let name: String
     let status: String
     let key: String
+}
+
+struct MonthlyInsightsResponse: Decodable {
+    let totalReports: Int
+    let totalSignatures: Int
+    let totalComments: Int
+    let totalPetitions: Int
+    let recentActivity: [String: DaySummary]
+}
+
+struct InsightsFilter {
+    var year: String
+    var month: String
 }

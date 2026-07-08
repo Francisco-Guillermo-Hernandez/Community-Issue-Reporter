@@ -48,3 +48,32 @@ func createdAtNow(format: DateFormat) -> String {
             .verbatim(verbatim, timeZone: .current, calendar: .current)
     )
 }
+
+
+func getMonthName() -> String {
+    
+    let englishLocale = Locale(identifier: "en")
+
+    return Date()
+        .formatted(.dateTime.month(.wide)
+        .locale(englishLocale))
+        .lowercased()
+}
+
+func getFullYear() -> String {
+    return  Date()
+        .formatted(.dateTime.year())
+}
+
+
+extension Date {
+    func addingDays(_ days: Int) -> Date {
+        return Calendar.current.date(byAdding: .day, value: days, to: self) ?? self
+    }
+    
+    func reduceDays(_ days: Int) -> Date {
+        return Calendar.current.date(byAdding: .day, value: -days, to: self) ?? self
+    }
+}
+
+

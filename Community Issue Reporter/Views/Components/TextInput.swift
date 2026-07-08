@@ -12,25 +12,13 @@ enum TextInputStatus: String, CaseIterable, Codable {
     case invalid
     case error
     case untouched
-    
-    var color: Color {
-        switch self {
-        case .valid:
-            return .green
-        case .invalid:
-            return .red
-        case .error:
-            return .red
-        case .untouched:
-            return .secondary
-        }
-    }
+    case touched
 }
 
 struct TailwindInputModifier: ViewModifier {
     @Environment(\.colorScheme) var colorScheme
-    var isFocused: Bool
-    var isInvalid: Bool
+    @FocusState.Binding var isFocused: Bool
+    @Binding var isInvalid: Bool
     var isDisabled: Bool
     var axis: Axis
     
@@ -48,7 +36,7 @@ struct TailwindInputModifier: ViewModifier {
             .overlay(
                 shapeMask
                     .stroke(
-                        isInvalid ? Color.theme.destructive : (isFocused ? Color.theme.inputRing : Color.theme.inputBorder),
+                        isInvalid ? (isFocused ? Color.theme.inputRing : Color.theme.inputBorder) : Color.theme.destructive,
                         lineWidth: 1
                     )
             )
@@ -68,7 +56,7 @@ struct TailwindInputModifier: ViewModifier {
 }
 
 extension View {
-    func tailwindInputStyle(isFocused: Bool, isInvalid: Bool, isDisabled: Bool, axis: Axis) -> some View {
+    func tailwindInputStyle(isFocused: FocusState<Bool>.Binding, isInvalid: Binding<Bool>, isDisabled: Bool, axis: Axis) -> some View {
         self.modifier(TailwindInputModifier(isFocused: isFocused, isInvalid: isInvalid, isDisabled: isDisabled, axis: axis))
     }
 }
@@ -100,7 +88,6 @@ struct TextInput: View {
          regex: RegexType = .customPattern("[a-zA-Z0-9,\\u00C0-\\u00FF ]"),
          axis: Axis = .horizontal,
          message: String = "",
-         status: TextInputStatus = .untouched,
          isValid: Binding<Bool>,
          value: Binding<String>,
          disabled: Bool = false
@@ -117,22 +104,35 @@ struct TextInput: View {
         self.regex = regex
         self.axis = axis
         self._message = State(initialValue: message)
-        self._status = State(initialValue: status)
         self._isValid = isValid
         self._value = value
         self.disabled = disabled
+        
+//        preCheck()
+    }
+    
+    
+    func preCheck() {
+        if self.status == .untouched && value == "" {
+            
+            print("check")
+            self.isValid = true
+        }
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: .themeSpacing * 2) { // gap-2
             LabelView(text: label, isDisabled: disabled)
-                
+            
             TextField(name, text: $value, prompt: promptView, axis: axis)
                 .focused($isFocused)
                 .disabled(disabled)
+                .onChange(of: isFocused) { _, newValue in
+                    status = .touched
+                }
                 .tailwindInputStyle(
-                    isFocused: isFocused,
-                    isInvalid: !isValid,
+                    isFocused: $isFocused,
+                    isInvalid: $isValid,
                     isDisabled: disabled,
                     axis: axis
                 )
@@ -140,13 +140,7 @@ struct TextInput: View {
                 .tint(Color.theme.inputRing) // focus-visible:ring-ring
                 .autocorrectionDisabled()
                 .onChange(of: value) { _, newValue in
-                    let filtered = regex == .email ? newValue : filterValue(newValue)
-                    
-                    if filtered != newValue {
-                        self.value = filtered
-                    }
-                    
-                    validate(filtered)
+                    filter(newValue)
                 }
             
             if !isValid && !message.isEmpty {
@@ -160,6 +154,16 @@ struct TextInput: View {
         .task {
             validate(value)
         }
+    }
+    
+    private func filter(_ newValue: String) {
+        let filtered = regex == .email ? newValue : filterValue(newValue)
+        
+        if filtered != newValue {
+            self.value = filtered
+        }
+        
+        validate(filtered)
     }
     
     private var promptView: Text {

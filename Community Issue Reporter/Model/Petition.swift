@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Observation
 
 enum PostVisibility: String, Codable {
     case hidden
@@ -33,7 +34,8 @@ struct ReportMetadata: Identifiable, Codable {
     let matterToSolveId: Int
 }
 
-struct Petition: Identifiable, Codable, Equatable, Hashable {
+@Observable
+class Petition: Identifiable, Codable, Equatable, Hashable {
     
     static func == (lhs: Petition, rhs: Petition) -> Bool {
         lhs.id == rhs.id

@@ -14,7 +14,7 @@ enum LandingNavigation: Hashable {
 }
 
 struct LandingView: View {
-    @EnvironmentObject var controller: LandingController
+    @Bindable var controller: LandingController
     @EnvironmentObject var appState: AuthViewModel
     
     var body: some View {
@@ -60,7 +60,7 @@ struct LandingView: View {
     @Previewable
     @State var isGuest: Bool = false
     
-    LandingView()
+    @State var controller = LandingController.shared
+    LandingView(controller: controller)
         .environmentObject(AuthViewModel())
-        .environmentObject(LandingController())
 }

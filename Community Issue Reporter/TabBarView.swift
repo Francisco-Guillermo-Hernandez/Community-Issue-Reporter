@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct TabBarView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var settings: SettingsStore
@@ -83,5 +82,4 @@ struct TabBarView: View {
         .environmentObject(AuthViewModel())
         .environmentObject(DeepLinkRouter())
         .environmentObject(SettingsStore())
-        .environmentObject(LandingController())
 }

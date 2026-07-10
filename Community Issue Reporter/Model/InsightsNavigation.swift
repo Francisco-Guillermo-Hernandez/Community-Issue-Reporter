@@ -7,5 +7,5 @@ enum InsightsNavigation: Hashable {
     case activity(date: String)
     case noActivity
     case report(Report)
-    case petition(Petition)
+    case petition(PetitionPost)
 }

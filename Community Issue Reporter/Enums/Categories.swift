@@ -64,3 +64,8 @@ enum Categories: String, CaseIterable, Codable, Equatable {
     }
 
 }
+
+func getCategoryName(id: Int) -> String {
+    return Categories.allCases.first(where: { $0.identifier == id })?.title
+    ?? "Unknown"
+}

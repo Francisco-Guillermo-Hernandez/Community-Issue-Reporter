@@ -6,16 +6,18 @@
 //
 
 import SwiftUI
-internal import Combine
+import Observation
+
 
 @MainActor
-final class MyReportsController: ObservableObject {
-    @Published var reports: [Report] = []
-    @Published var showDeleteAlert: Bool = false
-    @Published var elementToDelete: IndexSet = []
-    @Published var reportToDelete: Report? = nil
-    @Published var refreshID = UUID()
-    @Published var isLoading: Bool = false
+@Observable
+final class MyReportsController {
+    var reports: [Report] = []
+    var showDeleteAlert: Bool = false
+    var elementToDelete: IndexSet = []
+    var reportToDelete: Report? = nil
+    var refreshID = UUID()
+    var isLoading: Bool = false
     
     let model = ReportDataModel.shared
     

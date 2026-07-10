@@ -6,21 +6,23 @@
 //
 
 import SwiftUI
-internal import Combine
+import Observation
 
 @MainActor
-class LandingController: ObservableObject {
-    @Published var presentAlert: Bool = false
-    @Published var message: String = ""
-    @Published var path: [LandingNavigation] = []
-    @Published var isGuest: Bool = false
-    @Published var isLoggedIn: Bool = false
-    @Published var isCheckingStatus: Bool = false
-    @Published var userOAuthState: UserOAuthResultState = .unowned
-    @Published var selectedCity: FriendlyCityDistribution
+@Observable
+final class LandingController {
     
-    @Published var countryCode: CountryCode = .SV
+    static var shared = LandingController()
     
+    var presentAlert: Bool = false
+    var message: String = ""
+    var path: [LandingNavigation] = []
+    var isGuest: Bool = false
+    var isLoggedIn: Bool = false
+    var isCheckingStatus: Bool = false
+    var userOAuthState: UserOAuthResultState = .unowned
+    var selectedCity: FriendlyCityDistribution
+    var countryCode: CountryCode = .SV
     private var settings: SettingsStore?
     var profile: ProfileDataModel
     init() {

@@ -34,21 +34,7 @@ final class PetitionController {
             disabled: false,
             createdAt: Date(),
             updatedAt: Date(),
-            reportsIds: [],
-            attachments: [],
-            postMetadata: .init(
-                audience: "", 
-                visibility: .draft,
-                countryCode: .SV,
-                language: "es",
-                shareLink: ""
-            ),
-            postPublisher: .init(
-                username: "", 
-                avatar: "",
-                profileId: ""
-            ),
-            reportsMetadata: []
+            reportsIds: []
         )
         
         stepperAction = ""

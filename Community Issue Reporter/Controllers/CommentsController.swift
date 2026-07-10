@@ -6,25 +6,26 @@
 //
 
 import SwiftUI
-internal import Combine
+import Observation
 
 @MainActor
-final class CommentsController: ObservableObject {
+@Observable
+final class CommentsController {
+    
     let commentFor: CommentForType
     let resourceId: String
-    
-    @Published var commentInput: String = ""
-    @Published var comments: [Comment] = []
-    @Published var disableInput: Bool = false
-    @Published var isLoading: Bool = false
-    @Published var currentPage: Int = 1
-    @Published var canLoadMore: Bool = true
-    @Published var isSubmitting: Bool = false
-    @Published var paginatedResult: PaginatedResponse<Comment>
-    @Published var limit: Int = 16
-    @Published var animateInputIn: Bool = false
-    @Published var presentAlert: Bool = false
-    @Published var message: String = ""
+    var commentInput: String = ""
+    var comments: [Comment] = []
+    var disableInput: Bool = false
+    var isLoading: Bool = false
+    var currentPage: Int = 1
+    var canLoadMore: Bool = true
+    var isSubmitting: Bool = false
+    var paginatedResult: PaginatedResponse<Comment>
+    var limit: Int = 16
+    var animateInputIn: Bool = false
+    var presentAlert: Bool = false
+    var message: String = ""
     
     init(commentFor: CommentForType, resourceId: String) {
         self.commentFor = commentFor
@@ -98,7 +99,6 @@ final class CommentsController: ObservableObject {
             )
             
             if let newComments = result.documents {
-                // Keep the exact same print statement from the original view logic
                 print("load more")
                 dump(newComments)
             }

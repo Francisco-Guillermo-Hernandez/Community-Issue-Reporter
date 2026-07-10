@@ -12,7 +12,7 @@ import Observation
 @Observable
 final class SignRequestController {
     
-    var petitions: [Petition] = []
+    var petitions: [PetitionPost] = []
     private(set) var isLoading: Bool = false
     
     private(set) var currentPage: Int = 1
@@ -37,11 +37,8 @@ final class SignRequestController {
     var strokes: [SignatureLine] = []
     
     var users: [User] = [
-        User(username: "janeDoe", avatar: "user", profileId: ""),
-        User(username: "mayDoe", avatar: "user", profileId: ""),
-        User(username: "mperez", avatar: "user", profileId: ""),
+       User(names: "", userName: "", profilePicture: "", profileId: "")
     ]
-    
     
     func fetchPetitions(reset: Bool = false) async {
         if reset {
@@ -71,12 +68,12 @@ final class SignRequestController {
         print(locator)
         
         self.petitions = [
-            Petition(
+            PetitionPost(
                 id: "1",
                 title: "Recarpet of big potholes on the road  ",
                 description: "Several potholes must be recarpeted",
-                targetSignatures: 22,
-                currentSignatures: 0,
+                targetSignatures: 100,
+                currentSignatures: 10,
                 categoryId: 4,
                 statusId: 1,
                 reportedBy: UUID(
@@ -94,15 +91,17 @@ final class SignRequestController {
                     "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
                 ],
                 postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(username: "", avatar: "", profileId: "")
+                postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
+                postSigners: .init(),
+                progress: 10.0
             ),
             
-            Petition(
+            PetitionPost(
                 id: "2",
                 title: "Un semaforo no esta funcionando en la avenida",
                 description: "Un semaforo esta funcionando mal",
-                targetSignatures: 22,
-                currentSignatures: 0,
+                targetSignatures: 200,
+                currentSignatures: 20,
                 categoryId: 4,
                 statusId: 1,
                 reportedBy: UUID(
@@ -120,14 +119,16 @@ final class SignRequestController {
                     "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
                 ],
                 postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(username: "", avatar: "", profileId: "")
+                postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
+                postSigners: .init(),
+                progress: 10.0
             ),
-            Petition(
+            PetitionPost(
                 id: "3",
                 title: "Hay una fuga de agua en la colonia",
-                description: "",
-                targetSignatures: 22,
-                currentSignatures: 0,
+                description: "Demo demo demo demo",
+                targetSignatures: 300,
+                currentSignatures: 30,
                 categoryId: 4,
                 statusId: 1,
                 reportedBy: UUID(
@@ -145,7 +146,9 @@ final class SignRequestController {
                     "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
                 ],
                 postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(username: "", avatar: "", profileId: "")
+                postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
+                postSigners: .init(hasCurrentUserSigned: true),
+                progress: 10.0
             ),
         ]
         
@@ -184,5 +187,21 @@ final class SignRequestController {
 //        )
         
         isLoading = false
+    }
+    
+    func getSelectedIndex(_ petition: PetitionPost) -> Int {
+        petitions.firstIndex(where: {
+                $0.id == petition.id
+            }
+        ) ?? 0
+    }
+    
+    func formatSigners(for petition: PetitionPost) -> String {
+        
+        if petition.postSigners.hasCurrentUserSigned {
+            return String(format: "%d citizens and you have signed", petition.currentSignatures)
+        }
+        
+        return String(format: "%d citizens have signed", petition.currentSignatures)
     }
 }

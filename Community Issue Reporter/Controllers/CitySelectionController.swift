@@ -6,23 +6,24 @@
 //
 
 import SwiftUI
-internal import Combine
+import Observation
 
 @MainActor
-final class CitySelectionController: ObservableObject {
+@Observable
+final class CitySelectionController {
     let countryCode: CountryCode
     
-    @Published var page: Int = 1
-    @Published var friendlyCities: FriendlyCities = .init(
+    var page: Int = 1
+    var friendlyCities: FriendlyCities = .init(
         documents: [],
         hasNext: false,
         hasPrev: false
     )
-    @Published var searchText: String = ""
-    @Published var isLoading: Bool = false
-    @Published var isSearchActive: Bool = false
-    @Published var searchOptionsSelection: CityFilter = .city
-    @Published var triggerFeedBack: Bool = false
+    var searchText: String = ""
+    var isLoading: Bool = false
+    var isSearchActive: Bool = false
+    var searchOptionsSelection: CityFilter = .city
+    var triggerFeedBack: Bool = false
     
     init(countryCode: CountryCode) {
         self.countryCode = countryCode
@@ -70,7 +71,10 @@ final class CitySelectionController: ObservableObject {
     }
     
     func performSearch() async {
-        try? await Task.sleep(for: .milliseconds(450))
+        
+        print("searching")
+        
+//        try? await Task.sleep(for: .milliseconds(450))
         if searchOptionsSelection == .legal { await fetchCitiesByGroupingName() }
         if searchOptionsSelection == .city  { await fetchByCityName() }
         if searchOptionsSelection == .state { await fetchCitiesByStateName() }

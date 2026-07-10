@@ -7,15 +7,18 @@
 
 import Foundation
 internal import Combine
+import Observation
+
 
 @MainActor
-class ReportController: ObservableObject {
+@Observable
+class ReportController {
     
-    @Published var reportId: String = ""
-    @Published var isLoading: Bool = false
-    @Published var presentAlert: Bool = false
-    @Published var alertMessage: String = ""
-    @Published var shareableLink: String = ""
+    var reportId: String = ""
+    var isLoading: Bool = false
+    var presentAlert: Bool = false
+    var alertMessage: String = ""
+    var shareableLink: String = ""
     
     func startRePorting(_ model: ReportDataModel) async {
         do {

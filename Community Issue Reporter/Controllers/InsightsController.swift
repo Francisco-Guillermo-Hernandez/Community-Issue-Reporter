@@ -13,7 +13,6 @@ import Observation
 final class InsightsController {
     
     var navigationPath: [InsightsNavigation] = []
-    
     private(set) var insights: MonthlyInsightsResponse = .init(totalReports: 0, totalSignatures: 0, totalComments: 0, totalPetitions: 0, recentActivity: [:])
     private(set) var isLoading: Bool = false
     private(set) var message: String = ""

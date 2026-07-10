@@ -15,39 +15,34 @@ final class PetitionRepository {
         self.service = PetitionsService()
     }
 
-    func list(
-        q: PaginatedRequestQueryParams,
-        locator: Locator,
-        onComplete: @escaping (PaginatedResponse<Petition>) -> Void,
-        onError: @escaping (Error) -> Void
-    ) async {
+    func list(q: PaginatedRequestQueryParams, locator: Locator) async throws -> PaginatedResponse<PetitionPost> {
         do {
 
-            let l = LocatorHeaders(headers: [
+            return try await self.service.fetchPetitions(q, LocatorHeaders(headers: [
                 HTTPHeader(name: "CountryCode", content: locator.countryCode),
                 HTTPHeader(name: "SecondLevel", content: locator.secondLevel),
                 HTTPHeader(name: "ThirdLevel", content: locator.thirdLevel),
-            ])
+            ]))
             
-            let result = try await self.service.fetchPetitions(q, l)
-            onComplete(result)
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
 
-    func create(
-        _ petition: Petition,
-        onComplete: @escaping (GenericResponse) -> Void,
-        onError: @escaping (Error) -> Void
-    ) async {
+    func create(_ petition: Petition) async throws -> SuccessfulResult {
         do {
             let result = try await self.service.createPetition(
                 petition: petition
             )
-            onComplete(result)
+           
+            if result.code == "PETITION_CREATED" {
+                return .created
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.message)
+            }
+            
         } catch {
-            onError(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     

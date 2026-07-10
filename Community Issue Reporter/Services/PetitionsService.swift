@@ -14,7 +14,7 @@ struct PetitionsService {
         self.client = client
     }
     
-    func fetchPetitions(_ q: PaginatedRequestQueryParams, _ l: LocatorHeaders) async throws -> PaginatedResponse<Petition> {
+    func fetchPetitions(_ q: PaginatedRequestQueryParams, _ l: LocatorHeaders) async throws -> PaginatedResponse<PetitionPost> {
         return try await self.client.get(path: "petitions/", query: q, headers: l.headers, withOAuth: true)
     }
     

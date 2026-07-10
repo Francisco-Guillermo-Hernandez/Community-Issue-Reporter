@@ -10,6 +10,7 @@ import SwiftMsgpack
 
 ///
 enum HttpMethod: String {
+    case query = "QUERY"
     case get = "GET"
     case post = "POST"
     case put = "PUT"
@@ -30,7 +31,6 @@ enum NetworkState<T> {
     case success(T)
     case failure(Error)
 }
-
 
 ///
 enum ServiceError: Error {
@@ -177,10 +177,12 @@ struct ServiceClient {
     
     private func HTTPErrorHandler(for httpResponse: HTTPURLResponse, with data: Data, request: URLRequest, _ url: URL) throws {
        
-        print("[DEBUG] HTTPErrorHandler: current url: \(url)")
-        print("[DEBUG] HTTPErrorHandler: current response: \(httpResponse.statusCode)")
-        print("[DEBUG] HTTPErrorHandler: current request: \(request.httpMethod!)")
-        
+        #if DEBUG
+            print("[DEBUG] HTTPErrorHandler: current url: \(url)")
+            print("[DEBUG] HTTPErrorHandler: current response: \(httpResponse.statusCode)")
+            print("[DEBUG] HTTPErrorHandler: current request: \(request.httpMethod!)")
+        #else
+        #endif
         let genericResponse = genericResponseDecoder(data, request: request, url)
         
         switch httpResponse.statusCode {
@@ -418,13 +420,6 @@ struct ServiceClient {
         }
         
         try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
-        
-//        guard (200...299).contains(httpResponse.statusCode) else {
-//            if let jsonString = String(data: data, encoding: .utf8) {
-//                print("Error Response Body: \(jsonString)")
-//            }
-//            throw ServiceError.httpStatus(httpResponse.statusCode)
-//        }
         
         return try decode(V.self, from: data)
     }

@@ -24,7 +24,7 @@ struct UserProfileView: View {
     @Environment(\.mySettings) private var settings
     @State private var showSheet = false
     @State private var selectedOption: String = ""
-    @EnvironmentObject var controller: LandingController
+    @State var controller = LandingController.shared
     @State private var profile = ProfileDataModel()
     
     let options: [ProfileOption] = [
@@ -189,7 +189,6 @@ struct UserProfileView: View {
 #Preview {
     UserProfileView()
         .environmentObject(AuthViewModel())
-        .environmentObject(LandingController())
 }
 
 

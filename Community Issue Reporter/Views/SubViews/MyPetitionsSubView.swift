@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PetitionCellView: View {
-    var petition: Petition
+    var petition: PetitionPost
     var body: some View {
         Group {
             HStack {
@@ -34,7 +34,7 @@ struct PetitionCellView: View {
 struct MyPetitionsSubView: View {
     @State private var isLoading: Bool = false
     @State private var refreshID = UUID()
-    @State private var petitions: [Petition] = []
+    @State private var petitions: [PetitionPost] = []
     @State private var page: Int = 1
     //    @State private var model: PetitionDataModel = PetitionDataModel.shared
     @Binding var path: [InsightsNavigation]
@@ -95,21 +95,20 @@ struct MyPetitionsSubView: View {
         let locator: Locator = .init()
         
         let query = PaginatedRequestQueryParams(page: 1, limit: 16)
-        await PetitionRepository.share.list(
-            q: query,
-            locator: locator,
-            onComplete: { result in
+        do {
+            
+           let result = try await PetitionRepository.share.list(q: query, locator: locator)
+            
+            guard let documents = result.documents else { return }
+            petitions = documents
 
-                guard let documents = result.documents else { return }
-                petitions = documents
-
-                isLoading = false
-            },
-            onError: { error in
-                print(error)
-                isLoading = false
-            }
-        )
+           
+            
+        } catch {
+            
+        }
+        
+        isLoading = false
     }
 }
 

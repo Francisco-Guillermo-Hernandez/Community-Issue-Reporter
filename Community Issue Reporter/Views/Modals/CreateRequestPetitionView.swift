@@ -133,24 +133,24 @@ struct CreateRequestPetitionView: View {
                     Button(role: .confirm) {
                         controller.isSubmitting.toggle()
                         
+                       
+                        
                         Task {
                           
-                            await PetitionRepository.share.create(
-                                controller.petition,
-                                onComplete: { result in
+                            do {
+                               _ = try await PetitionRepository.share.create(controller.petition)
                                 
-                                    onCompletion("Petition created", .info)
-                                    dismiss()
-                                    
-                                },
-                                onError: { error in
-                                    onCompletion("Error", .error)
-                                    dismiss()
-                                })
+                                onCompletion("Petition created", .info)
+                                dismiss()
+                                
+                            } catch {
+                                onCompletion("Petition created", .info)
+                                dismiss()
+                            }
                                 
                             controller.isSubmitting.toggle()
                         }
-                        
+//                        
                     } label: {
                         if controller.isSubmitting {
                             ProgressView()

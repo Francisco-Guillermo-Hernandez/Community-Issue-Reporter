@@ -310,7 +310,7 @@ private struct StatusFilterRow: View {
 #Preview {
     NavigationStack {
         ReportsView()
-            .environmentObject(LandingController())
+           
             .environmentObject(AuthViewModel())
             .environmentObject(DeepLinkRouter())
             .environmentObject(SettingsStore())

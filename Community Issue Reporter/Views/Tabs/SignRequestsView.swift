@@ -9,7 +9,7 @@ import SwiftUI
 
 enum SignRequestsViewsDestinations: Hashable {
     case comments(postId: String)
-    case postDetail(of: Petition)
+    case postDetail(of: PetitionPost)
 }
 
 struct SignRequestsView: View {
@@ -24,14 +24,8 @@ struct SignRequestsView: View {
             
             VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 
-                
                 ForEach(controller.petitions) { petition in
-                    EventsOnDay(
-                        petition: petition,
-                        selectedIndex: controller.petitions.firstIndex(where: {
-                            $0.id == petition.id
-                        }) ?? 0
-                    )
+                    EventsOnDay(petition, selectedIndex: controller.getSelectedIndex(petition))
                     //                            .task {
                     //                                if petition.id == petitions.last?.id {
                     //                                    await fetchPetitions()
@@ -59,7 +53,7 @@ struct SignRequestsView: View {
             EmptyView()
         } trailing: {
             
-            HStack(spacing: 16) {
+            HStack(spacing: .themeSpacing * 4) {
                 
                 Button("Add", systemImage: "plus") {
                     controller.showCreateRequestView.toggle()
@@ -205,7 +199,7 @@ struct SignRequestsView: View {
     }
     
     @ViewBuilder
-    func EventsOnDay(petition: Petition, selectedIndex: Int) -> some View {
+    func EventsOnDay(_ petition: PetitionPost, selectedIndex: Int) -> some View {
         
         VStack(alignment: .leading, spacing: .themeSpacing * 4) {
             VStack(alignment: .leading) {
@@ -218,7 +212,7 @@ struct SignRequestsView: View {
                     .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
                         content
                             .opacity(controller.activeSubtitleIndex == selectedIndex ? 0 : 1)
-                            .scaleEffect(controller.activeSubtitleIndex == selectedIndex ? 0.01 : 1, anchor: .top)
+                            .scaleEffect(controller.activeSubtitleIndex == selectedIndex ? 0.02 : 1, anchor: .top)
                     }
                     .onGeometryChange(for: Bool.self) {
                         let offset = $0.frame(in: .scrollView).minY
@@ -252,12 +246,13 @@ struct SignRequestsView: View {
             Divider()
                 .opacity(0.67)
             
-            Gauge(value: controller.value, in: 0...100) {
-                Text(String(localized: "Signatures", comment: "Signatures text at the bottom of the gauge"))
+            Gauge(value: petition.progress, in: 0...100) {
+                Text(String(localized: "Progress", comment: "Signatures text at the bottom of the gauge"))
                     .font(.caption)
                     .fontWeight(.medium)
             } currentValueLabel: {
-                Text("\(Int(controller.value)) %")
+//                Text(petition.percentage)
+                Text("\(petition.percentage) of \(petition.targetSignatures) signatures")
             }
             .gaugeStyle(.accessoryLinearCapacity)
             
@@ -265,8 +260,8 @@ struct SignRequestsView: View {
             VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 HStack(alignment: .top) {
                     Signatories(users: controller.users)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Text("125 signatories")
+                    
+                    Text(controller.formatSigners(for: petition))
                         .font(.caption)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
@@ -276,14 +271,15 @@ struct SignRequestsView: View {
                     .opacity(0.67)
                 
                 PostInteractions(
+                    hasCurrentUserSigned: petition.postSigners.hasCurrentUserSigned,
                     sign: {
                         controller.showSignatureModal.toggle()
                     },
                     comment: {
-                        navigationPath.append(SignRequestsViewsDestinations.comments(postId: "sample"))
+                        navigationPath.append(SignRequestsViewsDestinations.comments(postId: petition.id))
                     },
                     share: {
-                        let shareURL = buildShareURL(for: "7BTheYpPwK1L/report/traffic-light-ou")!
+                        let shareURL = buildShareURL(for: petition.postMetadata.shareLink)!
                         shareFromClosure(item: shareURL)
                     }
                 )
@@ -305,18 +301,6 @@ struct SignRequestsView: View {
     }
 }
 
-
-func getCategoryName(id: Int) -> String {
-    return Categories.allCases.first(where: { $0.identifier == id })?.title
-    ?? "Unknown"
-}
-
 #Preview {
     SignRequestsView()
-}
-
-extension UIDevice {
-    static var isIPad: Bool {
-        UIDevice.current.userInterfaceIdiom == .pad
-    }
 }

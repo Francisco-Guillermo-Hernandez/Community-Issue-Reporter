@@ -123,7 +123,7 @@ struct ReportCellView: View {
 
 // MARK: - sub view
 struct MyReportsSubView: View {
-    @StateObject private var controller = MyReportsController()
+    @State private var controller = MyReportsController()
     @Binding var path: [InsightsNavigation]
     var subViewName: String
     var mode: ViewOptions = .list

@@ -11,7 +11,7 @@ import SwiftUI
 
 // MARK: - View
 struct PetitionDetailView: View {
-    var petition: Petition
+    var petition: PetitionPost
     var offline: Bool = false
     
     var body: some View {
@@ -163,7 +163,7 @@ struct SectionHeader: View {
 #Preview {
 
     @Previewable
-    @State var petition: Petition = .init(
+    @State var petition: PetitionPost = .init(
         id: "",
         title: "Fix those roads, please",
         description: "",
@@ -177,7 +177,9 @@ struct SectionHeader: View {
         updatedAt: Date(),
         reportsIds: [],
         postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-        postPublisher: .init(username: "", avatar: "", profileId: "")
+        postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
+        postSigners: .init(),
+        progress: 10.1,
     )
 
     NavigationStack {

@@ -52,7 +52,7 @@ struct CityCellView: View {
 // MARK: - View
 struct CitySelectionView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var controller: CitySelectionController
+    @State private var controller: CitySelectionController
     
     var mode: CitySelectionMode = .step
     @Binding var selectedCity: FriendlyCityDistribution
@@ -62,18 +62,13 @@ struct CitySelectionView: View {
         self.mode = mode
         self._selectedCity = selectedCity
         self.nextStep = nextStep
-        self._controller = StateObject(wrappedValue: CitySelectionController(countryCode: countryCode))
+        self.controller = CitySelectionController(countryCode: countryCode)
     }
 
     var body: some View {
         VStack {
             ScrollView(.vertical) {
                 LazyVStack(spacing: .themeSpacing * 4) {
-
-                    if controller.isLoading {
-                        ProgressView()
-                            .containerRelativeFrame(.vertical)
-                    }
 
                     if controller.cities.isEmpty && !controller.isLoading {
                         /// No content state

@@ -9,16 +9,15 @@ import SwiftUI
 import CoreLocation
 
 struct CommentsSectionView: View {
-    @StateObject private var controller: CommentsController
+    @State private var controller: CommentsController
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @FocusState private var isTextFieldFocused: Bool
     @State private var title: String
     @State private var subtitle: String
     
-    init(for commentFor: CommentForType, with resourceId: String, title: String, subtitle: String) {
-        _controller = StateObject(wrappedValue: CommentsController(commentFor: commentFor, resourceId: resourceId))
-        
+    init(for commentFor: CommentForType, with resourceId: String, title: String, subtitle: String) {        
+        controller = CommentsController(commentFor: commentFor, resourceId: resourceId)
         self.title = title
         self.subtitle = subtitle
     }

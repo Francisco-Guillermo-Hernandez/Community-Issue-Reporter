@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    @StateObject var controller: LandingController = .init()
+    @State private var controller = LandingController.shared
     @EnvironmentObject var settings: SettingsStore
     
     var body: some View {
@@ -16,10 +16,8 @@ struct WelcomeView: View {
             
             if controller.isLoggedIn || controller.isGuest {
                 TabBarView()
-                    .environmentObject(controller)
             } else {
-                LandingView()
-                    .environmentObject(controller)
+                LandingView(controller: controller)
             }
         }
         .task {
@@ -32,5 +30,5 @@ struct WelcomeView: View {
 #Preview {
     WelcomeView()
         .environmentObject(AuthViewModel())
-        .environmentObject(LandingController())
+        .environmentObject(SettingsStore())
 }

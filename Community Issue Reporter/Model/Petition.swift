@@ -34,16 +34,18 @@ struct ReportMetadata: Identifiable, Codable {
     let matterToSolveId: Int
 }
 
+struct PostSigners: Decodable {
+    var hasCurrentUserSigned: Bool
+    let latestsSigners: [User]
+    
+    init(hasCurrentUserSigned: Bool = false, latestsSigners: [User] = []) {
+        self.hasCurrentUserSigned = hasCurrentUserSigned
+        self.latestsSigners = latestsSigners
+    }
+}
+
 @Observable
-class Petition: Identifiable, Codable, Equatable, Hashable {
-    
-    static func == (lhs: Petition, rhs: Petition) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
+class Petition: Codable {
     var id: String?
     var title: String
     var description: String
@@ -56,13 +58,9 @@ class Petition: Identifiable, Codable, Equatable, Hashable {
     var createdAt: Date?
     var updatedAt: Date?
     var reportsIds: [String]
-    var attachments: [Attachment]
-    let postMetadata: PostMetadata
-    let postPublisher: User
-    let reportsMetadata: [ReportMetadata]
     
     init(
-        id: String?,
+        id: String? = nil,
         title: String,
         description: String,
         targetSignatures: Int,
@@ -74,10 +72,70 @@ class Petition: Identifiable, Codable, Equatable, Hashable {
         createdAt: Date?,
         updatedAt: Date?,
         reportsIds: [String] = [],
+    ) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.targetSignatures = targetSignatures
+        self.currentSignatures = currentSignatures
+        self.categoryId = categoryId
+        self.statusId = statusId
+        self.reportedBy = reportedBy
+        self.disabled = disabled
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.reportsIds = reportsIds
+    }
+}
+
+class PetitionPost: Identifiable, Decodable, Equatable, Hashable {
+    
+    static func == (lhs: PetitionPost, rhs: PetitionPost) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    var id: String
+    let title: String
+    let description: String
+    let targetSignatures: Int
+    let currentSignatures: Int
+    let categoryId: Int
+    let statusId: Int
+    let reportedBy: UUID?
+    let disabled: Bool
+    let createdAt: Date
+    let updatedAt: Date?
+    let reportsIds: [String]
+    let attachments: [Attachment]
+    let postMetadata: PostMetadata
+    let postPublisher: User
+    let reportsMetadata: [ReportMetadata]
+    let postSigners: PostSigners
+    let progress: Double
+    
+    init(
+        id: String,
+        title: String,
+        description: String,
+        targetSignatures: Int,
+        currentSignatures: Int,
+        categoryId: Int,
+        statusId: Int,
+        reportedBy: UUID?,
+        disabled: Bool,
+        createdAt: Date,
+        updatedAt: Date?,
+        reportsIds: [String] = [],
         attachments: [Attachment] = [],
         postMetadata: PostMetadata,
         postPublisher: User,
-        reportsMetadata: [ReportMetadata] = []
+        reportsMetadata: [ReportMetadata] = [],
+        postSigners: PostSigners,
+        progress: Double,
     ) {
         self.id = id
         self.title = title
@@ -95,6 +153,8 @@ class Petition: Identifiable, Codable, Equatable, Hashable {
         self.postMetadata = postMetadata
         self.postPublisher = postPublisher
         self.reportsMetadata = reportsMetadata
+        self.postSigners = postSigners
+        self.progress = progress
     }
 }
 
@@ -130,7 +190,35 @@ extension Petition {
         set {
             self.targetSignatures = newValue
         }
+    }
+}
+
+extension PetitionPost {
+    var category: Categories {
         
+        get {
+            Categories.allCases.first(where: { $0.identifier == self.categoryId }) ?? .emergency
+        }
+    }
+    
+    var status: IssueStatus {
+        get {
+            IssueStatus.allCases.first(where: { $0.identifier == self.statusId }) ?? .inProgress
+        }
+    }
+    
+    var updateSignatures: Int {
+        
+        get {
+            self.targetSignatures
+        }
         
     }
+    
+    var percentage: String {
+        get {
+            String(format: "%.2f%%", self.progress)
+        }
+    }
+    
 }

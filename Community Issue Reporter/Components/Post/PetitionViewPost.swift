@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct PetitionViewPost: View {
-    var petition: Petition
+    var petition: PetitionPost
+    @State private var opacity: Double = 0.85
     @State private var photos: [PhotoSample] = [
         PhotoSample(id: "1", photo: "a", published: Date(), user: "Jane Doe"),
         PhotoSample(id: "2", photo: "b", published: Date(), user: "John Smith"),
@@ -35,7 +36,7 @@ struct PetitionViewPost: View {
                 VStack(alignment: .leading) {
                     Text(String(localized: "Category", comment: "Category text at petition list"))
                         .font(.caption)
-                        .opacity(0.85)
+                        .opacity(opacity)
                     
                     Text(getCategoryName(id: petition.categoryId))
                         .font(.caption)
@@ -46,7 +47,7 @@ struct PetitionViewPost: View {
                 VStack(alignment: .leading) {
                     Text(String(localized: "Status", comment: "Status text at petition list"))
                         .font(.caption)
-                        .opacity(0.85)
+                        .opacity(opacity)
                     
                     Text(petition.status.title)
                         .font(.caption)
@@ -59,6 +60,7 @@ struct PetitionViewPost: View {
             VStack {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHGrid(rows: gridColumns, spacing: .themeSpacing * 4) {
+                       
                         ForEach(photos, id: \.id) { photo in
                             
                             Image(photo.photo)
@@ -80,10 +82,12 @@ struct PetitionViewPost: View {
                                         style: .continuous
                                     )
                                 )
+                                .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
                         }
                     }
                 }
                 .scrollClipDisabled()
+               
             }
             .frame(maxHeight: 200)
             
@@ -92,7 +96,7 @@ struct PetitionViewPost: View {
 }
 
 #Preview {
-    let petition = Petition(
+    let petition = PetitionPost(
         id: "3",
         title: "Hay una fuga de agua en la colonia",
         description: "",
@@ -115,8 +119,14 @@ struct PetitionViewPost: View {
             "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
         ],
         postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-        postPublisher: .init(username: "", avatar: "", profileId: "")
+        postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
+        postSigners: .init(),
+        progress: 10.1
     )
     
-    PetitionViewPost(petition: petition)
+    ScrollView {
+        PetitionViewPost(petition: petition)
+            .containerRelativeFrame(.vertical)
+    }
+    .background(Color.theme.background)
 }

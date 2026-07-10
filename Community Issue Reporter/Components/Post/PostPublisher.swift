@@ -7,22 +7,21 @@
 
 import SwiftUI
 
-struct UserProfile {
+struct UserProfile: Decodable {
     let username: String?
     let avatar: URL?
     let email: String?
     let profileId: String
 }
 
-struct User: Codable {
-    let username: String
-    let avatar: String
+struct User: Decodable {
+    let names: String
+    let userName: String
+    let profilePicture: String
     let profileId: String
     
-    init(username: String, avatar: String, profileId: String) {
-        self.username = username
-        self.avatar = avatar
-        self.profileId = profileId
+    var profilePictureURL: URL? {
+        URL(string: profilePicture)
     }
 }
 
@@ -88,5 +87,10 @@ struct PostPublisher: View {
 }
 
 #Preview {
-    PostPublisher()
+    ScrollView {
+        PostPublisher()
+            .padding(.horizontal)
+            .containerRelativeFrame(.vertical)
+    }
+    .background(Color.theme.background)
 }

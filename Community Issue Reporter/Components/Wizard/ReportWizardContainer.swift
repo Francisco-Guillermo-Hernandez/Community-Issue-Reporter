@@ -18,7 +18,7 @@ struct ReportWizardContainer: View {
     
     @State private var uploadTrackers: [PhotoUploadTracker] = []
     @State private var doneTrigger: Bool = false
-    @StateObject private var controller: ReportController
+    @State private var controller: ReportController
     
     var showCancelButton: Bool = false
     var onCompletion: (String, AlertType) -> Void
@@ -27,7 +27,7 @@ struct ReportWizardContainer: View {
         self.model = model
         self.onCompletion = onCompletion
         self.showCancelButton = showCancelButton
-        self._controller = StateObject(wrappedValue: ReportController())
+        self.controller = ReportController()
     }
     
     var body: some View {

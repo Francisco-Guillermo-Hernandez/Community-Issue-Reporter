@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct PostInteractions: View {
+    var hasCurrentUserSigned: Bool = false
     var sign: () -> Void
     var comment: () -> Void
     var share: () -> Void
@@ -16,6 +17,7 @@ struct PostInteractions: View {
             Button(action: sign) {
                 Image(systemName: "signature")
                     .font(.title2)
+                    .foregroundStyle(hasCurrentUserSigned ? Color.theme.primary : .primary)
                     .fontWeight(.bold)
                     .frame(width: 60, height: 40)
                     .background(Color.black.opacity(0.001))
@@ -61,4 +63,8 @@ struct PostInteractions: View {
 
 #Preview {
     PostInteractions(sign: {}, comment: {}, share: {})
+}
+
+#Preview("Signed") {
+    PostInteractions(hasCurrentUserSigned: true, sign: {}, comment: {}, share: {})
 }

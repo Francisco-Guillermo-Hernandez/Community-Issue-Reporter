@@ -13,6 +13,7 @@ enum IssueStatus: String, CaseIterable, Identifiable {
     case inProgress = "arrow.trianglehead.2.clockwise.rotate.90"
     case petitionToSign = "signature"
     case fixed = "wrench.and.screwdriver"
+    case assigned = "person.badge.plus"
     
     var id: String { self.rawValue }
     
@@ -25,6 +26,7 @@ enum IssueStatus: String, CaseIterable, Identifiable {
             case .inProgress: return String(localized: "In Progress")
             case .petitionToSign: return String(localized: "Petition to Sign")
             case .fixed: return String(localized: "Fixed")
+            case .assigned: return String(localized: "Assigned")
         }
     }
     
@@ -35,21 +37,24 @@ enum IssueStatus: String, CaseIterable, Identifiable {
             case .fixed: return .blue
             case .petitionToSign: return .purple
             case .confirmed: return .green
+            case .assigned: return .yellow
         }
     }
     
     var identifier: Int {
         switch self {
-        case .reported:
-            return 1
-        case .confirmed:
-            return 2
-        case .inProgress:
-            return 3
-        case .petitionToSign:
-            return 4
-        case .fixed:
-            return 5
+            case .reported:
+                return 1
+            case .confirmed:
+                return 2
+            case .inProgress:
+                return 3
+            case .petitionToSign:
+                return 4
+            case .fixed:
+                return 5
+            case .assigned:
+                return 6
         }
     }
 }

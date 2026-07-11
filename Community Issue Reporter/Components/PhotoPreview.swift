@@ -9,12 +9,18 @@ import SwiftUI
 
 struct PhotoPreview: View {
     @State private var cornerRadius: CGFloat = .themeRadius * 1.4
-    @State private var height: CGFloat = 160
-    @State private var width: CGFloat = 160
+    var height: CGFloat = 160
+    var width: CGFloat = 160
     
     var attachment: PreviewAttachment
     
     init(_ attachment: PreviewAttachment) { self.attachment = attachment }
+    
+    init (_ attachment: PreviewAttachment, height: CGFloat, width: CGFloat) {
+        self.attachment = attachment
+        self.height = height
+        self.width = width
+    }
     
     var body: some View {
         if let url = attachment.url {

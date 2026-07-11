@@ -17,7 +17,7 @@ class DeepLinkRouter: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var message: String = ""
     @Published var report: MapExplorerReport = .init(id: "", lat: 0, lng: 0, address: "", title: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAtRaw: 0, cellIndex: "", createdAtRaw: 0, updatedAtRaw: 0, reportedBy: "", cityId: "", petitionId: "", shareUrl: "",
-                                                     attachments: [])
+                                                     attachments: [], assignedTo: nil)
     @Published var presentAlert: Bool = false
     @Published var isReadyToRoute: Bool = false
     

@@ -30,6 +30,7 @@ struct MapExplorerReport: Identifiable, Decodable, Hashable {
     let petitionId: String?
     let shareUrl: String
     let attachments: [PreviewAttachment]
+    let assignedTo: String?
     var clLocation: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: lat, longitude: lng)
     }
@@ -91,5 +92,13 @@ extension MapExplorerReport {
     
     var updatedDate: String {
         formatRelativeDate(from: self.updatedAt)
+    }
+    
+    var assignedInstitution: String {
+        if let assignedTo {
+            return assignedTo
+        } else {
+            return String(localized: "Not assigned yet.")
+        }
     }
 }

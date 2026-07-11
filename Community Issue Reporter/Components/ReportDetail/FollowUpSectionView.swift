@@ -8,6 +8,12 @@
 import SwiftUI
 
 struct FollowUpSectionView: View {
+    @State private var opacity: Double = 0.85
+    
+    var report: MapExplorerReport
+    
+    init(for report: MapExplorerReport) { self.report = report }
+    
     var body: some View {
         VStack {
             SectionHeader(title: String(localized: "Follow up"))
@@ -15,24 +21,24 @@ struct FollowUpSectionView: View {
             
             List {
                 NavigationLink(destination:  IssueTimelineView(report: .mockReport)) {
-                  HStack {
-                      Text("Details of the progress")
-                          .font(.caption)
-                          .opacity(0.85)
-                          .fontWeight(.medium)
-                         
-                  }
-              }
+                    HStack {
+                        Text("Details of the progress")
+                            .font(.caption)
+                            .opacity(opacity)
+                            .fontWeight(.medium)
+                        
+                    }
+                }
                 .listRowBackground(Color.clear)
                 
                 HStack {
                     Text("Assigned institution:")
                         .font(.caption)
-                        .opacity(0.85)
+                        .opacity(opacity)
                         .fontWeight(.medium)
-                        
+                    
                     Spacer()
-                    Text("MOP")
+                    Text(report.assignedInstitution)
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
@@ -50,7 +56,7 @@ struct FollowUpSectionView: View {
 
 #Preview {
     ScrollView {
-        FollowUpSectionView()
+        FollowUpSectionView(for: MapExplorerMockedData.shared.report)
     }
     .background(Color.theme.background)
 }

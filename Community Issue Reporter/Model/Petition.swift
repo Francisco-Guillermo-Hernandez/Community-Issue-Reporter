@@ -9,16 +9,51 @@ import Foundation
 import SwiftUI
 import Observation
 
+// MARK: - Enums
+enum Audience: String, Codable {
+    case neighborhood
+    case district
+    case municipality
+    case country
+    
+    var description: String {
+        switch self {
+            case .neighborhood:
+                return String(localized: "Neighborhood")
+            case .district:
+                return String(localized: "District")
+            case .municipality:
+                return String(localized: "Municipality")
+            case .country:
+                return String(localized: "Country")
+        }
+    }
+}
+
 enum PostVisibility: String, Codable {
     case hidden
     case draft
     case published
+    
+    var description: String {
+        switch self {
+            case .hidden:
+                return String(localized: "Hidden")
+            case .draft:
+                return String(localized: "Draft")
+            case .published:
+                return String(localized: "Published")
+        }
+    }
 }
 
+// MARK: - Structs
 struct PostMetadata: Codable {
     let audience: String
     let visibility: PostVisibility
     let countryCode: CountryCode
+    let city: String
+    let cityId: String
     let language: String
     let shareLink: String
 }
@@ -110,7 +145,7 @@ class PetitionPost: Identifiable, Decodable, Equatable, Hashable {
     let createdAt: Date
     let updatedAt: Date?
     let reportsIds: [String]
-    let attachments: [Attachment]
+    let attachments: [PreviewAttachment]
     let postMetadata: PostMetadata
     let postPublisher: User
     let reportsMetadata: [ReportMetadata]
@@ -130,7 +165,7 @@ class PetitionPost: Identifiable, Decodable, Equatable, Hashable {
         createdAt: Date,
         updatedAt: Date?,
         reportsIds: [String] = [],
-        attachments: [Attachment] = [],
+        attachments: [PreviewAttachment] = [],
         postMetadata: PostMetadata,
         postPublisher: User,
         reportsMetadata: [ReportMetadata] = [],
@@ -157,6 +192,8 @@ class PetitionPost: Identifiable, Decodable, Equatable, Hashable {
         self.progress = progress
     }
 }
+
+// MARK: - Extensions
 
 extension Petition {
     
@@ -218,6 +255,22 @@ extension PetitionPost {
     var percentage: String {
         get {
             String(format: "%.2f%%", self.progress)
+        }
+    }
+    
+    var createdDate: String {
+        get {
+            formatRelativeDate(from: self.createdAt)
+        }
+    }
+    
+    var updatedDate: String? {
+        get {
+            if let updatedAt = self.updatedAt {
+                return formatRelativeDate(from: updatedAt)
+            }
+            
+            return nil
         }
     }
     

@@ -66,27 +66,6 @@ struct BasicInformationView: View {
 }
 
 #Preview {
-    let report = MapExplorerReport(
-        id: "SV-SS-260601-aXWsaxls",
-        lat: 13.701270,
-        lng: -89.224432,
-        address: "Lorem ipsum dolor sit ammet",
-        title: "A big pothole in the middle of the street",
-        description: "There is a big pothole that is affecting our cars",
-        severityId: 1,
-        statusId: 1,
-        issueTypeId: 1,
-        matterToSolveId: 1,
-        reportedAtRaw: nil,
-        cellIndex: "",
-        createdAtRaw: 1780036575602,
-        updatedAtRaw: 1780036575602,
-        reportedBy: "John Doe",
-        cityId: "",
-        petitionId: "",
-        shareUrl: "",
-        attachments: [],
-//                    updatedAt
-    )
-    BasicInformationView(for: report)
+    
+    BasicInformationView(for: MapExplorerMockedData.shared.report)
 }

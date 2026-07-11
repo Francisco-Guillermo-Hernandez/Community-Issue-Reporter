@@ -21,6 +21,9 @@ func buildShareURL(for path: String) -> URL? {
     return Endpoints.shareableURL.appending(path: path)
 }
 
+func getURL(from path: String) -> URL? {
+    return Endpoints.baseURL.appending(path: path)
+}
 
 func buildPreviewAttachmentURL(_ reportContainer: String, _ fileName: String, _ state: ReportAttachmentState, _ updatedAtRaw: Int64? = nil) -> URL? {
     
@@ -53,3 +56,4 @@ func buildPreviewAttachmentURL(_ reportContainer: String, _ fileName: String, _ 
 func urlFromString(_ string: String) -> URL? {
     return URL(string: string)
 }
+

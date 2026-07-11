@@ -10,22 +10,6 @@ import SwiftUI
 struct PetitionViewPost: View {
     var petition: PetitionPost
     @State private var opacity: Double = 0.85
-    @State private var photos: [PhotoSample] = [
-        PhotoSample(id: "1", photo: "a", published: Date(), user: "Jane Doe"),
-        PhotoSample(id: "2", photo: "b", published: Date(), user: "John Smith"),
-        PhotoSample(
-            id: "3",
-            photo: "c",
-            published: Date(),
-            user: "Michael Brown"
-        ),
-        PhotoSample(
-            id: "4",
-            photo: "d",
-            published: Date(),
-            user: "Emily Davis"
-        ),
-    ]
     
     var body: some View {
         
@@ -60,29 +44,8 @@ struct PetitionViewPost: View {
             VStack {
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHGrid(rows: gridColumns, spacing: .themeSpacing * 4) {
-                       
-                        ForEach(photos, id: \.id) { photo in
-                            
-                            Image(photo.photo)
-                                .resizable()
-                                .frame(
-                                    maxWidth: .infinity,
-                                    alignment: .topLeading
-                                )
-                                .aspectRatio(4 / 3, contentMode: .fill)
-                                .clipShape(
-                                    RoundedRectangle(
-                                        cornerRadius: .themeRadius,
-                                        style: .continuous
-                                    )
-                                )
-                                .contentShape(
-                                    RoundedRectangle(
-                                        cornerRadius: .themeRadius,
-                                        style: .continuous
-                                    )
-                                )
-                                .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+                        ForEach(petition.attachments, id: \.id) { attachment in
+                            PhotoPreview(attachment, height: 200, width: 200)
                         }
                     }
                 }
@@ -96,36 +59,10 @@ struct PetitionViewPost: View {
 }
 
 #Preview {
-    let petition = PetitionPost(
-        id: "3",
-        title: "Hay una fuga de agua en la colonia",
-        description: "",
-        targetSignatures: 22,
-        currentSignatures: 0,
-        categoryId: 4,
-        statusId: 1,
-        reportedBy: UUID(
-            uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-        ),
-        disabled: false,
-        createdAt: Date(timeIntervalSince1970: 799056444.493906),
-        updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-        reportsIds: [
-            "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-            "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-            "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-            "e6e67b15-15d7-4523-a85b-cd199d32117e",
-            "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-            "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-        ],
-        postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-        postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
-        postSigners: .init(),
-        progress: 10.1
-    )
+    
     
     ScrollView {
-        PetitionViewPost(petition: petition)
+        PetitionViewPost(petition: PetitionsPostMockedData.shared.petitions[0])
             .containerRelativeFrame(.vertical)
     }
     .background(Color.theme.background)

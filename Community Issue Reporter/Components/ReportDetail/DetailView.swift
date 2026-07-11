@@ -116,7 +116,7 @@ struct DetailView: View {
                     EvidenceOfTheReportView(report.attachments, id: report.id)
 
                     ///
-                    FollowUpSectionView()
+                    FollowUpSectionView(for:  report)
                     
                     ///
                     MoreInformationView(report: report)
@@ -246,37 +246,11 @@ func getMatterToSolve(id: Int) -> String {
         Button("Open"){
             isPresented.toggle()
         }
-            .sheet(isPresented: $isPresented) {
-                let report = MapExplorerReport(
-                    id: "SV-SS-260601-aXWsaxls",
-                    lat: 13.701270,
-                    lng: -89.224432,
-                    address: "Lorem ipsum dolor sit ammet",
-                    title: "A big pothole in the middle of the street",
-                    description: "There is a big pothole that is affecting our cars",
-                    severityId: 1,
-                    statusId: 1,
-                    issueTypeId: 1,
-                    matterToSolveId: 1,
-                    reportedAtRaw: nil,
-                    cellIndex: "",
-                    createdAtRaw: 1780036575602,
-                    updatedAtRaw: 1780036575602,
-                    reportedBy: "john.doe",
-                    cityId: "",
-                    petitionId: "",
-                    shareUrl: "",
-                    attachments: [
-                        PreviewAttachment(id: "24b93d66-07ff-4141-91ce-408b615123c3", type: .image, createdAtRaw: 0, updatedAtRaw: 0, uploaderUserName: "jhon.doe", validatedBy: .bot, state: .pending, fileName: "1783058838224-f02fb5e4-07d1-49d4-a9f5-742816b669c9.webp", reportContainer: "587d3ac3-0715-4958-8955-1d6d29a3d489"),
-                        
-                        PreviewAttachment(id: "06d3df5f-ef2a-43c0-bd40-5125a12fe284", type: .image, createdAtRaw: 0, updatedAtRaw: 0, uploaderUserName: "jhon.doe", validatedBy: .bot, state: .pending, fileName: "1783058837989-ab7a054b-7d99-4137-b9f9-ded39ce7732f.webp", reportContainer: "587d3ac3-0715-4958-8955-1d6d29a3d489")
-                    ],
-//                    updatedAt
-                )
-
-                DetailView(report: report)
-                    .skeleton(isRedacted: isLoading)
+        .sheet(isPresented: $isPresented) {
+               
+            DetailView(report: MapExplorerMockedData.shared.report)
+                .skeleton(isRedacted: isLoading)
                     
-            }
+        }
     }
 }

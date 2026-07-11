@@ -36,10 +36,7 @@ final class SignRequestController {
     var selectedItem: Int?
     var strokes: [SignatureLine] = []
     
-    var users: [User] = [
-       User(names: "", userName: "", profilePicture: "", profileId: "")
-    ]
-    
+    ///
     func fetchPetitions(reset: Bool = false) async {
         if reset {
             currentPage = 1
@@ -67,92 +64,7 @@ final class SignRequestController {
         
         print(locator)
         
-        self.petitions = [
-            PetitionPost(
-                id: "1",
-                title: "Recarpet of big potholes on the road  ",
-                description: "Several potholes must be recarpeted",
-                targetSignatures: 100,
-                currentSignatures: 10,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ],
-                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
-                postSigners: .init(),
-                progress: 10.0
-            ),
-            
-            PetitionPost(
-                id: "2",
-                title: "Un semaforo no esta funcionando en la avenida",
-                description: "Un semaforo esta funcionando mal",
-                targetSignatures: 200,
-                currentSignatures: 20,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ],
-                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
-                postSigners: .init(),
-                progress: 10.0
-            ),
-            PetitionPost(
-                id: "3",
-                title: "Hay una fuga de agua en la colonia",
-                description: "Demo demo demo demo",
-                targetSignatures: 300,
-                currentSignatures: 30,
-                categoryId: 4,
-                statusId: 1,
-                reportedBy: UUID(
-                    uuidString: "727DD4B3-6372-44A9-BD95-CD779BB5F290"
-                ),
-                disabled: false,
-                createdAt: Date(timeIntervalSince1970: 799056444.493906),
-                updatedAt: Date(timeIntervalSince1970: 799056444.493906),
-                reportsIds: [
-                    "9032fc2b-feee-4bc9-be27-63b2200f2f2c",
-                    "51aec27c-17a3-42f5-94a7-b3e9f54be651",
-                    "1d4049ce-df9c-4a02-ae17-db3ba5ceedbd",
-                    "e6e67b15-15d7-4523-a85b-cd199d32117e",
-                    "d76caf4a-75ef-41b3-a27f-f5e38a894e8e",
-                    "ac90b962-3ea9-405e-8a5b-f99ba3b9439d",
-                ],
-                postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-                postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
-                postSigners: .init(hasCurrentUserSigned: true),
-                progress: 10.0
-            ),
-        ]
-        
-        self.petitions.append(contentsOf: petitions)
+        self.petitions.append(contentsOf: PetitionsPostMockedData.shared.petitions)
         
         
 //        await PetitionRepository.share.list(

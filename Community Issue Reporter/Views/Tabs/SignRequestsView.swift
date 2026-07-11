@@ -25,7 +25,7 @@ struct SignRequestsView: View {
             VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 
                 ForEach(controller.petitions) { petition in
-                    EventsOnDay(petition, selectedIndex: controller.getSelectedIndex(petition))
+                    eventsOnDay(petition, selectedIndex: controller.getSelectedIndex(petition))
                     //                            .task {
                     //                                if petition.id == petitions.last?.id {
                     //                                    await fetchPetitions()
@@ -121,14 +121,14 @@ struct SignRequestsView: View {
                     posts()
                         .navigationDestination(for: SignRequestsViewsDestinations.self) { destination in
                             switch destination {
-                            case .comments(let id):
-                                CommentsSectionView(for: .petition, with: id, title: "", subtitle: "")
-                                    .toolbar(.hidden, for: .tabBar)
+                                case .comments(let id):
+                                    CommentsSectionView(for: .petition, with: id, title: "", subtitle: "")
+                                        .toolbar(.hidden, for: .tabBar)
+                                        
                                     
-                                
-                            case .postDetail(let petition):
-                                PetitionDetailView(petition: petition)
-                                    .toolbar(.hidden, for: .tabBar)
+                                case .postDetail(let petition):
+                                    PetitionDetailView(petition: petition)
+                                        .toolbar(.hidden, for: .tabBar)
                             }
                         }
                     
@@ -199,7 +199,7 @@ struct SignRequestsView: View {
     }
     
     @ViewBuilder
-    func EventsOnDay(_ petition: PetitionPost, selectedIndex: Int) -> some View {
+    func eventsOnDay(_ petition: PetitionPost, selectedIndex: Int) -> some View {
         
         VStack(alignment: .leading, spacing: .themeSpacing * 4) {
             VStack(alignment: .leading) {
@@ -212,7 +212,7 @@ struct SignRequestsView: View {
                     .animation(.smooth(duration: 0.35, extraBounce: 0)) { content in
                         content
                             .opacity(controller.activeSubtitleIndex == selectedIndex ? 0 : 1)
-                            .scaleEffect(controller.activeSubtitleIndex == selectedIndex ? 0.02 : 1, anchor: .top)
+//                            .scaleEffect(controller.activeSubtitleIndex == selectedIndex ? 0.02 : 1, anchor: .top)
                     }
                     .onGeometryChange(for: Bool.self) {
                         let offset = $0.frame(in: .scrollView).minY
@@ -232,9 +232,8 @@ struct SignRequestsView: View {
                 
             }
             
-            
-            PostPublisher()
-            
+            ///
+            PostPublisher(petition: petition)
             
             Button {
                 navigationPath.append(SignRequestsViewsDestinations.postDetail(of: petition))
@@ -246,20 +245,20 @@ struct SignRequestsView: View {
             Divider()
                 .opacity(0.67)
             
+            ///
             Gauge(value: petition.progress, in: 0...100) {
                 Text(String(localized: "Progress", comment: "Signatures text at the bottom of the gauge"))
                     .font(.caption)
                     .fontWeight(.medium)
             } currentValueLabel: {
-//                Text(petition.percentage)
                 Text("\(petition.percentage) of \(petition.targetSignatures) signatures")
             }
             .gaugeStyle(.accessoryLinearCapacity)
             
-            
+            ///
             VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 HStack(alignment: .top) {
-                    Signatories(users: controller.users)
+                    Signatories(users: petition.postSigners.latestsSigners)
                     
                     Text(controller.formatSigners(for: petition))
                         .font(.caption)

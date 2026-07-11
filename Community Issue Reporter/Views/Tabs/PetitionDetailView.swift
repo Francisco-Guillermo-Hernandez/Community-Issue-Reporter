@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-
-
 // MARK: - View
 struct PetitionDetailView: View {
     var petition: PetitionPost
@@ -104,15 +102,7 @@ struct PetitionDetailView: View {
                 
                 /// Comments section
                 SectionHeader(title: "Comments")
-                VStack(spacing: 16) {
-                   
-//                        ForEach(1..<5) { _ in
-//                            CommentRow(name: "Ethan Carter", time: "2d", message: "This pothole is really dangerous! I almost lost control of my car last night...................... demo deo demo demo")
-//                            
-//                            CommentRow(name: "Ethan ", time: "1d", message: "This ")
-//                        }
-                    
-                }
+                
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 32)
@@ -162,27 +152,7 @@ struct SectionHeader: View {
 
 #Preview {
 
-    @Previewable
-    @State var petition: PetitionPost = .init(
-        id: "",
-        title: "Fix those roads, please",
-        description: "",
-        targetSignatures: 100,
-        currentSignatures: 20,
-        categoryId: 1,
-        statusId: 1,
-        reportedBy: UUID(),
-        disabled: false,
-        createdAt: Date(),
-        updatedAt: Date(),
-        reportsIds: [],
-        postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, language: "es", shareLink: ""),
-        postPublisher: .init(names: "", userName: "", profilePicture: "", profileId: ""),
-        postSigners: .init(),
-        progress: 10.1,
-    )
-
     NavigationStack {
-        PetitionDetailView(petition: petition)
+        PetitionDetailView(petition: PetitionsPostMockedData.shared.petitions[0])
     }
 }

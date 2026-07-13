@@ -205,3 +205,23 @@ final class PetitionsPostMockedData {
         ]
     }
 }
+
+final class SelectedMockedCity {
+    
+    static var shared = SelectedMockedCity()
+    
+    var city: FriendlyCityDistribution
+    private init() {
+        city = .init(
+            cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
+            firstLevel: "El Salvador",
+            secondLevel: "San Salvador",
+            thirdLevel: "San Salvador",
+            ZipCode: "1101",
+            legalGroupName: "Distrito de San Salvador",
+            coordinates: .init(lat: 13.701270, lng: -89.224432),
+            isCapitalCity: 1,
+            isDepartmentalCapital: 1
+        )
+    }
+}

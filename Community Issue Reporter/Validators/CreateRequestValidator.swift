@@ -44,6 +44,34 @@ let descriptionValidator: [Validator] = [
     )
 ]
 
+let addressValidator: [Validator] = [
+//    Validator(
+//        name: "Isn't empty",
+//        message: "The address can't be empty",
+//        fn: { !$0.isEmpty }
+//    ),
+    Validator(
+        name: "Isn't too long",
+        message: "The address can't be longer than 200 characters",
+        fn: { $0.count <= 200 }
+    ),
+    Validator(
+        name: "Isn't too short",
+        message: "The address can't be shorter than 5 characters",
+        fn: { $0.count >= 5 }
+    ),
+//    Validator(
+//        name: "Validate address",
+//        message: String(localized: "The address contains invalid characters"),
+//        fn: { value in
+//            let addressRegex = /^[\p{L}0-9\s,.\-#]+$/
+//            return value.wholeMatch(of: addressRegex) != nil
+//        }
+//    )
+]
+
+let addressRegex = "[\\p{L}0-9\\s,.\\-#]"
+
 var emailValidator: [Validator] = [
     Validator(
         name: "Validate email",

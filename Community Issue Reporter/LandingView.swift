@@ -21,7 +21,7 @@ struct LandingView: View {
         NavigationStack(path: $controller.path) {
 
             LoginView() { session, type in
-                controller.handleLogin(for: session, with: type)
+                controller.handleLogin(for: session, with: type, appState)
             }
             .navigationDestination(for: LandingNavigation.self) { destination in
                 switch destination {

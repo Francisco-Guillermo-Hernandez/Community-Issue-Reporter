@@ -15,7 +15,7 @@ struct CardModifier: ViewModifier {
             .background(
                 ZStack {
                     
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous)
                         .fill(.clear)
                     
                     GeometryReader { geo in
@@ -32,8 +32,7 @@ struct CardModifier: ViewModifier {
                     }
                 }
             )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-//            .shadow(color: Color.black.opacity(0.1), radius: 30, x: 0, y: 0)
+            .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
     }
 }
 

@@ -92,6 +92,7 @@ final class ReportDataModel {
     }
     
     func updateCoordinate(_ coordinate: Coordinate) {
+        isDifferentLocation = true
         report.coordinate = coordinate
     }
     

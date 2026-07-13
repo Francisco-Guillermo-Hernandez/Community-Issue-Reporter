@@ -9,8 +9,8 @@ import SwiftUI
 
 struct PhotoPreview: View {
     @State private var cornerRadius: CGFloat = .themeRadius * 1.4
-    var height: CGFloat = 160
-    var width: CGFloat = 160
+    var height: CGFloat = 170
+    var width: CGFloat = 170
     
     var attachment: PreviewAttachment
     

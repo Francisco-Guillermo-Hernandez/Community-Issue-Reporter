@@ -7,6 +7,15 @@
 
 import Foundation
 
+enum ResponsibleEntity: String, Codable {
+    case municipality = "Alcaldía Municipal"
+    case mopFovial = "MOP / FOVIAL"
+    case anda = "ANDA"
+    case vmt = "VMT"
+    case civilProtection = "Protección Civil"
+    case shared = "Alcaldía / MOP"
+}
+
 let mattersToResolve: [MatterToSolve] = [
     MatterToSolve(
         id: 1,
@@ -16,10 +25,11 @@ let mattersToResolve: [MatterToSolve] = [
         description: String(
             localized: "dangerous potholes that cause problems"
         ),
-        issueType: .building,
+        issueType: .road,
         severity: .low,
         image: "matt-hoffman-MQjJHTT-diQ-unsplash",
-        suggestions: ["pothole filling", "pothole repair", "pothole sealing", "pothole excavation", "pothole removal"]
+        suggestions: ["pothole filling", "pothole repair", "pothole sealing", "pothole excavation", "pothole removal"],
+        primaryEntity: .shared
     ),
     MatterToSolve(
         id: 2,
@@ -32,7 +42,8 @@ let mattersToResolve: [MatterToSolve] = [
         issueType: .building,
         severity: .high,
         image: "arun-prakash-p0_6IwEjK98-unsplash",
-        suggestions: ["water leak repair", "water leak sealing"]
+        suggestions: ["water leak repair", "water leak sealing"],
+        primaryEntity: .anda
     ),
     MatterToSolve(
         id: 3,
@@ -42,10 +53,11 @@ let mattersToResolve: [MatterToSolve] = [
         description: String(
             localized: "Missing street sign, damaged, or request to place one"
         ),
-        issueType: .building,
+        issueType: .road,
         severity: .low,
         image: "zoshua-colah-1BEULYOAnio-unsplash",
-        suggestions: ["place a street sign", "change a damaged street sign"]
+        suggestions: ["place a street sign", "change a damaged street sign"],
+        primaryEntity: .vmt
     ),
     MatterToSolve(
         id: 4,
@@ -56,9 +68,10 @@ let mattersToResolve: [MatterToSolve] = [
             localized: "damaged traffic lights, traffic lights that don't work well"
         ),
         issueType: .building,
-        severity: .low,
+        severity: .high,
         image: "eliobed-suarez-PN-YnI5stdQ-unsplash",
-        suggestions: ["replace a damaged traffic light", "place a new traffic light"]
+        suggestions: ["replace a damaged traffic light", "place a new traffic light"],
+        primaryEntity: .vmt
     ),
     MatterToSolve(
         id: 5,
@@ -71,7 +84,8 @@ let mattersToResolve: [MatterToSolve] = [
         issueType: .building,
         severity: .low,
         image: "mukesh-naik-PZK-dEVBF9g-unsplash",
-        suggestions: ["place a new lamp", "replace a damaged lamp", "repair a burned lamp"]
+        suggestions: ["place a new lamp", "replace a damaged lamp", "repair a burned lamp"],
+        primaryEntity: .municipality
     ),
     MatterToSolve(
         id: 6,
@@ -84,7 +98,8 @@ let mattersToResolve: [MatterToSolve] = [
         issueType: .building,
         severity: .medium,
         image: "john-cameron-EVhuJCqYLxM-unsplash",
-        suggestions: ["tree trimming", "tree planting", "tree removal"]
+        suggestions: ["tree trimming", "tree planting", "tree removal"],
+        primaryEntity: .municipality
     ),
     MatterToSolve(
         id: 7,
@@ -94,10 +109,11 @@ let mattersToResolve: [MatterToSolve] = [
         description: String(
             localized: "Flood"
         ),
-        issueType: .building,
+        issueType: .publicSpace,
         severity: .high,
         image: "phillip-flores-38wqGW802RM-unsplash",
-        suggestions: ["retaing flood prone areas", "repair flood damaged structures"]
+        suggestions: ["retaing flood prone areas", "repair flood damaged structures"],
+        primaryEntity: .municipality
     ),
     MatterToSolve(
         id: 8,
@@ -110,6 +126,7 @@ let mattersToResolve: [MatterToSolve] = [
         issueType: .publicSpace,
         severity: .low,
         image: "pixel-shot-kxTwgF_uHow-unsplash",
-        suggestions: ["improve waste collection systems", "increase recycling programs", "promote waste reduction", "organize community clean-ups", "implement recycling incentives", "encourage composting", "provide information on recycling and waste reduction", "request for volunteers to assist with waste management tasks"]
+        suggestions: ["improve waste collection systems", "increase recycling programs", "promote waste reduction", "organize community clean-ups", "implement recycling incentives", "encourage composting", "provide information on recycling and waste reduction", "request for volunteers to assist with waste management tasks"],
+        primaryEntity: .municipality
     )
 ]

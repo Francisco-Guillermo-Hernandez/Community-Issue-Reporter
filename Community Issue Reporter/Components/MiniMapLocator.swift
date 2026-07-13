@@ -14,6 +14,7 @@ struct MiniMapLocator: View {
     @Binding var locator: Locator
     @Environment(\.colorScheme) private var colorScheme
     var onExpandMap: ((Coordinate) -> Void)?
+    var onChange: () -> Void
     @State private var cameraPosition: MapCameraPosition
     @State private var selectedCoordinate: CLLocationCoordinate2D
     @State private var locationManager = LocationManager()
@@ -23,12 +24,14 @@ struct MiniMapLocator: View {
     init(
         coordinate: Binding<Coordinate>,
         locator: Binding<Locator>,
-        onExpandMap: ((Coordinate) -> Void)? = nil
+        onExpandMap: ((Coordinate) -> Void)? = nil,
+        onChange: @escaping @Sendable () -> Void
     ) {
         self._coordinate = coordinate
         self._locator = locator
         self.selectedCoordinate = getLocation(coordinate)
         self.onExpandMap = onExpandMap
+        self.onChange = onChange
         self.cameraPosition = .region(
             MKCoordinateRegion(
                 center: getLocation(coordinate),
@@ -48,6 +51,11 @@ struct MiniMapLocator: View {
                     locationManager.requestAuthorization()
                 }
                 .onChange(of: locationManager.lastLocation) { _, newLocation in
+                }
+                .onMapCameraChange(frequency: .onEnd) { context in
+                    if cameraPosition.positionedByUser {
+                        onChange()
+                    }
                 }
                 .onMapCameraChange { context in
                     selectedCoordinate = context.camera.centerCoordinate
@@ -170,6 +178,9 @@ struct MiniMapLocator: View {
         locator: $locator,
         onExpandMap: { _ in
 //            showMapPickerSheet.toggle()
+        },
+        onChange: {
+            print("user has changed the location,")
         }
     )
 }

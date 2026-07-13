@@ -58,7 +58,7 @@ final class ReportRepository {
         }
     }
     
-    func listByUser(page: Int) async throws -> Reports {
+    func listByUser(page: Int) async throws -> PaginatedResponse<ReportDAO> {
         do {
           
            return try await self.reportsService.fetchReportByUser(

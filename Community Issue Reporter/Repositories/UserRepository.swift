@@ -34,6 +34,8 @@ final class UserRepository {
     }
     
     
+    /// We are going to check if the token generated from the login process is valid
+    /// then we are going to generate a session in response to that login request
     func login(_ token: String) async throws -> (UserOAuthResultState, String, PublicUserData)  {
         do {
         
@@ -55,7 +57,8 @@ final class UserRepository {
         }
     }
     
-    
+    /// We are going to let users to report as a guests
+    /// this feature offers a limited features compared to registered users
     func loginAsGuest() async throws -> (UserOAuthResultState, String) {
         do {
         
@@ -71,10 +74,12 @@ final class UserRepository {
         }
     }
     
+    ///
     func getProfilePicture() -> String {
        return  UserDefaults.standard.string(forKey: "avatar_url") ?? ""
     }
     
+    ///
     func getProfilePictureURL() -> URL? {
         guard let user = GIDSignIn.sharedInstance.currentUser,
               let profile = user.profile,
@@ -85,10 +90,12 @@ final class UserRepository {
         return profile.imageURL(withDimension: 200)
     }
     
+    ///
     func getNames() -> String {
         UserDefaults.standard.string(forKey: "names") ?? "Guest"
     }
     
+    ///
     func getName() -> String {
         guard let user = GIDSignIn.sharedInstance.currentUser,
               let profile = user.profile else {  return getNames() }
@@ -96,18 +103,22 @@ final class UserRepository {
         return profile.name
     }
     
+    ///
     func setNames(_ names: String) -> Void {
         UserDefaults.standard.set(names, forKey: "names")
     }
     
+    ///
     func getUsername() -> String {
         UserDefaults.standard.string(forKey: "user_name") ?? "guest"
     }
     
+    /// Save user name into user defaults
     func setUsername(_ username: String) {
         UserDefaults.standard.set(username, forKey: "user_name")
     }
     
+    /// Save avatar url to user defaults
     func setAvatar(url: String) -> Void {
         UserDefaults.standard.set(url, forKey: "avatar_url")
     }
@@ -206,9 +217,10 @@ final class UserRepository {
         }
     }
     
+    /// Modify notification settings
     func modify(_ notifications: Notifications, completion : @escaping (Result<String, Error>) -> Void) async {
         do {
-            let result = try await self.service.modify(notifications, [])
+            let result = try await self.service.modify(notifications, self.headers)
             
             if result.code == "NOTIFICATIONS_UPDATED" {
                 completion(.success(result.message))
@@ -218,6 +230,7 @@ final class UserRepository {
         }
     }
     
+    /// Updates the state of the landing process
     func completeLandingPage(completion: @escaping () -> Void) async {
         do {
             let result = try await self.service.completeLandingPage()
@@ -249,16 +262,19 @@ final class UserRepository {
         }
     }
     
+    /// Lets check if the user has completed the landing process to not show that process again.
     func userHasCompletedLandingPage() -> Bool {
         let token = KeychainService.getToken(.deviceId)
         return token.contains("completion:state:successfully")
     }
     
+    /// Lets check if user has a valid session
     func isSessionValid() -> Bool {
         let token = KeychainService.getToken(.sessionStateVerification)
         return !token.isEmpty && token.contains("session:state:valid")
     }
     
+    /// Privacy settings to show or hide their profile / userName.
     func privacy(settings: PrivacySettings) async throws {
         do {
             
@@ -278,6 +294,26 @@ final class UserRepository {
         }
     }
     
+    /// Reporting settings are used to identify the preferred city or district to which reports belong.
+    func updateDefaultReporting(_ cityId: String) async throws -> SuccessfulResult {
+        do {
+            let result = try await self.service.defaultReportingCity(DefaultReportingCity(cityId), self.headers)
+            if result.code == "DEFAULT_CITY_UPDATED" {
+                return .updated
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.code)
+            }
+            
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
     
 }
 

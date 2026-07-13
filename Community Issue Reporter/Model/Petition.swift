@@ -123,6 +123,36 @@ class Petition: Codable {
     }
 }
 
+struct PetitionDTO: Codable {
+    let id: String?
+    let title: String
+    let description: String
+    let targetSignatures: Int
+    let currentSignatures: Int?
+    let categoryId: Int
+    let statusId: Int?
+    let reportedBy: UUID?
+    let disabled: Bool?
+    let createdAt: Date?
+    let updatedAt: Date?
+    let reportsIds: [String]
+    
+    init(petition: Petition) {
+        self.id = petition.id
+        self.title = petition.title
+        self.description = petition.description
+        self.targetSignatures = petition.targetSignatures
+        self.currentSignatures = petition.currentSignatures
+        self.categoryId = petition.categoryId
+        self.statusId = petition.statusId
+        self.reportedBy = petition.reportedBy
+        self.disabled = petition.disabled
+        self.createdAt = petition.createdAt
+        self.updatedAt = petition.updatedAt
+        self.reportsIds = petition.reportsIds
+    }
+}
+
 class PetitionPost: Identifiable, Decodable, Equatable, Hashable {
     
     static func == (lhs: PetitionPost, rhs: PetitionPost) -> Bool {
@@ -227,6 +257,10 @@ extension Petition {
         set {
             self.targetSignatures = newValue
         }
+    }
+    
+    func toDTO() -> PetitionDTO {
+        PetitionDTO(petition: self)
     }
 }
 

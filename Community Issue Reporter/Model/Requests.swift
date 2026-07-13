@@ -65,3 +65,11 @@ struct LocatorHeaders {
 struct AvatarCreatedFromRequest: Encodable {
     let avatarCreatedFrom: AvatarCreatedFrom
 }
+
+struct DefaultReportingCity: Encodable {
+    let cityId: String
+    
+    init(_ cityId: String) {
+        self.cityId = cityId
+    }
+}

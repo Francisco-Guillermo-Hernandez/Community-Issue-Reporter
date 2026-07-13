@@ -36,7 +36,16 @@ class AuthViewModel: ObservableObject {
         setupInitialCameraPosition()
     }
     
-    private func setupInitialCameraPosition() {
+    func setCameraPosition(to position: Coordinate) {
+        cameraPosition = .region(
+            MKCoordinateRegion(
+                center: position.locationCoordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta:  0.016440700713786782)
+            )
+        )
+    }
+    
+    func setupInitialCameraPosition() {
         if let city = selectedCity {
             let latDelta = UserDefaults.standard.double(forKey: "map_latitude_delta")
             let lonDelta = UserDefaults.standard.double(forKey: "map_longitude_delta")

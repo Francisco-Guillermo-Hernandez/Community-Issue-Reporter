@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 
 struct Coordinate: Codable, Equatable, Hashable {
     var lat: Double
@@ -20,5 +21,19 @@ struct Coordinate: Codable, Equatable, Hashable {
         self.lat = lat
         self.lng = lng
     }
+}
 
+// MARK: - Extension
+extension Coordinate {
+    var location: CLLocation {
+        get {
+            CLLocation(latitude: lat, longitude: lng)
+        }
+    }
+    
+    var locationCoordinate: CLLocationCoordinate2D {
+        get {
+            CLLocationCoordinate2D(latitude: lat, longitude: lng)
+        }
+    }
 }

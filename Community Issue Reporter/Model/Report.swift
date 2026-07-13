@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Observation
 
 // MARK: - Possible states of a report
 enum ReportStates: String, Codable, CaseIterable {
@@ -18,8 +19,8 @@ enum ReportStates: String, Codable, CaseIterable {
     case modifying
 }
 
-
-struct Report: Identifiable, Codable, Hashable {
+@Observable
+final class Report: Identifiable, Codable, Hashable {
     
     static func == (lhs: Report, rhs: Report) -> Bool {
         lhs.id == rhs.id
@@ -90,6 +91,76 @@ struct Report: Identifiable, Codable, Hashable {
         }
 }
 
+
+struct ReportDAO: Identifiable, Codable {
+    
+    var id: String?
+    var coordinate: Coordinate
+    var address: String
+    var title: String
+    var description: String
+    var severityId: Int
+    var statusId: Int
+    var issueTypeId: Int
+    var matterToSolveId: Int
+    var reportedAt: Date?
+    var cellIndex: String
+    var createdAt: Date?
+    var updatedAt: Date?
+    var reportedBy: String?
+    var olc: String?
+    var suggestedTitle: String?
+    var suggestedDescription: String?
+    var reportState: ReportStates?
+    var attachments: [PreviewAttachmentRequest]
+    
+    init(_ report: Report) {
+        self.id = report.id
+        self.coordinate = report.coordinate
+        self.address = report.address
+        self.title = report.title
+        self.description = report.description
+        self.severityId = report.severityId
+        self.statusId = report.statusId
+        self.issueTypeId = report.issueTypeId
+        self.matterToSolveId = report.matterToSolveId
+        self.reportedAt = report.reportedAt
+        self.cellIndex = report.cellIndex
+        self.olc = report.olc
+        self.createdAt = report.createdAt
+        self.updatedAt = report.updatedAt
+        self.reportedBy = report.reportedBy
+        self.suggestedTitle = report.suggestedTitle
+        self.suggestedDescription = report.suggestedDescription
+        self.reportState = report.reportState
+        self.attachments = report.attachments
+    }
+    
+    func toModel() -> Report {
+        return Report(
+            id: self.id,
+            coordinate: self.coordinate,
+            address: self.address,
+            title: self.title,
+            description: self.description,
+            severityId: self.severityId,
+            statusId: self.statusId,
+            issueTypeId: self.issueTypeId,
+            matterToSolveId: self.matterToSolveId,
+            reportedAt: self.reportedAt,
+            cellIndex: self.cellIndex,
+            olc: self.olc,
+            createdAt: self.createdAt,
+            updatedAt: self.updatedAt,
+            reportedBy: self.reportedBy,
+            suggestedTitle: self.suggestedTitle,
+            suggestedDescription: self.suggestedDescription,
+            reportState: self.reportState,
+            attachments: self.attachments,
+        )
+    }
+}
+
 protocol ReportRepresentable {
     var issueType: IssueTypes { get set}
     var severity: Severity { get set }
@@ -102,6 +173,12 @@ protocol ReportRepresentable {
 
 // MARK: - Extension to use related values of the enums
 extension Report {
+    
+    /// Maps out the current report to be sent 
+    func toDao() -> ReportDAO {
+        ReportDAO(self)
+    }
+    
     var issueType: IssueTypes {
         get {
             IssueTypes.allCases.first(where: { $0.identifier == self.issueTypeId }) ?? .all

@@ -16,8 +16,19 @@ struct MatterToSolve: Identifiable {
     var severity: Severity
     var image: String?
     var suggestions: [String]?
-    
-    init(id: Int, title: String, icon: String? = nil, description: String, issueType: IssueTypes, severity: Severity, image: String? = nil, suggestions: [String]? = nil) {
+    let primaryEntity: ResponsibleEntity
+
+    init(
+        id: Int,
+        title: String,
+        icon: String? = nil,
+        description: String,
+        issueType: IssueTypes,
+        severity: Severity,
+        image: String? = nil,
+        suggestions: [String]? = nil,
+        primaryEntity: ResponsibleEntity
+    ) {
         self.id = id
         self.title = title
         self.icon = icon
@@ -26,5 +37,6 @@ struct MatterToSolve: Identifiable {
         self.severity = severity
         self.image = image
         self.suggestions = suggestions
+        self.primaryEntity = primaryEntity
     }
 }

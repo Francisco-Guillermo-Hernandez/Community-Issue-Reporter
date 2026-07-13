@@ -23,7 +23,7 @@ struct PetitionsService {
     }
     
     func createPetition(petition: Petition) async throws -> GenericResponse {
-        return try await self.client.post(path: "petitions/create", body: petition, withOAuth: true)
+        return try await self.client.post(path: "petitions/create", body: petition.toDTO(), withOAuth: true)
     }
     
     func updatePetition(id: String, petition: Petition) async throws -> GenericResponse {

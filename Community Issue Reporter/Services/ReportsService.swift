@@ -29,7 +29,7 @@ struct ReportsService {
     }
     
     func createReport(report: Report, headers: Array<HTTPHeader>) async throws -> GenericResponse {
-        return try await client.post(path: "reports/create", body: report, headers: headers, withOAuth: true)
+        return try await client.post(path: "reports/create", body: report.toDao(), headers: headers, withOAuth: true)
     }
     
     func deleteReport(by reportId: String) async throws -> GenericResponse {
@@ -60,7 +60,7 @@ struct ReportsService {
         return try await client.delete(path: "attach-media/\(key)", body: [String: String](), headers: headers, withOAuth: true)
     }
         
-    func fetchReportByUser(q: PaginatedRequestQueryParams) async throws -> PaginatedResponse<Report> {
+    func fetchReportByUser(q: PaginatedRequestQueryParams) async throws -> PaginatedResponse<ReportDAO> {
         return try await client.get(path: "reports/byUser", query: q, headers: [], withOAuth: true,)
     }
     

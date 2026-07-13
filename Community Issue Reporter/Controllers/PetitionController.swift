@@ -56,10 +56,25 @@ final class PetitionController {
         do {
             let result = try await ReportRepository.shared.listByUser(page: 1)
             guard let reports = result.documents else { return }
-            self.reports = reports
+            self.reports = reports.map { $0.toModel() } 
             
         } catch {
+            print(error)
             print(error.localizedDescription)
+        }
+    }
+    
+    func submit() {
+        Task {
+          
+            do {
+                _ = try await PetitionRepository.share.create(petition)
+                
+            } catch {
+               
+            }
+                
+            isSubmitting.toggle()
         }
     }
 }

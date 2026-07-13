@@ -27,7 +27,7 @@ final class MyReportsController {
             
             let result = try await ReportRepository.shared.listByUser(page: 1)
             guard let documents = result.documents else { return }
-            self.reports = documents
+            self.reports = documents.map { $0.toModel() }
         } catch {
             print(error)
         }

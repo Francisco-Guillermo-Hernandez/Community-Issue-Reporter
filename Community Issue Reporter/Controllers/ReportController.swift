@@ -9,7 +9,6 @@ import Foundation
 internal import Combine
 import Observation
 
-
 @MainActor
 @Observable
 class ReportController {
@@ -19,6 +18,8 @@ class ReportController {
     var presentAlert: Bool = false
     var alertMessage: String = ""
     var shareableLink: String = ""
+    var doneTrigger: Bool = false
+    var currentStep: ReportStep = .location
     
     func startRePorting(_ model: ReportDataModel) async {
         do {
@@ -116,4 +117,33 @@ class ReportController {
         alertMessage = message
     }
 
+        
+    func goNext() {
+        if let next = ReportStep(rawValue: currentStep.rawValue + 1) {
+            currentStep = next
+        }
+    }
+    
+    func goBack() {
+        if let prev = ReportStep(rawValue: currentStep.rawValue - 1) {
+            currentStep = prev
+        }
+    }
+    
+    var buttonMessage: String {
+        currentStep == .details ? String(localized: "Submit") : String(localized: "Next")
+    }
+    
+    func submit(_ model: ReportDataModel, _ uploadTrackers: [PhotoUploadTracker]) -> Void {
+         
+        if currentStep == .details {
+           
+            submitReport(model, attachments: uploadTrackers) {
+                self.goNext()
+            }
+            
+        } else {
+            self.goNext()
+        }
+    }
 }

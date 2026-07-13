@@ -45,7 +45,7 @@ final class LandingController {
         self.settings = settings
     }
     
-    func handleLogin(for session: String, with type: LoginType) {
+    func handleLogin(for session: String, with type: LoginType, _ appState: AuthViewModel) {
         if !session.isEmpty {
             if type == .guest {
                 saveIntoKeychain(session)
@@ -100,6 +100,9 @@ final class LandingController {
         self.presentAlert = true
     }
     
+    private func setCameraPosition(appState: AuthViewModel) -> Void {
+        appState
+    }
     private func setSettingsFromAuthenticatedUser(with data: PublicUserData) -> Void {
         
         /// Personalization settings
@@ -119,6 +122,8 @@ final class LandingController {
         /// Reporting settings
         settings?.countryCode = data.settings.reportLocatorSettings.countryCode
         settings?.cityId = data.settings.reportLocatorSettings.cityId
+        
+        
         
         
         _ = KeychainService.save(key: .sessionStateVerification, value: "session:state:valid")

@@ -35,46 +35,34 @@ final class CitySelectionController {
     }
     
     func loadLocalCities() {
-        isLoading = true
         friendlyCities = CitiesRepository.shared.loadLocalCities(of: countryCode)
-        isLoading = false
     }
     
     func fetchCitiesByGroupingName() async {
-        isLoading = true
         friendlyCities = await CitiesRepository.shared.filter(
             countryCode: countryCode.rawValue,
             page: page,
             groupingName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         )
-        isLoading = false
     }
 
     func fetchCitiesByStateName() async {
-        isLoading = true
         friendlyCities = await CitiesRepository.shared.filter(
             countryCode: countryCode.rawValue,
             page: page,
             stateName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         )
-        isLoading = false
     }
 
     func fetchByCityName() async {
-        isLoading = true
         friendlyCities = await CitiesRepository.shared.filter(
             countryCode: countryCode.rawValue,
             page: page,
             cityName: searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         )
-        isLoading = false
     }
     
     func performSearch() async {
-        
-        print("searching")
-        
-//        try? await Task.sleep(for: .milliseconds(450))
         if searchOptionsSelection == .legal { await fetchCitiesByGroupingName() }
         if searchOptionsSelection == .city  { await fetchByCityName() }
         if searchOptionsSelection == .state { await fetchCitiesByStateName() }
@@ -88,6 +76,22 @@ final class CitySelectionController {
                 searchText = ""
             }
             isSearchActive = true
+        }
+    }
+    
+    func updateCity(city: FriendlyCityDistribution, onUpdated: @escaping () -> Void) {
+        Task {
+            do {
+                isLoading = true
+                let result = try await UserRepository.shared.updateDefaultReporting(city.cityId)
+                if result == .updated {
+                    onUpdated()
+                }
+            } catch {
+                /// TODO: Implement retry in case of error
+            }
+            
+            isLoading = false
         }
     }
 }

@@ -12,12 +12,8 @@ import SwiftUI
 
 struct ReportWizardContainer: View {
     @Bindable var model: ReportDataModel
-    @State private var currentStep: ReportStep = .location
     @Environment(\.dismiss) private var dismiss
-    
-    
     @State private var uploadTrackers: [PhotoUploadTracker] = []
-    @State private var doneTrigger: Bool = false
     @State private var controller: ReportController
     
     var showCancelButton: Bool = false
@@ -37,7 +33,7 @@ struct ReportWizardContainer: View {
                 .ignoresSafeArea()
            
             /// Top Glow Gradient representing the active step color
-            currentStep.color
+            controller.currentStep.color
                 .opacity(0.12)
                 .frame(height: 280)
                 .mask(
@@ -62,7 +58,7 @@ struct ReportWizardContainer: View {
                             ForEach(ReportStep.allCases, id: \.self) { step in
                                 StepCardView(
                                     step: step,
-                                    currentStep: currentStep,
+                                    currentStep: controller.currentStep,
                                     metadata: stepsMetadata[step.metadataKey]
                                 ) {
                                     Group {
@@ -80,9 +76,9 @@ struct ReportWizardContainer: View {
                                 }
                                 .id(step)
                                 .onTapGesture {
-                                    if step < currentStep {
+                                    if step < controller.currentStep {
                                         withAnimation(.snappy(duration: 0.45, extraBounce: 0.08)) {
-                                            currentStep = step
+                                            controller.currentStep = step
                                         }
                                     }
                                 }
@@ -91,7 +87,7 @@ struct ReportWizardContainer: View {
                         .padding(.horizontal, 20)
                         .padding(.top, 10)
                     }
-                    .onChange(of: currentStep) { _, newValue in
+                    .onChange(of: controller.currentStep) { _, newValue in
                         withAnimation(.snappy(duration: 0.45, extraBounce: 0.08)) {
                             proxy.scrollTo(newValue, anchor: .center)
                         }
@@ -108,13 +104,13 @@ struct ReportWizardContainer: View {
             }
         }
         /// Smoothly animate the transitions of layout changes and background gradient
-        .animation(.snappy(duration: 0.45, extraBounce: 0.08), value: currentStep)
-        .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: currentStep) { oldValue, newValue in
+        .animation(.snappy(duration: 0.45, extraBounce: 0.08), value: controller.currentStep)
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: controller.currentStep) { oldValue, newValue in
             return newValue > oldValue
         }
         .toolbarTitleDisplayMode(.inline)
         .toolbarVisibility(.hidden, for: .navigationBar)
-        .sensoryFeedback(.success, trigger: doneTrigger)
+        .sensoryFeedback(.success, trigger: controller.doneTrigger)
         .task {
             await self.controller.startRePorting(model)
         }
@@ -131,13 +127,13 @@ struct ReportWizardContainer: View {
         VStack(spacing: .themeSpacing * 3) {
             
             HStack {
-                Text(String(localized: "Step \(currentStep.rawValue) of 4"))
+                Text(String(localized: "Step \(controller.currentStep.rawValue) of 4"))
                     .font(.headline)
                     .foregroundColor(Color.theme.foreground)
             }
             
-            ProgressView(value: Double(currentStep.rawValue), total: 4)
-                .tint(currentStep.color)
+            ProgressView(value: Double(controller.currentStep.rawValue), total: 4)
+                .tint(controller.currentStep.color)
                 .background(Color.gray.opacity(0.2))
                 .scaleEffect(x: 1, y: 1.5, anchor: .center)
         }
@@ -146,11 +142,13 @@ struct ReportWizardContainer: View {
     @ViewBuilder
     private func wizardFooter() -> some View {
         HStack {
-            if currentStep < .confirmation {
+            if controller.currentStep < .confirmation {
                 
                 ThemedButton(
-                    message: buttonMessage,
-                    action: submitReport,
+                    message: controller.buttonMessage,
+                    action: {
+                        controller.submit(model, uploadTrackers)
+                    },
                     type: .primary,
                     style: .prominent,
                     icon: "",
@@ -159,13 +157,13 @@ struct ReportWizardContainer: View {
                 .disabled(disableButton)
                 
             } else {
-                Button(action: { doneTrigger.toggle(); dismiss() }) {
+                Button(action: { controller.doneTrigger.toggle(); dismiss() }) {
                     Text(String(localized: "Done"))
                         .font(.headline)
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(currentStep.color)
+                        .background(controller.currentStep.color)
                         .foregroundColor(.white)
                         .contentShape(Capsule())
                         .clipShape(Capsule())
@@ -178,47 +176,22 @@ struct ReportWizardContainer: View {
     }
   
     
-    // MARK: - Logic
+    // MARK: - validations
     
-    private func submitReport() -> Void {
-         
-        if currentStep == .details {
-           
-            controller.submitReport(model, attachments: uploadTrackers) {
-                goNext()
-            }
-            
-        } else {
-            goNext()
-        }
+    var isLocationStepReadyToContinue: Bool {
+        model.isDifferentLocation && model.isAddressValid
     }
-    
-    private var disableButton: Bool {
-        switch currentStep {
-            case .media: return !isReadyToContinue
-            default: return false
-        }
-    }
-    
-    private var isReadyToContinue: Bool {
+ 
+    var isReadyToContinue: Bool {
         !uploadTrackers.isEmpty && uploadTrackers.allSatisfy { $0.phase == .success }
     }
     
-  
-    private func goNext() {
-        if let next = ReportStep(rawValue: currentStep.rawValue + 1) {
-            currentStep = next
+    var disableButton: Bool {
+        switch controller.currentStep {
+            case .location: return !isLocationStepReadyToContinue
+            case .media: return !isReadyToContinue
+            default: return false
         }
-    }
-    
-    private func goBack() {
-        if let prev = ReportStep(rawValue: currentStep.rawValue - 1) {
-            currentStep = prev
-        }
-    }
-    
-    private var buttonMessage: String {
-        currentStep == .details ? String(localized: "Submit") : String(localized: "Next")
     }
 }
 

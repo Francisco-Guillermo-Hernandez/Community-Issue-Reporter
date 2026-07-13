@@ -25,6 +25,9 @@ struct LocationStepView: View {
                         locator: $model.locator,
                         onExpandMap: { _ in
                             showMapPickerSheet.toggle()
+                        },
+                        onChange: {
+                            model.isDifferentLocation = true
                         }
                     )
                     
@@ -38,7 +41,7 @@ struct LocationStepView: View {
                 .sheet(isPresented: $showMapPickerSheet)  {
                     
                     ZStack(alignment: .top) {
-                        // Screen Background
+//                        // Screen Background
                         Color.theme.background
                             .ignoresSafeArea()
                         
@@ -53,6 +56,7 @@ struct LocationStepView: View {
                             )
                             .blur(radius: 20)
                             .ignoresSafeArea()
+                        
                         MapPickerView(
                             coordinate: $model.report.coordinate,
                             locator: $model.locator,
@@ -64,12 +68,12 @@ struct LocationStepView: View {
                         )
                     }
                 }
-//                .frame(maxHeight: .infinity)
-                
-//
+
                 TextInput(
                     name: "Address",
                     label: String(localized: "Please tell us where is the issue", comment: "ReportView: Please tell us where is the issue"),
+                    validators: addressValidator,
+                    regex: .customPattern(addressRegex),
                     axis: .vertical,
                     isValid: $model.isAddressValid,
                     value: $model.report.address

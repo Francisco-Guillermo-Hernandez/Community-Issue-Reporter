@@ -20,19 +20,19 @@ enum ReportStep: Int, CaseIterable, Comparable {
     
     var metadataKey: String {
         switch self {
-        case .location: return "Location"
-        case .media: return "Attachments"
-        case .details: return "Details"
-        case .confirmation: return "Confirmation"
+            case .location: return "Location"
+            case .media: return "Attachments"
+            case .details: return "Details"
+            case .confirmation: return "Confirmation"
         }
     }
     
     var color: Color {
         switch self {
-        case .location: return Color.theme.primary
-        case .media: return Color.theme.primary
-        case .details: return Color.theme.primary
-        case .confirmation: return .green
+            case .location: return Color.theme.primary
+            case .media: return Color.theme.primary
+            case .details: return Color.theme.primary
+            case .confirmation: return .green
         }
     }
 }

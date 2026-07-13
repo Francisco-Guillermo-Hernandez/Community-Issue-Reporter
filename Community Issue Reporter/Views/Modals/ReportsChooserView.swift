@@ -135,7 +135,7 @@ struct MultipleSelectionRow: View {
     @Previewable
     @State var reports: [Report] = [
         Report(
-            id: "1",
+
                    coordinate: Coordinate(lat: 13.693175616298355, lng:-89.21848208712787 ),
                    address: "PanAmerican Highway, San Salvador, San Salvador, El Salvador",
                    title: "Un bache en la avenida",
@@ -149,7 +149,7 @@ struct MultipleSelectionRow: View {
                    updatedAt: parsePostgresDate("2026-04-19T22:47:41.213141-06:00"),
                ),
         Report(
-            id: "2",
+           
                    coordinate: Coordinate(lat: 13.693175616298355, lng:-89.21848208712787 ),
                    address: "PanAmerican ",
                    title: "Un bache en la avenida",

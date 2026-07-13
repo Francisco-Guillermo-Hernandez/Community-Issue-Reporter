@@ -115,14 +115,18 @@ struct CitySelectionView: View {
                     ThemedButton(
                         message: buttonMessage,
                         action: {
-                            controller.triggerFeedBack.toggle()
-                            nextStep()
-                            
-                            if mode == .modify {
-                                dismiss()
+                            controller.updateCity(city: selectedCity) {
+                                
+                                nextStep()
+                                if mode == .modify {
+                                    dismiss()
+                                }
                             }
+                            
+                            controller.triggerFeedBack.toggle()
                         },
-                        type: .primary
+                        type: .primary,
+                        isLoading: $controller.isLoading
                     )
                     .padding()
                     .padding(.top, 0)
@@ -202,17 +206,7 @@ struct CitySelectionView: View {
 #Preview {
     
     @Previewable
-    @State var sanSalvador: FriendlyCityDistribution = .init(
-        cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
-        firstLevel: "El Salvador",
-        secondLevel: "San Salvador",
-        thirdLevel: "San Salvador",
-        ZipCode: "1101",
-        legalGroupName: "Distrito de San Salvador",
-        coordinates: .init(lat: 13.701270, lng: -89.224432),
-        isCapitalCity: 1,
-        isDepartmentalCapital: 1
-    )
+    @State var sanSalvador: FriendlyCityDistribution = SelectedMockedCity.shared.city
     let countryCode: CountryCode = .SV
     
     NavigationStack {

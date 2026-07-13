@@ -132,25 +132,10 @@ struct CreateRequestPetitionView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(role: .confirm) {
                         controller.isSubmitting.toggle()
-                        
-                       
-                        
-                        Task {
-                          
-                            do {
-                               _ = try await PetitionRepository.share.create(controller.petition)
-                                
-                                onCompletion("Petition created", .info)
-                                dismiss()
-                                
-                            } catch {
-                                onCompletion("Petition created", .info)
-                                dismiss()
-                            }
-                                
-                            controller.isSubmitting.toggle()
-                        }
-//                        
+                        controller.submit()
+                        onCompletion("", .info)
+                        dismiss()
+
                     } label: {
                         if controller.isSubmitting {
                             ProgressView()

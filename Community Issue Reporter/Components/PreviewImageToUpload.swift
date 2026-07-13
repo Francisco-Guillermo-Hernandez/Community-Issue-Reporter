@@ -25,15 +25,14 @@ struct PreviewImageToUpload: View {
                     .resizable()
                     .clipped()
                     .scaledToFit()
-//                    .aspectRatio(1, contentMode: .fill)
                     .blur(radius: completed ? 0 : 4)
-                    .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
                     .overlay {
                        
                         ZStack(alignment: .bottomLeading) {
                             
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous)
                             
                                 .fill(
                                     LinearGradient(

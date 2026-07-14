@@ -64,6 +64,9 @@ struct LocationStepView: View {
                                 model.updateCoordinate(coordinate)
                                 model.updateLocator(with: locator)
                                 self.showMapPickerSheet = false
+                            },
+                            onChange: {
+                                model.isDifferentLocation = true
                             }
                         )
                     }

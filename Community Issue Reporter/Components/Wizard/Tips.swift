@@ -11,15 +11,25 @@ import TipKit
 struct TipsDemo: View {
     let takeAPhotoTip = TakeAPhotoTip()
     var body: some View {
-        Text("Demo")
-            .popoverTip(takeAPhotoTip, arrowEdge: .top)
-        
-        Button {
-            Task {
-                await takeAPhotoTip.resetEligibility()
+        VStack {
+            Text("Demo")
+                .popoverTip(takeAPhotoTip, arrowEdge: .top)
+            
+            Button {
+                Task {
+                    await takeAPhotoTip.resetEligibility()
+                }
+            } label: {
+                Text("Hello")
             }
-        } label: {
-            Text("Hello")
+        }
+        .task {
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            await MainActor.run {
+                withAnimation {
+                    TakeAPhotoTip.shouldShow = true
+                }
+            }
         }
     }
 }
@@ -29,6 +39,7 @@ struct TipsDemo: View {
 }
 
 struct TakeAPhotoTip: Tip {
+    @Parameter static var shouldShow: Bool = false
     @State private var numberOfPhotos: Int = 6
     
     var title: Text {
@@ -41,5 +52,9 @@ struct TakeAPhotoTip: Tip {
     
     var image: Image? {
         Image(systemName: "camera")
+    }
+    
+    var rules: [Rule] {
+        #Rule(Self.$shouldShow) { $0 == true }
     }
 }

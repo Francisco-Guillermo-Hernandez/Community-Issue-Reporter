@@ -170,6 +170,13 @@ struct MiniMapLocator: View {
       }
 }
 
+#Preview("Map Picker") {
+    @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
+    @Previewable @State var locator: Locator = .init()
+    MapPickerView(coordinate: $coordinate, locator: $locator, onChange: {})
+}
+
+
 #Preview("Minimap") {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
     @Previewable @State var locator: Locator = .init()
@@ -183,10 +190,4 @@ struct MiniMapLocator: View {
             print("user has changed the location,")
         }
     )
-}
-
-#Preview {
-    @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
-    @Previewable @State var locator: Locator = .init()
-    MapPickerView(coordinate: $coordinate, locator: $locator)
 }

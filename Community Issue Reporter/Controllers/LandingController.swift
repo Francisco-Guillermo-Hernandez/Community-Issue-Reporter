@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Observation
+import SwiftData
 
 @MainActor
 @Observable
@@ -65,6 +66,7 @@ final class LandingController {
                             if data.landingPageCompleted {
                                 /// Set preferences
                                 self.setSettingsFromAuthenticatedUser(with: data)
+                                self.setCameraPositionByCityId(appState: appState)
                                 self.isLoggedIn = true
                             } else {
                                 
@@ -100,8 +102,38 @@ final class LandingController {
         self.presentAlert = true
     }
     
-    private func setCameraPosition(appState: AuthViewModel) -> Void {
-        appState
+    private func setCameraPositionByCityId(appState: AuthViewModel) -> Void {
+        if let settings = settings {
+            if let container = SwiftDataLocatorDAO.shared.container {
+                let context = container.mainContext
+                if let city = SwiftDataLocatorDAO.shared.findCityBy(
+                    cityId: settings.cityId,
+                    countryCode: settings.countryCode,
+                    in: context
+                ) {
+                    
+                    appState.selectedCity = FriendlyCityDistribution(
+                        cityId: city.cityId,
+                        firstLevel: city.firstLevel ?? "",
+                        secondLevel: city.secondLevel ?? "",
+                        thirdLevel: city.thirdLevel ?? "",
+                        ZipCode: city.zipCode,
+                        legalGroupName: city.legalGroupName ?? "",
+                        coordinates: .init(city.lat, city.lng),
+                        isCapitalCity: 0,
+                        isDepartmentalCapital: 0,
+                        groupingId: city.groupingId,
+                        groupingName: city.groupingName
+                    )
+                    
+                    appState.setCameraPosition(
+                        to: .init(lat: city.lat, lng: city.lng),
+                        latitudeDelta:  0.005738743213994368,
+                        longitudeDelta: 0.003718218254761041,
+                    )
+                }
+            }
+        }
     }
     private func setSettingsFromAuthenticatedUser(with data: PublicUserData) -> Void {
         
@@ -122,9 +154,6 @@ final class LandingController {
         /// Reporting settings
         settings?.countryCode = data.settings.reportLocatorSettings.countryCode
         settings?.cityId = data.settings.reportLocatorSettings.cityId
-        
-        
-        
         
         _ = KeychainService.save(key: .sessionStateVerification, value: "session:state:valid")
     }

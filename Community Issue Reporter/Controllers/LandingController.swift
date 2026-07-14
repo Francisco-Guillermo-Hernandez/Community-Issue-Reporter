@@ -15,7 +15,10 @@ final class LandingController {
     
     static var shared = LandingController()
     
-    var presentAlert: Bool = false
+    
+    var userPersonalizationDataModel: UserPersonalizationDataModel
+    var notifications: Notifications
+    var presentAlert: Bool
     var message: String = ""
     var path: [LandingNavigation] = []
     var isGuest: Bool = false
@@ -27,8 +30,10 @@ final class LandingController {
     private var settings: SettingsStore?
     var profile: ProfileDataModel
     init() {
+        self.userPersonalizationDataModel = .init()
+        self.notifications = .init(app: false, email: false, web: false)
         self.profile = .init()
-        
+        self.presentAlert = false
         selectedCity = .init(
             cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
             firstLevel: "El Salvador",
@@ -66,7 +71,7 @@ final class LandingController {
                             if data.landingPageCompleted {
                                 /// Set preferences
                                 self.setSettingsFromAuthenticatedUser(with: data)
-                                self.setCameraPositionByCityId(appState: appState)
+                                self.setCameraPositionByCityId(appState)
                                 self.isLoggedIn = true
                             } else {
                                 
@@ -102,7 +107,7 @@ final class LandingController {
         self.presentAlert = true
     }
     
-    private func setCameraPositionByCityId(appState: AuthViewModel) -> Void {
+    private func setCameraPositionByCityId(_ appState: AuthViewModel) -> Void {
         if let settings = settings {
             if let container = SwiftDataLocatorDAO.shared.container {
                 let context = container.mainContext
@@ -135,6 +140,9 @@ final class LandingController {
             }
         }
     }
+    
+
+    
     private func setSettingsFromAuthenticatedUser(with data: PublicUserData) -> Void {
         
         /// Personalization settings

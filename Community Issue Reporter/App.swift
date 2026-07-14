@@ -21,19 +21,19 @@ struct Community_Issue_ReporterApp: App {
     @StateObject private var authViewModel = AuthViewModel()
     
     /// Inject settings store
-    @StateObject private var settingsStore = SettingsStore()
+    @State private var settingsStore = SettingsStore.shared
     
     /// Inject network monitor
-    @StateObject private var networkMonitor = NetworkMonitor()
+    @State private var networkMonitor = NetworkMonitor()
     
     /// Inject the AppDelegate lifecycle adaptor
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     /// Reference the manager state
-    @StateObject private var notificationManager = AppDelegate.sharedNotificationManager
+    @State private var notificationManager = AppDelegate.sharedNotificationManager
     
     /// Router
-    @StateObject private var router = DeepLinkRouter()
+    @State private var router = DeepLinkRouter.shared
     
     init() {
         #if DEBUG
@@ -66,11 +66,11 @@ struct Community_Issue_ReporterApp: App {
     var body: some Scene {
         WindowGroup {
             WelcomeView()
-                .environmentObject(router)
+                .environment(router)
                 .environmentObject(authViewModel)
-                .environmentObject(settingsStore)
-                .environmentObject(notificationManager)
-                .environmentObject(networkMonitor)
+                .environment(settingsStore)
+                .environment(notificationManager)
+                .environment(networkMonitor)
                 .environment(\.locale, .init(identifier: settingsStore.selectedLanguageCode))
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)

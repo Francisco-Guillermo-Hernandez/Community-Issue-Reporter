@@ -237,14 +237,18 @@ final class UserRepository {
     }
     
     /// Updates the state of the landing process
-    func completeLandingPage(completion: @escaping () -> Void) async {
+    func completeLandingPage() async throws -> SuccessfulResult {
         do {
             let result = try await self.service.completeLandingPage()
             if result.code == "LANDING_COMPLETED_UPDATED" {
-                completion()
+                return .done
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.message)
             }
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
-            
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     

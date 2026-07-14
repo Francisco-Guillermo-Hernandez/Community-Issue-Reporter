@@ -25,25 +25,42 @@ struct LandingView: View {
             }
             .navigationDestination(for: LandingNavigation.self) { destination in
                 switch destination {
-                case .selectCity:
+                    /// Step to choose the city that user prefer to report issues/problems
+                    case .selectCity:
                     CitySelectionView(
                         countryCode: controller.countryCode,
                         selectedCity: $controller.selectedCity,
                         nextStep: {
                             appState.selectedCity = controller.selectedCity
+                           
+                            appState.setCameraPosition(
+                                to: controller.selectedCity.coordinates,
+                                latitudeDelta:  0.005738743213994368,
+                                longitudeDelta: 0.003718218254761041,
+                            )
+                            
                             controller.path.append(.personalizeProfile)
                         }
                     )
+                    
+                    ///
+                    case .personalizeProfile:
+                    UserPersonalizationView(
+                        model: $controller.userPersonalizationDataModel,
+                        nextStep: {
+                            controller.path.append(.essentialInfo)
+                        }
+                    )
 
-                case .personalizeProfile:
-                    UserPersonalizationView(nextStep: {
-                        controller.path.append(.essentialInfo)
-                    })
-
-                case .essentialInfo:
-                    EssentialInformationView(finalStep: {
-                        controller.isLoggedIn.toggle()
-                    })
+                    ///
+                    case .essentialInfo:
+                    EssentialInformationView(
+                        notifications: $controller.notifications,
+                        finalStep: {
+                            _ = KeychainService.save(key: .sessionStateVerification, value: "session:state:valid")
+                            controller.isLoggedIn.toggle()
+                        }
+                    )
                 }
             }
         }

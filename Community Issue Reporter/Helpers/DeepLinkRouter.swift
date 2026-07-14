@@ -6,20 +6,24 @@
 //
 
 import SwiftUI
-internal import Combine
+import Observation
 
 @MainActor
-class DeepLinkRouter: ObservableObject {
-    @Published var pendingDeepLink: DeepLink?
-    @Published var activeReportID: String?
-    @Published var activeTab: Int = 0
-    @Published var isPresented: Bool = false
-    @Published var isLoading: Bool = false
-    @Published var message: String = ""
-    @Published var report: MapExplorerReport = .init(id: "", lat: 0, lng: 0, address: "", title: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAtRaw: 0, cellIndex: "", createdAtRaw: 0, updatedAtRaw: 0, reportedBy: "", cityId: "", petitionId: "", shareUrl: "",
+@Observable
+class DeepLinkRouter {
+    
+    static var shared: DeepLinkRouter = .init()
+    
+    var pendingDeepLink: DeepLink?
+    var activeReportID: String?
+    var activeTab: Int = 0
+    var isPresented: Bool = false
+    var isLoading: Bool = false
+    var message: String = ""
+    var report: MapExplorerReport = .init(id: "", lat: 0, lng: 0, address: "", title: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAtRaw: 0, cellIndex: "", createdAtRaw: 0, updatedAtRaw: 0, reportedBy: "", cityId: "", petitionId: "", shareUrl: "",
                                                      attachments: [], assignedTo: nil)
-    @Published var presentAlert: Bool = false
-    @Published var isReadyToRoute: Bool = false
+    var presentAlert: Bool = false
+    var isReadyToRoute: Bool = false
     
     func handleIncomingURL(_ url: URL) {
         

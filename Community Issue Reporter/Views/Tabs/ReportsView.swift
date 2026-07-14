@@ -15,7 +15,7 @@ struct ReportsView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
     @EnvironmentObject var appState: AuthViewModel
-    @EnvironmentObject var settings: SettingsStore
+    @Environment(SettingsStore.self) var settings
     @State private var profile = ProfileDataModel()
     
     @State private var controller = MapExplorerController()
@@ -27,7 +27,7 @@ struct ReportsView: View {
     @Environment(\.dismiss) private var dismissSheet
     @Namespace private var animationID
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var router: DeepLinkRouter
+    @State private var router = DeepLinkRouter.shared
     
     private let animation = Animation.easeInOut(duration: 0.25)
     
@@ -312,7 +312,7 @@ private struct StatusFilterRow: View {
         ReportsView()
            
             .environmentObject(AuthViewModel())
-            .environmentObject(DeepLinkRouter())
-            .environmentObject(SettingsStore())
+            .environment(DeepLinkRouter())
+            .environment(SettingsStore())
     }
 }

@@ -25,6 +25,7 @@ struct SettingsHeaderView: View {
 }
 
 struct SettingsGroup<Content: View>: View {
+    @Environment(\.isEnabled) var isEnabled
     let title: String
     let footerText: String?
     let content: Content
@@ -41,9 +42,11 @@ struct SettingsGroup<Content: View>: View {
             VStack(spacing: .themeSpacing * 1.5) {
                 
                 SettingsHeaderView(title)
+                    .opacity(isEnabled ? 1 : 0.5)
                 VStack {
                     VStack(spacing: .themeSpacing * 4) {
                         content
+                            .opacity(isEnabled ? 1 : 0.5)
                     }
                     .padding()
                 }
@@ -56,6 +59,7 @@ struct SettingsGroup<Content: View>: View {
                         .foregroundStyle(.secondary)
                         .padding(.leading, .themeSpacing * 4.5)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .opacity(isEnabled ? 1 : 0.5)
                 }
             }
             
@@ -69,8 +73,9 @@ import SwiftUI
 struct SettingsSubView: View {
     
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var settings: SettingsStore
+    @State private var settings = SettingsStore.shared
     @EnvironmentObject var appState: AuthViewModel
+    @Environment(NetworkMonitor.self) var networkMonitor
     
     @State private var geographicalRegion: Int = 1
     @State private var countries: [Country] = []
@@ -78,22 +83,12 @@ struct SettingsSubView: View {
     
     @State private var cities: [FriendlyCityDistribution] = []
     
-    @EnvironmentObject var notificationManager: NotificationManager
-    
-    @State private var selectedCity: FriendlyCityDistribution = .init(
-        cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
-        firstLevel: "El Salvador",
-        secondLevel: "San Salvador",
-        thirdLevel: "San Salvador",
-        ZipCode: "1101",
-        legalGroupName: "Distrito de San Salvador",
-        coordinates: .init(lat: 13.701270, lng: -89.224432),
-        isCapitalCity: 1,
-        isDepartmentalCapital: 1
-    )
+    @Environment(NotificationManager.self) var notificationManager
+    @State private var controller: SettingsSubViewController
     
     init(subViewName: String) {
         self.subViewName = subViewName
+        controller = SettingsSubViewController()
     }
     
     var subViewName: String
@@ -113,13 +108,14 @@ struct SettingsSubView: View {
                                 
                                 Spacer()
                                 HStack(spacing: 4) {
-                                    Text(selectedCity.thirdLevel)
+                                    Text(controller.selectedCity.thirdLevel)
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 12))
                                 }
                             }
                         }
                     }
+                    .disabled(!networkMonitor.isConnected)
                     
                     SettingsGroup(
                         title: String(localized: "Privacy"),
@@ -128,22 +124,23 @@ struct SettingsSubView: View {
                         Toggle("Show my profile", isOn: $settings.showMyProfile)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.showMyProfile) { oldValue, newValue in
-                                updatePrivacySettings()
+                                controller.updatePrivacySettings()
                             }
                         
                         Toggle(String(localized: "Show my user name when I share"), isOn: $settings.showMyUseNameWhenShare)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.showMyUseNameWhenShare) { oldValue, newValue in
-                                updatePrivacySettings()
+                                controller.updatePrivacySettings()
                             }
                     }
+                    .disabled(!networkMonitor.isConnected)
                     
                     /// Notifications group
                     SettingsGroup(title: String(localized: "Notifications")) {
                         Toggle("Push notifications", isOn: $settings.enablePushNotifications)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enablePushNotifications) { oldValue, newValue in
-                                updateNotificationSettings()
+                                controller.updateNotificationSettings()
                                 
                                 if !notificationManager.isPermissionGranted {
                                     notificationManager.requestAuthorization()
@@ -152,16 +149,17 @@ struct SettingsSubView: View {
                             }
                             .onChange(of: notificationManager.isPermissionGranted) { oldValue, newValue in
                                 if oldValue != newValue && !notificationManager.deviceToken.isEmpty {
-                                    updateDeviceToken()
+                                    controller.updateDeviceToken()
                                 }
                             }
                         
                         Toggle("Email notifications", isOn: $settings.enableEmailNotifications)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enableEmailNotifications) { oldValue, newValue in
-                                updateNotificationSettings()
+                                controller.updateNotificationSettings()
                             }
                     }
+                    .disabled(!networkMonitor.isConnected)
                     
                     SettingsGroup(title: String(localized: "App settings")) {
                         
@@ -176,6 +174,7 @@ struct SettingsSubView: View {
                             .foregroundStyle(Color.theme.inputText)
                         
                     }
+                    .disabled(!networkMonitor.isConnected)
                 }
             }
             .padding(.horizontal)
@@ -185,6 +184,9 @@ struct SettingsSubView: View {
                 else { return }
                 
                 cities = documents
+                
+                /// Inject dependencies
+                controller.inject(self.settings, self.notificationManager)
             }
             .scrollDisabled(true)
             .scrollContentBackground(.hidden)
@@ -194,7 +196,7 @@ struct SettingsSubView: View {
             .task {
                 
                 if let savedCity = appState.selectedCity {
-                    self.selectedCity = savedCity
+                    controller.selectedCity = savedCity
                 }
             }
         }
@@ -217,9 +219,9 @@ struct SettingsSubView: View {
         CitySelectionView(
             countryCode: settings.countryCodeIso,
             mode: .modify,
-            selectedCity: $selectedCity,
+            selectedCity: $controller.selectedCity,
             nextStep: {
-                appState.selectedCity = selectedCity
+                appState.selectedCity = controller.selectedCity
                 
                 let span = MKCoordinateSpan(
                     latitudeDelta: 0.0022298826163122953,
@@ -229,8 +231,8 @@ struct SettingsSubView: View {
                 appState.cameraPosition = .region(
                     MKCoordinateRegion(
                         center: CLLocationCoordinate2D(
-                            latitude: selectedCity.coordinates.lat,
-                            longitude: selectedCity.coordinates.lng
+                            latitude: controller.selectedCity.coordinates.lat,
+                            longitude: controller.selectedCity.coordinates.lng
                         ),
                         span: span
                     )
@@ -241,67 +243,12 @@ struct SettingsSubView: View {
         )
     }
     
-    func updatePrivacySettings() {
-        Task {
-            print("update privacy settings")
-            do {
-                /// Debouncing
-                try await Task.sleep(for: .milliseconds(550))
-                try await UserRepository.shared.privacy(
-                    settings: .init(
-                        showMyProfile: settings.showMyProfile,
-                        showMyUseNameWhenShare: settings.showMyUseNameWhenShare
-                    )
-                )
-            } catch {
-                
-            }
-        }
-    }
-    
-    func updateNotificationSettings() {
-        Task {
-            
-            do {
-                try await Task.sleep(for: .milliseconds(550))
-                let result = try await UserRepository.shared.modify(
-                    .init(
-                        app: settings.enablePushNotifications,
-                        email: settings.enableEmailNotifications,
-                        web: settings.enableWebNotifications
-                    )
-                )
-                
-                switch result {
-                case .success(let message):
-                    print(message)
-                    
-                case .failure(let error):
-                    print(error)
-                    
-                }
-            } catch {
-                
-            }
-        }
-    }
-    
-    func updateDeviceToken() {
-        
-        Task {
-            
-            do {
-                _ = try await UserRepository.shared.sendDevice(notificationManager.deviceToken)
-            } catch {
-                print(error)
-            }
-        }
-    }
 }
 
 #Preview {
     SettingsSubView(subViewName: "Settings")
         .environmentObject(AuthViewModel())
-        .environmentObject(NotificationManager())
-        .environmentObject(SettingsStore())
+        .environment(NotificationManager())
+        .environment(SettingsStore())
+        .environment(NetworkMonitor())
 }

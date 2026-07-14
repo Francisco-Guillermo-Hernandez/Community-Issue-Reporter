@@ -103,28 +103,6 @@ class AuthViewModel: ObservableObject {
     
     func logout() {
         GIDSignIn.sharedInstance.signOut()
-        
-        DispatchQueue.main.async {
-            self.user = nil
-            self.isLoggedIn = false
-            self.userProfile = nil
-            
-            _ = KeychainService.deleteToken(key: .query)
-            _ = KeychainService.deleteToken(key: .mutation)
-            _ = KeychainService.deleteToken(key: .sessionStateVerification)
-            
-//            UserDefaults.standard.set(nil, forKey: "selected_city")
-            
-            let selectedOptionKey = "selected_avatar_option"
-            let selectedColorKey = "selected_avatar_color"
-            UserDefaults.standard.set(nil, forKey: selectedOptionKey)
-            UserDefaults.standard.set(nil, forKey: selectedColorKey)
-            UserDefaults.standard.set(nil, forKey: "map_latitude_delta")
-            UserDefaults.standard.set(nil, forKey: "map_longitude_delta")
-            UserDefaults.standard.set(nil, forKey: "avatar_url")
-            UserDefaults.standard.set(nil, forKey: "user_name")
-            UserDefaults.standard.set(nil, forKey: "selectedLanguageCode")
-        }
     }
     
 }

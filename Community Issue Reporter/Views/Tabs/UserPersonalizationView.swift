@@ -32,21 +32,17 @@ enum UserNameAvailabilityStatus {
     case untouched
 }
 
+
+
 struct UserPersonalizationView: View {
     @Environment(\.dismiss) var dismiss
     @FocusState private var isInputFocused: Bool
     @State private var profile = ProfileDataModel()
     @State private var isPresented: Bool = false
     @State private var triggerFeedBack: Bool = false
-    @State private var userName: String = ""
-    @State private var email: String = ""
-    @State private var name: String = ""
-    @State private var isEmailValid: Bool = false
-    @State private var isUserNameValid: Bool = false
+    @Binding var model: UserPersonalizationDataModel
+   
     @State private var user: UserProfile?
-    @State private var userNameAvailabilityStatus: UserNameAvailabilityStatus = .untouched
-    @State private var userNameErrorMessage: String = ""
-    @State private var isLoading: Bool = false
     
     let appState = AuthViewModel()
     
@@ -63,11 +59,11 @@ struct UserPersonalizationView: View {
                         .padding(.bottom, 8)
                         .padding(.top, .themePadding * 2)
                        
-                    Text(name)
+                    Text(model.name)
                         .font(.title3)
                         .fontWeight(.semibold)
                     
-                    Text(userAlias(userName))
+                    Text(userAlias(model.userName))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -82,11 +78,11 @@ struct UserPersonalizationView: View {
                                 label: String(localized: "User Name", comment: "User Name input"),
                                 validators: userNameValidator,
                                 regex: .customPattern(userNameRegex),
-                                isValid: $isUserNameValid,
-                                value: $userName,
+                                isValid: $model.isUserNameValid,
+                                value: $model.userName,
                             )
                             .focused($isInputFocused)
-                            .onChange(of: userName) { _, newValue in
+                            .onChange(of: model.userName) { _, newValue in
                                 profile.userName = newValue
                             }
                             .onChange(of: profile.showPicker) { oldValue, newValue in
@@ -104,8 +100,8 @@ struct UserPersonalizationView: View {
                             name: "hello@reportamelo.app",
                             label: String(localized: "Email", comment: "Email input"),
                             regex: .email,
-                            isValid: $isEmailValid,
-                            value: $email,
+                            isValid: $model.isEmailValid,
+                            value: $model.email,
                             disabled: true,
                         )
                     }
@@ -119,42 +115,42 @@ struct UserPersonalizationView: View {
                 
             }
         }
-        .task(id: userName) {
+        .task(id: model.userName) {
         
         
            /// Check if conditions met
-           if userName.count >= 3 && userName.count < 21 {
+            if model.userName.count >= 3 && model.userName.count < 21 && model.userNameAvailabilityStatus != .available  {
                
                /// Debouncing time
                try? await Task.sleep(for: .milliseconds(400))
                
                /// Set loading state
-              userNameAvailabilityStatus = .loading
+                model.userNameAvailabilityStatus = .loading
                
                /// Check availability
               await UserRepository.shared.checkAvailability(
-                   of: userName,
-                   completion: { (result: Result<String, UserError>) in
+                    of: model.userName,
+                    completion: { (result: Result<String, UserError>) in
                        
                        switch result {
                            case .success(let result):
                            print(result)
                               
                                /// Set available state to show that message
-                               userNameAvailabilityStatus = .available
+                           model.userNameAvailabilityStatus = .available
                            case .failure(let error):
                           
                            switch error {
                                case .taken:
-                                   userNameAvailabilityStatus = .error
-                                   userNameErrorMessage = String(localized: "User name is taken")
+                                    model.userNameAvailabilityStatus = .error
+                                    model.userNameErrorMessage = String(localized: "User name is taken")
                                    
                                case .invalidUserName:
-                                   userNameAvailabilityStatus = .error
-                                   userNameErrorMessage = String(localized: "User name is invalid")
+                                    model.userNameAvailabilityStatus = .error
+                                    model.userNameErrorMessage = String(localized: "User name is invalid")
                                    
                                default:
-                                   userNameAvailabilityStatus = .error
+                                    model.userNameAvailabilityStatus = .error
                            }
                        }
                    }
@@ -162,7 +158,7 @@ struct UserPersonalizationView: View {
            } else {
                
                /// Set Initial state
-               userNameAvailabilityStatus = .untouched
+               model.userNameAvailabilityStatus = .untouched
            }
         }
         .blur(radius: profile.showPicker ? .themeRadius * 2 : 0)
@@ -179,13 +175,13 @@ struct UserPersonalizationView: View {
             guard let user = user else { return }
             
             if let email = user.email {
-                self.email = email
+                model.email = email
              }
              
              if let name = user.username {
-                 self.name = name
+                 model.name = name
                  profile.userName = name
-                 self.userName = name
+                 model.userName = name
                      .lowercased()
                      .split(separator: " ")
                      .joined(separator: ".")
@@ -199,9 +195,10 @@ struct UserPersonalizationView: View {
                         triggerFeedBack.toggle()
                         updateUsername()
                     },
-                    type: .primary
+                    type: .primary,
+                    isLoading: $model.isLoading
                 )
-                .disabled(!isFormValid)
+                .disabled(!model.isFormValid)
                 .padding()
                 .padding(.top, 0)
             }
@@ -217,7 +214,7 @@ struct UserPersonalizationView: View {
     @ViewBuilder
     private func showUserNameStates() -> some View {
         Group {
-            switch userNameAvailabilityStatus {
+            switch model.userNameAvailabilityStatus {
             case .available:
                 Text(String(localized: "Available"))
                     .foregroundColor(Color.green)
@@ -229,7 +226,7 @@ struct UserPersonalizationView: View {
                     .progressViewStyle(.circular)
                     .controlSize(.small)
             case .error:
-                Text(userNameErrorMessage)
+                Text(model.userNameErrorMessage)
                     .foregroundColor(Color.theme.destructive)
                     .font(.caption)
             }
@@ -240,23 +237,22 @@ struct UserPersonalizationView: View {
     
     private func updateUsername() -> Void {
         Task {
-            isLoading.toggle()
+            model.isLoading.toggle()
             
             /// save userName into userDefault
-            UserRepository.shared.setUsername(userName)
-            await UserRepository.shared.change(userName, completion: { (result: Result<String, UserError>) in
+            UserRepository.shared.setUsername(model.userName)
+            await UserRepository.shared.change(model.userName, completion: { (result: Result<String, UserError>) in
                 switch result {
                 case .success(let message):
                     print(message)
-                    isLoading.toggle()
+                    model.isLoading.toggle()
                     nextStep()
                     
                     /// Error handling
                 case .failure(let error):
                     
-                    isLoading.toggle()
+                    model.isLoading.toggle()
                     print("error from update user name")
-                    dump(error)
                     switch error {
                     case .serverError(let message):
                       print(message)
@@ -268,13 +264,12 @@ struct UserPersonalizationView: View {
         }
     }
     
-    private var isFormValid: Bool {
-        isUserNameValid && isEmailValid && userNameAvailabilityStatus == .available
-    }
 }
 
 #Preview {
-    UserPersonalizationView(nextStep: {
+    @Previewable
+    @State var model = UserPersonalizationDataModel()
+    UserPersonalizationView(model: $model, nextStep: {
         
     })
 }

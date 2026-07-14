@@ -9,9 +9,10 @@ import SwiftUI
 
 struct EssentialInformationView: View {
     @State private var triggerFeedBack: Bool = false
-    @EnvironmentObject var notificationManager: NotificationManager
+    @Environment(NotificationManager.self) var notificationManager
     @Environment(\.mySettings) private var settings
-    @State var notifications: Notifications = .init(app: false, email: false, web: false)
+    @Binding var notifications: Notifications
+    @State private var isLoading: Bool = false
 
     var finalStep: () -> Void
     var body: some View {
@@ -68,30 +69,37 @@ struct EssentialInformationView: View {
                 ThemedButton(
                     message: String(localized: "Report Problems"),
                     action: {
-                        triggerFeedBack.toggle()
-                        
                         completeLandingPage()
+                        triggerFeedBack.toggle()
                         finalStep()
+                        
                      
                     },
-                    type: .primary
+                    type: .primary,
+                    isLoading: $isLoading
                 )
                 .padding()
                 .padding(.top, 0)
             }
         }
-        .sensoryFeedback(
-            .impact(weight: .medium),
-            trigger: triggerFeedBack
-        )
+        .sensoryFeedback(.success, trigger: triggerFeedBack)
         .background(Color.theme.background)
     }
     
     func completeLandingPage() -> Void {
         Task {
-            await UserRepository.shared.completeLandingPage(completion: {
-                _ = KeychainService.save(key: .landingPageComplete, value: "completion:state:successfully")
-            })
+            do {
+                isLoading = true
+                let result = try await UserRepository.shared.completeLandingPage()
+                if result == .done {
+                    _ = KeychainService.save(key: .landingPageComplete, value: "completion:state:successfully")
+                }
+               
+            } catch {
+                // TODO: retry 
+            }
+            
+            isLoading = false
         }
     }
     
@@ -119,9 +127,10 @@ struct EssentialInformationView: View {
 
 #Preview {
     NavigationStack {
-        EssentialInformationView(finalStep: {
+        
+        EssentialInformationView(notifications: .constant(.init(app: false, email: false, web: false)), finalStep: {
             
         })
-        .environmentObject(NotificationManager())
+        .environment(NotificationManager())
     }
 }

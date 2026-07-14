@@ -9,7 +9,7 @@ import SwiftUI
 
 struct WelcomeView: View {
     @State private var controller = LandingController.shared
-    @EnvironmentObject var settings: SettingsStore
+    @Environment(SettingsStore.self) var settings
     
     var body: some View {
         ZStack {
@@ -30,5 +30,5 @@ struct WelcomeView: View {
 #Preview {
     WelcomeView()
         .environmentObject(AuthViewModel())
-        .environmentObject(SettingsStore())
+        .environment(SettingsStore())
 }

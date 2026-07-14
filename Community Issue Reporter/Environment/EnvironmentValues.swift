@@ -6,84 +6,86 @@
 //
 
 import SwiftUI
-internal import Combine
-final class SettingsStore: ObservableObject {
+import Observation
+
+@Observable
+final class SettingsStore {
     
     static let shared = SettingsStore()
 
-    @Published var geographicalRegion: Int {
+    var geographicalRegion: Int {
         didSet { UserDefaults.standard.set(geographicalRegion, forKey: "geographicalRegion") }
     }
     
-    @Published var selectedCountry: Int {
+    var selectedCountry: Int {
         didSet { UserDefaults.standard.set(selectedCountry, forKey: "selectedCountry") }
     }
     
-    @Published var countryCode: String {
+    var countryCode: String {
         didSet { UserDefaults.standard.set(countryCode, forKey: "countryCode") }
     }
     
-    @Published var cityId: String {
+    var cityId: String {
         didSet { UserDefaults.standard.set(cityId, forKey: "cityId") }
     }
     
-    @Published var selectedState: Int {
+    var selectedState: Int {
         didSet { UserDefaults.standard.set(selectedState, forKey: "selectedState") }
     }
     
-    @Published var selectedCity: Int {
+    var selectedCity: Int {
         didSet { UserDefaults.standard.set(selectedCity, forKey: "selectedCity") }
     }
     
-    @Published var enableBackgroundSync: Bool {
+    var enableBackgroundSync: Bool {
         didSet { UserDefaults.standard.set(enableBackgroundSync, forKey: "enableBackgroundSync") }
     }
     
-    @Published var enableAnonymousTelemetry: Bool {
+    var enableAnonymousTelemetry: Bool {
         didSet { UserDefaults.standard.set(enableAnonymousTelemetry, forKey: "enableAnonymousTelemetry") }
     }
     
-    @Published var selectedLanguageID: Int {
+    var selectedLanguageID: Int {
         didSet { UserDefaults.standard.set(selectedLanguageID, forKey: "selectedLanguageID") }
     }
     
-    @Published var selectedLanguageCode: String {
+    var selectedLanguageCode: String {
         didSet { UserDefaults.standard.set(selectedLanguageCode, forKey: "selectedLanguageCode") }
     }
     
-    @Published var enableAutomaticIdentification: Bool {
+    var enableAutomaticIdentification: Bool {
         didSet { UserDefaults.standard.set(enableAutomaticIdentification, forKey: "enableAutomaticIdentification") }
     }
     
-    @Published var enableNotifications: Bool {
+    var enableNotifications: Bool {
         didSet { UserDefaults.standard.set(enableNotifications, forKey: "enableNotifications") }
     }
     
-    @Published var enablePushNotifications: Bool {
+    var enablePushNotifications: Bool {
         didSet { UserDefaults.standard.set(enablePushNotifications, forKey: "enablePushNotifications") }
     }
     
-    @Published var enableEmailNotifications: Bool {
+    var enableEmailNotifications: Bool {
         didSet { UserDefaults.standard.set(enableEmailNotifications, forKey: "enableEmailNotifications") }
     }
     
-    @Published var enableWebNotifications: Bool {
+    var enableWebNotifications: Bool {
         didSet { UserDefaults.standard.set(enableWebNotifications, forKey: "enableEmailNotifications") }
     }
     
-    @Published var saveLastLocation: Bool {
+    var saveLastLocation: Bool {
         didSet { UserDefaults.standard.set(saveLastLocation, forKey: "saveLastLocation") }
     }
   
-    @Published var useMyCurrentLocation: Bool {
+    var useMyCurrentLocation: Bool {
         didSet { UserDefaults.standard.set(useMyCurrentLocation, forKey: "useMyCurrentLocation") }
     }
     
-    @Published var showMyProfile: Bool {
+    var showMyProfile: Bool {
         didSet { UserDefaults.standard.set(showMyProfile, forKey: "showMyProfile") }
     }
     
-    @Published var showMyUseNameWhenShare: Bool {
+    var showMyUseNameWhenShare: Bool {
         didSet { UserDefaults.standard.set(showMyUseNameWhenShare, forKey: "showMyUseNameWhenShare") }
     }
     

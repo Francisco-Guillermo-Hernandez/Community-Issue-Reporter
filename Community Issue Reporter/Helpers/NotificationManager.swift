@@ -8,11 +8,12 @@
 
 import SwiftUI
 import UserNotifications
-internal import Combine
+import Observation
 
-class NotificationManager: NSObject, UNUserNotificationCenterDelegate, ObservableObject {
-    @Published var isPermissionGranted = false
-    @Published var deviceToken: String = ""
+@Observable
+class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
+    var isPermissionGranted = false
+    var deviceToken: String = ""
     
     override init() {
         super.init()
@@ -35,7 +36,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate, Observabl
         }
     }
 
-    // Handle notifications when the app is actively running in the foreground
+    /// Handle notifications when the app is actively running in the foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
@@ -43,7 +44,7 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate, Observabl
         completionHandler([.banner, .sound, .list])
     }
 
-    // Handle user tapping on the notification
+    /// Handle user tapping on the notification
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {

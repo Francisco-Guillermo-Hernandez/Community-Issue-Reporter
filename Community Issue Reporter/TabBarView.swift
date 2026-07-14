@@ -9,19 +9,19 @@ import SwiftUI
 
 struct TabBarView: View {
     @Environment(\.colorScheme) var colorScheme
-    @EnvironmentObject var settings: SettingsStore
+    @Environment(SettingsStore.self) var settings
     @State private var model = ReportDataModel.shared
     @State private var presentSheetOnDeepLink: Bool = false
     @AppStorage("openReportFromShortcut") private var openReportFromShortcut = false
     @State private var showShortcutReport: Bool = false
-    @EnvironmentObject var router: DeepLinkRouter
+    @State private var router = DeepLinkRouter.shared
     
     var body: some View {
         TabView(selection: $router.activeTab) {
             
             Tab(String(localized: "Issues"), systemImage: "map", value: 1) {
                 ReportsView()
-                    .environmentObject(router)
+                  
             }
             
             Tab(String(localized: "Sign petitions"), systemImage: "signature", value: 2) {
@@ -80,6 +80,6 @@ struct TabBarView: View {
 #Preview {
     TabBarView()
         .environmentObject(AuthViewModel())
-        .environmentObject(DeepLinkRouter())
-        .environmentObject(SettingsStore())
+        .environment(DeepLinkRouter())
+        .environment(SettingsStore())
 }

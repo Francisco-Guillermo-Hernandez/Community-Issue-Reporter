@@ -130,7 +130,7 @@ struct PostPublisher: View {
 }
 
 #Preview {
-    var petition = PetitionPost(
+    let petition = PetitionPost(
         id: "",
         title: "",
         description: "",
@@ -158,7 +158,7 @@ struct PostPublisher: View {
 }
 
 #Preview("Signers") {
-    var users: [User] = [
+    let users: [User] = [
         User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9"),
         User(names: "Martha Doe", userName: "martha.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "ieq3sSu1zcQ1U9"),
         User(names: "Michael Brown", userName: "michael.brown", profilePicture: "/avatars/019f4f22-1464-79bc-a712-acf20b7b3664.png", profileId: "l33sSu1zcQ1U9"),

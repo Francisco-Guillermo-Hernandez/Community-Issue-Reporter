@@ -7,13 +7,14 @@
 
 import Foundation
 import Network
-internal import Combine
+import Observation
 
-final class NetworkMonitor: ObservableObject {
+@Observable
+final class NetworkMonitor {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitorQueue")
     
-    @Published private(set) var isConnected: Bool = true
+    private(set) var isConnected: Bool = true
     
     init() {
         monitor.pathUpdateHandler = { [weak self] path in

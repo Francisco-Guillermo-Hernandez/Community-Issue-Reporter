@@ -218,15 +218,21 @@ final class UserRepository {
     }
     
     /// Modify notification settings
-    func modify(_ notifications: Notifications, completion : @escaping (Result<String, Error>) -> Void) async {
+    func modify(_ notifications: Notifications) async throws -> Result<String, Error> {
         do {
             let result = try await self.service.modify(notifications, self.headers)
             
             if result.code == "NOTIFICATIONS_UPDATED" {
-                completion(.success(result.message))
+                return .success(result.message)
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.message)
             }
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
-            completion(.failure(error))
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
     

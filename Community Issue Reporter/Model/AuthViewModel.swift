@@ -12,6 +12,9 @@ import MapKit
 import SwiftUI
 
 class AuthViewModel: ObservableObject {
+    
+    static let shared = AuthViewModel()
+    
     @Published var userProfile: UserProfile?
     @Published var user: GIDGoogleUser?
     @Published var isLoggedIn = false
@@ -36,11 +39,11 @@ class AuthViewModel: ObservableObject {
         setupInitialCameraPosition()
     }
     
-    func setCameraPosition(to position: Coordinate) {
+    func setCameraPosition(to position: Coordinate, latitudeDelta: Double, longitudeDelta: Double) {
         cameraPosition = .region(
             MKCoordinateRegion(
                 center: position.locationCoordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta:  0.016440700713786782)
+                span: MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
             )
         )
     }

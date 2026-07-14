@@ -92,7 +92,6 @@ final class ReportDataModel {
     }
     
     func updateCoordinate(_ coordinate: Coordinate) {
-        isDifferentLocation = true
         report.coordinate = coordinate
     }
     
@@ -124,8 +123,20 @@ final class ReportDataModel {
     }
     
     func clear() -> Void {
+        
+        let appState = AuthViewModel()
+        var lat: Double =  13.7159815
+        var lng: Double = -89.1801214
+
+        if let selectedCity = appState.selectedCity {
+            lat = selectedCity.coordinates.lat
+            lng = selectedCity.coordinates.lng
+        }
+        
+        self.isAddressValid = false
+        self.isDifferentLocation = false
         self.report = Report(
-            coordinate: .init(lat: 13.68935, lng: -89.18718),
+            coordinate: .init(lat, lng),
             address: "",
             title: "",
             description: "",

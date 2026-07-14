@@ -31,12 +31,16 @@ struct MapPickerView: View {
     private let span = MKCoordinateSpan(latitudeDelta: 0.00088, longitudeDelta: 0.00088)
     
     var onConfirm: OnConfirm
+    var onChange: () -> Void
     
-    init(coordinate: Binding<Coordinate>, locator: Binding<Locator>, onConfirm: OnConfirm = nil) {
+    init(coordinate: Binding<Coordinate>,
+         locator: Binding<Locator>,
+         onConfirm: OnConfirm = nil, onChange: @escaping @Sendable () -> Void) {
     
         self._coordinate = coordinate
         self._locator = locator
         self.onConfirm = onConfirm
+        self.onChange = onChange
         self.selectedCoordinate = getLocation(coordinate)
         self.searchText = ""
         self.address = ""
@@ -65,6 +69,11 @@ struct MapPickerView: View {
                     .onMapCameraChange { context in
                         selectedCoordinate = context.camera.centerCoordinate
                         handleMapMovement(center: context.camera.centerCoordinate)
+                    }
+                    .onMapCameraChange(frequency: .onEnd) { context in
+                        if cameraPosition.positionedByUser {
+                            onChange()
+                        }
                     }
                     .task {
                         self.isSearchFocused = false
@@ -300,6 +309,6 @@ func getLocation(c coordinate: Coordinate) -> CLLocationCoordinate2D {
 #Preview {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
     @Previewable @State var locator: Locator = .init()
-    MapPickerView(coordinate: $coordinate, locator: $locator)
+    MapPickerView(coordinate: $coordinate, locator: $locator, onChange: {})
 
 }

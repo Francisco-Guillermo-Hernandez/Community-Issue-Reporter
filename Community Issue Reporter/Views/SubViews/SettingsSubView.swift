@@ -73,26 +73,12 @@ struct SettingsSubView: View {
     @EnvironmentObject var appState: AuthViewModel
     
     @State private var geographicalRegion: Int = 1
-    @State private var selectedCountry: Int = 0
-    @State private var enableBackgroundSync: Bool = false
-    @State private var enableAnonymousTelemetry: Bool = true
-    @State private var selectedLanguage: Int = 1
-    @State private var enableAutomaticIdentification: Bool = true
-    
     @State private var countries: [Country] = []
     @State private var regions: [Region] = []
-    @State private var cities: [FriendlyCityDistribution] = []
-    @State private var language: String = "es-419"
-    @State private var enableNotifications: Bool = false
-    @State private var saveLastLocation: Bool = true
-    @State private var useMyCurrentLocation: Bool = false
     
+    @State private var cities: [FriendlyCityDistribution] = []
     
     @EnvironmentObject var notificationManager: NotificationManager
-    
-    @State private var textToCopy = "Hello, World!"
-    @State private var showCopiedMessage = false
-    
     
     @State private var selectedCity: FriendlyCityDistribution = .init(
         cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
@@ -135,7 +121,10 @@ struct SettingsSubView: View {
                         }
                     }
                     
-                    SettingsGroup(title: String(localized: "Privacy"), footerText: "") {
+                    SettingsGroup(
+                        title: String(localized: "Privacy"),
+                        footerText: String(localized: "You can show your profile and your username when you share your reports and petitions with others.")
+                    ) {
                         Toggle("Show my profile", isOn: $settings.showMyProfile)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.showMyProfile) { oldValue, newValue in
@@ -209,7 +198,6 @@ struct SettingsSubView: View {
                 }
             }
         }
-        
         .background(Color.theme.background)
         .interactiveDismissDisabled(true)
         
@@ -227,7 +215,7 @@ struct SettingsSubView: View {
     @ViewBuilder
     private func selectCityView() -> some View {
         CitySelectionView(
-            countryCode: .SV,
+            countryCode: settings.countryCodeIso,
             mode: .modify,
             selectedCity: $selectedCity,
             nextStep: {
@@ -272,11 +260,18 @@ struct SettingsSubView: View {
     }
     
     func updateNotificationSettings() {
-        
-        print("updating")
         Task {
-            try? await Task.sleep(for: .milliseconds(550))
-            await UserRepository.shared.modify(.init(app: settings.enablePushNotifications, email: settings.enableEmailNotifications, web: settings.enableWebNotifications), completion: { (result: Result<String, Error>) in
+            
+            do {
+                try await Task.sleep(for: .milliseconds(550))
+                let result = try await UserRepository.shared.modify(
+                    .init(
+                        app: settings.enablePushNotifications,
+                        email: settings.enableEmailNotifications,
+                        web: settings.enableWebNotifications
+                    )
+                )
+                
                 switch result {
                 case .success(let message):
                     print(message)
@@ -285,7 +280,9 @@ struct SettingsSubView: View {
                     print(error)
                     
                 }
-            })
+            } catch {
+                
+            }
         }
     }
     

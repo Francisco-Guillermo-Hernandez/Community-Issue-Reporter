@@ -19,7 +19,7 @@ struct EssentialInformationView: View {
             VStack {
                 
                 /// Notifications group
-                SettingsGroup(title: "Notifications") {
+                SettingsGroup(title: String(localized: "Notifications"), footerText: String(localized: "")) {
                     Toggle("Push notifications", isOn: $notifications.app)
                         .foregroundStyle(Color.theme.inputText)
                         .onChange(of: notifications.app) { oldValue, newValue in
@@ -84,6 +84,7 @@ struct EssentialInformationView: View {
             .impact(weight: .medium),
             trigger: triggerFeedBack
         )
+        .background(Color.theme.background)
     }
     
     func completeLandingPage() -> Void {
@@ -96,10 +97,22 @@ struct EssentialInformationView: View {
     
     func updateNotificationSettings() {
         Task {
-            try? await Task.sleep(for: .milliseconds(550))
-            await UserRepository.shared.modify(notifications, completion: { _ in
-                print("updated")
-            })
+            
+            do {
+                try await Task.sleep(for: .milliseconds(550))
+                let result = try await UserRepository.shared.modify(notifications)
+                
+                switch result {
+                    case .success(let message):
+                        print(message)
+
+                    case .failure(let error):
+                        print(error)
+
+                }
+            } catch {
+                
+            }
         }
     }
 }

@@ -157,7 +157,7 @@ struct ReportWizardContainer: View {
                 .disabled(disableButton)
                 
             } else {
-                Button(action: { controller.doneTrigger.toggle(); dismiss() }) {
+                Button(action: done) {
                     Text(String(localized: "Done"))
                         .font(.headline)
                         .fontWeight(.bold)
@@ -165,8 +165,8 @@ struct ReportWizardContainer: View {
                         .padding()
                         .background(controller.currentStep.color)
                         .foregroundColor(.white)
-                        .contentShape(Capsule())
-                        .clipShape(Capsule())
+                        .contentShape(.capsule)
+                        .clipShape(.capsule)
                         .glassEffect(in: .capsule)
                     
                 }
@@ -192,6 +192,12 @@ struct ReportWizardContainer: View {
             case .media: return !isReadyToContinue
             default: return false
         }
+    }
+    
+    func done() {
+        controller.doneTrigger.toggle()
+        model.clear()
+        dismiss()
     }
 }
 

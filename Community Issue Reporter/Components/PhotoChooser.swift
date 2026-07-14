@@ -75,6 +75,14 @@ struct PhotoChooser: View {
                     )
                     .popoverTip(takeAPhotoTip, arrowEdge: .top)
                     .disabled(disableOnMaxImagesCompleted)
+                    .task {
+                        try? await Task.sleep(nanoseconds: 2_000_000_000)
+                        await MainActor.run {
+                            withAnimation {
+                                TakeAPhotoTip.shouldShow = true
+                            }
+                        }
+                    }
                     
                     PhotosPicker(
                         selection: $selectedPhotoItems,
@@ -313,6 +321,7 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
         
         @objc func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true, completion: nil)
             onImagePicked(nil)
         }
         

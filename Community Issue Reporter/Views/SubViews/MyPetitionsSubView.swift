@@ -40,6 +40,7 @@ struct MyPetitionsSubView: View {
     @Binding var path: [InsightsNavigation]
 
     var subViewName: String
+    var mode: ViewOptions = .list
     var body: some View {
         Group {
 

@@ -21,7 +21,7 @@ struct MapPickerView: View {
     @State private var searchText: String
     @State private var hasCenteredOnUser = false
     @State private var locationManager = LocationManager()
-    @StateObject private var searchCompleter = SearchCompleter()
+    @State private var searchCompleter = SearchCompleter()
     @FocusState private var isSearchFocused: Bool
     
     @State private var address: String

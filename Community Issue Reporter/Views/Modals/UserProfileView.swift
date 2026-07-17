@@ -166,9 +166,9 @@ struct UserProfileView: View {
         case "op:comments":
             CommentsSubView(subViewName: option.title)
         case "op:reports":
-            MyReportsSubView(path: $navigationPath, subViewName: option.title)
+            MyReportsSubView(path: $navigationPath, subViewName: option.title, mode: .listAndModify)
         case "op:signPetitions":
-            MyPetitionsSubView(path: $navigationPath, subViewName: option.title)
+            MyPetitionsSubView(path: $navigationPath, subViewName: option.title, mode: .listAndModify)
             
         default:
             Text("\(option.id) selected")

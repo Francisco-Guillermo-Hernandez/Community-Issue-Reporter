@@ -14,18 +14,18 @@ internal import Combine
 struct ReportsView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
+    @Namespace private var animationID
     @EnvironmentObject var appState: AuthViewModel
     @Environment(SettingsStore.self) var settings
     @State private var profile = ProfileDataModel()
     
     @State private var controller = MapExplorerController()
-    @StateObject private var searchCompleter = SearchCompleter()
+    @State private var searchCompleter = SearchCompleter()
     @FocusState private var isSearchFocused: Bool
     @FocusState private var isOverlaySearchFocused: Bool
     @State private var offsetY: CGFloat = 0
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismissSheet
-    @Namespace private var animationID
     @Environment(\.dismiss) private var dismiss
     @State private var router = DeepLinkRouter.shared
     

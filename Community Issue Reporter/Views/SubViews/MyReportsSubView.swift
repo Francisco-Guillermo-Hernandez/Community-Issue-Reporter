@@ -154,8 +154,26 @@ struct MyReportsSubView: View {
             } else {
                 List {
                     ForEach(controller.reports, id: \.id) { report in
-                        ReportCellView(report: report)
-                            .cellStyle()
+                        if mode == .listAndModify {
+                            NavigationLink(destination: showWizard(report)) {
+                                ReportCellView(report: report)
+                                    .cellStyle()
+                            }
+                            .listRowInsets(themeCellEdgeInsets)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    controller.reportToDelete = report
+                                    controller.showDeleteAlert = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                        } else {
+                            ReportCellView(report: report)
+                                .cellStyle()
+                        }
                     }
                 }
                 .listStyle(.plain)
@@ -182,6 +200,17 @@ struct MyReportsSubView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)
+    }
+    
+    @ViewBuilder
+    private func showWizard(_ report: Report) -> some View {
+        ReportWizardContainer(model: controller.model, onCompletion: { _, _ in })
+            .task {
+                controller.model.prepareForModification(report)
+                if let matter = mattersToResolve.first(where: { $0.id == report.matterToSolveId }) {
+                    controller.model.setMatterToSolve(matter)
+                }
+            }
     }
 }
 

@@ -25,10 +25,10 @@ struct AvatarResponse: Decodable {
 }
 
 struct ReportSessionResponse: Codable {
-    let reportContainer: String
-    let createdAt: Date
-    let shareIndexHash: String
-    let reportCreationOn: String
+    var reportContainer: String
+    var createdAt: Date
+    var shareIndexHash: String
+    var reportCreationOn: String
 }
 
 struct GenericResponse: Identifiable, Codable {

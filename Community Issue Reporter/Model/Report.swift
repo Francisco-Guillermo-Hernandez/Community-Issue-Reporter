@@ -48,6 +48,8 @@ final class Report: Identifiable, Codable, Hashable {
     var suggestedDescription: String?
     var reportState: ReportStates?
     var attachments: [PreviewAttachmentRequest]
+    var cityId: String?
+    var reportContainer: String?
     init(
             id: String? = nil,
             coordinate: Coordinate,
@@ -67,7 +69,9 @@ final class Report: Identifiable, Codable, Hashable {
             suggestedTitle: String? = nil,
             suggestedDescription: String? = nil,
             reportState: ReportStates? = .new,
-            attachments: [PreviewAttachmentRequest] = []
+            attachments: [PreviewAttachmentRequest] = [],
+            cityId: String? = nil,
+            reportContainer: String? = nil
         ) {
             self.id = id
             self.coordinate = coordinate
@@ -88,6 +92,8 @@ final class Report: Identifiable, Codable, Hashable {
             self.suggestedDescription = suggestedDescription
             self.reportState = reportState
             self.attachments = attachments
+            self.cityId = cityId
+            self.reportContainer = reportContainer
         }
 }
 
@@ -113,6 +119,8 @@ struct ReportDAO: Identifiable, Codable {
     var suggestedDescription: String?
     var reportState: ReportStates?
     var attachments: [PreviewAttachmentRequest]
+    var cityId: String?
+    var reportContainer: String?
     
     init(_ report: Report) {
         self.id = report.id
@@ -134,6 +142,8 @@ struct ReportDAO: Identifiable, Codable {
         self.suggestedDescription = report.suggestedDescription
         self.reportState = report.reportState
         self.attachments = report.attachments
+        self.cityId = report.cityId
+        self.reportContainer = report.reportContainer
     }
     
     func toModel() -> Report {
@@ -157,6 +167,8 @@ struct ReportDAO: Identifiable, Codable {
             suggestedDescription: self.suggestedDescription,
             reportState: self.reportState,
             attachments: self.attachments,
+            cityId: self.cityId,
+            reportContainer: self.reportContainer
         )
     }
 }

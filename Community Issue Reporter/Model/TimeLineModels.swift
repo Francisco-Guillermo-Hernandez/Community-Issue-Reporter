@@ -129,4 +129,5 @@ struct PreviewAttachmentRequest: Codable {
     let type: AttachmentType
     let key: String
     let notes: String?
+    let reportContainer: String
 }

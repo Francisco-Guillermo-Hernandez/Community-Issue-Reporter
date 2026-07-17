@@ -365,3 +365,8 @@ enum ImageError: Error {
     case tooLarge(String)
     case unknownError(String)
 }
+
+enum ReportError: Error {
+    case noIdentifier
+    case noCityIdentifier
+}

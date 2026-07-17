@@ -14,19 +14,20 @@ typealias Reports = PaginatedResponse<Report>
 final class ReportRepository {
     static let shared = ReportRepository()
     private let reportsService: ReportsService
+    
+    var headers: [HTTPHeader]
     private init() {
         reportsService = ReportsService()
+        headers = [
+            HTTPHeader(name: "Client-Type", content: "Mobile-App"),
+            HTTPHeader(name: "CountryCode", content: "SV"),
+        ]
     }
     
 
     func start() async throws -> StartReportResponse {
         do {
-            return try await self.reportsService.start(
-                headers: [
-                    HTTPHeader(name: "Client-Type", content: "Mobile-App"),
-                    HTTPHeader(name: "CountryCode", content: "SV"),
-                ]
-            )
+            return try await self.reportsService.start(headers: headers)
         } catch {
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
@@ -116,7 +117,7 @@ final class ReportRepository {
         }
     }
     
-    func update(report: Report, locator: Locator) async throws -> SuccessfulResult {
+    func update(_ report: Report) async throws -> SuccessfulResult {
         do {
             
             guard let id = report.id as String? else {
@@ -125,7 +126,7 @@ final class ReportRepository {
             }
             
             if report.reportState == .modifying {
-                let response = try await self.reportsService.updateReport(reportId: id, report: report, headers: [])
+                let response = try await self.reportsService.updateReport(reportId: id, report: report, headers: self.headers)
                 
                 if response.code == "REPORT_UPDATED" {
                     return .updated
@@ -147,10 +148,7 @@ final class ReportRepository {
         do {
             let response = try await self.reportsService.submitGroupedAttachments(
                 attachments: attachments,
-                headers: [
-                    HTTPHeader(name: "Client-Type", content: "Mobile-App"),
-                    HTTPHeader(name: "CountryCode", content: "SV"),
-                ]
+                headers: self.headers
             )
             
             if response.code == "ATTACHMENTS_SAVED" {

@@ -8,10 +8,11 @@
 import CoreLocation
 import MapKit
 import SwiftUI
-internal import Combine
+import Observation
 
-final class SearchCompleter: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
-    @Published private(set) var suggestions: [SearchSuggestion] = []
+@Observable
+final class SearchCompleter: NSObject, MKLocalSearchCompleterDelegate {
+    private(set) var suggestions: [SearchSuggestion] = []
     private let completer = MKLocalSearchCompleter()
 
     override init() {

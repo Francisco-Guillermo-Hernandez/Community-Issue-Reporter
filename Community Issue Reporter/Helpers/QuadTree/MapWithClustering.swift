@@ -10,7 +10,7 @@ import MapKit
 
 struct MapWithClustering: View {
     @EnvironmentObject var appState: AuthViewModel
-    @ObservedObject var manager: MapManager
+    @State var manager: MapManager
     @State private var selectedPlaceID: String?
     @State private var expandedItem: MapExplorerReport?
     private let animation = Animation.easeInOut(duration: 0.25)

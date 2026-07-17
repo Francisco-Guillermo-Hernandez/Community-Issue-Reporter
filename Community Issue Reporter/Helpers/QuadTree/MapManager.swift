@@ -9,13 +9,14 @@ import Foundation
 import CoreLocation
 import CoreGraphics
 import MapKit
-internal import Combine
+import Observation
 
 @MainActor
-class MapManager: ObservableObject {
-    @Published var renderedClusters: [ReportCluster] = []
+@Observable
+class MapManager {
+    var renderedClusters: [ReportCluster] = []
     
-    @Published var reports: [MapExplorerReport] = [] {
+    var reports: [MapExplorerReport] = [] {
         didSet {
             treeManager.clear()
             treeManager.insert(reports)

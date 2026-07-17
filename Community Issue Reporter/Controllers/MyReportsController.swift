@@ -42,6 +42,23 @@ final class MyReportsController {
         reportToDelete = nil
     }
     
+    func update(report: Report) {
+        Task {
+            isLoading = true
+            do {
+                let result = try await ReportRepository.shared.update(report)
+                if result == .updated {
+                    self.refreshID = .init()
+                }
+                
+            } catch {
+                
+            }
+            
+            isLoading = false
+        }
+    }
+    
     func delete(report id: Report? = nil) {
         Task {
             guard let id = id?.id else { return }
@@ -50,8 +67,6 @@ final class MyReportsController {
                 let result = try await ReportRepository.shared.delete(id)
                 if result == .deleted {
                     self.confirmDeletion(of: id)
-                } else {
-                    
                 }
             } catch {
                 

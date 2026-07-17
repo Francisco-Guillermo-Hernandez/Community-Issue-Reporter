@@ -23,10 +23,41 @@ class ReportController {
     
     func startRePorting(_ model: ReportDataModel) async {
         do {
-            let result = try await ReportRepository.shared.start()
-            model.updateReportSession(result.data)
-        } catch {
+            if model.report.reportState == .modifying {
+                
+                print("Modifying report")
+                
+                guard let reportId = model.report.id else {
+                    throw ReportError.noIdentifier
+                }
+                guard let cityId = model.report.cityId else {
+                    throw ReportError.noIdentifier
+                }
+                
+                let reportContainer = model.report.attachments.first?.reportContainer ?? ""
+                
+                /// Get metadata
+                let (countryCode, reportSession) = model.getMetadataFromReportId(reportId, reportContainer)
+                
+                /// Update report session
+                model.updateReportSession(reportSession)
+                
+                /// Set locator using metadata information
+                model.setLocator(countryCode: countryCode, cityId: cityId)
+                
+                print("setLocator")
+                dump(model.locator)
+                
+                print("reportsession")
+                dump(model.reportSession)
+            } else {
+                let result = try await ReportRepository.shared.start()
+                model.updateReportSession(result.data)
+            }
             
+        } catch {
+            print("startReporting: ")
+            print(error)
         }
     }
     
@@ -66,13 +97,22 @@ class ReportController {
     func submitGroupedAttachments(with attachments: [PhotoUploadTracker], using model: ReportDataModel) async {
         do {
       
+            var reportId = model.buildReportId()
+            
+            if model.report.reportState == .modifying, let id = model.report.id {
+                reportId = id
+            }
+            
+            print("reportId: \(reportId)")
+            print("AttachmentContainer: \(model.reportSession.reportContainer)")
+            
             let payload = attachments.map { tracker in
                 GroupedAttachmentPayload(
                     attachmentContainer: model.reportSession.reportContainer,
                     key: tracker.key,
                     previewFileName: "preview_\(tracker.name)",
                     fileName: tracker.name,
-                    reportId: model.buildReportId(),
+                    reportId: reportId,
                     notes: ""
                 )
             }
@@ -93,16 +133,41 @@ class ReportController {
         }
     }
     
+    func modify(using model: ReportDataModel, with attachments: [PhotoUploadTracker]) async {
+        do {
+            guard let id = model.report.id else { return }
+            reportId = id
+            
+            print("reportId")
+            print(reportId)
+            
+            print("reportContainer")
+            print(model.report.attachments[0].reportContainer)
+            model.reportSession.reportContainer = model.report.attachments[0].reportContainer
+            let result = try await ReportRepository.shared.update(model.report)
+            if result == .updated {
+                await submitGroupedAttachments(with: attachments, using: model)
+            }
+        } catch {
+            showAlert(message: error.localizedDescription)
+        }
+    }
+    
     func submitReport(_ model: ReportDataModel, attachments: [PhotoUploadTracker], onComplete: @escaping () -> Void) {
         Task {
             isLoading = true
             model.addAttachments(attachments)
             
-            async let a = createShareableLink(model)
-            async let b = createReport(using: model)
-            async let c = submitGroupedAttachments(with: attachments, using: model)
-            
-            _ = await (a, b, c)
+            if model.report.reportState == .modifying {
+               await modify(using: model, with: attachments)
+               
+            } else {
+                async let a = createShareableLink(model)
+                async let b = createReport(using: model)
+                async let c = submitGroupedAttachments(with: attachments, using: model)
+                
+                _ = await (a, b, c)
+            }
             
             model.removeAttachments()
             isLoading = false

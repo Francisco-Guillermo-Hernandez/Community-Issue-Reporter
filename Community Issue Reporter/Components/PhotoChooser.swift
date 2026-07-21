@@ -37,6 +37,7 @@ struct PhotoChooser: View {
     @State private var isCameraPresented: Bool
     @State private var cameraCompletion: (([MediaResources]) -> Void)?
     @State private var previewImage: UIImage?
+    @State private var previewURL: URL?
     @State private var previewID: UUID?
     @State private var isImagePreviewPresented: Bool
     @State var orientation = UIDevice.current.orientation
@@ -133,6 +134,7 @@ struct PhotoChooser: View {
                             name: tracker.name,
                             phase: tracker.phase,
                             data: tracker.localResource.data,
+                            url: tracker.url,
                             currentValue: Binding(
                                 get: { tracker.uploadProgress },
                                 set: { _ in }
@@ -147,9 +149,9 @@ struct PhotoChooser: View {
                         )
                         .onLongPressGesture(minimumDuration: 0.4) {
                             triggerHaptic()
-                            showPreview(for: tracker.localResource)
+                            showPreview(for: tracker)
                         }
-                        .matchedTransitionSource(id: tracker.id, in: nameSpace)
+                        .matchedTransitionSource(id: tracker.localResource.id, in: nameSpace)
                         .sensoryFeedback(.impact(weight: .medium), trigger: isImagePreviewPresented)
                         
                     }
@@ -167,7 +169,7 @@ struct PhotoChooser: View {
                 .ignoresSafeArea()
             }
             .fullScreenCover(isPresented: $isImagePreviewPresented) {
-                if isImagePreviewPresented, let previewImage, let previewID {
+                if isImagePreviewPresented, let previewID {
                     ZStack {
                         Rectangle()
                             .opacity(0.001)
@@ -178,17 +180,31 @@ struct PhotoChooser: View {
                             }
                         
                         GeometryReader { proxy in
-                            Image(uiImage: previewImage)
-                                .resizable()
-                                .scaledToFit()
-                                .clipShape(RoundedRectangle(cornerRadius: 32))
-                                .shadow(radius: 16)
-                                .contentShape(RoundedRectangle(cornerRadius: 32))
-                                .frame(width: proxy.size.width - 32, height: proxy.size.height / 2)
-                                .position(x: proxy.size.width / 2 , y: proxy.size.height / 2)
-                                .onTapGesture {
-                                    dismissPreview()
+                            Group {
+                                if let previewImage {
+                                    Image(uiImage: previewImage)
+                                        .resizable()
+                                } else if let previewURL {
+                                    CachedAsyncImage(url: previewURL) { image in
+                                        image
+                                            .resizable()
+                                    } placeholder: {
+                                        ZStack {
+                                            Color.gray.opacity(0.1)
+                                            ProgressView()
+                                        }
+                                    }
                                 }
+                            }
+                            .scaledToFit()
+                            .clipShape(RoundedRectangle(cornerRadius: 32))
+                            .shadow(radius: 16)
+                            .contentShape(RoundedRectangle(cornerRadius: 32))
+                            .frame(width: proxy.size.width - 32, height: proxy.size.height / 2)
+                            .position(x: proxy.size.width / 2 , y: proxy.size.height / 2)
+                            .onTapGesture {
+                                dismissPreview()
+                            }
                         }
                     }
                     .navigationTransition(.zoom(sourceID: previewID, in: nameSpace))
@@ -245,16 +261,24 @@ struct PhotoChooser: View {
         }
     }
     
-    private func showPreview(for resource: MediaResources) {
-        guard let data = resource.data else { return }
-        previewImage = data
-        previewID = resource.id
+    private func showPreview(for tracker: PhotoUploadTracker) {
+        if let data = tracker.localResource.data {
+            previewImage = data
+            previewURL = nil
+        } else if let url = tracker.url {
+            previewImage = nil
+            previewURL = url
+        } else {
+            return
+        }
+        previewID = tracker.localResource.id
         isImagePreviewPresented = true
     }
     
     private func dismissPreview() {
         isImagePreviewPresented = false
         previewImage = nil
+        previewURL = nil
         previewID = nil
     }
     

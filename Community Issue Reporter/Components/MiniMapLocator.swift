@@ -144,6 +144,7 @@ struct MiniMapLocator: View {
                 )
             )
             selectedCoordinate = lastLocation.coordinate
+            onChange()
         } else {
             locationManager.requestAuthorization()
         }

@@ -39,6 +39,7 @@ struct SearchBar: View {
                         .onChange(of: isFocused) { _, newValue in
                             onFocusChange(newValue)
                         }
+                        .accessibilityIdentifier("SearchBarTextField")
                 }
                 .glassEffect()
                 .animation(
@@ -98,6 +99,7 @@ struct SearchBar: View {
                             }
                         }
                         .matchedTransitionSource(id: "openProfile", in: profileNamespace)
+                        .accessibilityIdentifier("SearchBarActionButton")
                     }
                 }
             }

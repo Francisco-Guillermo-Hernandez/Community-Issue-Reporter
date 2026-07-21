@@ -131,3 +131,15 @@ struct PreviewAttachmentRequest: Codable {
     let notes: String?
     let reportContainer: String
 }
+
+extension PreviewAttachmentRequest {
+    var url: URL? {
+        get {
+            if !reportContainer.isEmpty && !fileName.isEmpty {
+                return getURL(from: self.key)
+            }
+            
+            return nil
+        }
+    }
+}

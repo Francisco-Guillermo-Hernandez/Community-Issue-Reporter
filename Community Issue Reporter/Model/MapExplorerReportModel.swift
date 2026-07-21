@@ -31,6 +31,7 @@ struct MapExplorerReport: Identifiable, Decodable, Hashable {
     let shareUrl: String
     let attachments: [PreviewAttachment]
     let assignedTo: String?
+    let reportContainer: String
     var clLocation: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: lat, longitude: lng)
     }

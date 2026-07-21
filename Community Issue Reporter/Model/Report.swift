@@ -46,10 +46,11 @@ final class Report: Identifiable, Codable, Hashable {
     var olc: String?
     var suggestedTitle: String?
     var suggestedDescription: String?
-    var reportState: ReportStates?
+    var reportState: ReportStates
     var attachments: [PreviewAttachmentRequest]
     var cityId: String?
     var reportContainer: String?
+    var shareUrl: String?
     init(
             id: String? = nil,
             coordinate: Coordinate,
@@ -68,10 +69,11 @@ final class Report: Identifiable, Codable, Hashable {
             reportedBy: String? = nil,
             suggestedTitle: String? = nil,
             suggestedDescription: String? = nil,
-            reportState: ReportStates? = .new,
+            reportState: ReportStates = .new,
             attachments: [PreviewAttachmentRequest] = [],
             cityId: String? = nil,
-            reportContainer: String? = nil
+            reportContainer: String? = nil,
+            shareUrl: String? = nil
         ) {
             self.id = id
             self.coordinate = coordinate
@@ -94,6 +96,7 @@ final class Report: Identifiable, Codable, Hashable {
             self.attachments = attachments
             self.cityId = cityId
             self.reportContainer = reportContainer
+            self.shareUrl = shareUrl
         }
 }
 
@@ -121,6 +124,7 @@ struct ReportDAO: Identifiable, Codable {
     var attachments: [PreviewAttachmentRequest]
     var cityId: String?
     var reportContainer: String?
+    var shareUrl: String?
     
     init(_ report: Report) {
         self.id = report.id
@@ -144,6 +148,7 @@ struct ReportDAO: Identifiable, Codable {
         self.attachments = report.attachments
         self.cityId = report.cityId
         self.reportContainer = report.reportContainer
+        self.shareUrl = report.shareUrl
     }
     
     func toModel() -> Report {
@@ -165,10 +170,11 @@ struct ReportDAO: Identifiable, Codable {
             reportedBy: self.reportedBy,
             suggestedTitle: self.suggestedTitle,
             suggestedDescription: self.suggestedDescription,
-            reportState: self.reportState,
+            reportState: self.reportState ?? .modifying,
             attachments: self.attachments,
             cityId: self.cityId,
-            reportContainer: self.reportContainer
+            reportContainer: self.reportContainer,
+            shareUrl: self.shareUrl
         )
     }
 }

@@ -71,16 +71,8 @@ struct LocationStepView: View {
                         )
                     }
                 }
-
-                TextInput(
-                    name: "Address",
-                    label: String(localized: "Please tell us where is the issue", comment: "ReportView: Please tell us where is the issue"),
-                    validators: addressValidator,
-                    regex: .customPattern(addressRegex),
-                    axis: .vertical,
-                    isValid: $model.isAddressValid,
-                    value: $model.report.address
-                )
+            
+                FooterText(text: String(localized: "Please pan the map to select where the issue is. "))
                 
                 Spacer()
             }

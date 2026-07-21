@@ -21,11 +21,10 @@ struct TimelineNode<Content: View>: View {
     var body: some View {
         HStack(alignment: .top, spacing: 15) {
             VStack(spacing: 0) {
-                // The "Station" dot
+          
                 ZStack {
                     Circle()
                         .fill(Color.theme.primary.opacity(0.88))
-//                        .fill(status.color)
                         .frame(width: 20, height: 20)
                     Circle()
                         .fill(.white)
@@ -36,12 +35,9 @@ struct TimelineNode<Content: View>: View {
                 // The "Rail" line
                 if !isLast {
                     Rectangle()
-//                        .fill(status.color.opacity(0.5))
                         .fill(Color.theme.primary.opacity(0.47))
-                        
                         .frame(width: 4)
                         .glassEffect(in: .rect)
-//                        .cornerRadius(2)
                 }
             }
             .frame(width: 24)
@@ -213,8 +209,21 @@ struct AttachmentDetailView: View {
 
 
 #Preview {
+    
     NavigationStack {
         IssueTimelineView(report: .mockReport)
+        
+        Button("showJson") {
+            do {
+                let encoder = JSONEncoder()
+                let jsonData = try encoder.encode(IssueReport.mockReport)
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
+                    print(jsonString)
+                }
+            } catch {
+                print("Error encoding user: \(error)")
+            }
+        }
     }
 }
 

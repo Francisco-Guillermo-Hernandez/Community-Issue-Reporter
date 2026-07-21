@@ -20,21 +20,24 @@ struct TabBarView: View {
         TabView(selection: $router.activeTab) {
             
             Tab(String(localized: "Issues"), systemImage: "map", value: 1) {
-                ReportsView()
-                  
+                MapExplorerView()
             }
+            .accessibilityIdentifier("MapExplorerTab")
             
             Tab(String(localized: "Sign petitions"), systemImage: "signature", value: 2) {
                SignRequestsView()
             }
+            .accessibilityIdentifier("SignRequestsTab")
             
             Tab(String(localized: "Insights"), systemImage: "sparkles", value: 3) {
                 InsightsView()
             }
+            .accessibilityIdentifier("ShowInsightsTab")
             
             Tab(String(localized: "Add"), systemImage: "plus", value: 4, role: .search) {
                 CreateReportView()
             }
+            .accessibilityIdentifier("CreateReportTab")
         }
         .alert("Status Update", isPresented: $router.presentAlert) {
             Button("OK", role: .cancel) {

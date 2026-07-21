@@ -34,7 +34,7 @@ class ReportController {
                     throw ReportError.noIdentifier
                 }
                 
-                let reportContainer = model.report.attachments.first?.reportContainer ?? ""
+                let reportContainer = model.report.reportContainer ?? ""
                 
                 /// Get metadata
                 let (countryCode, reportSession) = model.getMetadataFromReportId(reportId, reportContainer)
@@ -96,7 +96,9 @@ class ReportController {
     
     func submitGroupedAttachments(with attachments: [PhotoUploadTracker], using model: ReportDataModel) async {
         do {
-      
+            let newAttachments = attachments.filter { !$0.isExisting }
+            guard !newAttachments.isEmpty else { return }
+            
             var reportId = model.buildReportId()
             
             if model.report.reportState == .modifying, let id = model.report.id {
@@ -106,7 +108,7 @@ class ReportController {
             print("reportId: \(reportId)")
             print("AttachmentContainer: \(model.reportSession.reportContainer)")
             
-            let payload = attachments.map { tracker in
+            let payload = newAttachments.map { tracker in
                 GroupedAttachmentPayload(
                     attachmentContainer: model.reportSession.reportContainer,
                     key: tracker.key,
@@ -138,12 +140,10 @@ class ReportController {
             guard let id = model.report.id else { return }
             reportId = id
             
-            print("reportId")
-            print(reportId)
+            guard let url = model.report.shareUrl else { return }
             
-            print("reportContainer")
-            print(model.report.attachments[0].reportContainer)
-            model.reportSession.reportContainer = model.report.attachments[0].reportContainer
+            shareableLink = url
+            
             let result = try await ReportRepository.shared.update(model.report)
             if result == .updated {
                 await submitGroupedAttachments(with: attachments, using: model)

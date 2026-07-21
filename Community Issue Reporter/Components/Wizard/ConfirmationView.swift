@@ -10,6 +10,7 @@ import UIKit
 
 struct ConfirmationView: View {
     @State private var showCopiedCodeMicroInteraction: Bool = false
+    @State private var isAnimating: Bool = true
     
     @Binding var id: String
     @Binding var url: String
@@ -24,6 +25,10 @@ struct ConfirmationView: View {
                         Color.green,
                         Color.green
                     )
+                    .symbolEffect(.drawOn, isActive: isAnimating)
+                    .onAppear {
+                        isAnimating = false
+                    }
                 
                 Text(String(localized: "Your report has been submitted"))
                     .font(.title2)
@@ -71,12 +76,14 @@ struct ConfirmationView: View {
                         style: .normal,
                         icon: icon
                     )
+                    .id(WizardElements.copyCodeButton)
                     .accessibilityIdentifier("copy-report-code")
                     
                     ThemedButton(
-                        message: "Share Report",
+                        message: String(localized: "Share Report"),
                         action: {
-                            shareFromClosure(item: urlFromString(url)!)
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            shareFromClosure(item: buildShareURL(for: url)!)
                         },
                         type: .outline,
                         style: .normal,
@@ -86,15 +93,20 @@ struct ConfirmationView: View {
                 }
                     
             }
+            
+            Color.clear
+                .frame(height: 1)
+                .id(WizardElements.final)
         }
         .frame(maxWidth: .infinity)
+        .padding(.bottom, 100)
         .padding(.vertical, 12)
     }
     
     // MARK: - Logic
     
     private var message: String {
-        showCopiedCodeMicroInteraction ? "Copied!" : "Copy report code"
+        showCopiedCodeMicroInteraction ? String(localized: "Copied!") : String(localized: "Copy report code")
     }
     
     private var icon: String {

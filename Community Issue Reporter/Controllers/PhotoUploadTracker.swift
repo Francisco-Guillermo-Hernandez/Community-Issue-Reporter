@@ -14,13 +14,30 @@ class PhotoUploadTracker: Identifiable {
     var id: String = UUID().uuidString
     var key: String = ""
     let localResource: MediaResources
+    var url: URL? = nil
     
     var phase: ImagePhase = .optimizing
     var uploadProgress: Float = 0.0
     var name: String = ""
+    var isExisting: Bool = false
     
-    init(localResource: MediaResources) {
+    init(localResource: MediaResources, isExisting: Bool = false) {
         self.localResource = localResource
+        self.isExisting = isExisting
+    }
+    
+    init(key: String, name: String, url: URL?, isExisting: Bool = true) {
+        self.key = key
+        self.name = name
+        self.url = url
+        self.phase = .success
+        self.uploadProgress = 1.0
+        self.isExisting = isExisting
+        self.localResource = MediaResources(
+            type: .photo,
+            data: nil,
+            metadata: BasicMetadata(deviceOrientation: .portrait)
+        )
     }
 }
 

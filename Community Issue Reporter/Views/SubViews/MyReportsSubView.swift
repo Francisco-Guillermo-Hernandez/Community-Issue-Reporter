@@ -204,13 +204,11 @@ struct MyReportsSubView: View {
     
     @ViewBuilder
     private func showWizard(_ report: Report) -> some View {
-        ReportWizardContainer(model: controller.model, onCompletion: { _, _ in })
-            .task {
-                controller.model.prepareForModification(report)
-                if let matter = mattersToResolve.first(where: { $0.id == report.matterToSolveId }) {
-                    controller.model.setMatterToSolve(matter)
-                }
-            }
+        ReportWizardContainer(
+            model: controller.model,
+            onCompletion: { _, _ in },
+            reportToModify: report
+        )
     }
 }
 

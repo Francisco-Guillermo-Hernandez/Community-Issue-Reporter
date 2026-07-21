@@ -65,7 +65,7 @@ struct ReportsService {
     }
     
     func updateReport(reportId: String, report: Report, headers: Array<HTTPHeader>) async throws -> GenericResponse {
-        return try await client.patch(path: "reports/\(reportId)", body: report, headers: headers, withOAuth: true)
+        return try await client.patch(path: "reports/\(reportId)", body: report.toDao(), headers: headers, withOAuth: true)
     }
     
     func submitGroupedAttachments(attachments: [GroupedAttachmentPayload], headers: Array<HTTPHeader>) async throws -> GenericResponse {

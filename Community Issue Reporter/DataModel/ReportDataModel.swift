@@ -17,8 +17,12 @@ final class ReportDataModel {
     private let settings = SettingsStore.shared
    
     var isAddressValid: Bool = false
+    var isTitleValid: Bool = false
+    var isDescriptionValid: Bool = false
     var reportSession: ReportSessionResponse
     var isDifferentLocation: Bool = false
+    var titlePlaceholder: String = "e.g. Street Repair"
+    var descriptionPlaceholder: String = "e.g. Street is blocked"
     private init() {
         self.reportSession = .init(
             reportContainer: "", 
@@ -81,41 +85,95 @@ final class ReportDataModel {
         report.matterToSolveId = matter.id
         report.severityId = matter.severity.identifier
         report.issueTypeId = matter.issueType.identifier
-        report.title = matter.title
-        report.description = matter.description
+        titlePlaceholder = matter.title
+        descriptionPlaceholder = matter.description
         report.suggestedTitle = matter.title
         report.suggestedDescription = matter.description
     }
     
-    func updateReportSession(_ reportSession: ReportSessionResponse) {
-        self.reportSession = reportSession
+    func setLocator(countryCode: String, cityId: String) {
+        self.locator = LocatorDAO.shared.findBy(countryCode: countryCode, cityId: cityId)
     }
     
+    func getMetadataFromReportId(_ reportId: String, _ reportContainer: String) -> (String, ReportSessionResponse) {
+
+        /// SV-SSC-20260715-e5v2TpcbuyvaRLY0
+        /// country [0]
+        /// grouping [1]
+        /// reportCreationOn [2]
+        /// shareIndexHash [3]
+        let parts = reportId.split(separator: "-")
+        
+        return (
+            String(parts[0]),
+            .init(
+                reportContainer: reportContainer,
+                createdAt: Date(),
+                shareIndexHash: String(parts[3]),
+                reportCreationOn: String(parts[2])
+            )
+        )
+    }
+    
+    ///
+    func updateReportSession(_ reportSession: ReportSessionResponse) {
+        self.reportSession = reportSession
+        self.report.reportContainer = reportSession.reportContainer
+    }
+    
+    ///
     func updateCoordinate(_ coordinate: Coordinate) {
         report.coordinate = coordinate
     }
     
+    ///
     func updateLocator(with locator: Locator) {
         self.locator = locator
         self.report.address = self.locator.address
     }
     
+    /// Set report for modifying state
     func prepareForModification(_ report: Report) {
         self.report = report
         self.report.reportState = .modifying
     }
     
+    /// Maps out PhotoUploadTracker to PreviewAttachmentRequest to add those attachments into report attachment
     func addAttachments(_ attachments: [PhotoUploadTracker]) {
-        let payload = attachments.map { attachment in
+        if self.report.reportState == .modifying {
+            let existingKeys = Set(attachments.filter { $0.isExisting }.map { $0.key })
+            self.report.attachments.removeAll { !existingKeys.contains($0.key) }
+        }
+        
+        let newAttachments = attachments.filter { !$0.isExisting }
+        let payload = newAttachments.map { attachment in
             PreviewAttachmentRequest(
                 fileName: attachment.name,
                 type: .image,
                 key: attachment.key,
-                notes: ""
+                notes: "",
+                reportContainer: self.report.reportContainer ?? "",
             )
         }
         
         self.report.attachments.append(contentsOf: payload)
+    }
+    
+    /// Maps incoming PreviewAttachmentRequest array to PhotoUploadTracker array
+    func mapAttachmentsToTrackers(_ attachments: [PreviewAttachmentRequest]) -> [PhotoUploadTracker] {
+        return attachments.map { attachment in
+            PhotoUploadTracker(
+                key: attachment.key,
+                name: attachment.fileName,
+                url: attachment.url,
+                isExisting: true
+            )
+        }
+    }
+    
+    /// Maps current report's PreviewAttachmentRequest attachments to PhotoUploadTracker array
+    func getAttachmentsAsTrackers() -> [PhotoUploadTracker] {
+        return mapAttachmentsToTrackers(self.report.attachments)
     }
     
     func removeAttachments() {

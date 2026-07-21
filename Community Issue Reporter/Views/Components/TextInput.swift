@@ -19,11 +19,13 @@ struct TailwindInputModifier: ViewModifier {
     @Environment(\.colorScheme) var colorScheme
     @FocusState.Binding var isFocused: Bool
     @Binding var isInvalid: Bool
+    @Binding var value: String
     var isDisabled: Bool
     var axis: Axis
     
     func body(content: Content) -> some View {
         content
+            .foregroundStyle( Color.theme.foreground)
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
             .frame(height: axis == .vertical ? 60 : 36)
@@ -40,7 +42,7 @@ struct TailwindInputModifier: ViewModifier {
                         lineWidth: 1
                     )
             )
-            .opacity(isDisabled ? 0.5 : 1.0)
+            .opacity(opacity)
             .animation(.easeOut(duration: 0.2), value: isFocused)
             .animation(.easeOut(duration: 0.2), value: isInvalid)
     }
@@ -53,14 +55,36 @@ struct TailwindInputModifier: ViewModifier {
         }
     }
     
-}
-
-extension View {
-    func tailwindInputStyle(isFocused: FocusState<Bool>.Binding, isInvalid: Binding<Bool>, isDisabled: Bool, axis: Axis) -> some View {
-        self.modifier(TailwindInputModifier(isFocused: isFocused, isInvalid: isInvalid, isDisabled: isDisabled, axis: axis))
+    var opacity: Double {
+        if isDisabled {
+            return 0.5
+        } else if value.isEmpty {
+            return 0.75
+        } else {
+            return 1
+        }
     }
 }
 
+extension View {
+    func tailwindInputStyle(
+        isFocused: FocusState<Bool>.Binding,
+        isInvalid: Binding<Bool>,
+        value: Binding<String>,
+        isDisabled: Bool,
+        axis: Axis
+    ) -> some View {
+        self.modifier(
+            TailwindInputModifier(
+                isFocused: isFocused,
+                isInvalid: isInvalid,
+                value: value,
+                isDisabled: isDisabled,
+                axis: axis
+            )
+        )
+    }
+}
 
 enum RegexType: Equatable {
     case customPattern(String)
@@ -133,6 +157,7 @@ struct TextInput: View {
                 .tailwindInputStyle(
                     isFocused: $isFocused,
                     isInvalid: $isValid,
+                    value: $value,
                     isDisabled: disabled,
                     axis: axis
                 )
@@ -213,6 +238,12 @@ private struct LabelView: View {
     }
 }
 
+enum TestFieldsMock: Hashable {
+    case email
+    case invalidEmail
+    case disabledEmail
+    case randomText
+}
 
 #Preview {
     @Previewable

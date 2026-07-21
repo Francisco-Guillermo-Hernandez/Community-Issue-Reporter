@@ -15,15 +15,26 @@ struct ReportWizardContainer: View {
     @Environment(\.dismiss) private var dismiss
     @State private var uploadTrackers: [PhotoUploadTracker] = []
     @State private var controller: ReportController
+    @FocusState private var focusedField: WizardElements?
     
     var showCancelButton: Bool = false
     var onCompletion: (String, AlertType) -> Void
+    var reportToModify: Report? = nil
     
-    init(model: ReportDataModel, onCompletion: @escaping (String, AlertType) -> Void, showCancelButton: Bool = false) {
+    init(
+        model: ReportDataModel,
+        onCompletion: @escaping (String, AlertType) -> Void,
+        showCancelButton: Bool = false,
+        reportToModify: Report? = nil
+    ) {
         self.model = model
         self.onCompletion = onCompletion
         self.showCancelButton = showCancelButton
+        self.reportToModify = reportToModify
         self.controller = ReportController()
+        
+        print("Report state: ")
+        print(model.report.reportState )
     }
     
     var body: some View {
@@ -68,15 +79,20 @@ struct ReportWizardContainer: View {
                                         case .media:
                                             MediaStepView(model, $uploadTrackers)
                                         case .details:
-                                            DetailsView(model)
+                                            DetailsView(model, $focusedField)
                                         case .confirmation:
-                                            ConfirmationView(id: $controller.reportId, url: $controller.shareableLink)
+                                            ConfirmationView(
+                                                id: $controller.reportId,
+                                                url: $controller.shareableLink
+                                            )
                                         }
                                     }
                                 }
                                 .id(step)
                                 .onTapGesture {
-                                    if step < controller.currentStep {
+                                    guard controller.currentStep != .confirmation, step != .confirmation else { return }
+                                    
+                                    if model.report.reportState == .modifying || step < controller.currentStep {
                                         withAnimation(.snappy(duration: 0.45, extraBounce: 0.08)) {
                                             controller.currentStep = step
                                         }
@@ -88,14 +104,33 @@ struct ReportWizardContainer: View {
                         .padding(.top, 10)
                     }
                     .onChange(of: controller.currentStep) { _, newValue in
-                        withAnimation(.snappy(duration: 0.45, extraBounce: 0.08)) {
-                            proxy.scrollTo(newValue, anchor: .center)
+                        if newValue == .confirmation {
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                withAnimation(.snappy(duration: 0.45, extraBounce: 0.08)) {
+                                    proxy.scrollTo(WizardElements.final, anchor: .bottom)
+                                }
+                            }
+                        } else {
+                            withAnimation(.snappy(duration: 0.45, extraBounce: 0.08)) {
+                                proxy.scrollTo(newValue, anchor: .center)
+                            }
+                        }
+                    }
+                    .onChange(of: focusedField) { _, newField in
+                           if let fieldToScroll = newField {
+                               /// Slight delay allows the keyboard to present fully before calculating the scroll geometry
+                               DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                                   withAnimation(.snappy(duration: 0.45, extraBounce: 0.08)) {
+                                      
+                                    proxy.scrollTo(fieldToScroll, anchor: .center)
+                                }
+                            }
                         }
                     }
                 }
             
             }
-            .ignoresSafeArea(edges: .init(arrayLiteral: .bottom) )
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             BottomFadedView {
@@ -110,9 +145,21 @@ struct ReportWizardContainer: View {
         }
         .toolbarTitleDisplayMode(.inline)
         .toolbarVisibility(.hidden, for: .navigationBar)
+        .enableInteractivePopGesture()
         .sensoryFeedback(.success, trigger: controller.doneTrigger)
         .task {
+            if let reportToModify {
+                model.prepareForModification(reportToModify)
+                if let matter = mattersToResolve.first(where: { $0.id == reportToModify.matterToSolveId }) {
+                    model.setMatterToSolve(matter)
+                }
+            }
+            
             await self.controller.startRePorting(model)
+            
+            if model.report.reportState == .modifying {
+                uploadTrackers = model.getAttachmentsAsTrackers()
+            }
         }
         .alert("Status Update", isPresented: $controller.presentAlert) {
             Button("OK", role: .cancel) { }
@@ -133,9 +180,10 @@ struct ReportWizardContainer: View {
             }
             
             ProgressView(value: Double(controller.currentStep.rawValue), total: 4)
+                .shimmering()
                 .tint(controller.currentStep.color)
-                .background(Color.gray.opacity(0.2))
-                .scaleEffect(x: 1, y: 1.5, anchor: .center)
+                .background(Color.theme.inputBorder)
+                .scaleEffect(x: 1, y: 1.2, anchor: .center)
         }
     }
     
@@ -179,18 +227,23 @@ struct ReportWizardContainer: View {
     // MARK: - validations
     
     var isLocationStepReadyToContinue: Bool {
-        model.isDifferentLocation && model.isAddressValid
+        model.isDifferentLocation
     }
  
     var isReadyToContinue: Bool {
         !uploadTrackers.isEmpty && uploadTrackers.allSatisfy { $0.phase == .success }
     }
     
+    var areDetailsValid: Bool {
+        model.isTitleValid && model.isDescriptionValid && model.isAddressValid
+    }
+    
     var disableButton: Bool {
         switch controller.currentStep {
             case .location: return !isLocationStepReadyToContinue
+            case .details: return !areDetailsValid
             case .media: return !isReadyToContinue
-            default: return false
+            case .confirmation: return false
         }
     }
     

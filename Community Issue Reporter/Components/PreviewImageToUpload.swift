@@ -13,6 +13,7 @@ struct PreviewImageToUpload: View {
     var name: String
     var phase: ImagePhase
     var data: UIImage?
+    var url: URL? = nil
     @Binding var currentValue: Float
     var total: Float
     var delete: (String) -> Void
@@ -20,51 +21,65 @@ struct PreviewImageToUpload: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             
-            if let imageData = data {
-                Image(uiImage: imageData)
-                    .resizable()
-                    .clipped()
-                    .scaledToFit()
-                    .blur(radius: completed ? 0 : 4)
-                    .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
-                    .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
-                    .overlay {
-                       
-                        ZStack(alignment: .bottomLeading) {
-                            
-                            RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous)
-                            
-                                .fill(
-                                    LinearGradient(
-                                        stops: [
-                                            .init(color: .black.opacity(0.75), location: 0),
-                                            .init(color: .black.opacity(0.2), location: 0.5),
-                                            .init(color: .clear, location: 1)
-                                        ],
-                                        startPoint: .bottom,
-                                        endPoint: .top
-                                    )
-                                )
-                            
-                            VStack(alignment: .leading, spacing: 2) {
-
-                                Text(phase.description)
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.white.opacity(0.85))
-                                    .padding(.bottom, 4)
-                                    .animatedDots(animate: animateDots)
-                                
-                                
-                                if !completed && phase != .success {
-                                    ProgressView(value: currentValue, total: total)
-                                        .shimmering()
-                                }
-                                
-                            }
-                            .padding()
+            Group {
+                if let imageData = data {
+                    Image(uiImage: imageData)
+                        .resizable()
+                        .clipped()
+                        .scaledToFit()
+                        .blur(radius: completed ? 0 : 4)
+                } else if let url = url {
+                    CachedAsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .clipped()
+                            .scaledToFit()
+                    } placeholder: {
+                        ZStack {
+                            Color.gray.opacity(0.1)
+                            ProgressView()
                         }
                     }
+                }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+            .overlay {
+               
+                ZStack(alignment: .bottomLeading) {
+                    
+                    RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous)
+                    
+                        .fill(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: .black.opacity(0.75), location: 0),
+                                    .init(color: .black.opacity(0.2), location: 0.5),
+                                    .init(color: .clear, location: 1)
+                                ],
+                                startPoint: .bottom,
+                                endPoint: .top
+                            )
+                        )
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+
+                        Text(phase.description)
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white.opacity(0.85))
+                            .padding(.bottom, 4)
+                            .animatedDots(animate: animateDots)
+                        
+                        
+                        if !completed && phase != .success {
+                            ProgressView(value: currentValue, total: total)
+                                .shimmering()
+                        }
+                        
+                    }
+                    .padding()
+                }
             }
             
             

@@ -257,6 +257,7 @@ struct MapPickerView: View {
                 )
             )
             selectedCoordinate = lastLocation.coordinate
+            onChange()
         } else {
             locationManager.requestAuthorization()
         }

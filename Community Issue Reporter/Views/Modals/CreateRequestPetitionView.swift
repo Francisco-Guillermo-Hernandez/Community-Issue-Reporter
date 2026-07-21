@@ -7,9 +7,15 @@
 
 import SwiftUI
 
+enum PetitionInputs: Hashable {
+    case title
+    case description
+}
+
 struct CreateRequestPetitionView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @FocusState var focusedField: PetitionInputs?
     @Bindable var controller: PetitionController
     var onCompletion: (String, AlertType) -> Void
     
@@ -24,8 +30,9 @@ struct CreateRequestPetitionView: View {
                             label: String(localized: "Please enter a title"),
                             validators: titleValidator,
                             isValid: $controller.isTitleValid,
-                            value: $controller.petition.title
+                            value: $controller.petition.title,
                        )
+                       .id(PetitionInputs.title)
                     
                        TextInput(
                             name: String(localized: "Description"),
@@ -34,6 +41,7 @@ struct CreateRequestPetitionView: View {
                             isValid: $controller.isDescriptionValid,
                             value: $controller.petition.description
                        )
+                       .id(PetitionInputs.description)
                     }
                     
                     Picker("Category", selection: $controller.petition.category) {

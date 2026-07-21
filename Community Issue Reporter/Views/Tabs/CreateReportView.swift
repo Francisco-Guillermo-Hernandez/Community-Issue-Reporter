@@ -91,6 +91,7 @@ struct CreateReportView: View {
         ReportWizardContainer(model: model, onCompletion: { _, _ in
         })
         .task {
+            model.clear()
             model.setMatterToSolve(matter)
         }
     }

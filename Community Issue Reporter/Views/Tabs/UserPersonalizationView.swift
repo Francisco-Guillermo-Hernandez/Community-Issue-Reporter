@@ -33,6 +33,10 @@ enum UserNameAvailabilityStatus {
 }
 
 
+enum PersonalizationInputs: Hashable {
+    case email
+    case username
+}
 
 struct UserPersonalizationView: View {
     @Environment(\.dismiss) var dismiss
@@ -81,6 +85,7 @@ struct UserPersonalizationView: View {
                                 isValid: $model.isUserNameValid,
                                 value: $model.userName,
                             )
+                            .id(PersonalizationInputs.username)
                             .focused($isInputFocused)
                             .onChange(of: model.userName) { _, newValue in
                                 profile.userName = newValue
@@ -104,6 +109,7 @@ struct UserPersonalizationView: View {
                             value: $model.email,
                             disabled: true,
                         )
+                        .id(PersonalizationInputs.email)
                     }
                     .padding(.horizontal, 24)
                 }

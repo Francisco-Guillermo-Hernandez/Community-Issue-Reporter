@@ -1,5 +1,5 @@
 //
-//  Reports.swift
+//  MapExplorerView.swift
 //  Community Issue Reporter
 //
 //  Created by Francisco Hernandez on 18/2/26.
@@ -11,7 +11,7 @@ import Observation
 import SwiftUI
 internal import Combine
 
-struct ReportsView: View {
+struct MapExplorerView: View {
     @Namespace private var profileNamespace
     @Namespace private var searchPlacesNamespace
     @Namespace private var animationID
@@ -104,7 +104,7 @@ struct ReportsView: View {
         .onChange(of: controller.locationManager.lastLocation) { _, newLocation in
             // Handled or observed if needed
         }
-        .sheet(isPresented: $controller.showUserProfileOverlay) {
+        .fullScreenCover(isPresented: $controller.showUserProfileOverlay) {
             UserProfileView()
         }
         .sheet(item: $controller.expandedItem) { report in
@@ -309,7 +309,7 @@ private struct StatusFilterRow: View {
 
 #Preview {
     NavigationStack {
-        ReportsView()
+        MapExplorerView()
            
             .environmentObject(AuthViewModel())
             .environment(DeepLinkRouter())

@@ -7,6 +7,19 @@
 
 import SwiftUI
 
+struct FooterText: View {
+    var text: String
+    
+    var body: some View {
+        Text(text)
+            .font(Font.footnote)
+            .fontWeight(.regular)
+            .foregroundStyle(.secondary)
+            .padding(.leading, .themeSpacing * 4.5)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
 struct SettingsHeaderView: View {
     var title: String
     
@@ -52,13 +65,8 @@ struct SettingsGroup<Content: View>: View {
                 }
                 .customCardStyle()
                 
-                if let footerText = footerText {
-                    Text(footerText)
-                        .font(Font.footnote)
-                        .fontWeight(.regular)
-                        .foregroundStyle(.secondary)
-                        .padding(.leading, .themeSpacing * 4.5)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                if let text = footerText {
+                    FooterText(text: text)
                         .opacity(isEnabled ? 1 : 0.5)
                 }
             }
@@ -119,7 +127,7 @@ struct SettingsSubView: View {
                     
                     SettingsGroup(
                         title: String(localized: "Privacy"),
-                        footerText: String(localized: "You can show your profile and your username when you share your reports and petitions with others.")
+                        footerText: String(localized: "You can show or hide your profile and your username when you share your reports and petitions with others.")
                     ) {
                         Toggle("Show my profile", isOn: $settings.showMyProfile)
                             .foregroundStyle(Color.theme.inputText)

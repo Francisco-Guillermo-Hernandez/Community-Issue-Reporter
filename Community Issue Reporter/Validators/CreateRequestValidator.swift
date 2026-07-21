@@ -7,67 +7,62 @@
 
 import Foundation
 
+/// 
+let titleMinCharacters: Int = 5
+let titleMaxCharacters: Int = 90
 let titleValidator: [Validator] = [
     Validator(
         name: "Isn't empty",
-        message: "The title can't be empty",
+        message: String(localized: "The title can't be empty"),
         fn: { !$0.isEmpty }
     ),
     Validator(
         name: "Isn't too long",
-        message: "The title can't be longer than 50 characters",
-        fn: { $0.count <= 50 }
+        message: String(localized: "The title can't be longer than \(titleMaxCharacters) characters"),
+        fn: { $0.count <= titleMaxCharacters }
     ),
     Validator(
         name: "Isn't too short",
-        message: "The title can't be shorter than 5 characters",
-        fn: { $0.count >= 5 }
+        message: String(localized: "The title can't be shorter than \(titleMinCharacters) characters"),
+        fn: { $0.count >= titleMinCharacters }
     )
 ]
 
-
+///
+let descriptionMinCharacters: Int = 5
+let descriptionMaxCharacters: Int = 50
 let descriptionValidator: [Validator] = [
     Validator(
         name: "Isn't empty",
-        message: "The description can't be empty",
+        message: String(localized: "The description can't be empty"),
         fn: { !$0.isEmpty }
     ),
     Validator(
         name: "Isn't too long",
-        message: "The description can't be longer than 50 characters",
-        fn: { $0.count <= 50 }
+        message: String(localized: "The description can't be longer than \(descriptionMaxCharacters) characters"),
+        fn: { $0.count <= descriptionMaxCharacters }
     ),
     Validator(
         name: "Isn't too short",
-        message: "The description can't be shorter than 5 characters",
-        fn: { $0.count >= 5 }
+        message: String(localized: "The description can't be shorter than \(descriptionMinCharacters) characters"),
+        fn: { $0.count >= descriptionMinCharacters }
     )
 ]
 
+///
+let addressMinCharacters: Int = 5
+let addressMaxCharacters: Int = 200
 let addressValidator: [Validator] = [
-//    Validator(
-//        name: "Isn't empty",
-//        message: "The address can't be empty",
-//        fn: { !$0.isEmpty }
-//    ),
     Validator(
         name: "Isn't too long",
-        message: "The address can't be longer than 200 characters",
-        fn: { $0.count <= 200 }
+        message: String(localized: "The address can't be longer than \(addressMaxCharacters) characters"),
+        fn: { $0.count <= addressMaxCharacters }
     ),
     Validator(
         name: "Isn't too short",
-        message: "The address can't be shorter than 5 characters",
-        fn: { $0.count >= 5 }
+        message: String(localized: "The address can't be shorter than \(addressMinCharacters) characters"),
+        fn: { $0.count >= addressMinCharacters }
     ),
-//    Validator(
-//        name: "Validate address",
-//        message: String(localized: "The address contains invalid characters"),
-//        fn: { value in
-//            let addressRegex = /^[\p{L}0-9\s,.\-#]+$/
-//            return value.wholeMatch(of: addressRegex) != nil
-//        }
-//    )
 ]
 
 let addressRegex = "[\\p{L}0-9\\s,.\\-#]"
@@ -84,22 +79,24 @@ var emailValidator: [Validator] = [
     )
 ]
 
-
+/// Validator to evaluate userName in ...
+let userNameMinCharacters: Int = 3
+let userNameMaxCharacters: Int = 20
 let userNameValidator: [Validator] = [
     Validator(
         name: "Isn't empty",
-        message: "User name can't be empty",
+        message: String(localized: "User name can't be empty"),
         fn: { !$0.isEmpty }
     ),
     Validator(
         name: "Isn't too long",
-        message: "User name can't be longer than 20 characters",
-        fn: { $0.count <= 20 }
+        message: String(localized: "User name can't be longer than \(userNameMaxCharacters) characters"),
+        fn: { $0.count <= userNameMaxCharacters }
     ),
     Validator(
         name: "Isn't too short",
-        message: "User name can't be shorter than 3 characters",
-        fn: { $0.count >= 3 }
+        message: String(localized: "User name can't be shorter than \(userNameMinCharacters) characters"),
+        fn: { $0.count >= userNameMinCharacters }
     )
 ]
 

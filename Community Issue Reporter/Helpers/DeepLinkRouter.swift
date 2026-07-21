@@ -20,8 +20,29 @@ class DeepLinkRouter {
     var isPresented: Bool = false
     var isLoading: Bool = false
     var message: String = ""
-    var report: MapExplorerReport = .init(id: "", lat: 0, lng: 0, address: "", title: "", description: "", severityId: 1, statusId: 1, issueTypeId: 1, matterToSolveId: 1, reportedAtRaw: 0, cellIndex: "", createdAtRaw: 0, updatedAtRaw: 0, reportedBy: "", cityId: "", petitionId: "", shareUrl: "",
-                                                     attachments: [], assignedTo: nil)
+    var report: MapExplorerReport = .init(
+        id: "",
+        lat: 0,
+        lng: 0,
+        address: "",
+        title: "",
+        description: "",
+        severityId: 1,
+        statusId: 1,
+        issueTypeId: 1,
+        matterToSolveId: 1,
+        reportedAtRaw: 0,
+        cellIndex: "",
+        createdAtRaw: 0,
+        updatedAtRaw: 0,
+        reportedBy: "",
+        cityId: "",
+        petitionId: "",
+        shareUrl: "",
+        attachments: [],
+        assignedTo: nil,
+        reportContainer: ""
+    )
     var presentAlert: Bool = false
     var isReadyToRoute: Bool = false
     

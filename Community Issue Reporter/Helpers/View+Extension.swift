@@ -70,3 +70,35 @@ extension UIDevice {
         UIDevice.current.userInterfaceIdiom == .pad
     }
 }
+
+// MARK: - Extension to re-enable interactive pop gesture when navigation bar is hidden
+private struct EnableInteractivePopGesture: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        InteractivePopViewController()
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+
+    private class InteractivePopViewController: UIViewController, UIGestureRecognizerDelegate {
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            navigationController?.interactivePopGestureRecognizer?.delegate = self
+            navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        }
+
+        func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+            return (navigationController?.viewControllers.count ?? 0) > 1
+        }
+        
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+            return true
+        }
+    }
+}
+
+extension View {
+    func enableInteractivePopGesture() -> some View {
+        background(EnableInteractivePopGesture())
+    }
+}
+

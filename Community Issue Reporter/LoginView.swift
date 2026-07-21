@@ -43,6 +43,7 @@ struct LoginView: View {
                 GooglePillButton(action: loginWithGoogle)
                     .padding(.top, 8)
                     .disabled(disableLoginButtons)
+                    .accessibilityIdentifier("LoginWithGoogle")
                 
                 ThemedButton(
                     message: String(localized: "Login as a Guest"),
@@ -53,6 +54,7 @@ struct LoginView: View {
                 .frame(maxWidth: .infinity, maxHeight: 40)
                 .disabled(disableLoginButtons)
                 .padding(.bottom, 20)
+                .accessibilityIdentifier("LoginAsGuest")
                 
                 
                 ///

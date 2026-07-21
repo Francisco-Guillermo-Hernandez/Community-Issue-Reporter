@@ -1,0 +1,45 @@
+{
+  "configurations" : [
+    {
+      "id" : "7FDE96DC-8C89-4949-99DF-0B447F638EB7",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Community Issue Reporter.xcodeproj",
+      "identifier" : "56E42B4F2F46BC8C00AC84C7",
+      "name" : "Community Issue Reporter"
+    }
+  },
+  "testTargets" : [
+    {
+      "enabled" : false,
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Community Issue Reporter.xcodeproj",
+        "identifier" : "56E42B5C2F46BC8D00AC84C7",
+        "name" : "Community Issue ReporterTests"
+      }
+    },
+    {
+      "parallelizable" : true,
+      "skippedTests" : [
+        "Community_Issue_ReporterUITests\/testExample()",
+        "Community_Issue_ReporterUITests\/testLaunchPerformance()",
+        "Community_Issue_ReporterUITestsLaunchTests",
+        "Community_Issue_ReporterUITestsLaunchTests\/testLaunch()"
+      ],
+      "target" : {
+        "containerPath" : "container:Community Issue Reporter.xcodeproj",
+        "identifier" : "56E42B662F46BC8D00AC84C7",
+        "name" : "Community Issue ReporterUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

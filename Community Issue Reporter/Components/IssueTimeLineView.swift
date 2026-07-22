@@ -56,29 +56,29 @@ struct TimelineNode<Content: View>: View {
 
 
 struct IssueTimelineView: View {
-    let report: IssueReport
+    let resolution: Resolution
     
     var body: some View {
         ScrollView {
            
             VStack(alignment: .leading, spacing: 0) {
-//                DetailsHeader(title: "Report follow up", description: "ID #\(report.id)")
+//                DetailsHeader(title: "Report follow up", description: "ID #\(resolution.id)")
 //                    .padding(.bottom, .themePadding * 1.5)
-//                Text("ID #\(report.id)")
+//                Text("ID #\(resolution.id)")
 //                    .font(.caption)
 //                    .foregroundStyle(.secondary)
 //                    .padding(.bottom, 20)
                 
                 /// 1. Reported
                 TimelineNode(status: .reported) {
-                    MilestoneHeader(title: String(localized: "Reported"), date: report.history.reported?.date)
-                    Text("By \(report.history.reported?.by ?? "Unknown")")
+                    MilestoneHeader(title: String(localized: "Reported"), date: resolution.history.reported?.date)
+                    Text("By \(resolution.history.reported?.by ?? "Unknown")")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
                 
                 /// 2. Confirmed
-                if let confirmed = report.history.confirmed {
+                if let confirmed = resolution.history.confirmed {
                     TimelineNode(status: .confirmed) {
                         MilestoneHeader(title: String(localized: "Confirmed"), date: confirmed.date ?? confirmed.computedConfirmationDate)
                         Text("Issue verified by the community").font(.subheadline)
@@ -87,7 +87,7 @@ struct IssueTimelineView: View {
                 }
                 
                 /// 3. In Progress (Expanded Sub-tasks)
-                if let inProgress = report.history.inProgress {
+                if let inProgress = resolution.history.inProgress {
                     TimelineNode(status: .inProgress) {
                         VStack(alignment: .leading, spacing: .themeSpacing * 3) {
                             MilestoneHeader(title: String(localized: "In Progress"), date: nil)
@@ -123,7 +123,7 @@ struct IssueTimelineView: View {
                 }
                 
                 /// 4. Fixed
-                if let fixed = report.history.fixed {
+                if let fixed = resolution.history.fixed {
                     TimelineNode(status: .fixed, isLast: true) {
                         VStack(alignment: .leading) {
                             MilestoneHeader(title: String(localized: "Fixed"), date: fixed.date)
@@ -154,7 +154,7 @@ struct IssueTimelineView: View {
         }
         .toolbarTitleDisplayMode(.large)
         .navigationTitle("Report follow up")
-        .navigationSubtitle("ID: \(report.id)")
+        .navigationSubtitle("ID: \(resolution.id)")
 //        .background(Color.theme.background)
     }
 }
@@ -211,12 +211,12 @@ struct AttachmentDetailView: View {
 #Preview {
     
     NavigationStack {
-        IssueTimelineView(report: .mockReport)
+        IssueTimelineView(resolution: .resolution)
         
         Button("showJson") {
             do {
                 let encoder = JSONEncoder()
-                let jsonData = try encoder.encode(IssueReport.mockReport)
+                let jsonData = try encoder.encode(Resolution.resolution)
                 if let jsonString = String(data: jsonData, encoding: .utf8) {
                     print(jsonString)
                 }
@@ -228,8 +228,8 @@ struct AttachmentDetailView: View {
 }
 
 // MARK: - Mock Data Extension
-extension IssueReport {
-    static let mockReport = IssueReport(
+extension Resolution {
+    static let resolution = Resolution(
         status: "fixed",
         id: "SV-SS-260601-aXWsaxls",
         history: IssueHistory(
@@ -283,7 +283,8 @@ extension IssueReport {
                 attachments: [
                     Attachment(id: "", type: .document, createdAt: Date(), updatedAt: Date(), uploadedBy: "", ValidatedAt: Date(), validatedBy: .citizen, state: .confirmed, notes: "", url: "", previewUrl: ""),
                 ]
-            )
-        )
+            ),
+        ),
+        metadata: ResolutionMetadata(cityId: "", groupingId: "", assigned: .init(institutionName: "", institutionCode: "", institutionID: ""), resourceType: "", resourceId: "")
     )
 }

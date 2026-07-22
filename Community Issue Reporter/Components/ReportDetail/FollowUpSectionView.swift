@@ -11,8 +11,16 @@ struct FollowUpSectionView: View {
     @State private var opacity: Double = 0.85
     
     var report: MapExplorerReport
+    var resolution: Resolution?
     
-    init(for report: MapExplorerReport) { self.report = report }
+    init(for report: MapExplorerReport, resolution: Resolution? = nil) {
+        self.report = report
+        self.resolution = resolution
+    }
+    
+    private var isFollowUpDisabled: Bool {
+        report.institutionId == nil || report.assignedTo == nil
+    }
     
     var body: some View {
         VStack {
@@ -20,15 +28,16 @@ struct FollowUpSectionView: View {
                 .padding(.bottom, -10)
             
             List {
-                NavigationLink(destination:  IssueTimelineView(report: .mockReport)) {
+                NavigationLink(destination: IssueTimelineView(resolution: resolution ?? .resolution)) {
                     HStack {
                         Text("Details of the progress")
                             .font(.caption)
-                            .opacity(opacity)
+                            .opacity(isFollowUpDisabled ? 0.4 : opacity)
                             .fontWeight(.medium)
                         
                     }
                 }
+                .disabled(isFollowUpDisabled)
                 .listRowBackground(Color.clear)
                 
                 HStack {

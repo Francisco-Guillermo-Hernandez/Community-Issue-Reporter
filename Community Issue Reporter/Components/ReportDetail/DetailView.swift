@@ -65,6 +65,7 @@ struct DetailView: View {
     @State private var type: AlertType = .success
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var comments: Comments = .init(documents: [], hasNext: false, hasPrev: false)
+    @State private var resolution: Resolution?
 
     init(report: MapExplorerReport) {
         self.report = report
@@ -92,7 +93,7 @@ struct DetailView: View {
     func lastComments() -> some View {
         Group {
             SectionHeader(title: String(localized: "Latest Comments"))
-            LazyVStack(spacing: .themeSpacing * 4) {
+                LazyVStack(spacing: .themeSpacing * 4) {
                 ForEach(comments.documents ?? []) { c in
                     CommentRow(comment: c)
                 }
@@ -116,7 +117,7 @@ struct DetailView: View {
                     EvidenceOfTheReportView(report.attachments, id: report.id)
 
                     ///
-                    FollowUpSectionView(for:  report)
+                    FollowUpSectionView(for: report, resolution: resolution)
                     
                     ///
                     MoreInformationView(report: report)
@@ -126,6 +127,16 @@ struct DetailView: View {
 
                 }
                 .padding(.leading, 16)
+            }
+            .task(id: activeDetent) {
+                guard activeDetent == .medium else { return }
+                guard report.institutionId != nil && report.assignedTo != nil else { return }
+                guard resolution == nil else { return }
+                do {
+                    self.resolution = try await ReportRepository.shared.fetchResolutionByReport(report.id)
+                } catch {
+                    print("Error fetching resolution: \(error)")
+                }
             }
             .task {
                 guard !Task.isCancelled else { return }

@@ -37,7 +37,8 @@ final class MapExplorerMockedData {
                 
                 PreviewAttachment(id: "06d3df5f-ef2a-43c0-bd40-5125a12fe284", type: .image, createdAtRaw: 0, updatedAtRaw: 0, uploaderUserName: "jhon.doe", validatedBy: .bot, state: .pending, fileName: "1783058837989-ab7a054b-7d99-4137-b9f9-ded39ce7732f.webp", reportContainer: "587d3ac3-0715-4958-8955-1d6d29a3d489")
             ],
-            assignedTo: "Alcaldia de san salvador",
+            assignedTo: nil,
+            institutionId: nil,
             reportContainer: ""
         )
         

@@ -7,10 +7,25 @@
 
 import Foundation
 
-struct IssueReport: Codable {
+struct AssignedInstitution: Codable {
+    let institutionName: String
+    let institutionCode: String
+    let institutionId:   String
+}
+
+struct ResolutionMetadata: Codable {
+    let cityId: String
+    let groupingId: String
+    let assigned: AssignedInstitution
+    let resourceType: String
+    let resourceId: String
+}
+
+struct Resolution: Codable {
     let status: String
     let id: String
     let history: IssueHistory
+    let metadata: ResolutionMetadata
 }
 
 struct IssueHistory: Codable {
@@ -60,6 +75,7 @@ enum ReportAttachmentState: String, Codable {
     case pending
     case inappropriate
     case deleted
+    case manualRevision
 }
 
 struct Attachment: Codable, Identifiable {

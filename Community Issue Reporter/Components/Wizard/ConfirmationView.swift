@@ -19,7 +19,7 @@ struct ConfirmationView: View {
             VStack(spacing: .themeSpacing * 4) {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 56))
-                    .symbolRenderingMode(.palette)
+                    .symbolColorRenderingMode(.gradient)
                     .foregroundStyle(
                         Color.white,
                         Color.green,

@@ -41,6 +41,7 @@ class DeepLinkRouter {
         shareUrl: "",
         attachments: [],
         assignedTo: nil,
+        institutionId: nil,
         reportContainer: ""
     )
     var presentAlert: Bool = false

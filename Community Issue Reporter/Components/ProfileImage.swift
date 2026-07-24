@@ -32,7 +32,9 @@ let options: [AvatarOption] = [
 struct UserAvatarPersonalizationSheet: View {
     var animation: Animation
     @Bindable var viewModel: ProfileDataModel
+    @Binding var isSheetLocked: Bool
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @State private var isPhotosPickerPresented: Bool = false
     @State private var currentView: AvatarCreatedFrom = .optionsSelector
     @State private var duration: String = ""
     @State var orientation = UIDevice.current.orientation
@@ -93,6 +95,42 @@ struct UserAvatarPersonalizationSheet: View {
         }
         .padding([.horizontal, .top], .themePadding * 1.23)
         .frame(maxHeight: .infinity, alignment: .bottom)
+        .photosPicker(
+            isPresented: $isPhotosPickerPresented,
+            selection: $selectedPhotoItems,
+            maxSelectionCount: 1,
+            matching: .any(
+                of: [
+                    .images,
+                    .panoramas,
+                    .screenshots,
+                    .not(.videos),
+                    .not(.screenRecordings),
+                    .not(.spatialMedia),
+                ]
+            )
+        )
+        .onChange(of: selectedPhotoItems) { _, newItems in
+            guard !newItems.isEmpty else { return }
+            
+            Task {
+                do {
+                    let image = try await loadSelectedImages(from: newItems)
+                    if let avatar = image {
+                        viewModel.selectedAvatarOptionView = .photo
+                        onSelect(avatar)
+                    }
+                } catch {
+                    /// TODO: error handiing
+                }
+            }
+        }
+        .onChange(of: isPhotosPickerPresented) { _, _ in
+            isSheetLocked = isPhotosPickerPresented || isCameraPresented
+        }
+        .onChange(of: isCameraPresented) { _, _ in
+            isSheetLocked = isPhotosPickerPresented || isCameraPresented
+        }
     }
 
     @ViewBuilder
@@ -161,6 +199,7 @@ struct UserAvatarPersonalizationSheet: View {
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
+                                .accessibilityIdentifier("ChooseGoogleAuthenticatorButton")
                                 
                             }
 
@@ -168,6 +207,7 @@ struct UserAvatarPersonalizationSheet: View {
 
                                 Button {
                                     viewModel.selectedAvatarOptionView = option.associatedView
+                                    isSheetLocked = true
                                     takePhotoUsingCamera { images in
                                         onSelect(images)
                                     }
@@ -182,6 +222,7 @@ struct UserAvatarPersonalizationSheet: View {
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
+                                .accessibilityIdentifier("ChooseCameraButton")
                                 .fullScreenCover(isPresented: $isCameraPresented) {
                                     ImagePicker(sourceType: .camera, onImagePicked: { resource in
                                         
@@ -199,20 +240,10 @@ struct UserAvatarPersonalizationSheet: View {
 
                             if option.associatedView == .photo {
 
-                                PhotosPicker(
-                                    selection: $selectedPhotoItems,
-                                    maxSelectionCount: 1,
-                                    matching: .any(
-                                        of: [
-                                            .images,
-                                            .panoramas,
-                                            .screenshots,
-                                            .not(.videos),
-                                            .not(.screenRecordings),
-                                            .not(.spatialMedia),
-                                        ]
-                                    )
-                                ) {
+                                Button {
+                                    isSheetLocked = true
+                                    isPhotosPickerPresented = true
+                                } label: {
                                     Image(systemName: "photo.on.rectangle")
                                         .font(.system(size: 36))
                                         .fontWeight(.medium)
@@ -222,26 +253,9 @@ struct UserAvatarPersonalizationSheet: View {
                                         .clipShape(Circle())
 
                                 }
-                                .onChange(of: selectedPhotoItems) { _, newItems in
-                                    guard !newItems.isEmpty else { return }
-                                    
-                                    
-                                    Task {
-                                        do {
-                                            let image = try await loadSelectedImages(from: newItems)
-                                                if let avatar = image {
-                                                    viewModel.selectedAvatarOptionView = option.associatedView
-                                                    onSelect(avatar)
-                                                }
-                                        } catch {
-                                                /// TODO: error handiing
-                                        }
-                                    }
-                                       
-                                    
-                                }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
+                                .accessibilityIdentifier("ChoosePhotosPickerButton")
                             }
 
                             if option.associatedView == .initials {
@@ -259,6 +273,7 @@ struct UserAvatarPersonalizationSheet: View {
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
+                                .accessibilityIdentifier("ChooseInitialsButton")
 
                             }
 
@@ -276,6 +291,7 @@ struct UserAvatarPersonalizationSheet: View {
                                 }
                                 .buttonStyle(.glass)
                                 .buttonBorderShape(.circle)
+                                .accessibilityIdentifier("ChooseMonogramButton")
 
                             }
 
@@ -461,17 +477,13 @@ struct ProfileImage: View {
                     .font(.system(size: 30))
                     .foregroundColor(viewModel.isGuest ? .accentColor.mix(with: .black, by: 0.5) : .accentColor)
             }
+            .accessibilityIdentifier("ShowImagePickerButton")
             .disabled(viewModel.isGuest)
+            .symbolColorRenderingMode(.gradient)
         }
         .sheet(isPresented: $viewModel.showPicker) {
             let animation: Animation = .snappy(duration: 0.3, extraBounce: 0)
-            DynamicSheet(animation: animation) {
-                UserAvatarPersonalizationSheet(
-                    animation: animation,
-                    viewModel: viewModel
-                )
-                .presentationBackground(Color.theme.background)
-            }
+            DynamicSheetWrapper(animation: animation, viewModel: viewModel)
             .background(Color.theme.background)
             .interactiveDismissDisabled()
 
@@ -481,6 +493,30 @@ struct ProfileImage: View {
     }
 }
 
+// MARK: - DynamicSheet wrapper
+/// Bridges `UserAvatarPersonalizationSheet.isSheetLocked` directly into
+/// `DynamicSheet.isLocked` so the lock is evaluated synchronously during the
+/// geometry change handler — not one frame later via a PreferenceKey.
+private struct DynamicSheetWrapper: View {
+    let animation: Animation
+    @Bindable var viewModel: ProfileDataModel
+
+    /// Owned here, bound into the sheet, and passed to DynamicSheet.
+    /// Because DynamicSheet reads this as a plain `var`, SwiftUI evaluates
+    /// it synchronously inside the `.onGeometryChange` action closure.
+    @State private var isLocked: Bool = false
+
+    var body: some View {
+        DynamicSheet(animation: animation, isLocked: isLocked) {
+            UserAvatarPersonalizationSheet(
+                animation: animation,
+                viewModel: viewModel,
+                isSheetLocked: $isLocked
+            )
+            .presentationBackground(Color.theme.background)
+        }
+    }
+}
 #Preview {
     @Previewable
     @State var profile = ProfileDataModel()

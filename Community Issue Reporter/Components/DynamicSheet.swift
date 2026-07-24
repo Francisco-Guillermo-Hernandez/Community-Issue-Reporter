@@ -37,10 +37,27 @@ struct SheetHeaderView: View {
 }
 
 // MARK: - Custom sheet
+
+/// Kept for backward compatibility, but no longer used by DynamicSheet itself.
+struct DynamicSheetLockPreference: PreferenceKey {
+    static var defaultValue: Bool = false
+    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+        value = value || nextValue()
+    }
+}
+
+extension View {
+    func lockDynamicSheet(_ isLocked: Bool) -> some View {
+        preference(key: DynamicSheetLockPreference.self, value: isLocked)
+    }
+}
+
 struct DynamicSheet<Content: View>: View {
     var animation: Animation
+    var isLocked: Bool = false
     @ViewBuilder var content: Content
     @State private var sheetHeight: CGFloat = 0
+
     var body: some View {
         ZStack {
             content
@@ -49,12 +66,17 @@ struct DynamicSheet<Content: View>: View {
                 .onGeometryChange(for: CGSize.self) {
                     $0.size
                 } action: { newValue in
-                    if sheetHeight == .zero {
-                        /// Customize it according to your needs!
-                        sheetHeight = min(newValue.height, windowSize.height - 110)
-                    } else {
-                        withAnimation(animation) {
-                            sheetHeight = min(newValue.height, windowSize.height - 110)
+                    guard newValue.height > 50 else { return }
+                    guard !isLocked else { return }
+                    let newHeight = min(newValue.height, windowSize.height - 110)
+                    if abs(sheetHeight - newHeight) > 0.5 {
+                        if sheetHeight == .zero {
+                            /// Customize it according to your needs!
+                            sheetHeight = newHeight
+                        } else {
+                            withAnimation(animation) {
+                                sheetHeight = newHeight
+                            }
                         }
                     }
                 }
@@ -72,12 +94,8 @@ struct DynamicSheet<Content: View>: View {
     }
 }
 
-fileprivate struct SheetHeightModifier: ViewModifier, Animatable {
+fileprivate struct SheetHeightModifier: ViewModifier {
     var height: CGFloat
-    var animatableData: CGFloat {
-        get { height }
-        set { height = newValue }
-    }
     func body(content: Content) -> some View {
         content
             .presentationDetents(height == .zero ? [.medium] : [.height(height)])

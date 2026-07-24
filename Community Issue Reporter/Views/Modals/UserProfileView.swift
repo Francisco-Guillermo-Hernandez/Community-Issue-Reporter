@@ -47,18 +47,17 @@ struct UserProfileView: View {
             color: Color.purple
         ),
         ProfileOption(
-            id: "op:licenses",
-            title: String(localized: "Licenses"),
-            icon: "text.page.fill",
-            color: Color.green
-        ),
-        ProfileOption(
             id: "op:settings",
             title: String(localized: "Settings"),
             icon: "gear",
             color: Color.gray
         ),
-
+        ProfileOption(
+            id: "op:licenses",
+            title: String(localized: "Licenses"),
+            icon: "text.page.fill",
+            color: Color.green
+        ),
     ]
 
     var body: some View {
@@ -67,7 +66,7 @@ struct UserProfileView: View {
             ScrollView(.vertical) {
                 
                 VStack(spacing: 4) {
-//                    
+                    
                     ProfileImage(viewModel: profile)
                         .padding(.bottom, 8)
                         .disabled(controller.isGuest)
@@ -91,7 +90,7 @@ struct UserProfileView: View {
                                 .frame(width: 36, height: 36)
                                 .overlay {
                                     Image(systemName: option.icon)
-                                        .font(Font.system(size: 17, weight: .medium))
+                                        .font(Font.system(size: 16, weight: .medium))
                                         .foregroundStyle( Color.white)
                                 }
                                 
@@ -101,11 +100,10 @@ struct UserProfileView: View {
                             Text(option.title)
                                 
                         }
-                        
                     }
                 }
-//                .listRowBackground(Color.clear)
                 .frame(height: 500)
+                .contentMargins(.top, 16, for: .scrollContent)
                 .scrollContentBackground(.hidden)
                 .scrollDisabled(true)
                 
@@ -128,6 +126,7 @@ struct UserProfileView: View {
                         .fontWeight(.bold)
                         .padding(8)
                 }
+                .accessibilityIdentifier("LogoutButton")
                 .buttonSizing(.flexible)
                 .buttonStyle(.bordered)
                 .buttonBorderShape(.capsule)
@@ -135,15 +134,11 @@ struct UserProfileView: View {
                 .padding(.top, 0)
                
             }
-            .toolbar(profile.showPicker ? .hidden : .visible, for: .navigationBar)
             .task {
                 profile.isGuest = controller.isGuest
                 profile.setUserName(UserRepository.shared.getName())
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(role: .close) { dismiss() }
-                }
                 
                 ToolbarItem(placement: .title) {
                     Text(String(localized: "Profile"))
@@ -189,6 +184,9 @@ struct UserProfileView: View {
 #Preview {
     UserProfileView()
         .environmentObject(AuthViewModel())
+        .environment(NotificationManager())
+        .environment(SettingsStore())
+        .environment(NetworkMonitor())
 }
 
 

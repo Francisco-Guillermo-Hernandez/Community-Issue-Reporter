@@ -28,18 +28,7 @@ struct FollowUpSectionView: View {
                 .padding(.bottom, -10)
             
             List {
-                NavigationLink(destination: IssueTimelineView(resolution: resolution ?? .resolution)) {
-                    HStack {
-                        Text("Details of the progress")
-                            .font(.caption)
-                            .opacity(isFollowUpDisabled ? 0.4 : opacity)
-                            .fontWeight(.medium)
-                        
-                    }
-                }
-                .disabled(isFollowUpDisabled)
-                .listRowBackground(Color.clear)
-                
+            
                 HStack {
                     Text("Assigned institution:")
                         .font(.caption)
@@ -52,12 +41,35 @@ struct FollowUpSectionView: View {
                         .fontWeight(.semibold)
                 }
                 .listRowBackground(Color.clear)
+                
+                HStack {
+                    Text("Assignation date:")
+                        .font(.caption)
+                        .opacity(opacity)
+                        .fontWeight(.medium)
+                    
+                    Spacer()
+                    Text(report.assignedDate)
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                }
+                .listRowBackground(Color.clear)
+                
+                NavigationLink(destination: IssueTimelineView(of: resolution)) {
+                    HStack {
+                        Text("Details of the progress")
+                            .font(.caption)
+                            .opacity(isFollowUpDisabled ? 0.4 : opacity)
+                            .fontWeight(.medium)
+                    }
+                }
+                .disabled(isFollowUpDisabled)
             }
             .scrollDisabled(true)
             .scrollContentBackground(.hidden)
             .listStyle(.plain)
             .scrollClipDisabled(true)
-            .frame(height: 75)
+            .frame(height: 135)
         }
         .padding(.bottom, .themePadding)
     }

@@ -69,24 +69,24 @@ struct MapExplorerView: View {
         .ignoresSafeArea(edges: .bottom)
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 16) {
-                SearchBar(
-                    text: $controller.searchText,
-                    onSubmit: {
-                        controller.performSearch()
-                        controller.showSearchOverlay = false
-                    },
-                    onFocusChange: { isFocused in
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                            controller.showSearchOverlay = isFocused
-                        }
-                    },
-                    onUserProfileTap: {
-                        controller.showUserProfileOverlay.toggle()
-                    },
-                    isFocused: $isSearchFocused,
-                    profileNamespace: profileNamespace,
-                    avatarURL: profile.avatarURL
-                )
+//                SearchBar(
+//                    text: $controller.searchText,
+//                    onSubmit: {
+//                        controller.performSearch()
+//                        controller.showSearchOverlay = false
+//                    },
+//                    onFocusChange: { isFocused in
+//                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+//                            controller.showSearchOverlay = isFocused
+//                        }
+//                    },
+//                    onUserProfileTap: {
+//                        controller.showUserProfileOverlay.toggle()
+//                    },
+//                    isFocused: $isSearchFocused,
+//                    profileNamespace: profileNamespace,
+//                    avatarURL: profile.avatarURL
+//                )
                 
                 StatusFilterRow(selectedStatuses: $controller.selectedStatuses)
             }

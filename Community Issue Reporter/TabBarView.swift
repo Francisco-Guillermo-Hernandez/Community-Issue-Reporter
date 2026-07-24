@@ -24,7 +24,7 @@ struct TabBarView: View {
             }
             .accessibilityIdentifier("MapExplorerTab")
             
-            Tab(String(localized: "Sign petitions"), systemImage: "signature", value: 2) {
+            Tab(String(localized: "Petitions"), systemImage: "signature", value: 2) {
                SignRequestsView()
             }
             .accessibilityIdentifier("SignRequestsTab")
@@ -34,7 +34,12 @@ struct TabBarView: View {
             }
             .accessibilityIdentifier("ShowInsightsTab")
             
-            Tab(String(localized: "Add"), systemImage: "plus", value: 4, role: .search) {
+            Tab(String(localized: "Profile"), systemImage: "person.fill", value: 4) {
+                UserProfileView()
+            }
+            .accessibilityIdentifier("UserProfileTab")
+            
+            Tab(String(localized: "Add"), systemImage: "plus", value: 5, role: .search) {
                 CreateReportView()
             }
             .accessibilityIdentifier("CreateReportTab")

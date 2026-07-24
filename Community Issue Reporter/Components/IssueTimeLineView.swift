@@ -50,112 +50,115 @@ struct TimelineNode<Content: View>: View {
     }
 }
 
-
-///
-///
-
-
+// MARK: - Multiline
 struct IssueTimelineView: View {
-    let resolution: Resolution
+    let resolution: Resolution?
+    
+    init(of resolution: Resolution?) {
+        self.resolution = resolution
+    }
     
     var body: some View {
         ScrollView {
            
             VStack(alignment: .leading, spacing: 0) {
-//                DetailsHeader(title: "Report follow up", description: "ID #\(resolution.id)")
-//                    .padding(.bottom, .themePadding * 1.5)
-//                Text("ID #\(resolution.id)")
-//                    .font(.caption)
-//                    .foregroundStyle(.secondary)
-//                    .padding(.bottom, 20)
                 
-                /// 1. Reported
-                TimelineNode(status: .reported) {
-                    MilestoneHeader(title: String(localized: "Reported"), date: resolution.history.reported?.date)
-                    Text("By \(resolution.history.reported?.by ?? "Unknown")")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                
-                /// 2. Confirmed
-                if let confirmed = resolution.history.confirmed {
-                    TimelineNode(status: .confirmed) {
-                        MilestoneHeader(title: String(localized: "Confirmed"), date: confirmed.date ?? confirmed.computedConfirmationDate)
-                        Text("Issue verified by the community").font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                
-                /// 3. In Progress (Expanded Sub-tasks)
-                if let inProgress = resolution.history.inProgress {
-                    TimelineNode(status: .inProgress) {
-                        VStack(alignment: .leading, spacing: .themeSpacing * 3) {
-                            MilestoneHeader(title: String(localized: "In Progress"), date: nil)
-                            Text(inProgress.assignedInstitution)
-                                .font(.headline)
-                                .foregroundColor(.orange)
-                            
-                            // Sub-steps (Updates)
-                            VStack(alignment: .leading, spacing: .themeSpacing * 3) {
-                                ForEach(inProgress.updates) { update in
-                                    HStack(alignment: .top) {
-                                        Circle().fill(.orange).frame(width: 6, height: 6).padding(.top, 6)
-                                        VStack(alignment: .leading) {
-                                            Text(update.comments).font(.footnote)
-                                            Text(update.date).font(.caption2).foregroundStyle(.secondary)
-                                            
-                                            if !update.attachments.isEmpty {
-                                                NavigationLink(destination: AttachmentDetailView(attachments: update.attachments)) {
-                                                    Label("\(update.attachments.count) Attachments", systemImage: "paperclip")
-                                                        .font(.caption)
-                                                        .padding(6)
-                                                        .background(Color.orange.opacity(0.1))
-                                                        .cornerRadius(4)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            .padding(.leading, 10)
-                        }
-                    }
-                }
-                
-                /// 4. Fixed
-                if let fixed = resolution.history.fixed {
-                    TimelineNode(status: .fixed, isLast: true) {
-                        VStack(alignment: .leading) {
-                            MilestoneHeader(title: String(localized: "Fixed"), date: fixed.date)
-                            Text(fixed.comments ?? String(localized: "Repair finalized"))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            
-                            if let attachments = fixed.attachments {
-                                NavigationLink(destination: AttachmentDetailView(attachments: attachments)) {
-                                    HStack {
-                                        Image(systemName: "checkmark.seal.fill")
-                                        Text(String(localized: "View Final Evidence"))
-                                        
-                                    }
-                                    .font(.system(size: 14, weight: .bold))
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                                }
-                                .padding(.top, 8)
-                            }
-                        }
-                    }
+               if let resolution {
+                   /// 1. Reported
+                   TimelineNode(status: .reported) {
+                       MilestoneHeader(title: String(localized: "Reported"), date: resolution.history.reported?.date)
+                       Text("By \(resolution.history.reported?.by ?? "Unknown")")
+                           .font(.subheadline)
+                           .foregroundStyle(.secondary)
+                   }
+                   
+                   /// 2. Confirmed
+                   if let confirmed = resolution.history.confirmed {
+                       TimelineNode(status: .confirmed) {
+                           MilestoneHeader(title: String(localized: "Confirmed"), date: confirmed.date ?? confirmed.computedConfirmationDate)
+                           Text("Issue verified by the community").font(.subheadline)
+                               .foregroundStyle(.secondary)
+                       }
+                   }
+                   
+                   /// 3. In Progress (Expanded Sub-tasks)
+                   if let inProgress = resolution.history.inProgress {
+                       TimelineNode(status: .inProgress) {
+                           VStack(alignment: .leading, spacing: .themeSpacing * 3) {
+                               MilestoneHeader(title: String(localized: "In Progress"), date: nil)
+                               Text(inProgress.assignedInstitution)
+                                   .font(.headline)
+                                   .foregroundColor(.orange)
+                               
+                               // Sub-steps (Updates)
+                               VStack(alignment: .leading, spacing: .themeSpacing * 3) {
+                                   ForEach(inProgress.updates) { update in
+                                       HStack(alignment: .top) {
+                                           Circle().fill(.orange).frame(width: 6, height: 6).padding(.top, 6)
+                                           VStack(alignment: .leading) {
+                                               Text(update.comments).font(.footnote)
+                                               Text(update.date).font(.caption2).foregroundStyle(.secondary)
+                                               
+                                               if !update.attachments.isEmpty {
+                                                   NavigationLink(destination: AttachmentDetailView(attachments: update.attachments)) {
+                                                       Label("\(update.attachments.count) Attachments", systemImage: "paperclip")
+                                                           .font(.caption)
+                                                           .padding(6)
+                                                           .background(Color.orange.opacity(0.1))
+                                                           .cornerRadius(4)
+                                                   }
+                                               }
+                                           }
+                                       }
+                                   }
+                               }
+                               .padding(.leading, 10)
+                           }
+                       }
+                   }
+                   
+                   /// 4. Fixed
+                   if let fixed = resolution.history.fixed {
+                       TimelineNode(status: .fixed, isLast: true) {
+                           VStack(alignment: .leading) {
+                               MilestoneHeader(title: String(localized: "Fixed"), date: fixed.date)
+                               Text(fixed.comments ?? String(localized: "Repair finalized"))
+                                   .font(.subheadline)
+                                   .foregroundStyle(.secondary)
+                               
+                               if let attachments = fixed.attachments {
+                                   NavigationLink(destination: AttachmentDetailView(attachments: attachments)) {
+                                       HStack {
+                                           Image(systemName: "checkmark.seal.fill")
+                                           Text(String(localized: "View Final Evidence"))
+                                           
+                                       }
+                                       .font(.system(size: 14, weight: .bold))
+                                       .padding()
+                                       .background(Color.blue)
+                                       .foregroundColor(.white)
+                                       .cornerRadius(10)
+                                   }
+                                   .padding(.top, 8)
+                               }
+                           }
+                       }
+                   }
                 }
             }
             .padding()
         }
         .toolbarTitleDisplayMode(.large)
         .navigationTitle("Report follow up")
-        .navigationSubtitle("ID: \(resolution.id)")
-//        .background(Color.theme.background)
+        .navigationSubtitle(subtitle)
+    }
+    
+    var subtitle: String {
+        if let resolution = resolution {
+            return String(format: "ID: %@", resolution.id)
+        } else {
+            return "No ID"
+        }
     }
 }
 
@@ -211,7 +214,7 @@ struct AttachmentDetailView: View {
 #Preview {
     
     NavigationStack {
-        IssueTimelineView(resolution: .resolution)
+        IssueTimelineView(of: .resolution)
         
         Button("showJson") {
             do {
@@ -285,6 +288,6 @@ extension Resolution {
                 ]
             ),
         ),
-        metadata: ResolutionMetadata(cityId: "", groupingId: "", assigned: .init(institutionName: "", institutionCode: "", institutionID: ""), resourceType: "", resourceId: "")
+        metadata: ResolutionMetadata(cityId: "", groupingId: "", assigned: .init(institutionName: "", institutionCode: "", institutionId: ""), resourceType: "", resourceId: "")
     )
 }

@@ -24,6 +24,7 @@ struct StepCardView<Content: View>: View {
                         Image(systemName: metadata?.icon ?? "")
                             .font(.system(size: 26, weight: .bold))
                             .symbolRenderingMode(.palette)
+                            .symbolColorRenderingMode(.gradient)
                             .foregroundStyle(
                                 Color.theme.primary,
                                 Color.theme.foreground.opacity(0.8),
@@ -67,8 +68,8 @@ struct StepCardView<Content: View>: View {
                     
                     if step < currentStep {
                         Image(systemName: "checkmark.circle.fill")
-//                            .foregroundColor(.green)
                             .symbolRenderingMode(.palette)
+                            .symbolColorRenderingMode(.gradient)
                             .foregroundStyle(
                                 Color.white,
                                 Color.green,

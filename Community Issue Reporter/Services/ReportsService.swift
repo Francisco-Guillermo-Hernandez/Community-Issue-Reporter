@@ -71,4 +71,8 @@ struct ReportsService {
     func submitGroupedAttachments(attachments: [GroupedAttachmentPayload], headers: Array<HTTPHeader>) async throws -> GenericResponse {
         return try await client.post(path: "report-attachments/group/by/container", body: attachments, headers: headers, withOAuth: true)
     }
+    
+    func fetchResolutionByReport(reportId: String, headers: Array<HTTPHeader>) async throws -> Resolution {
+        return try await client.get(path: "resolutions/byReportId/\(reportId)", headers: headers, withOAuth: true)
+    }
 }

@@ -12,22 +12,10 @@ struct BasicInformationView: View {
     private var opacity: Double = 0.85
     init(for report: MapExplorerReport) { self.report = report }
     var body: some View {
-        HStack(spacing: .themeSpacing * 4) {
-
+        HStack(spacing: .themeSpacing * 7) {
             
             Group {
-                VStack {
-                    Text("Reported at")
-                        .font(.caption)
-                        .opacity(opacity)
-                        
-
-                    Text(report.reportedDate)
-                        .font(.caption)
-                        .fontWeight(.semibold)
-
-                }
-
+                
                 VStack {
                     Text("Issue Type")
                         .font(.caption)

@@ -167,6 +167,21 @@ final class ReportRepository {
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
+    
+    func fetchResolutionByReport(_ reportId: String) async throws -> Resolution {
+        do {
+            return try await self.reportsService.fetchResolutionByReport(reportId: reportId, headers: self.headers)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        } catch ServiceError.badRequest(let response) {
+            throw CommonIntercommunicationErrors.invalidPetition(response.code)
+        } catch ServiceError.serverError(let code) {
+            throw CommonIntercommunicationErrors.serverError(code)
+        } catch {
+            print(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
 }
 
 

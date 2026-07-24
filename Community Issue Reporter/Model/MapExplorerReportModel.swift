@@ -31,6 +31,7 @@ struct MapExplorerReport: Identifiable, Decodable, Hashable {
     let shareUrl: String
     let attachments: [PreviewAttachment]
     let assignedTo: String?
+    let institutionId: String?
     let reportContainer: String
     var clLocation: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: lat, longitude: lng)
@@ -79,7 +80,7 @@ extension MapExplorerReport {
         }
     }
     
-    var reportedDate: String {
+    var assignedDate: String {
        if reportedAt == nil {
             String(localized: "Not yet")
        } else {

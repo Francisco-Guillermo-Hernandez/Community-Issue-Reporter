@@ -129,17 +129,17 @@ struct DetailView: View {
                 .padding(.leading, 16)
             }
             .task(id: activeDetent) {
-                guard activeDetent == .medium else { return }
+                guard activeDetent == .medium || activeDetent == .large else { return }
                 guard report.institutionId != nil && report.assignedTo != nil else { return }
-                guard resolution == nil else { return }
                 do {
                     self.resolution = try await ReportRepository.shared.fetchResolutionByReport(report.id)
                 } catch {
                     print("Error fetching resolution: \(error)")
                 }
             }
-            .task {
-                guard !Task.isCancelled else { return }
+            .task(id: activeDetent) {
+                
+                guard activeDetent == .large else { return }
                 do {
                     self.comments = try await CommentsRepository.shared.list(report.id, page: 1)
                     

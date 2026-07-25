@@ -84,8 +84,17 @@ struct StepCardView<Content: View>: View {
                 .transition(.opacity)
             }
         }
-        .scaleEffect(step == currentStep ? 1.0 : (step < currentStep ? 0.96 : 0.98))
-        .opacity(step == currentStep ? 1.0 : (step < currentStep ? 0.75 : 0.55))
+        .scaleEffect(scale)
+        .opacity(opacity)
+        
+    }
+    
+    
+    private var scale: CGFloat {
+        step == currentStep ? 1.0 : (step < currentStep ? 0.96 : 0.98)
+    }
+    private var opacity: Double {
+         step == currentStep ? 1.0 : (step < currentStep ? 0.75 : 0.55)
     }
 }
 

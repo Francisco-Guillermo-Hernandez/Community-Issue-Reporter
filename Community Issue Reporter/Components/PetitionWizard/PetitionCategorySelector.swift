@@ -52,7 +52,7 @@ struct SelectOption: View {
     
     private func getForegroundColor() -> Color {
         if colorScheme == .dark {
-            return isSelected ?  Color.white : Color.white
+            return Color.white
         } else {
             return isSelected ? Color.white : Color.theme.foreground
         }

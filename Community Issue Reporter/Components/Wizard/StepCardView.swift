@@ -91,10 +91,19 @@ struct StepCardView<Content: View>: View {
     
     
     private var scale: CGFloat {
-        step == currentStep ? 1.0 : (step < currentStep ? 0.96 : 0.98)
+        if step == currentStep {
+            return 1.0
+        } else {
+           return step < currentStep ? 0.96 : 0.98
+        }
     }
+    
     private var opacity: Double {
-         step == currentStep ? 1.0 : (step < currentStep ? 0.75 : 0.55)
+        if step == currentStep {
+            return 1.0
+        } else {
+            return step < currentStep ? 0.75 : 0.55
+        }
     }
 }
 

@@ -189,14 +189,15 @@ struct ThemedSecondaryButtonStyle: ButtonStyle {
             .label
             .foregroundStyle(Color.white)
             .background(Color.theme.secondary)
-            .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
-            .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+            .contentShape(.capsule)
+            .clipShape(.capsule)
             .font(Font.body.bold())
             .overlay {
-                RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
+                Capsule()
                     .stroke(Color.theme.secondary.mix(with: .white, by: 0.3), lineWidth: 1)
             }
-            .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
+            .glassEffect(in: .capsule)
+            .modifier(GlassBounceModifier(isPressed: configuration.isPressed))
     }
 }
 

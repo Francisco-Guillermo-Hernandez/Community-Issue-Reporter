@@ -14,7 +14,7 @@ struct ShareService {
         self.client = client
     }
     
-    func createLink<R: Codable>(for share: Share<R>) async throws -> CustomizedResponse<ShareUrlResponse> {
-        try await client.post(path: "actions/create/shareable/link", body: share, withOAuth: true)
+    func createLink<R: Codable>(for share: Share<R>, headers: [HTTPHeader]) async throws -> CustomizedResponse<ShareUrlResponse> {
+        try await client.post(path: "actions/create/shareable/link", body: share, headers: headers, withOAuth: true)
     }
 }

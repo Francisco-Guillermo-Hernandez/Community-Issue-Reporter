@@ -18,8 +18,8 @@ enum TextInputStatus: String, CaseIterable, Codable {
 struct TailwindInputModifier: ViewModifier {
     @Environment(\.colorScheme) var colorScheme
     @FocusState.Binding var isFocused: Bool
-    @Binding var isInvalid: Bool
-    @Binding var value: String
+    var hasError: Bool
+    var value: String
     var isDisabled: Bool
     var axis: Axis
     
@@ -38,13 +38,13 @@ struct TailwindInputModifier: ViewModifier {
             .overlay(
                 shapeMask
                     .stroke(
-                        isInvalid ? (isFocused ? Color.theme.inputRing : Color.theme.inputBorder) : Color.theme.destructive,
+                        hasError ? Color.theme.destructive : (isFocused ? Color.theme.inputRing : Color.theme.inputBorder),
                         lineWidth: 1
                     )
             )
             .opacity(opacity)
             .animation(.easeOut(duration: 0.2), value: isFocused)
-            .animation(.easeOut(duration: 0.2), value: isInvalid)
+            .animation(.easeOut(duration: 0.2), value: hasError)
     }
     
     var shapeMask: AnyShape {
@@ -69,15 +69,15 @@ struct TailwindInputModifier: ViewModifier {
 extension View {
     func tailwindInputStyle(
         isFocused: FocusState<Bool>.Binding,
-        isInvalid: Binding<Bool>,
-        value: Binding<String>,
+        hasError: Bool,
+        value: String,
         isDisabled: Bool,
         axis: Axis
     ) -> some View {
         self.modifier(
             TailwindInputModifier(
                 isFocused: isFocused,
-                isInvalid: isInvalid,
+                hasError: hasError,
                 value: value,
                 isDisabled: isDisabled,
                 axis: axis
@@ -97,6 +97,7 @@ struct TextInput: View {
     var validators: [Validator]
     var regex: RegexType
     var axis: Axis
+    var resetTrigger: AnyHashable?
     
     @State private var message: String
     @Binding var isValid: Bool
@@ -114,7 +115,8 @@ struct TextInput: View {
          message: String = "",
          isValid: Binding<Bool>,
          value: Binding<String>,
-         disabled: Bool = false
+         disabled: Bool = false,
+         resetTrigger: AnyHashable? = nil
     ) {
         self.name = name
         self.label = label
@@ -131,6 +133,7 @@ struct TextInput: View {
         self._isValid = isValid
         self._value = value
         self.disabled = disabled
+        self.resetTrigger = resetTrigger
         
 //        preCheck()
     }
@@ -152,12 +155,15 @@ struct TextInput: View {
                 .focused($isFocused)
                 .disabled(disabled)
                 .onChange(of: isFocused) { _, newValue in
-                    status = .touched
+                    if newValue && status == .untouched {
+                        status = .touched
+                        validate(value)
+                    }
                 }
                 .tailwindInputStyle(
                     isFocused: $isFocused,
-                    isInvalid: $isValid,
-                    value: $value,
+                    hasError: !isValid && status != .untouched,
+                    value: value,
                     isDisabled: disabled,
                     axis: axis
                 )
@@ -165,10 +171,13 @@ struct TextInput: View {
                 .tint(Color.theme.inputRing) // focus-visible:ring-ring
                 .autocorrectionDisabled()
                 .onChange(of: value) { _, newValue in
+                    if status == .untouched {
+                        status = .touched
+                    }
                     filter(newValue)
                 }
             
-            if !isValid && !message.isEmpty {
+            if !isValid && !message.isEmpty && status != .untouched {
                 Text(message)
                     .foregroundColor(Color.theme.destructive)
                     .font(.caption)
@@ -178,6 +187,12 @@ struct TextInput: View {
         .padding(.vertical, 4)
         .task {
             validate(value)
+        }
+        .onChange(of: resetTrigger) { _, _ in
+            Task { @MainActor in
+                status = .untouched
+                validate(value)
+            }
         }
     }
     
@@ -198,17 +213,23 @@ struct TextInput: View {
     
     /// Lets use the validations to check the text
     private func validate(_ value: String) {
+        let wasUntouched = (status == .untouched)
+        
         for validator in validators {
             if !validator.fn(value) {
                 self.isValid = false
                 self.message = validator.message
-                self.status = .error
+                if !wasUntouched {
+                    self.status = .error
+                }
                 return
             }
         }
         self.isValid = true
         self.message = ""
-        self.status = .valid
+        if !wasUntouched {
+            self.status = .valid
+        }
     }
 
     private func filterValue(_ value: String) -> String {
@@ -224,7 +245,7 @@ struct TextInput: View {
     }
 }
 
-private struct LabelView: View {
+struct LabelView: View {
     let text: String
     let isDisabled: Bool
     
@@ -252,8 +273,15 @@ enum TestFieldsMock: Hashable {
     @Previewable
     @State var isValid: Bool = false
     
+    @State var resetId: UUID = UUID()
+    
     VStack(spacing: 20) {
-        TextInput(name: "hello@reportamelo.app", label: "Email", regex: .email, isValid: $isValid, value: $value,)
+        TextInput(name: "hello@reportamelo.app", label: "Email", regex: .email, isValid: $isValid, value: $value, resetTrigger: resetId)
+        
+        Button("Clear & Reset Form") {
+                            value = ""
+                            resetId = UUID() // Changing the trigger resets the untouched state
+                        }
         
         TextInput(name: "hello@reportamelo.app", label: "Invalid State", validators: [
             Validator(name: "error", message: "This is an error", fn: { _ in false })

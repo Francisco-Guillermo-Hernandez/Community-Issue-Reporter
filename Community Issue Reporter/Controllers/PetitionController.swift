@@ -19,6 +19,8 @@ final class PetitionController {
     var stepperAction: String
     var isDescriptionValid: Bool
     var minimumSignatures: Int
+    var currentStep: PetitionStep
+    var doneTrigger: Bool
    
     init() {
         self.reports = []
@@ -42,6 +44,8 @@ final class PetitionController {
         isTitleValid = false
         isDescriptionValid = false
         minimumSignatures = 10
+        currentStep = .details
+        doneTrigger = false
     }
     
     func prepareForModification(_ petition: Petition) {
@@ -64,17 +68,51 @@ final class PetitionController {
         }
     }
     
-    func submit() {
-        Task {
-          
-            do {
-                _ = try await PetitionRepository.share.create(petition)
-                
-            } catch {
-               
-            }
-                
-            isSubmitting.toggle()
+    
+    func goNext() {
+        if let next = PetitionStep(rawValue: currentStep.rawValue + 1) {
+            currentStep = next
         }
     }
+    
+    func goBack() {
+        if let prev = PetitionStep(rawValue: currentStep.rawValue - 1) {
+            currentStep = prev
+        }
+    }
+    
+    func submit() {
+//        Task {
+//          
+//            do {
+//                _ = try await PetitionRepository.share.create(petition)
+//                
+//            } catch {
+//               
+//            }
+//                
+//            isSubmitting.toggle()
+//        }
+        if currentStep == .signatures {
+            self.goNext()
+        } else {
+            self.goNext()
+        }
+    }
+    
+    var buttonMessage: String {
+        currentStep == .signatures ? String(localized: "Submit") : String(localized: "Next")
+    }
 }
+
+
+
+//if currentStep == .details {
+//   
+//    submitReport(model, attachments: uploadTrackers) {
+//        self.goNext()
+//    }
+//    
+//} else {
+//    self.goNext()
+//}

@@ -41,7 +41,12 @@ final class ShareRepository {
             let share = Share<ReportToShare>(payload, type: .report, lang: "es-419")
             
             ///  Lets invoke the service
-            let result = try await service.createLink(for: share)
+            let result = try await service.createLink(
+                for: share,
+                headers: [
+                    HTTPHeader(name: "CountryCode", content: "SV")
+                ]
+            )
             
             /// Lets validate the incoming response to extract shareUrl
             if result.code == "SHARE_GENERATED" {

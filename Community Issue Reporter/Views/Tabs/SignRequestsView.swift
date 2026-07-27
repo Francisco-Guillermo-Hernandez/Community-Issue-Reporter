@@ -163,13 +163,22 @@ struct SignRequestsView: View {
         .onChange(of: controller.orderFilter) {
             Task { await controller.fetchPetitions(reset: true) }
         }
-        .sheet(isPresented: $controller.showCreateRequestView) {
-            CreateRequestPetitionView(controller: petitionController, onCompletion: { _, _ in
-                
-            })
-            .navigationTransition(
-                .zoom(sourceID: "openCreateRequest", in: namespace)
-            )
+        .sheet(
+            isPresented: $controller.showCreateRequestView,
+            onDismiss: {
+                petitionController = PetitionController()
+            }
+        ) {
+            PetitionWizardContainer(controller: petitionController)
+                .navigationTransition(
+                    .zoom(sourceID: "openCreateRequest", in: namespace)
+                )
+//            CreateRequestPetitionView(controller: petitionController, onCompletion: { _, _ in
+//                
+//            })
+//            .navigationTransition(
+//                .zoom(sourceID: "openCreateRequest", in: namespace)
+//            )
         }
         .sensoryFeedback(.selection, trigger: controller.subtitle != nil)
         

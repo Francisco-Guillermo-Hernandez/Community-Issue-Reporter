@@ -82,6 +82,7 @@ struct SettingsSubView: View {
     
     @Environment(\.dismiss) private var dismiss
     @State private var settings = SettingsStore.shared
+    @State private var router = DeepLinkRouter.shared
     @EnvironmentObject var appState: AuthViewModel
     @Environment(NetworkMonitor.self) var networkMonitor
     
@@ -247,6 +248,7 @@ struct SettingsSubView: View {
                 )
                 
                 dismiss()
+                router.activeTab = 1
             }
         )
     }

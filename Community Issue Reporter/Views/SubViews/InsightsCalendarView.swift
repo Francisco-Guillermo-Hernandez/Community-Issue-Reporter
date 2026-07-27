@@ -85,6 +85,7 @@ struct SimpleView: View {
                        ContentUnavailableView {
                            Label(String(localized: "No activity"), systemImage: "calendar.badge.exclamationmark")
                                .symbolRenderingMode(.palette)
+                               .symbolColorRenderingMode(.gradient)
                                .foregroundStyle(
                                     Color.theme.foreground.opacity(0.7),
                                     Color.theme.primary,

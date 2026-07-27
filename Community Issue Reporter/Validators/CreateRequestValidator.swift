@@ -30,7 +30,7 @@ let titleValidator: [Validator] = [
 
 ///
 let descriptionMinCharacters: Int = 5
-let descriptionMaxCharacters: Int = 90
+let descriptionMaxCharacters: Int = 150
 let descriptionValidator: [Validator] = [
     Validator(
         name: "Isn't empty",

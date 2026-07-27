@@ -50,6 +50,7 @@ enum Categories: String, CaseIterable, Codable, Equatable {
     
     var identifier: Int {
         switch self {
+            case .all: return 0
             case .prevention: return 1
             case .corrective: return 2
             case .repair: return 3
@@ -58,8 +59,6 @@ enum Categories: String, CaseIterable, Codable, Equatable {
             case .installation: return 6
             case .inspection: return 7
             case .emergency: return 8
-        default:
-            return 1
         }
     }
 

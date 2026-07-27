@@ -98,6 +98,8 @@ struct ReportWizardContainer: View {
                                         }
                                     }
                                 }
+                                /// Smoothly animate the transitions of layout changes and background gradient
+                                .animation(.snappy(duration: 0.45, extraBounce: 0.08), value: controller.currentStep)
                             }
                         }
                         .padding(.horizontal, 20)
@@ -138,8 +140,6 @@ struct ReportWizardContainer: View {
                     .padding()
             }
         }
-        /// Smoothly animate the transitions of layout changes and background gradient
-        .animation(.snappy(duration: 0.45, extraBounce: 0.08), value: controller.currentStep)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: controller.currentStep) { oldValue, newValue in
             return newValue > oldValue
         }
@@ -203,21 +203,16 @@ struct ReportWizardContainer: View {
                     isLoading: $controller.isLoading
                 )
                 .disabled(disableButton)
+                .accessibilityIdentifier("Report\(controller.currentStep.rawValue)Button")
                 
             } else {
-                Button(action: done) {
-                    Text(String(localized: "Done"))
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(controller.currentStep.color)
-                        .foregroundColor(.white)
-                        .contentShape(.capsule)
-                        .clipShape(.capsule)
-                        .glassEffect(in: .capsule)
-                    
-                }
+                ThemedButton(
+                    message: String(localized: "Done"),
+                    action: done,
+                    type: .secondary,
+                    style: .prominent
+                )
+                .accessibilityIdentifier("ReportDoneButton")
                
             }
         }

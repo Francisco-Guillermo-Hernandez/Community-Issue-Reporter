@@ -26,8 +26,10 @@ struct ConfirmationView: View {
                         Color.green
                     )
                     .symbolEffect(.drawOn, isActive: isAnimating)
-                    .onAppear {
-                        isAnimating = false
+                    .task {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.785) {
+                            isAnimating = false
+                        }
                     }
                 
                 Text(String(localized: "Your report has been submitted"))

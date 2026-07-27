@@ -32,7 +32,7 @@ enum ReportStep: Int, CaseIterable, Comparable {
             case .location: return Color.theme.primary
             case .media: return Color.theme.primary
             case .details: return Color.theme.primary
-            case .confirmation: return .green
+            case .confirmation: return Color.theme.secondary
         }
     }
 }

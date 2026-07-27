@@ -160,14 +160,27 @@ struct AppTheme {
     
     static let secondary = dynamicColor(
         light: Color(
-            red: 71/255,
-            green: 181/255,
-            blue: 188/255
+            red: 129/255,
+            green: 34/255,
+            blue: 246/255
         ),
         dark: Color(
-            red: 97/255,
-            green: 139/255,
-            blue: 140/255
+            red: 147/255,
+            green: 88/255,
+            blue: 236/255
+        )
+    )
+    
+    static let tertiary = dynamicColor(
+        light: Color(
+            red: 100/255,
+            green: 100/255,
+            blue: 100/255
+        ),
+        dark: Color(
+            red: 88/255,
+            green: 236/255,
+            blue: 147/255
         )
     )
     

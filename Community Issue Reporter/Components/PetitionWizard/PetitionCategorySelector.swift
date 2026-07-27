@@ -44,9 +44,9 @@ struct SelectOption: View {
     
     private func getBackgroundColor() -> Color {
         if colorScheme == .dark {
-            return isSelected ? Color.theme.primary.opacity(0.86) : Color.clear
+            return isSelected ? Color.theme.cardForeground : Color.clear
         } else {
-            return isSelected ? Color.theme.primary.opacity(0.75) : Color.white
+            return isSelected ? Color.init(hex: "38271F") : Color.white
         }
     }
     

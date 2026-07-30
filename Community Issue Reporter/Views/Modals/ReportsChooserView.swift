@@ -23,28 +23,30 @@ struct ReportsChooserView: View {
     }
     
     var body: some View {
-        List(filteredReports, id: \.id) { report in
-            MultipleSelectionRow(of: report, isSelected: isSelected(report)) {
-                if let index = self.selectedReports.firstIndex(of: report.id!) {
-                    self.selectedReports.remove(at: index)
-                } else {
-                    self.selectedReports.append(getId(from: report))
+        ForEach(filteredReports, id: \.id) { report in
+            LazyVStack(alignment: .leading) {
+                MultipleSelectionRow(of: report, isSelected: isSelected(report)) {
+                    if let index = self.selectedReports.firstIndex(of: report.id!) {
+                        self.selectedReports.remove(at: index)
+                    } else {
+                        self.selectedReports.append(getId(from: report))
+                    }
                 }
+                .cellStyle()
             }
-            .cellStyle()
         }
         .listStyle(.plain)
-        .padding(.horizontal, 0)
-        .background(Color.theme.background)
+//        .background(Color.theme.background)
         .scrollContentBackground(.hidden)
         .interactiveDismissDisabled()
-        .searchable(
-            text: $searchText,
-            placement: .toolbar, // .navigationBarDrawer,
-            prompt: String(localized: "Search a report")
-        )
-        .navigationTitle("Choose one or multiple reports")
-        .navigationBarTitleDisplayMode(.inline)
+        .contentMargins(.all, 0, for: .scrollContent)
+//        .searchable(
+//            text: $searchText,
+//            placement: .toolbar, // .navigationBarDrawer,
+//            prompt: String(localized: "Search a report")
+//        )
+//        .navigationTitle("Choose one or multiple reports")
+//        .navigationBarTitleDisplayMode(.inline)
 //        .toolbar {
 //            ToolbarItem(placement: .automatic) {
 //                Button {
@@ -111,7 +113,7 @@ struct MultipleSelectionRow: View {
                 VStack {
                     Image(systemName: "checkmark")
                         .font(.title3)
-                        .foregroundStyle(isSelected ? Color.blue : .clear)
+                        .foregroundStyle(isSelected ? Color.theme.secondary : .clear)
                 }
                 .frame(alignment: .trailing)
             }

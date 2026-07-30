@@ -9,6 +9,22 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
+enum MapModeOption: String, CaseIterable, Identifiable {
+    case standard
+    case imagery
+    case hybrid
+    
+    var id: String { rawValue }
+    
+    var description: String {
+        switch self {
+            case .standard: return String(localized: "Standard")
+            case .imagery: return String(localized: "Satellite")
+            case .hybrid: return String(localized: "Hybrid")
+        }
+    }
+}
+
 typealias OnConfirm = ((Coordinate, Locator) -> Void)?
 
 struct MapPickerView: View {
@@ -26,6 +42,9 @@ struct MapPickerView: View {
     
     @State private var address: String
     @State private var isSearchActive: Bool = false
+    @State private var showTraffic: Bool = false
+    @State private var showLabels: Bool = true
+    @State private var selectedMode: MapModeOption = .standard
     @Environment(\.dismissSearch) private var dismissSearch
     
     private let span = MKCoordinateSpan(latitudeDelta: 0.00088, longitudeDelta: 0.00088)
@@ -53,18 +72,37 @@ struct MapPickerView: View {
         )
     }
 
+    private var mapStyle: MapStyle {
+            switch selectedMode {
+            case .standard:
+                return .standard(showsTraffic: showTraffic)
+            case .imagery:
+                return .imagery
+            case .hybrid:
+                return .hybrid(showsTraffic: showTraffic)
+            }
+        }
+        
+    
     var body: some View {
         NavigationStack {
             VStack {
                 
-                Text("Move the map where you want to report the issue")
-                    .font(.subheadline)
-                    .padding(.top, 8)
+                Picker("Map Mode", selection: $selectedMode) {
+                    ForEach(MapModeOption.allCases) { mode in
+                        Text(mode.description).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 16)
+                .accessibilityIdentifier("MapModePicker")
                 
                 ZStack {
                     Map(position: $cameraPosition) {
                         UserAnnotation()
                     }
+                    .mapStyle(mapStyle)
+                    .contentMargins(.leading, 32, for: .scrollContent)
                     .allowsHitTesting(true)
                     .onMapCameraChange { context in
                         selectedCoordinate = context.camera.centerCoordinate
@@ -77,9 +115,6 @@ struct MapPickerView: View {
                     }
                     .task {
                         self.isSearchFocused = false
-                    }
-                    .onChange(of: locationManager.lastLocation) { _, newLocation in
-                        
                     }
                     .searchable(text: $searchText,  isPresented: $isSearchActive,  prompt: "Search a place")
                     .searchFocused($isSearchFocused)
@@ -134,6 +169,7 @@ struct MapPickerView: View {
                 }
             }
             .navigationTitle("Location")
+            .navigationSubtitle("Move the map where you want to report the issue")
             .navigationBarTitleDisplayMode(.inline)
         }
     }

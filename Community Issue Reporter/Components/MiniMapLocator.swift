@@ -12,6 +12,7 @@ import MapKit
 struct MiniMapLocator: View {
     @Binding var coordinate: Coordinate
     @Binding var locator: Locator
+    @Environment(SettingsStore.self) var settings
     @Environment(\.colorScheme) private var colorScheme
     var onExpandMap: ((Coordinate) -> Void)?
     var onChange: () -> Void
@@ -46,11 +47,12 @@ struct MiniMapLocator: View {
                 Map(position: $cameraPosition, interactionModes: [.pan, .rotate]) {
                     UserAnnotation()
                 }
+                .contentMargins(.bottom, 8, for: .scrollContent)
+                .contentMargins(.leading, 8, for: .scrollContent)
                 .task {
-                    /// Request the location permissions to the user
-                    locationManager.requestAuthorization()
-                }
-                .onChange(of: locationManager.lastLocation) { _, newLocation in
+                    if settings.useMyCurrentLocation {
+                        centerOnUser()
+                    }
                 }
                 .onMapCameraChange(frequency: .onEnd) { context in
                     if cameraPosition.positionedByUser {
@@ -191,4 +193,5 @@ struct MiniMapLocator: View {
             print("user has changed the location,")
         }
     )
+    .environment(SettingsStore())
 }

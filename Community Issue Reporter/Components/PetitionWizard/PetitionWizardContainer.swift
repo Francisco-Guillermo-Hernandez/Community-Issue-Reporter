@@ -48,14 +48,14 @@ struct PetitionWizardContainer: View {
                                     ) {
                                         Group {
                                             switch step {
-                                            case .details:
-                                                PetitionDetailsView(controller, $focusedField)
-                                            case .reports:
-                                                ReportsChooser()
-                                            case .signatures:
-                                                PetitionSignaturesConfigurator()
-                                            case .confirmation:
-                                                PetitionConfirmationView()
+                                                case .details:
+                                                    PetitionDetailsView(controller, $focusedField)
+                                                case .reports:
+                                                    ReportsChooserView(reports: controller.reports, selectedReports: $controller.petition.reportsIds)
+                                                case .signatures:
+                                                    PetitionSignaturesConfigurator()
+                                                case .confirmation:
+                                                    PetitionConfirmationView()
                                                 
                                             }
                                         }
@@ -94,6 +94,13 @@ struct PetitionWizardContainer: View {
                     }
                 }
             }
+            .task {
+                /// Let's cancel the task if the user change the view
+                guard !Task.isCancelled else { return }
+                
+                /// list reports for the creation of the petition
+                await controller.fetchReports()
+            }
             .sensoryFeedback(.success, trigger: controller.doneTrigger)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 BottomFadedView {
@@ -119,6 +126,7 @@ struct PetitionWizardContainer: View {
                     style: .prominent,
                     isLoading: .constant(false)
                 )
+                .disabled(disableButton)
                 .accessibilityIdentifier("Petition\(controller.currentStep.rawValue)Button")
                 
             } else {
@@ -137,6 +145,24 @@ struct PetitionWizardContainer: View {
     
     // MARK: validations
     
+    
+    var areDetailsValid: Bool {
+        controller.isTitleValid && controller.isDescriptionValid
+    }
+    
+    var areReportsValid: Bool {
+        controller.reports.count > 0 && controller.reports.count <= 6
+    }
+    
+    var disableButton: Bool {
+        switch controller.currentStep {
+            case .details: return !areDetailsValid
+            case .reports: return !areReportsValid
+            case .signatures: return false
+            case .confirmation: return false
+        }
+    }
+    
     func done() {
         controller.doneTrigger.toggle()
         dismiss()
@@ -144,16 +170,13 @@ struct PetitionWizardContainer: View {
 }
 
 #Preview {
-    
     @Previewable @State var controller = PetitionController()
     @State var isPresented: Bool = true
     
-    NavigationStack {
-        Button("Open") {
-            isPresented.toggle()
-        }
-        .sheet(isPresented: $isPresented) {
-            PetitionWizardContainer(controller: controller)
-        }
+    Button("Open") {
+        isPresented.toggle()
+    }
+    .sheet(isPresented: $isPresented) {
+        PetitionWizardContainer(controller: controller)
     }
 }

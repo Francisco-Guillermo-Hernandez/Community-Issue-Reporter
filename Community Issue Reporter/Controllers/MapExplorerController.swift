@@ -29,8 +29,14 @@ final class MapExplorerController {
     var isPresented = false
     var selectedPlaceID: String?
     var expandedItem: MapExplorerReport?
+    var selection: String = ""
+    var isSearchExpanded: Bool = false
+    var isSearchActivated: Bool = false
+    var searchItems: [String] = []
     
-    init() {}
+    init() {
+        self.searchItems = IssueStatus.allCases.map(\.title)
+    }
     
     func loadReports() async {
         guard let authViewModel = authViewModel else { return }
@@ -52,6 +58,27 @@ final class MapExplorerController {
             )
         } catch {
             print(error)
+        }
+    }
+    
+    var searchedReportOverview: MapExplorerReport?
+    
+    func searchReport(by id: String) async {
+        do {
+            let result = try await MapExplorerRepository.shared.report(id, countryCode: .SV, cityId: "")
+            self.searchedReportOverview = result
+            
+            if let authViewModel = authViewModel {
+                authViewModel.cameraPosition = .region(
+                    MKCoordinateRegion(
+                        center: result.clLocation,
+                        span: MKCoordinateSpan(latitudeDelta: 0.009, longitudeDelta: 0.009)
+                    )
+                )
+            }
+        } catch {
+            print("Failed to fetch report overview: \(error)")
+            self.searchedReportOverview = nil
         }
     }
     
@@ -131,8 +158,9 @@ final class MapExplorerController {
             
             let coordinate = item.location.coordinate
             let address = item.address?.fullAddress ?? item.address?.shortAddress ?? "Unknown"
+            
             self.searchMarker = IssueMarker(
-                id: UUID().uuidString, 
+                id: UUID().uuidString,
                 title: item.name ?? String(localized: "Result"),
                 description: "",
                 status: 1,
@@ -142,10 +170,14 @@ final class MapExplorerController {
                 matterToSolveId: 1,
                 address: address
             )
+            
             self.authViewModel?.cameraPosition = .region(
                 MKCoordinateRegion(
                     center: coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
+                    span: MKCoordinateSpan(
+                        latitudeDelta: 0.009769149244501563,
+                        longitudeDelta: 0.006849679212379556
+                    )
                 )
             )
         }
@@ -198,7 +230,7 @@ final class MapExplorerController {
 
 @Observable
 final class LocationManager: NSObject, CLLocationManagerDelegate {
-    private let manager = CLLocationManager()
+    let manager = CLLocationManager()
     var lastLocation: CLLocation?
     
     override init() {

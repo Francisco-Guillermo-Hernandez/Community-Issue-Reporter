@@ -51,7 +51,7 @@ let petitionStepsMetadata: [String: StepsMetadata] = [
     "Signatures": StepsMetadata(
         title: String(localized: "Signatures"),
         description: String(localized: "Set up your signature"),
-        icon: "long.text.page.and.pencil"
+        icon: "signature"
     ),
     "Confirmation": StepsMetadata(
         title: String(localized: "Confirmation"),

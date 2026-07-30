@@ -12,13 +12,13 @@ struct SelectOption: View {
     @Environment(\.colorScheme) private var colorScheme
     @Binding var selectedCategory: Categories
     var category: Categories
-    var onTap: () -> Void
+    var onTap: (() -> Void)? = nil
     
     private var isSelected: Bool {
         category == selectedCategory
     }
     
-    init (_ category: Categories, _ selectedCategory: Binding<Categories>, _ onTap: @escaping () -> Void) {
+    init (_ category: Categories, _ selectedCategory: Binding<Categories>, _ onTap: (() -> Void)? = nil) {
         self.category = category
         self._selectedCategory = selectedCategory
         self.onTap = onTap
@@ -37,7 +37,7 @@ struct SelectOption: View {
             .onTapGesture {
                 UIImpactFeedbackGenerator(style: .soft).impactOccurred()
                 selectedCategory = category
-                onTap()
+                onTap?()
             }
         
     }
@@ -61,7 +61,7 @@ struct SelectOption: View {
 
 struct PetitionCategorySelector: View {
     @Binding var selected: Categories
-    var onTap: () -> Void
+    var onTap: (() -> Void)?
     var body: some View {
         
         VStack(alignment: .leading) {
@@ -93,9 +93,7 @@ struct PetitionCategorySelector: View {
     @Previewable
     @State var selected: Categories = .corrective
     ScrollView(.vertical) {
-        PetitionCategorySelector(selected: $selected) {
-            print(selected)
-        }
+        PetitionCategorySelector(selected: $selected)
     }
     .background(Color.theme.cardBackground)
 }

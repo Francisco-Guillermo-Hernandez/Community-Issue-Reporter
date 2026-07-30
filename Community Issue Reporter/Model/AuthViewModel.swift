@@ -56,14 +56,32 @@ class AuthViewModel: ObservableObject {
             let span = (latDelta != 0 && lonDelta != 0) ?
                 MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: lonDelta) :
                 MKCoordinateSpan(latitudeDelta: 0.016837009321045926, longitudeDelta: 0.016440700713786782)
+                
+            let center: CLLocationCoordinate2D
+            let shouldLoadLastLocation = UserDefaults.standard.bool(forKey: "saveLastLocation")
+            
+            if shouldLoadLastLocation,
+               UserDefaults.standard.object(forKey: "map_latitude") != nil,
+               UserDefaults.standard.object(forKey: "map_longitude") != nil {
+                let savedLat = UserDefaults.standard.double(forKey: "map_latitude")
+                let savedLon = UserDefaults.standard.double(forKey: "map_longitude")
+                center = CLLocationCoordinate2D(latitude: savedLat, longitude: savedLon)
+            } else {
+                center = CLLocationCoordinate2D(latitude: city.coordinates.lat, longitude: city.coordinates.lng)
+            }
 
             cameraPosition = .region(
                 MKCoordinateRegion(
-                    center: CLLocationCoordinate2D(latitude: city.coordinates.lat, longitude: city.coordinates.lng),
+                    center: center,
                     span: span
                 )
             )
         }
+    }
+    
+    func updateLastLocation(latitude: Double, longitude: Double) {
+        UserDefaults.standard.set(latitude, forKey: "map_latitude")
+        UserDefaults.standard.set(longitude, forKey: "map_longitude")
     }
 
     private func saveCityToUserDefaults() {

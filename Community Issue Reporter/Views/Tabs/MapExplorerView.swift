@@ -28,6 +28,7 @@ struct MapExplorerView: View {
     @Environment(\.dismiss) private var dismissSheet
     @Environment(\.dismiss) private var dismiss
     @State private var router = DeepLinkRouter.shared
+    @State private var showLocationAlert = false
     
     private let animation = Animation.easeInOut(duration: 0.25)
     
@@ -52,15 +53,22 @@ struct MapExplorerView: View {
                         Marker(searchMarker.title, coordinate: searchMarker.coordinate)
                     }
                 }
+                .contentMargins(.leading, 32, for: .scrollContent)
                 .contentMargins(.bottom, 90, for: .scrollContent)
                 .onMapCameraChange(frequency: .onEnd) { context in
-                    print("all context")
-                    dump(context)
+                   
                     controller.handleMapMovement(center: context.camera.centerCoordinate)
                     
                     // Store the span in UserDefaults when the user zooms
                     UserDefaults.standard.set(context.region.span.latitudeDelta, forKey: "map_latitude_delta")
                     UserDefaults.standard.set(context.region.span.longitudeDelta, forKey: "map_longitude_delta")
+                    
+                    if settings.saveLastLocation {
+                        appState.updateLastLocation(
+                            latitude: context.camera.centerCoordinate.latitude,
+                            longitude: context.camera.centerCoordinate.longitude
+                        )
+                    }
                 }
                 
                 bottom
@@ -69,33 +77,43 @@ struct MapExplorerView: View {
         .ignoresSafeArea(edges: .bottom)
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 16) {
-//                SearchBar(
-//                    text: $controller.searchText,
-//                    onSubmit: {
-//                        controller.performSearch()
-//                        controller.showSearchOverlay = false
-//                    },
-//                    onFocusChange: { isFocused in
-//                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-//                            controller.showSearchOverlay = isFocused
-//                        }
-//                    },
-//                    onUserProfileTap: {
-//                        controller.showUserProfileOverlay.toggle()
-//                    },
-//                    isFocused: $isSearchFocused,
-//                    profileNamespace: profileNamespace,
-//                    avatarURL: profile.avatarURL
-//                )
-                
-                StatusFilterRow(selectedStatuses: $controller.selectedStatuses)
+//                Text("Repórtamelo")
+//                    .font(.custom("Lora", size: 16, relativeTo: .title))
+////                    .padding(.top, 16)
+//                    .padding(.horizontal)
+//                    .kerning(0.6)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+                CustomTabBar(
+                    items: controller.searchItems,
+                    searchHint: String(localized: "Reports, Petitions, Places..."),
+                    selection: $controller.selection,
+                    searchText: $controller.searchText,
+                    isSearchExpanded: $controller.isSearchExpanded,
+                    onSearchActivated: {_ in },
+                    onLocationTap: {
+                        let status = controller.locationManager.manager.authorizationStatus
+                        if status == .denied || status == .restricted {
+                            showLocationAlert = true
+                        } else {
+                            controller.centerMapOnUserLocation()
+                        }
+                    }
+                )
+                .zIndex(30)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
+//            .padding(.top, 10)
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
         .onChange(of: controller.searchText) { _, newValue in
-            searchCompleter.update(query: newValue, region: currentRegion(c: appState.cameraPosition))
+            let pattern = "^[a-zA-Z]{2}-[a-zA-Z]{2,3}-\\d{8}-[a-zA-Z0-9]{16}$"
+            if newValue.range(of: pattern, options: .regularExpression) != nil {
+                Task {
+                    await controller.searchReport(by: newValue)
+                }
+            } else {
+                controller.searchedReportOverview = nil
+                searchCompleter.update(query: newValue, region: currentRegion(c: appState.cameraPosition))
+            }
         }
         .task {
             await appState.checkStatus()
@@ -115,19 +133,57 @@ struct MapExplorerView: View {
                 .skeleton(isRedacted: router.isLoading)
         }
         .overlay {
-            if controller.showSearchOverlay {
-                placesOverlay(p: profileNamespace, controller: controller)
+            ZStack {
+                if controller.isSearchExpanded {
+                    if let report = controller.searchedReportOverview {
+                        ReportOverviewList(report: report, controller: controller, router: router)
+                            .background(
+                                Color.clear
+                                    .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: .themeRadius * 2))
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2))
+                            .padding()
+                            .padding(.top, 64)
+                            .transition(.scale(scale: 0.95, anchor: .top).combined(with: .opacity))
+                            .frame(maxHeight: 450, alignment: .top)
+                    } else {
+                        SuggestionsResultList(searchText: $controller.searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
+                            controller.applySuggestion(suggestion)
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                                controller.isSearchExpanded = false
+                            }
+                        })
+                        .background(
+                            Color.clear
+                                .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: .themeRadius * 2))
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2))
+                        .padding()
+//                        .frame(maxHeight: 250, alignment: .top)
+                        .padding(.top, 64)
+                        .transition(.scale(scale: 0.95, anchor: .top).combined(with: .opacity))
+                    }
+                }
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: controller.isSearchExpanded)
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: controller.searchedReportOverview != nil)
         }
         .toolbar(controller.showSearchOverlay ? .hidden : .visible, for: .tabBar)
-        .task {
-//            controller.showSearchOverlay = false
-        }
         .task {
             guard !Task.isCancelled else { return }
             controller.authViewModel = appState
             controller.settings = settings
             await controller.loadReports()
+        }
+        .alert(String(localized: "Location Permission"), isPresented: $showLocationAlert) {
+            Button(String(localized: "Settings"), role: .cancel) {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button(String(localized: "Cancel"), role: .destructive) {}
+        } message: {
+            Text(String(localized: "Please enable location permissions in settings."))
         }
     }
     
@@ -253,8 +309,10 @@ private struct IssuePin: View {
 
 // MARK - Custom badges to filter over the map
 private struct StatusFilterRow: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var selectedStatuses: Set<IssueStatus>
     @State private var issueType: IssueTypes = .all
+    
     
     var body: some View {
         HStack {
@@ -268,25 +326,26 @@ private struct StatusFilterRow: View {
                             } label: {
                                 HStack {
                                     Image(systemName: status.iconName)
-                                        .tint(.white)
+                                        .foregroundStyle(status.color)
                                     
                                     Text(LocalizedStringKey(status.title))
+                                        .foregroundStyle(status.color)
                                         .font(.subheadline.weight(.semibold))
                                 }
-                                .foregroundStyle(isSelected ? Color.white : Color.primary)
-                                .padding(.vertical, 8)
+//                                .foregroundStyle(isSelected ? Color.white : Color.primary)
+                                .padding(.vertical, 12)
                                 .padding(.horizontal, 16)
                                 .background(
                                     Capsule()
-                                        .fill(isSelected ? status.color : status.color.opacity(0.55))
-                                        .brightness(-0.2)
+                                        .fill(isSelected ? (colorScheme != .dark ? .white : .black) : .primary )
+//                                        .brightness(-0.2)
                                 )
-                                .glassEffect(in: .capsule)
-                                .transition(.blurReplace)
-                                .overlay(
-                                    Capsule()
-                                        .stroke(status.color.opacity(isSelected ? 0.0 : 0.7), lineWidth: 1)
-                                )
+                                .glassEffect(.regular.interactive(), in: .capsule)
+//                                .transition(.blurReplace)
+//                                .overlay(
+//                                    Capsule()
+//                                        .stroke(status.color.opacity(isSelected ? 0.0 : 0.7), lineWidth: 1)
+//                                )
                             }
                             .sensoryFeedback(.selection, trigger: isSelected)
                         }
@@ -307,10 +366,51 @@ private struct StatusFilterRow: View {
     }
 }
 
+private struct ReportOverviewList: View {
+    let report: MapExplorerReport
+    let controller: MapExplorerController
+    let router: DeepLinkRouter
+    
+    var body: some View {
+        List {
+            VStack(alignment: .leading, spacing: 20) {
+                DetailsHeader(title: report.title, description: report.description)
+                
+                BasicInformationView(for: report)
+                
+                Button {
+                    Task {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                            controller.isSearchExpanded = false
+                        }
+                        try? await Task.sleep(for: .milliseconds(350))
+                        
+                        await MainActor.run {
+                            router.report = report
+                            router.activeTab = 1
+                            router.isPresented = true
+                        }
+                    }
+                } label: {
+                    Text(String(localized: "Show more details"))
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+            .padding(.vertical, 10)
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+    }
+}
+
 #Preview {
     NavigationStack {
-        MapExplorerView()
-           
+        MapExplorerView()           
             .environmentObject(AuthViewModel())
             .environment(DeepLinkRouter())
             .environment(SettingsStore())

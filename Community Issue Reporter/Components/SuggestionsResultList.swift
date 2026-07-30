@@ -13,13 +13,14 @@ struct SuggestionsResultList: View {
     @State var searchCompleter: SearchCompleter
     var applySuggestion: (SearchSuggestion) -> Void
     var body: some View {
-        List {
-            let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.isEmpty {
-                Text(String(localized: "Start typing to search."))
-            } else if searchCompleter.suggestions.isEmpty {
-                ContentUnavailableView.search(text: String(localized: "No matches found."))
-            } else {
+        let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            Text(String(localized: "Start typing to search."))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if searchCompleter.suggestions.isEmpty {
+            ContentUnavailableView.search(text: String(localized: "No matches found."))
+        } else {
+            List {
                 ForEach(searchCompleter.suggestions) { suggestion in
                     Button {
                         applySuggestion(suggestion)
@@ -28,8 +29,15 @@ struct SuggestionsResultList: View {
                             Image(systemName: "mappin")
                                 .frame(width: 32, height: 32)
                                 .clipShape(Circle())
-                                .background(.thinMaterial, in: .circle)
+//                                .background(.thinMaterial, in: .circle)
                                 .transition(.blurReplace)
+                                .symbolColorRenderingMode(.gradient)
+                            
+//                                .symbolRenderingMode(.multicolor)
+//                                                    .symbolColorRenderingMode(.gradient)
+//                                                    .font(.system(size: 30))
+                                                    .foregroundColor(.secondary)
+                            
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(suggestion.title)
                                     .fontWeight(.semibold)
@@ -46,11 +54,12 @@ struct SuggestionsResultList: View {
                         .padding(.vertical, 6)
                     }
                     .buttonStyle(.plain)
+                    .listRowBackground(Color.clear)
                 }
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
         }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
     }
 }
 

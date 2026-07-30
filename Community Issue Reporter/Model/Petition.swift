@@ -30,6 +30,35 @@ enum Audience: String, Codable {
     }
 }
 
+enum PetitionState: String, Codable, CaseIterable {
+    case new
+    case modifying
+    case voting
+    case closed
+    case rejected
+    case resolved
+    case cancelled
+    
+    var description: String {
+        switch self {
+            case .new:
+                return String(localized: "New")
+            case .modifying:
+                return String(localized: "Modifying")
+            case .voting:
+                return String(localized: "Voting")
+            case .closed:
+                return String(localized: "Closed")
+            case .rejected:
+                return String(localized: "Rejected")
+            case .resolved:
+                return String(localized: "Resolved")
+            case .cancelled:
+                return String(localized: "Cancelled")
+        }
+    }
+}
+
 enum PostVisibility: String, Codable {
     case hidden
     case draft

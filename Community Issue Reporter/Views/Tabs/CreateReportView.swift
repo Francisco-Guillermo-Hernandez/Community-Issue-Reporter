@@ -132,6 +132,7 @@ struct CardView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .cardStyle(color: matter.severity.color)
             }
+            .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
         }
         
     }
@@ -139,4 +140,5 @@ struct CardView: View {
 
 #Preview {
     CreateReportView()
+        .environment(SettingsStore())
 }

@@ -52,9 +52,7 @@ struct PetitionDetailsView: View {
             .accessibilityIdentifier("PetitionDescriptionInput")
             
             /// Its used to choose a category in order to categorize the petition
-            PetitionCategorySelector(selected: $controller.petition.category) {
-                
-            }
+            PetitionCategorySelector(selected: $controller.petition.category) {}
             .id(PetitionWizardElements.category)
             .focused($focusedField, equals: .category)
             .accessibilityIdentifier("PetitionCategorySelector")

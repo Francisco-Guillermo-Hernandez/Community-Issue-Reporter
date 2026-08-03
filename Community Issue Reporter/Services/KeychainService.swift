@@ -66,6 +66,7 @@ enum TokenType: String {
     case landingPageComplete = "landingPageComplete"
     case sessionStateVerification = "sessionStateVerification"
     case deviceId = "deviceId"
+    case userType = "userType"
 }
 
 extension KeychainService {

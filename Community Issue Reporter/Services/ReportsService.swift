@@ -75,4 +75,8 @@ struct ReportsService {
     func fetchResolutionByReport(reportId: String, headers: Array<HTTPHeader>) async throws -> Resolution {
         return try await client.get(path: "resolutions/byReportId/\(reportId)", headers: headers, withOAuth: true)
     }
+    
+    func boostReportValidation(_ reportId: String, headers: Array<HTTPHeader>) async throws -> GenericResponse {
+        return try await client.patch(path: "reports/validate/byUsers/\(reportId)", body: [String: String](), headers: headers, withOAuth: true)
+    }
 }

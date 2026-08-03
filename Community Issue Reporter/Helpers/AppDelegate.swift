@@ -7,12 +7,20 @@
 
 import Foundation
 import SwiftUI
+import RevenueCat
+import GoogleMobileAds
+
+@_spi(Experimental) import RevenueCatAdMob
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     // Shared reference accessible across the app
     static var sharedNotificationManager = NotificationManager()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        Purchases.logLevel = .debug
+        Purchases.configure(withAPIKey: "test_WiMrbEnooYxnMyEFtalwTZyrZye")
+        MobileAds.shared.requestConfiguration.testDeviceIdentifiers = [ "242e9920ddb7197466af627199f82ebf" ]
+        MobileAds.shared.start { _ in }
         return true
     }
 

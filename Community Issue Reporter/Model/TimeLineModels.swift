@@ -49,12 +49,21 @@ struct InProgressMilestone: Codable {
 }
 
 struct IssueUpdate: Codable, Identifiable {
-    let id: String
+    let id: String?
     let date: String
     let by: String
     let comments: String
     let status: String
     let attachments: [Attachment]
+    
+    init(id: String? = UUID().uuidString, date: String, by: String, comments: String, status: String, attachments: [Attachment]) {
+        self.id = id
+        self.date = date
+        self.by = by
+        self.comments = comments
+        self.status = status
+        self.attachments = attachments
+    }
 }
 
 enum AttachmentType: String, Codable {

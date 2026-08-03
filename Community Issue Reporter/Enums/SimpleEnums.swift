@@ -46,6 +46,17 @@ enum UserType: String, Codable {
     case guest
     case citizen
     case government
+    
+    var description: String {
+        switch self {
+            case .citizen:
+                return "Citizen"
+            case .government:
+                return "Government"
+            case .guest:
+                return "Guest"
+        }
+    }
 }
 
 // MARK: - personalized error handler

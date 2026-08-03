@@ -105,7 +105,14 @@
       }
     },
     "Active" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activo"
+          }
+        }
+      }
     },
     "Add" : {
       "comment" : "A tab that allows users to create a new report.",
@@ -486,7 +493,14 @@
       }
     },
     "Cancelled" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelado"
+          }
+        }
+      }
     },
     "Category" : {
       "comment" : "Category text at petition list",
@@ -620,7 +634,14 @@
       }
     },
     "Closed" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrado"
+          }
+        }
+      }
     },
     "Comment" : {
       "localizations" : {
@@ -845,7 +866,14 @@
       }
     },
     "Create a Report" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creá un Reporte"
+          }
+        }
+      }
     },
     "Create a shortcut to report issues" : {
       "comment" : "Description of the intent that creates a shortcut to report issues.",
@@ -1069,6 +1097,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Distrito"
+          }
+        }
+      }
+    },
+    "Do you have a subscription?" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tienes una subscripción?"
           }
         }
       }
@@ -1793,7 +1831,14 @@
       }
     },
     "Location Permission" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permisos de localización"
+          }
+        }
+      }
     },
     "Log Out" : {
       "comment" : "A button label that logs out the user.",
@@ -1850,7 +1895,14 @@
 
     },
     "Map Mode" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo de mapa"
+          }
+        }
+      }
     },
     "Meanwhile, you can copy petition code or share it with others." : {
 
@@ -1907,7 +1959,14 @@
       }
     },
     "Modifying" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modificando"
+          }
+        }
+      }
     },
     "Monogram" : {
       "comment" : "Option to select a monogram as the user's avatar.",
@@ -2073,7 +2132,14 @@
       }
     },
     "New" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo"
+          }
+        }
+      }
     },
     "Newest to Oldest" : {
       "comment" : "Title of the filter option that sorts petitions by the most recent date.",
@@ -2441,7 +2507,14 @@
       }
     },
     "Please enable location permissions in settings." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por favor habilitá los permisos en la configuración."
+          }
+        }
+      }
     },
     "Please enter a description" : {
       "comment" : "Label for the description field in the CreateRequestPetitionView.",
@@ -2578,7 +2651,7 @@
         }
       }
     },
-    "PRO" : {
+    "Pro" : {
 
     },
     "problems with waste management" : {
@@ -2673,7 +2746,14 @@
       }
     },
     "Rejected" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechazado"
+          }
+        }
+      }
     },
     "Repair" : {
       "comment" : "Repair category.",
@@ -2780,7 +2860,14 @@
 
     },
     "Reportamelo Pro" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repórtamelo Pro"
+          }
+        }
+      }
     },
     "Reported" : {
       "comment" : "Reported description text at the report section",
@@ -2854,10 +2941,24 @@
       }
     },
     "Reports, Petitions, Places..." : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportes, Peticiones, Lugares…"
+          }
+        }
+      }
     },
     "Resolved" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resuelto"
+          }
+        }
+      }
     },
     "Response time can vary depending on the institution, severity and type of the report." : {
       "localizations" : {
@@ -2869,8 +2970,15 @@
         }
       }
     },
-    "Restore Purchases" : {
-
+    "Restore" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaura"
+          }
+        }
+      }
     },
     "Result" : {
       "comment" : "The title of the marker that appears when a user searches for a location.",
@@ -3313,7 +3421,7 @@
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Estado"
+            "value" : "Estado / Departamento"
           }
         }
       }
@@ -3390,7 +3498,14 @@
       }
     },
     "Subscription" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Subscripción"
+          }
+        }
+      }
     },
     "SVR: %@" : {
 
@@ -3609,7 +3724,14 @@
       }
     },
     "Upgrade" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiza"
+          }
+        }
+      }
     },
     "Uploaded" : {
       "comment" : "Description of a photo upload phase when the upload was successful.",
@@ -3849,6 +3971,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "De donde eres?"
+          }
+        }
+      }
+    },
+    "You can enable or disable push notifications in order to receive updates when authorities are resolving your report or petition." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tú puedes habilitar o deshabilitar las notificaciones para recibir actualizaciones cuando las autoridades están resolviendo tu reporte o petición."
+          }
+        }
+      }
+    },
+    "You can help us to improve the app by supporting us." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tú nos puedes ayudar a mejorar la App con tu soporte."
           }
         }
       }

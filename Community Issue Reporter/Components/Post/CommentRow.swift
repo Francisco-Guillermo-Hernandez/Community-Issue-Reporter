@@ -63,9 +63,6 @@ struct CommentRow: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.bottom, .themePadding / 4)
         
-        Divider()
-            .opacity(0.65)
-            .padding(.bottom, .themePadding / 4)
     }
 }
 

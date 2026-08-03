@@ -44,6 +44,8 @@ final class MapExplorerRepository {
             throw CommonIntercommunicationErrors.notFound
         } catch ServiceError.serverError(let code) {
             throw CommonIntercommunicationErrors.serverError(code)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
             print("ReportError: ")
             print(error.localizedDescription)
@@ -73,7 +75,9 @@ final class MapExplorerRepository {
         } catch ServiceError.notFound {
             throw CommonIntercommunicationErrors.notFound
         } catch ServiceError.serverError(let code) {
-          throw CommonIntercommunicationErrors.serverError(code)
+            throw CommonIntercommunicationErrors.serverError(code)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }

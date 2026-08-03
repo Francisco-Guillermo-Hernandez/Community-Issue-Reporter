@@ -284,6 +284,12 @@ final class UserRepository {
         return !token.isEmpty && token.contains("session:state:valid")
     }
     
+    /// Lets check if the current user is a guest
+    func isGuestUser() -> Bool {
+        let token = KeychainService.getToken(.userType)
+        return token == UserType.guest.description
+    }
+    
     /// Privacy settings to show or hide their profile / userName.
     func privacy(settings: PrivacySettings) async throws {
         do {

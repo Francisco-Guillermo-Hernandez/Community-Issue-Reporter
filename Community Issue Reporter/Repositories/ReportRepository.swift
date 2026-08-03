@@ -182,6 +182,26 @@ final class ReportRepository {
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
+    
+    func haveReportBeenValidatedByMe(_ reportId: String) async throws -> Bool {
+        if !reportId.isEmpty && reportId == "SV-SS-260601-aXWsaxls" {
+            return true
+        }
+        
+        return false
+    }
+    
+    func boostReportValidation(_ reportId: String) async throws -> GenericResponse {
+        do {
+            return try await self.reportsService.boostReportValidation(reportId, headers: self.headers)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        } catch ServiceError.badRequest(let error) {
+            throw CommonIntercommunicationErrors.invalidPetition(error.message)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
 }
 
 

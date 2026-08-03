@@ -24,11 +24,13 @@ struct PostInteractions: View {
                     .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
                     .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
             }
+            .accessibilityIdentifier("SignPetitionButton")
             .accessibilityLabel("Sign a petition button")
             .buttonStyle(.plain)
             .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
             .buttonSizing(.flexible)
             .frame(maxWidth: .infinity)
+            .disabled(UserRepository.shared.isGuestUser())
             
             Button(action: comment) {
                 Image(systemName: "text.bubble")
@@ -39,10 +41,12 @@ struct PostInteractions: View {
                     .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
                     .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
             }
+            .accessibilityIdentifier("CommentButton")
             .buttonStyle(.plain)
             .contentShape(Rectangle())
             .buttonSizing(.flexible)
             .frame(maxWidth: .infinity)
+            .disabled(UserRepository.shared.isGuestUser())
             
             Button(action: share) {
                 Image(systemName: "square.and.arrow.up")
@@ -53,6 +57,7 @@ struct PostInteractions: View {
                     .contentShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
                     .clipShape(RoundedRectangle(cornerRadius: .themeRadius, style: .continuous))
             }
+            .accessibilityIdentifier("ShareButton")
             .buttonStyle(.plain)
             .contentShape(Rectangle())
             .buttonSizing(.flexible)

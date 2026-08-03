@@ -33,6 +33,7 @@ struct TabBarView: View {
                 InsightsView()
             }
             .accessibilityIdentifier("ShowInsightsTab")
+            .disabled(UserRepository.shared.isGuestUser())
             
             Tab(String(localized: "Profile"), systemImage: "person.fill", value: 4) {
                 UserProfileView()

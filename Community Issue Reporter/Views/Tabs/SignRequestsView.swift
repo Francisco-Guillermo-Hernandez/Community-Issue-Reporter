@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
+@_spi(Experimental) import RevenueCatAdMob
 
 enum SignRequestsViewsDestinations: Hashable {
     case comments(postId: String)
@@ -17,6 +19,7 @@ struct SignRequestsView: View {
     @State private var controller = SignRequestController()
     @State private var petitionController = PetitionController()
     @State private var navigationPath: [SignRequestsViewsDestinations] = []
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     fileprivate func posts() -> some View {
         return LazyVStack(alignment: .leading, spacing: .themeSpacing * 4) {
@@ -25,12 +28,22 @@ struct SignRequestsView: View {
             VStack(alignment: .leading, spacing: .themeSpacing * 2) {
                 
                 ForEach(controller.petitions) { petition in
-                    eventsOnDay(petition, selectedIndex: controller.getSelectedIndex(petition))
+                    let index = controller.getSelectedIndex(petition)
+                    eventsOnDay(petition, selectedIndex: index)
                     //                            .task {
                     //                                if petition.id == petitions.last?.id {
                     //                                    await fetchPetitions()
                     //                                }
                     //                            }
+                    
+                    if !subscriptionManager.isPro, AdBackoffUtils.shouldShowAd(at: index) {
+                        if let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_NATIVE_AD_UNIT") as? String, !adUnitID.isEmpty {
+                            AdMobNativeAdView(adUnitID: adUnitID)
+                                .frame(height: 120)
+                                .padding(.horizontal)
+                                .padding(.bottom, .themeSpacing * 4)
+                        }
+                    }
                 }
                 
                 if controller.isLoading {
@@ -62,6 +75,7 @@ struct SignRequestsView: View {
                     id: "openCreateRequest",
                     in: namespace
                 )
+                .disabled(UserRepository.shared.isGuestUser())
                 
                 Menu {
                     Picker("Issue Type", selection: $controller.issueType) {

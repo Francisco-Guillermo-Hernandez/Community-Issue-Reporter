@@ -159,7 +159,7 @@ struct UserProfileView: View {
         case "op:licenses":
             LicensesSubView(subViewName: option.title)
         case "op:comments":
-            CommentsSubView(subViewName: option.title)
+            CommentsSubView(subViewName: option.title, mode: .listAndModify)
         case "op:reports":
             MyReportsSubView(path: $navigationPath, subViewName: option.title, mode: .listAndModify)
         case "op:signPetitions":
@@ -187,6 +187,7 @@ struct UserProfileView: View {
         .environment(NotificationManager())
         .environment(SettingsStore())
         .environment(NetworkMonitor())
+        .environmentObject(SubscriptionManager.shared)
 }
 
 

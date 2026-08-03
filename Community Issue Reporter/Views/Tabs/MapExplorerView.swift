@@ -101,7 +101,6 @@ struct MapExplorerView: View {
                 )
                 .zIndex(30)
             }
-//            .padding(.top, 10)
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
         .onChange(of: controller.searchText) { _, newValue in
@@ -146,6 +145,7 @@ struct MapExplorerView: View {
                             .padding(.top, 64)
                             .transition(.scale(scale: 0.95, anchor: .top).combined(with: .opacity))
                             .frame(maxHeight: 450, alignment: .top)
+                            .shadow(color: Color.black.opacity(0.125), radius: 16, x: 0, y: 6)
                     } else {
                         SuggestionsResultList(searchText: $controller.searchText, searchCompleter: searchCompleter, applySuggestion: { suggestion in
                             controller.applySuggestion(suggestion)
@@ -159,8 +159,8 @@ struct MapExplorerView: View {
                         )
                         .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2))
                         .padding()
-//                        .frame(maxHeight: 250, alignment: .top)
                         .padding(.top, 64)
+                        .shadow(color: Color.black.opacity(0.125), radius: 16, x: 0, y: 6)
                         .transition(.scale(scale: 0.95, anchor: .top).combined(with: .opacity))
                     }
                 }

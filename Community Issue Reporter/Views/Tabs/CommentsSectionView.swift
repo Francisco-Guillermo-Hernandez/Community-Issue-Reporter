@@ -42,6 +42,10 @@ struct CommentsSectionView: View {
                 } else {
                     ForEach(controller.comments) { c in
                         CommentRow(comment: c)
+                        
+                        Divider()
+                            .opacity(0.65)
+                            .padding(.bottom, .themePadding / 4)
                         .task {
                             if let lastComment = controller.comments.last, c.id == lastComment.id {
                                 await controller.loadMoreComments()

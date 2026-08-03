@@ -77,6 +77,8 @@ struct SettingsGroup<Content: View>: View {
 
 import MapKit
 import SwiftUI
+import RevenueCat
+import RevenueCatUI
 
 struct SettingsSubView: View {
     
@@ -93,6 +95,9 @@ struct SettingsSubView: View {
     @State private var cities: [FriendlyCityDistribution] = []
     
     @Environment(NotificationManager.self) var notificationManager
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    @State private var isPresentingPaywall = false
+    @State private var isPresentingCustomerCenter = false
     @State private var controller: SettingsSubViewController
     
     init(subViewName: String) {
@@ -104,7 +109,7 @@ struct SettingsSubView: View {
     var body: some View {
         NavigationStack {
             
-            ScrollView() {
+            ScrollView(showsIndicators: true) {
                 
                 VStack(spacing: .themeSpacing * 8) {
                     /// Location group
@@ -120,6 +125,53 @@ struct SettingsSubView: View {
                                     Text(controller.selectedCity.thirdLevel)
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 12))
+                                }
+                            }
+                        }
+                    }
+                    .disabled(!networkMonitor.isConnected)
+                    
+                    /// Subscription group
+                    SettingsGroup(
+                        title: String(localized: "Subscription"),
+                        footerText: String(localized: "You can help us to improve the app by supporting us.")) {
+                        if subscriptionManager.isPro {
+                            HStack {
+                                Text("Reportamelo Pro")
+                                    .foregroundStyle(Color.green)
+                                Spacer()
+                                Text("Active")
+                                    .foregroundStyle(.secondary)
+                            }
+                            
+                            Button(action: {
+                                isPresentingCustomerCenter = true
+                            }) {
+                                Text("Manage Subscription")
+                                    .foregroundStyle(Color.accentColor)
+                            }
+                        } else {
+                            Button(action: {
+                                isPresentingPaywall = true
+                            }) {
+                                HStack {
+                                    Text("Reportamelo Pro")
+                                        .foregroundStyle(Color.theme.inputText)
+                                    Spacer()
+                                    Text("Upgrade")
+                                        .foregroundStyle(Color.accentColor)
+                                }
+                            }
+                            
+                            Button(action: {
+                                subscriptionManager.restorePurchases()
+                            }) {
+                                HStack {
+                                    Text("Do you have a subscription?")
+                                        .foregroundStyle(Color.theme.inputText)
+                                    Spacer()
+                                    Text("Restore")
+                                        .foregroundStyle(Color.accentColor)
                                 }
                             }
                         }
@@ -142,10 +194,11 @@ struct SettingsSubView: View {
                                 controller.updatePrivacySettings()
                             }
                     }
-                    .disabled(!networkMonitor.isConnected)
+                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
                     /// Notifications group
-                    SettingsGroup(title: String(localized: "Notifications")) {
+                    SettingsGroup(title: String(localized: "Notifications"),
+                                  footerText: String(localized: "You can enable or disable push notifications in order to receive updates when authorities are resolving your report or petition.")) {
                         Toggle("Push notifications", isOn: $settings.enablePushNotifications)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enablePushNotifications) { oldValue, newValue in
@@ -168,7 +221,7 @@ struct SettingsSubView: View {
                                 controller.updateNotificationSettings()
                             }
                     }
-                    .disabled(!networkMonitor.isConnected)
+                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
                     SettingsGroup(title: String(localized: "App settings")) {
                         
@@ -183,7 +236,8 @@ struct SettingsSubView: View {
                             .foregroundStyle(Color.theme.inputText)
                         
                     }
-                    .disabled(!networkMonitor.isConnected)
+                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    
                 }
             }
             .padding(.horizontal)
@@ -197,7 +251,6 @@ struct SettingsSubView: View {
                 /// Inject dependencies
                 controller.inject(self.settings, self.notificationManager)
             }
-            .scrollDisabled(true)
             .scrollContentBackground(.hidden)
             .listSectionSpacing(32)
             .toolbarTitleDisplayMode(.inline)
@@ -208,6 +261,10 @@ struct SettingsSubView: View {
                     controller.selectedCity = savedCity
                 }
             }
+            .sheet(isPresented: $isPresentingPaywall) {
+                PaywallView()
+            }
+            .presentCustomerCenter(isPresented: $isPresentingCustomerCenter)
         }
         .background(Color.theme.background)
         .interactiveDismissDisabled(true)
@@ -261,4 +318,5 @@ struct SettingsSubView: View {
         .environment(NotificationManager())
         .environment(SettingsStore())
         .environment(NetworkMonitor())
+        .environmentObject(SubscriptionManager.shared)
 }

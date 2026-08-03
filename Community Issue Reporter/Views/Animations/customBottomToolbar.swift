@@ -12,84 +12,146 @@ struct customBottomToolbar: View {
     var commentAction: () -> Void
     var addPhotoAction: () -> Void
     var affectedAction: (Bool) -> Void
-    var addNotificationAction: (Bool) -> Void
+    var boostReportValidationAction: (Bool) -> Void
     @State private var commentState: Bool = false
     @State private var pictureState: Bool = false
+    @State private var isShowingPopover = false
+
     
     @Binding var affectedState: Bool
     @Binding var notificationState: Bool
     
     var body: some View {
         
-        HStack(spacing: 36) {
+        HStack(spacing: 8) {
             
             Button(action: performCommentActions) {
-                Image(systemName: "text.bubble")
-                    .font(.system(size: 18, weight: .semibold))
-                    .frame(width: 36, height: 36)
-                    .background(Color.black.opacity(0.001))
+                VStack(spacing: 2) {
+                    Image(systemName: "text.bubble")
+                        .font(.system(size: 18, weight: .semibold))
+                        .background(Color.black.opacity(0.001))
+                    
+                    Text("Comment")
+                        .font(.footnote)
+                }
+                .frame(width: 64, height: 64)
             }
-            .accessibilityLabel("Comment")
+            .accessibilityLabel("CommentReportButton")
             .buttonStyle(.plain)
             .contentShape(Rectangle())
             .buttonSizing(.flexible)
+            .disabled(UserRepository.shared.isGuestUser())
             
             Button(action: performPhotoActions) {
-                Image(systemName: "photo.badge.plus")
-                    .font(.system(size: 18, weight: .semibold))
-                    .frame(width: 36, height: 36)
-                    .background(Color.black.opacity(0.001))
-                    .symbolRenderingMode(pictureState ? .multicolor : .monochrome)
+                VStack(spacing: 4) {
+                    Image(systemName: "photo.badge.plus")
+                        .font(.system(size: 18, weight: .semibold))
+                        .background(Color.black.opacity(0.001))
+                        .symbolRenderingMode(pictureState ? .multicolor : .monochrome)
+                    
+                    Text("Attach")
+                        .font(.footnote)
+                }
+                .frame(width: 64, height: 64)
                 
             }
-            .accessibilityLabel("Add a photo")
+            .accessibilityLabel("AddAttachmentsButton")
             .buttonStyle(.plain)
             .contentShape(Rectangle())
             .buttonSizing(.flexible)
             
             Button(action: performAffectedActions) {
-                Image(systemName: affectedState ? "person.fill.xmark" :  "person.fill.checkmark")
-                    .font(.system(size: 18, weight: .semibold))
-                    .frame(width: 36, height: 36)
-                    .background(Color.black.opacity(0.001))
-                    .symbolRenderingMode(.palette )
-                    .foregroundStyle(
-                        affectedState ? .red: .blue,
-                        colorScheme == .dark ? .white : .black
-                    )
-                    .contentTransition(
-                        .symbolEffect(.replace.magic(fallback: .upUp.byLayer),
-                        options: .nonRepeating)
-                    )
+                VStack(spacing: 2) {
+                    Image(systemName: "hand.thumbsdown.hand.thumbsup.filled")
+                        .font(.system(size: 18, weight: .semibold))
+                        .background(Color.black.opacity(0.001))
+                        .symbolRenderingMode(.palette )
+                        .foregroundStyle(
+                            affectedState ? .red : .primary,
+                            colorScheme == .dark ? .white : .black
+                        )
+                        .contentTransition(
+                            .symbolEffect(.replace.magic(fallback: .upUp.byLayer),
+                            options: .nonRepeating)
+                        )
+                    
+                    Text("Vote")
+                        .font(.footnote)
+                }
+                .frame(width: 64, height: 64)
                     
             }
-            .accessibilityLabel("Comment")
+            .accessibilityLabel("AffectedButton")
             .buttonStyle(.plain)
             .contentShape(Rectangle())
             .buttonSizing(.flexible)
-            
-            Button(action: performNotificationActions) {
-                Image(systemName: "bell.badge")
-                    .font(.system(size: 18, weight: .semibold))
-                    .frame(width: 36, height: 36)
-                    .background(Color.black.opacity(0.001))
-                    .symbolRenderingMode(notificationState ? .multicolor : .monochrome)
-                    .symbolEffect(
-                        .wiggle.wholeSymbol,
-                        options: .nonRepeating,
-                        value: notificationState
-                    )
+            .popover(isPresented: $affectedState) {
+                HStack {
+                    Button {
+                        
+                    } label: {
+                        VStack {
+                            Image(systemName: "hand.thumbsup.fill")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(.black)
+                            
+                            Text(String(localized: "This report affects me"))
+                                .font(.footnote)
+                        }
+                    }
+                    
+                    
+                    Button {
+                        
+                    } label: {
+                        VStack {
+                            Image(systemName: "hand.thumbsdown.fill")
+                                .symbolRenderingMode(.monochrome)
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(.red)
+                            
+                            Text(String(localized: "This report is helpful"))
+                                .font(.footnote)
+                        }
+                    }
+                }
+                .frame(width: 128, height: 64)
+                .presentationCompactAdaptation(.popover)
             }
             
-            .accessibilityLabel("Add Notification")
+            Button(action: performNotificationActions) {
+                
+                VStack(spacing: 2) {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .background(Color.black.opacity(0.001))
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(
+                            Color.theme.primary,
+                            Color.white,
+                            Color.white
+                        )
+                        .symbolEffect(
+                            .pulse,
+                            options: .repeat(.continuous),
+                            value: notificationState
+                        )
+                    
+                    Text("Boost")
+                        .font(.footnote)
+                }
+                
+                .frame(width: 64, height: 64)
+            }
+            
+            .accessibilityLabel("BoostButton")
             .buttonStyle(.plain)
             .contentShape(Rectangle())
             .buttonSizing(.flexible)
         }
-        .padding()
+        .padding(.horizontal, 24)
         .optionalGlassWithShape(colorScheme, shape: .capsule)
-        .shadow(color: Color.black.opacity(0.125), radius: 10, x: 0, y: 6)
-        .padding(.horizontal, 16)
+        .shadow(color: Color.black.opacity(0.125), radius: 16, x: 0, y: 6)
         
     }
     
@@ -109,7 +171,7 @@ struct customBottomToolbar: View {
     
     private func performNotificationActions() -> Void {
         self.notificationState.toggle()
-        addNotificationAction(self.notificationState)
+        boostReportValidationAction(self.notificationState)
     }
 }
 
@@ -123,7 +185,7 @@ struct customBottomToolbar: View {
         commentAction: {},
         addPhotoAction: {},
         affectedAction: { _ in  },
-        addNotificationAction: { _ in },
+        boostReportValidationAction: { _ in },
         affectedState: $affectedState,
         notificationState: $notificationState
     )

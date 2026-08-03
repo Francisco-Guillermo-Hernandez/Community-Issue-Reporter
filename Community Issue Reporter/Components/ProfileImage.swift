@@ -424,6 +424,8 @@ struct UserAvatarPersonalizationSheet: View {
 struct ProfileImage: View {
 
     @Bindable var viewModel: ProfileDataModel
+    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    
     var body: some View {
         
         Group {
@@ -481,6 +483,28 @@ struct ProfileImage: View {
             .disabled(viewModel.isGuest)
             .symbolColorRenderingMode(.gradient)
         }
+        .overlay(alignment: .topLeading) {
+            if subscriptionManager.isPro {
+                Text("Pro")
+                    .accessibilityLabel("Pro")
+                    .font(.caption2.bold())
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(
+                        Capsule()
+                            .fill(LinearGradient(
+                                colors: [
+                                    Color.theme.secondary,
+                                    Color.theme.secondary.mix(with: .primary, by: 0.5)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing)
+                            )
+                    )
+                    .shadow(color: Color.black.opacity(0.125), radius: 16, x: 0, y: 6)
+                    .foregroundColor(.white)
+            }
+        }
         .sheet(isPresented: $viewModel.showPicker) {
             let animation: Animation = .snappy(duration: 0.3, extraBounce: 0)
             DynamicSheetWrapper(animation: animation, viewModel: viewModel)
@@ -523,6 +547,7 @@ private struct DynamicSheetWrapper: View {
 
     VStack {
         ProfileImage(viewModel: profile)
+            .environmentObject(SubscriptionManager.shared)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color.theme.cardBackground)

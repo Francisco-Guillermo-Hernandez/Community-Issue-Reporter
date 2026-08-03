@@ -96,6 +96,10 @@ struct DetailView: View {
                 LazyVStack(spacing: .themeSpacing * 4) {
                 ForEach(comments.documents ?? []) { c in
                     CommentRow(comment: c)
+                    
+                    Divider()
+                        .opacity(0.65)
+                        .padding(.bottom, .themePadding / 4)
                 }
             }
             .padding(.horizontal, .themePadding)
@@ -151,26 +155,51 @@ struct DetailView: View {
                 if activeDetent == .large {
                     customBottomToolbar(
                         commentAction: {
+                        
                             path.append(DetailNavigationDestination.comment(self.report.id))
                         },
                         addPhotoAction: {
                             path.append(DetailNavigationDestination.moreEvidences(self.report.id))
                         },
                         affectedAction: { status in
-                            type = .info
-                            status
-                                ? (message = "Added to affected list")
-                                : (message = "Removed from affected list")
-                            showAlert = true
-                            hideAlert()
+//                            type = .info
+//                            status
+//                                ? (message = "Added to affected list")
+//                                : (message = "Removed from affected list")
+//                            showAlert = true
+//                            hideAlert()
+                            
                         },
-                        addNotificationAction: { status in
-                            type = .info
-                            status
-                                ? (message = "Added to notification list")
-                                : (message = "Removed from notification list")
-                            showAlert = true
-                            hideAlert()
+                        boostReportValidationAction: { status in
+                            Task {
+                                let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_REPORT_VALIDATION_AD_UNIT") as? String ?? ""
+                                await AdMobManager.shared.loadRewardedAd(adUnitID: adUnitID)
+                                
+                                DispatchQueue.main.async {
+                                    AdMobManager.shared.showRewardedAd {
+                                        Task {
+                                            do {
+                                                _ = try await ReportRepository.shared.boostReportValidation(self.report.id)
+                                                let wasValidated = try await ReportRepository.shared.haveReportBeenValidatedByMe(self.report.id)
+                                                
+                                                DispatchQueue.main.async {
+                                                    self.type = .info
+                                                    self.message = wasValidated ? "Boost applied and validated!" : "Boost applied."
+                                                    self.showAlert = true
+                                                    self.hideAlert()
+                                                }
+                                            } catch {
+                                                DispatchQueue.main.async {
+                                                    self.type = .error
+                                                    self.message = "Failed to boost report"
+                                                    self.showAlert = true
+                                                    self.hideAlert()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         },
                         affectedState: $affectedState,
                         notificationState: $notificationState

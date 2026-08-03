@@ -59,8 +59,8 @@ struct ReportWizardContainer: View {
             
             VStack(spacing: 0) {
                 /// FIXED HEADER
-                wizardHeader()
-                    .padding()
+//                wizardHeader()
+//                    .padding()
                 
                 /// STEP FLOW
                 ScrollViewReader { proxy in
@@ -140,11 +140,14 @@ struct ReportWizardContainer: View {
                     .padding()
             }
         }
+        .navigationTitle("Create a Report")
+        .navigationSubtitle(String(localized: "Step \(controller.currentStep.rawValue) of 4"))
+        .navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: controller.currentStep) { oldValue, newValue in
             return newValue > oldValue
         }
-        .toolbarTitleDisplayMode(.inline)
-        .toolbarVisibility(.hidden, for: .navigationBar)
+//        .toolbarTitleDisplayMode(.inline)
+//        .toolbarVisibility(.hidden, for: .navigationBar)
         .enableInteractivePopGesture()
         .sensoryFeedback(.success, trigger: controller.doneTrigger)
         .task {
@@ -257,5 +260,6 @@ struct ReportWizardContainer: View {
         ReportWizardContainer(model: model, onCompletion: { data, type in
             
         }, showCancelButton: true)
+        .environment(SettingsStore())
     }
 }

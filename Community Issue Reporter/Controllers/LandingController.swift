@@ -164,6 +164,7 @@ final class LandingController {
         settings?.cityId = data.settings.reportLocatorSettings.cityId
         
         _ = KeychainService.save(key: .sessionStateVerification, value: "session:state:valid")
+        _ = KeychainService.save(key: .userType, value: data.userType.description)
     }
     
     private func setAvatar(url: String, _ createdFrom: AvatarCreatedFrom) -> Void {
@@ -181,9 +182,9 @@ final class LandingController {
         
         _ = KeychainService.deleteToken(key: .query)
         _ = KeychainService.deleteToken(key: .mutation)
+        _ = KeychainService.deleteToken(key: .userType)
         _ = KeychainService.deleteToken(key: .sessionStateVerification)
         
-//            UserDefaults.standard.set(nil, forKey: "selected_city")
         
         let selectedOptionKey = "selected_avatar_option"
         let selectedColorKey = "selected_avatar_color"
@@ -195,6 +196,11 @@ final class LandingController {
         UserDefaults.standard.set(nil, forKey: "user_name")
         UserDefaults.standard.set(nil, forKey: "names")
         UserDefaults.standard.set(nil, forKey: "selectedLanguageCode")
+        UserDefaults.standard.set(nil, forKey: "selected_city")
+        UserDefaults.standard.set(nil, forKey: "map_latitude")
+        UserDefaults.standard.set(nil, forKey: "map_longitude")
+        
+        print("[UserDefaults] - Cleared user data from UserDefaults]")
     }
     
 }

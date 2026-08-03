@@ -56,6 +56,35 @@ final class MapExplorerController {
                 countryCode: .SV,
                 cityId: authViewModel.selectedCity?.cityId ?? "1"
             )
+        } catch CommonIntercommunicationErrors.networkError(let message) {
+            /// TODO: show message
+        } catch {
+            print(error)
+        }
+    }
+    
+    /// Load near reports by using coordinates and
+    func loadReportsWith(_ coordinates: CLLocationCoordinate2D) async {
+        do {
+            let query = MapExplorerQueryParams(
+                lat: coordinates.latitude,
+                lng: coordinates.longitude,
+                radius: 300,
+                issueTypeIds: IssueTypes.allCases.compactMap(\.identifier),
+                severityIds: Severity.allCases.compactMap(\.identifier),
+                statusIds: IssueStatus.allCases.compactMap(\.identifier)
+            )
+            
+            print("[QUERY] : debugging")
+            dump(query)
+            
+            self.reports = try await MapExplorerRepository.shared.listReports(
+                for: query,
+                countryCode: .SV,
+                cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619"
+            )
+        } catch CommonIntercommunicationErrors.networkError(let message) {
+          /// TODO: show error
         } catch {
             print(error)
         }
@@ -180,6 +209,10 @@ final class MapExplorerController {
                     )
                 )
             )
+            
+            Task {
+                await self.loadReportsWith(coordinate)
+            }
         }
     }
     
@@ -200,6 +233,12 @@ final class MapExplorerController {
                 span: MKCoordinateSpan(latitudeDelta: 0.0082, longitudeDelta: 0.0082)
             )
         )
+        
+        print("[CAMERA POSITION]: \(authViewModel.cameraPosition.region?.center.latitude ?? 0), \(authViewModel.cameraPosition.region?.center.longitude ?? 0)")
+        
+        Task {
+            await loadReportsWith(location.coordinate)
+        }
     }
     
     func handleMapMovement(center: CLLocationCoordinate2D) {

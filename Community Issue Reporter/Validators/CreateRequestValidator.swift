@@ -101,3 +101,23 @@ let userNameValidator: [Validator] = [
 ]
 
 let userNameRegex = "[a-zA-Z0-9._-]"
+
+let blockReasonMinCharacters: Int = 12
+let blockReasonMaxCharacters: Int = 150
+let blockReasonValidator: [Validator] = [
+    Validator(
+        name: "Isn't empty",
+        message: String(localized: "The reason can't be empty"),
+        fn: { !$0.isEmpty }
+    ),
+    Validator(
+        name: "Isn't too long",
+        message: String(localized: "The reason can't be longer than \(blockReasonMaxCharacters) characters"),
+        fn: { $0.count <= blockReasonMaxCharacters }
+    ),
+    Validator(
+        name: "Isn't too short",
+        message: String(localized: "The reason can't be shorter than \(blockReasonMinCharacters) characters"),
+        fn: { $0.count >= blockReasonMinCharacters }
+    )
+]

@@ -56,7 +56,6 @@ struct LoginView: View {
                 .padding(.bottom, 20)
                 .accessibilityIdentifier("LoginAsGuest")
                 
-                
                 ///
                 LinksView()
             }
@@ -77,7 +76,8 @@ struct LoginView: View {
                     .glassEffect(in:  RoundedRectangle(cornerRadius: 52, style: .continuous))
             )
             .padding(.horizontal, 8)
-            .padding(.bottom, 8)
+            .padding(.bottom, 9)
+            .shadow(color: Color.black.opacity(0.5), radius: 16, x: 0, y: 16)
             
             
         }

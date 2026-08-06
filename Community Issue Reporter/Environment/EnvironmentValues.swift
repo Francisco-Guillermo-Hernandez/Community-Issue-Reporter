@@ -13,6 +13,22 @@ final class SettingsStore {
     
     static let shared = SettingsStore()
 
+    var commentsCount: Int {
+        didSet { UserDefaults.standard.set(commentsCount, forKey: "commentsCount") }
+    }
+    
+    var petitionsCount: Int {
+        didSet { UserDefaults.standard.set(petitionsCount, forKey: "petitionsCount") }
+    }
+    
+    var reportsCount: Int {
+        didSet { UserDefaults.standard.set(reportsCount, forKey: "reportsCount") }
+    }
+    
+    var signaturesCount: Int {
+        didSet { UserDefaults.standard.set(signaturesCount, forKey: "signaturesCount") }
+    }
+    
     var geographicalRegion: Int {
         didSet { UserDefaults.standard.set(geographicalRegion, forKey: "geographicalRegion") }
     }
@@ -110,6 +126,10 @@ final class SettingsStore {
         self.showMyProfile = UserDefaults.standard.bool(forKey: "showMyProfile")
         self.showMyUseNameWhenShare = UserDefaults.standard.bool(forKey: "showMyUseNameWhenShare")
         self.enableWebNotifications = UserDefaults.standard.bool(forKey: "enableWebNotifications")
+        self.commentsCount = UserDefaults.standard.integer(forKey: "commentsCount")
+        self.petitionsCount = UserDefaults.standard.integer(forKey: "petitionsCount")
+        self.reportsCount = UserDefaults.standard.integer(forKey: "reportsCount")
+        self.signaturesCount = UserDefaults.standard.integer(forKey: "signaturesCount")
         
         UserDefaults.standard.register(defaults: [
             "geographicalRegion": 2,
@@ -129,7 +149,11 @@ final class SettingsStore {
             "showMyProfile": true,
             "showMyUseNameWhenShare": true,
             "countryCode": "SV",
-            "cityId": "a67b90f9-1d76-4835-a994-03cd04f1d619"
+            "cityId": "a67b90f9-1d76-4835-a994-03cd04f1d619",
+            "commentsCount": 0,
+            "petitionsCount": 0,
+            "reportsCount": 0,
+            "signaturesCount": 0
         ])
     }
     

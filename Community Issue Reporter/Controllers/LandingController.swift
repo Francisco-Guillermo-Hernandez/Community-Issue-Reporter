@@ -58,13 +58,14 @@ final class LandingController {
                 self.isGuest = true
             } else {
                 Task {
-        
+                    
                     do {
                         let (state, sessionId, data) = try await UserRepository.shared.login(session)
                         
                         self.userOAuthState = state
                         /// Validates if the first time user login
                         if state == .firstLogin {
+                            self.setIntoKeychain(data)
                             self.path.append(.selectCity)
                         } else {
                             
@@ -72,6 +73,7 @@ final class LandingController {
                                 /// Set preferences
                                 self.setSettingsFromAuthenticatedUser(with: data)
                                 self.setCameraPositionByCityId(appState)
+                                await SubscriptionManager.shared.performUserLogin(data.userId)
                                 self.isLoggedIn = true
                             } else {
                                 
@@ -87,6 +89,8 @@ final class LandingController {
                         self.showAlert(message: "CLNT: \(code)")
                     } catch CommonIntercommunicationErrors.serverError(let code) {
                         self.showAlert(message: String(localized: "SVR: \(code)"))
+                    } catch CommonIntercommunicationErrors.networkError(let error) {
+                        self.showAlert(message: String(localized: "There was a problem with the network: \(error)"))
                     } catch {
                         self.showAlert(message: String(localized: "Something went wrong"))
                     }
@@ -141,7 +145,13 @@ final class LandingController {
         }
     }
     
-
+    private func setIntoKeychain(_ data: PublicUserData) -> Void {
+        print("[DEBUG] Saving userId: \(data.userId) in keychain]")
+        print("[DEBUG] Saving userType: \(data.userType.description) in keychain]")
+        
+        _ = KeychainService.save(key: .userId, value: data.userId)
+        _ = KeychainService.save(key: .userType, value: data.userType.description)
+    }
     
     private func setSettingsFromAuthenticatedUser(with data: PublicUserData) -> Void {
         
@@ -163,12 +173,13 @@ final class LandingController {
         settings?.countryCode = data.settings.reportLocatorSettings.countryCode
         settings?.cityId = data.settings.reportLocatorSettings.cityId
         
+        /// Set values into device keychain
+        setIntoKeychain(data)
         _ = KeychainService.save(key: .sessionStateVerification, value: "session:state:valid")
-        _ = KeychainService.save(key: .userType, value: data.userType.description)
+        
     }
     
     private func setAvatar(url: String, _ createdFrom: AvatarCreatedFrom) -> Void {
-//        self.profile.avatarURL = urlFromString(url)
         self.profile.selectedAvatarOptionView = createdFrom
     }
     
@@ -177,10 +188,14 @@ final class LandingController {
     }
     
     func logout() {
+        
+        /// route to login view
         self.isLoggedIn = false
         self.isGuest = false
         
+        /// Remove values from devices' keychain
         _ = KeychainService.deleteToken(key: .query)
+        _ = KeychainService.deleteToken(key: .userId)
         _ = KeychainService.deleteToken(key: .mutation)
         _ = KeychainService.deleteToken(key: .userType)
         _ = KeychainService.deleteToken(key: .sessionStateVerification)
@@ -201,6 +216,10 @@ final class LandingController {
         UserDefaults.standard.set(nil, forKey: "map_longitude")
         
         print("[UserDefaults] - Cleared user data from UserDefaults]")
+        
+        Task {
+            await SubscriptionManager.shared.handleUserLogout()
+        }
     }
     
 }

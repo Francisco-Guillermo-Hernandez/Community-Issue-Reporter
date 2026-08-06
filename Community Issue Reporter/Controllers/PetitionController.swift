@@ -21,7 +21,8 @@ final class PetitionController {
     var minimumSignatures: Int
     var currentStep: PetitionStep
     var doneTrigger: Bool
-   
+    var shareUrl: String
+    
     init() {
         self.reports = []
         self.petition = .init(
@@ -46,6 +47,7 @@ final class PetitionController {
         minimumSignatures = 10
         currentStep = .details
         doneTrigger = false
+        shareUrl = ""
     }
     
     func prepareForModification(_ petition: Petition) {

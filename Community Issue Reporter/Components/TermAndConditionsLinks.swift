@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct LinksView: View {
+    @State private var webViewURL = URL(string: "https://reportamelo.app/legal/terms")
+    @State private var showWebView = false
+    
     var underlinedMarkdown: AttributedString {
         let rawMarkdown = String(localized: "By continuing, you agree to our [Terms of Service](https://reportamelo.app/legal/terms) and [Privacy Policy](https://reportamelo.app/legal/privacy).")
         
@@ -34,6 +37,15 @@ struct LinksView: View {
             .tint(Color.theme.primary.mix(with: .white, by: 0.1))
             .frame(maxWidth: .infinity, alignment: .center)
             .kerning(-0.2)
+            .environment(\.openURL, OpenURLAction { url in
+                print("[debug]: Opening URL: \(url)")
+                webViewURL = url
+                showWebView = true
+                return .handled
+            })
+            .sheet(isPresented: $showWebView) {
+                WebBrowserView(url: $webViewURL)
+            }
     }
 }
 

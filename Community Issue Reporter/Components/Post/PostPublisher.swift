@@ -73,28 +73,34 @@ struct PostPublisher: View {
             HStack(alignment: .center, spacing: .themeSpacing * 3) {
                 VStack {
                     
-                    if let url = petition.postPublisher.profilePictureURL {
-                        CachedAsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            ProgressView()
+                    NavigationLink(value: SignRequestsViewsDestinations.citizenProfile(profileId: petition.postPublisher.profileId)) {
+                        Group {
+                            if let url = petition.postPublisher.profilePictureURL {
+                                CachedAsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                } placeholder: {
+                                    ProgressView()
+                                }
+                                .frame(width: 48, height: 48)
+                                .clipShape(.circle)
+                                .glassEffect(in: .circle)
+                                .id(url)
+
+                            } else {
+                                Image("user_b")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 48, height: 48)
+                                    .clipShape(.circle)
+                                    .glassEffect(in: .circle)
+
+                            }
                         }
-                        .frame(width: 48, height: 48)
-                        .clipShape(.circle)
-                        .glassEffect(in: .circle)
-                        .id(url)
-
-                    } else {
-                        Image("user_b")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 48, height: 48)
-                            .clipShape(.circle)
-                            .glassEffect(in: .circle)
-
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("PostPublisherAvatar")
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {

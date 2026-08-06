@@ -424,7 +424,7 @@ struct UserAvatarPersonalizationSheet: View {
 struct ProfileImage: View {
 
     @Bindable var viewModel: ProfileDataModel
-    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    @Environment(SubscriptionManager.self) var subscriptionManager
     
     var body: some View {
         
@@ -547,7 +547,7 @@ private struct DynamicSheetWrapper: View {
 
     VStack {
         ProfileImage(viewModel: profile)
-            .environmentObject(SubscriptionManager.shared)
+            .environment(SubscriptionManager.shared)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color.theme.cardBackground)

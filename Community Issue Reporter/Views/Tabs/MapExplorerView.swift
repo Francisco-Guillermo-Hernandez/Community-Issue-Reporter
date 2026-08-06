@@ -116,6 +116,7 @@ struct MapExplorerView: View {
         }
         .task {
             await appState.checkStatus()
+            await SubscriptionManager.shared.performLogin()
             
         }
         .onChange(of: controller.locationManager.lastLocation) { _, newLocation in

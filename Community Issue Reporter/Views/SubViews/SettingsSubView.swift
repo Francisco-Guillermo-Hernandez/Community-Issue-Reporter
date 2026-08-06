@@ -95,7 +95,7 @@ struct SettingsSubView: View {
     @State private var cities: [FriendlyCityDistribution] = []
     
     @Environment(NotificationManager.self) var notificationManager
-    @EnvironmentObject var subscriptionManager: SubscriptionManager
+    @Environment(SubscriptionManager.self) var subscriptionManager
     @State private var isPresentingPaywall = false
     @State private var isPresentingCustomerCenter = false
     @State private var controller: SettingsSubViewController
@@ -107,7 +107,7 @@ struct SettingsSubView: View {
     
     var subViewName: String
     var body: some View {
-        NavigationStack {
+        Group {
             
             ScrollView(showsIndicators: true) {
                 
@@ -147,7 +147,7 @@ struct SettingsSubView: View {
                             Button(action: {
                                 isPresentingCustomerCenter = true
                             }) {
-                                Text("Manage Subscription")
+                                Text(String(localized: "Manage Subscription"))
                                     .foregroundStyle(Color.accentColor)
                             }
                         } else {
@@ -162,9 +162,17 @@ struct SettingsSubView: View {
                                         .foregroundStyle(Color.accentColor)
                                 }
                             }
+                            .accessibilityIdentifier("UpgradeSubscriptionButton")
                             
                             Button(action: {
-                                subscriptionManager.restorePurchases()
+                                Task {
+                                    let success = await subscriptionManager.restorePurchases()
+                                    if success {
+                                        Toast.shared.show(message: String(localized: "Purchases restored successfully"), type: .success)
+                                    } else {
+                                        Toast.shared.show(message: String(localized: "Failed to restore purchases"), type: .error)
+                                    }
+                                }
                             }) {
                                 HStack {
                                     Text("Do you have a subscription?")
@@ -174,6 +182,7 @@ struct SettingsSubView: View {
                                         .foregroundStyle(Color.accentColor)
                                 }
                             }
+                            .accessibilityIdentifier("RestoreSubscriptionButton")
                         }
                     }
                     .disabled(!networkMonitor.isConnected)
@@ -318,5 +327,5 @@ struct SettingsSubView: View {
         .environment(NotificationManager())
         .environment(SettingsStore())
         .environment(NetworkMonitor())
-        .environmentObject(SubscriptionManager.shared)
+        .environment(SubscriptionManager.shared)
 }

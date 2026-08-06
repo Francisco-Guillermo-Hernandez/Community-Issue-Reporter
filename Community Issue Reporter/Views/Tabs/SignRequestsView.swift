@@ -12,6 +12,7 @@ import GoogleMobileAds
 enum SignRequestsViewsDestinations: Hashable {
     case comments(postId: String)
     case postDetail(of: PetitionPost)
+    case citizenProfile(profileId: String)
 }
 
 struct SignRequestsView: View {
@@ -19,7 +20,7 @@ struct SignRequestsView: View {
     @State private var controller = SignRequestController()
     @State private var petitionController = PetitionController()
     @State private var navigationPath: [SignRequestsViewsDestinations] = []
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @Environment(SubscriptionManager.self) var subscriptionManager
     
     fileprivate func posts() -> some View {
         return LazyVStack(alignment: .leading, spacing: .themeSpacing * 4) {
@@ -142,6 +143,10 @@ struct SignRequestsView: View {
                                     
                                 case .postDetail(let petition):
                                     PetitionDetailView(petition: petition)
+                                        .toolbar(.hidden, for: .tabBar)
+                                        
+                                case .citizenProfile(let profileId):
+                                    CitizenProfile(with: profileId)
                                         .toolbar(.hidden, for: .tabBar)
                             }
                         }
@@ -325,4 +330,5 @@ struct SignRequestsView: View {
 
 #Preview {
     SignRequestsView()
+        .environment(SubscriptionManager.shared)
 }

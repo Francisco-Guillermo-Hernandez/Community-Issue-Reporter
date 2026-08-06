@@ -26,6 +26,7 @@ struct UserProfileView: View {
     @State private var selectedOption: String = ""
     @State var controller = LandingController.shared
     @State private var profile = ProfileDataModel()
+    @State private var profileRouter = ProfileRouter.shared
     
     let options: [ProfileOption] = [
         ProfileOption(
@@ -61,7 +62,7 @@ struct UserProfileView: View {
     ]
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $profileRouter.path) {
             
             ScrollView(.vertical) {
                 
@@ -82,7 +83,22 @@ struct UserProfileView: View {
                 
                 List(options, id: \.self) { option in
                     
-                    NavigationLink(destination: destinationView(for: option)) {
+                    Button {
+                        switch option.id {
+                        case "op:reports":
+                            profileRouter.goTo(.reports)
+                        case "op:comments":
+                            profileRouter.goTo(.comments)
+                        case "op:signPetitions":
+                            profileRouter.goTo(.signPetitions)
+                        case "op:settings":
+                            profileRouter.goTo(.settings)
+                        case "op:licenses":
+                            profileRouter.goTo(.licenses)
+                        default:
+                            break
+                        }
+                    } label: {
                         HStack {
                             
                             RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
@@ -93,12 +109,18 @@ struct UserProfileView: View {
                                         .font(Font.system(size: 16, weight: .medium))
                                         .foregroundStyle( Color.white)
                                 }
-                                
                                 .padding(.trailing, 8)
                             
                             
                             Text(option.title)
-                                
+                                .fontWeight(.medium)
+                                .foregroundStyle(Color.theme.inputText)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color(uiColor: .tertiaryLabel))
                         }
                     }
                 }
@@ -106,6 +128,9 @@ struct UserProfileView: View {
                 .contentMargins(.top, 16, for: .scrollContent)
                 .scrollContentBackground(.hidden)
                 .scrollDisabled(true)
+                .navigationDestination(for: ProfileDestinations.self) { destination in
+                    destinationView(for: destination)
+                }
                 
             }
             .background(Color.theme.background)
@@ -151,22 +176,18 @@ struct UserProfileView: View {
     }
     
     @ViewBuilder
-    private func destinationView(for option: ProfileOption) -> some View {
-        
-        switch option.id {
-        case "op:settings":
-            SettingsSubView(subViewName: option.title)
-        case "op:licenses":
-            LicensesSubView(subViewName: option.title)
-        case "op:comments":
-            CommentsSubView(subViewName: option.title, mode: .listAndModify)
-        case "op:reports":
-            MyReportsSubView(path: $navigationPath, subViewName: option.title, mode: .listAndModify)
-        case "op:signPetitions":
-            MyPetitionsSubView(path: $navigationPath, subViewName: option.title, mode: .listAndModify)
-            
-        default:
-            Text("\(option.id) selected")
+    private func destinationView(for destination: ProfileDestinations) -> some View {
+        switch destination {
+        case .settings:
+            SettingsSubView(subViewName: String(localized: "Settings"))
+        case .licenses:
+            LicensesSubView(subViewName: String(localized: "Licenses"))
+        case .comments:
+            CommentsSubView(subViewName: String(localized: "My Comments"), mode: .listAndModify)
+        case .reports:
+            MyReportsSubView(path: $navigationPath, subViewName: String(localized: "My Reports"), mode: .listAndModify)
+        case .signPetitions:
+            MyPetitionsSubView(path: $navigationPath, subViewName: String(localized: "My Sign petitions"), mode: .listAndModify)
         }
     }
     
@@ -187,7 +208,7 @@ struct UserProfileView: View {
         .environment(NotificationManager())
         .environment(SettingsStore())
         .environment(NetworkMonitor())
-        .environmentObject(SubscriptionManager.shared)
+        .environment(SubscriptionManager.shared)
 }
 
 

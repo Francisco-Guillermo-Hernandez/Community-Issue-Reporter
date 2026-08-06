@@ -73,3 +73,10 @@ struct DefaultReportingCity: Encodable {
         self.cityId = cityId
     }
 }
+
+
+struct BlockUserReason: Encodable {
+    let profileId: String
+    let reason: String
+    let blockedReasonId: ReportReason
+}

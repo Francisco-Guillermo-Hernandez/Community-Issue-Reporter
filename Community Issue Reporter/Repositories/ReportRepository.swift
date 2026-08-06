@@ -97,6 +97,7 @@ final class ReportRepository {
                     HTTPHeader(name: "ShareIndexHash", content: model.reportSession.shareIndexHash),
                     HTTPHeader(name: "ReportContainer", content: model.reportSession.reportContainer),
                     HTTPHeader(name: "GroupingNameCode", content: model.locator.groupingNameCode),
+                    HTTPHeader(name: "GroupingCode", content: model.locator.groupingId)
                 ]
             )
             

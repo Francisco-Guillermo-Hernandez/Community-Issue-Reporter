@@ -331,6 +331,25 @@ final class UserRepository {
         }
     }
     
+    func reportUser(_ reason: BlockUserReason) async throws -> SuccessfulResult {
+        do {
+            let result = try await self.service.reportUser(reason: reason, headers: headers)
+            if result.code == "USER_REPORTED" {
+                return .updated
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.code)
+            }
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
 }
 
 enum DeviceType: String, Decodable, Encodable {

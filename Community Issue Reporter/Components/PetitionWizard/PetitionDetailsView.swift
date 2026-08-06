@@ -24,7 +24,7 @@ struct PetitionDetailsView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: .themeSpacing * 4) {
             
             /// Provides title for the petition
             TextInput(

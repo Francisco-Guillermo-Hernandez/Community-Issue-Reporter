@@ -12,6 +12,8 @@ struct PetitionWizardContainer: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var controller: PetitionController
     @FocusState private var focusedField: PetitionWizardElements?
+    @State private var deepLinkRouter = DeepLinkRouter.shared
+    @State private var profileRouter = ProfileRouter.shared
     
     var body: some View {
         NavigationStack {
@@ -51,11 +53,16 @@ struct PetitionWizardContainer: View {
                                                 case .details:
                                                     PetitionDetailsView(controller, $focusedField)
                                                 case .reports:
-                                                    ReportsChooserView(reports: controller.reports, selectedReports: $controller.petition.reportsIds)
+                                                    ReportsChooserView(
+                                                        reports: controller.reports,
+                                                        selectedReports: $controller.petition.reportsIds
+                                                    )
                                                 case .signatures:
-                                                    PetitionSignaturesConfigurator()
+                                                    PetitionSignaturesConfigurator(controller)
                                                 case .confirmation:
-                                                    PetitionConfirmationView()
+                                                    PetitionConfirmationView(url: $controller.shareUrl) {
+                                                        goToPetitions()
+                                                    }
                                                 
                                             }
                                         }
@@ -166,6 +173,22 @@ struct PetitionWizardContainer: View {
     func done() {
         controller.doneTrigger.toggle()
         dismiss()
+    }
+    
+    func goToPetitions() {
+        Task {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+               
+            dismiss()
+            
+            try? await Task.sleep(for: .milliseconds(128))
+            
+            deepLinkRouter.activeTab = 4
+            
+            try? await Task.sleep(for: .milliseconds(64))
+            
+            profileRouter.goTo(.signPetitions)
+        }
     }
 }
 

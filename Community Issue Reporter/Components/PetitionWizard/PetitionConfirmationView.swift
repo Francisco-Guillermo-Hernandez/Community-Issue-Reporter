@@ -9,6 +9,8 @@ import SwiftUI
 
 struct PetitionConfirmationView: View {
     @State private var isAnimating: Bool = true
+    @Binding var url: String
+    var goTo: () -> Void
     
     var body: some View {
         VStack(spacing: .themeSpacing * 6) {
@@ -33,12 +35,17 @@ struct PetitionConfirmationView: View {
                     .font(.title2)
                     .bold()
                 
-                Text(String(localized: "."))
+                Text(String(localized: "We will notify you in each step of the process to help you resolve problems in your community."))
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                 
-                Text(String(localized: "Meanwhile, you can copy petition code or share it with others."))
+                Text(String(localized: "Meanwhile, you can share your petition with your friends and neighbors to get them involved."))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                
+                Text(String(localized: "You can spread the word to speed up the resolution of reports. \n and get more people involved."))
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -47,7 +54,24 @@ struct PetitionConfirmationView: View {
             }
             
             VStack(spacing: .themeSpacing * 3) {
+                ThemedButton(
+                    message: String(localized: "See all of my petitions"),
+                    action: goTo,
+                    type: .outline,
+                    style: .normal
+                )
                 
+                ThemedButton(
+                    message: String(localized: "Share Report"),
+                    action: {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        shareFromClosure(item: buildShareURL(for: url)!)
+                    },
+                    type: .outline,
+                    style: .normal,
+                    icon: "square.and.arrow.up"
+                )
+                .accessibilityIdentifier("share-report")
             }
         }
         .frame(maxWidth: .infinity)
@@ -57,5 +81,7 @@ struct PetitionConfirmationView: View {
 }
 
 #Preview {
-    PetitionConfirmationView()
+    PetitionConfirmationView(url: .constant("")) {
+        print("Go to pressed")
+    }
 }

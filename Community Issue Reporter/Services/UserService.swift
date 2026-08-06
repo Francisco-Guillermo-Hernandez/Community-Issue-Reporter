@@ -71,4 +71,8 @@ struct UserService {
             withOAuth: true,
         )
     }
+    
+    func reportUser(reason: BlockUserReason, headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.patch(path: "user/report/reason", body: reason, headers: headers, withOAuth: true)
+    }
 }

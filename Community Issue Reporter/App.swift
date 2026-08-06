@@ -30,7 +30,7 @@ struct Community_Issue_ReporterApp: App {
     @State private var networkMonitor = NetworkMonitor()
     
     /// Inject subscription manager
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    @State private var subscriptionManager = SubscriptionManager.shared
     
     /// Inject the AppDelegate lifecycle adaptor
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
@@ -72,12 +72,13 @@ struct Community_Issue_ReporterApp: App {
     var body: some Scene {
         WindowGroup {
             WelcomeView()
+                .withToast()
                 .environment(router)
                 .environmentObject(authViewModel)
                 .environment(settingsStore)
                 .environment(notificationManager)
                 .environment(networkMonitor)
-                .environmentObject(subscriptionManager)
+                .environment(subscriptionManager)
                 .environment(\.locale, .init(identifier: settingsStore.selectedLanguageCode))
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)

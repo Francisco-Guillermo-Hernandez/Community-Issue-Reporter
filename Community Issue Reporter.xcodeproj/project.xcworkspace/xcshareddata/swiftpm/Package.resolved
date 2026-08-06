@@ -1,5 +1,5 @@
 {
-  "originHash" : "3524a734ea0be35afe860e1568802c21b9d04b0ea56d114605b887af6d77b61b",
+  "originHash" : "cd530a257f08959f70ec327bd55f844797094648a3ef3eacddcd8973b20e0b75",
   "pins" : [
     {
       "identity" : "app-check",
@@ -74,6 +74,24 @@
       }
     },
     {
+      "identity" : "purchases-ios-admob",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-admob",
+      "state" : {
+        "revision" : "0a40b0fc7fbb57bbf1644ffc8913a04c2df2ce74",
+        "version" : "5.81.3"
+      }
+    },
+    {
+      "identity" : "purchases-ios-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios-spm.git",
+      "state" : {
+        "revision" : "68bfa02cf20d46ee13cc7c774d5548fb3759cc69",
+        "version" : "5.81.3"
+      }
+    },
+    {
       "identity" : "swift-async-algorithms",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-async-algorithms.git",
@@ -98,6 +116,24 @@
       "state" : {
         "revision" : "822f5baa133705baf85cf5f919ecbe9fae7e70d3",
         "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "swift-package-manager-google-mobile-ads",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/googleads/swift-package-manager-google-mobile-ads.git",
+      "state" : {
+        "revision" : "868149fc50d1452078e83540e636cf519bac3e6a",
+        "version" : "13.7.0"
+      }
+    },
+    {
+      "identity" : "swift-package-manager-google-user-messaging-platform",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/googleads/swift-package-manager-google-user-messaging-platform.git",
+      "state" : {
+        "revision" : "13b248eaa73b7826f0efb1bcf455e251d65ecb1b",
+        "version" : "3.1.0"
       }
     },
     {

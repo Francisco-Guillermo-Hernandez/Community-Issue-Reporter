@@ -15,6 +15,9 @@
 		56AC7B4D2FCA72DA0015122D /* SwiftMsgpack in Frameworks */ = {isa = PBXBuildFile; productRef = 56AC7B4C2FCA72DA0015122D /* SwiftMsgpack */; };
 		56B934502FF4C2300079C44B /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 56B9344F2FF4C2300079C44B /* AsyncAlgorithms */; };
 		56B934522FF4C2300079C44B /* AsyncStreaming in Frameworks */ = {isa = PBXBuildFile; productRef = 56B934512FF4C2300079C44B /* AsyncStreaming */; };
+		56CD5D05301B31B4000327AB /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 56CD5D04301B31B4000327AB /* RevenueCat */; };
+		56CD5D07301B31B4000327AB /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 56CD5D06301B31B4000327AB /* RevenueCatUI */; };
+		56CD5D0A301B31EA000327AB /* RevenueCatAdMob in Frameworks */ = {isa = PBXBuildFile; productRef = 56CD5D09301B31EA000327AB /* RevenueCatAdMob */; };
 		56D5D99D2F65284500183FCE /* WebP in Frameworks */ = {isa = PBXBuildFile; productRef = 56D5D99C2F65284500183FCE /* WebP */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +41,7 @@
 /* Begin PBXFileReference section */
 		561FED2D2FEE03AE00335F73 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
 		561FED2F2FEE03D500335F73 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
+		56864544300F4C3F00737407 /* Community Issue Reporter.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Community Issue Reporter.xctestplan"; sourceTree = "<group>"; };
 		5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		56E42B502F46BC8C00AC84C7 /* Community Issue Reporter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Community Issue Reporter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56E42B5D2F46BC8D00AC84C7 /* Community Issue ReporterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Community Issue ReporterTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -69,7 +73,10 @@
 			files = (
 				569E2F472F739EB200B8C9DE /* GoogleSignInSwift in Frameworks */,
 				56D5D99D2F65284500183FCE /* WebP in Frameworks */,
+				56CD5D05301B31B4000327AB /* RevenueCat in Frameworks */,
 				56B934522FF4C2300079C44B /* AsyncStreaming in Frameworks */,
+				56CD5D07301B31B4000327AB /* RevenueCatUI in Frameworks */,
+				56CD5D0A301B31EA000327AB /* RevenueCatAdMob in Frameworks */,
 				569E2F452F739EB200B8C9DE /* GoogleSignIn in Frameworks */,
 				56AC7B4D2FCA72DA0015122D /* SwiftMsgpack in Frameworks */,
 				56B934502FF4C2300079C44B /* AsyncAlgorithms in Frameworks */,
@@ -96,6 +103,7 @@
 		56E42B472F46BC8C00AC84C7 = {
 			isa = PBXGroup;
 			children = (
+				56864544300F4C3F00737407 /* Community Issue Reporter.xctestplan */,
 				561FED2F2FEE03D500335F73 /* Production.xcconfig */,
 				561FED2D2FEE03AE00335F73 /* Development.xcconfig */,
 				5695C3F72F4D571000755B0E /* PrivacyInfo.xcprivacy */,
@@ -142,6 +150,9 @@
 				56AC7B4C2FCA72DA0015122D /* SwiftMsgpack */,
 				56B9344F2FF4C2300079C44B /* AsyncAlgorithms */,
 				56B934512FF4C2300079C44B /* AsyncStreaming */,
+				56CD5D04301B31B4000327AB /* RevenueCat */,
+				56CD5D06301B31B4000327AB /* RevenueCatUI */,
+				56CD5D09301B31EA000327AB /* RevenueCatAdMob */,
 			);
 			productName = "Community Issue Reporter";
 			productReference = 56E42B502F46BC8C00AC84C7 /* Community Issue Reporter.app */;
@@ -237,6 +248,8 @@
 				569E2F432F739EB200B8C9DE /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				56AC7B4B2FCA72DA0015122D /* XCRemoteSwiftPackageReference "swift-msgpack" */,
 				56B9344E2FF4C2300079C44B /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+				56CD5D03301B31B4000327AB /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+				56CD5D08301B31EA000327AB /* XCRemoteSwiftPackageReference "purchases-ios-admob" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56E42B512F46BC8C00AC84C7 /* Products */;
@@ -452,12 +465,14 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Community-Issue-Reporter-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Repórtamelo";
+				INFOPLIST_KEY_CFBundleDisplayName = Reportamelo;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
-				INFOPLIST_KEY_NSCameraUsageDescription = "I need this permission because you can attach photos to a report";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "I need this permission because of the location";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "I need this permission because you can attach photos to a report and a report needs it to provide evidence to local authorities.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "I need this permission to provide accurate location for the reports.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "I need this permission because you can attach stored pictures from your library as evidences of the issues. ";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This identifier will be used to deliver personalized ads to you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -497,12 +512,14 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Community-Issue-Reporter-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Repórtamelo";
+				INFOPLIST_KEY_CFBundleDisplayName = Reportamelo;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
-				INFOPLIST_KEY_NSCameraUsageDescription = "I need this permission because you can attach photos to a report";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "I need this permission because of the location";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "I need this permission because you can attach photos to a report and a report needs it to provide evidence to local authorities.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "I need this permission to provide accurate location for the reports.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "I need this permission because you can attach stored pictures from your library as evidences of the issues. ";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "This identifier will be used to deliver personalized ads to you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -536,11 +553,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T29BNUA7T2;
+				DEVELOPMENT_TEAM = B83C7CWWHT;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.DynamicSheetWithHeight.Community-Issue-ReporterTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.Comunity-Issues";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -558,11 +575,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T29BNUA7T2;
+				DEVELOPMENT_TEAM = B83C7CWWHT;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.DynamicSheetWithHeight.Community-Issue-ReporterTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.Comunity-Issues";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -579,10 +596,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T29BNUA7T2;
+				DEVELOPMENT_TEAM = B83C7CWWHT;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.DynamicSheetWithHeight.Community-Issue-ReporterUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.Comunity-Issues";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -599,10 +616,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = T29BNUA7T2;
+				DEVELOPMENT_TEAM = B83C7CWWHT;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.DynamicSheetWithHeight.Community-Issue-ReporterUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.FranciscoHernandez.Comunity-Issues";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -680,6 +697,22 @@
 				minimumVersion = 1.1.5;
 			};
 		};
+		56CD5D03301B31B4000327AB /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.81.3;
+			};
+		};
+		56CD5D08301B31EA000327AB /* XCRemoteSwiftPackageReference "purchases-ios-admob" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-admob";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.81.3;
+			};
+		};
 		56D5D99B2F65284500183FCE /* XCRemoteSwiftPackageReference "Swift-WebP" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ainame/Swift-WebP";
@@ -715,6 +748,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 56B9344E2FF4C2300079C44B /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
 			productName = AsyncStreaming;
+		};
+		56CD5D04301B31B4000327AB /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56CD5D03301B31B4000327AB /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		56CD5D06301B31B4000327AB /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56CD5D03301B31B4000327AB /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
+		};
+		56CD5D09301B31EA000327AB /* RevenueCatAdMob */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56CD5D08301B31EA000327AB /* XCRemoteSwiftPackageReference "purchases-ios-admob" */;
+			productName = RevenueCatAdMob;
 		};
 		56D5D99C2F65284500183FCE /* WebP */ = {
 			isa = XCSwiftPackageProductDependency;

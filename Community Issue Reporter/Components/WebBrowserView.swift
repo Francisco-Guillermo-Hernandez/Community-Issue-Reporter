@@ -2,6 +2,8 @@ import SwiftUI
 import WebKit
 import Observation
 
+// private var domains = ["https://reportamelo.app/", "://reportamelo.app/"]
+
 @Observable
 class WebViewModel {
     let webView = WKWebView()
@@ -30,6 +32,16 @@ struct WebBrowserView: View {
                     Button(role: .close) {
                         dismiss()
                     }
+                    .accessibilityIdentifier("CloseWebViewButton")
+                }
+                
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(action: {
+                        viewModel.webView.goBack()
+                    }) {
+                        Image(systemName: "chevron.left")
+                    }
+                    .accessibilityIdentifier("GoBackButton")
                 }
                 
                 ToolbarItemGroup(placement: .bottomBar) {
@@ -45,12 +57,15 @@ struct WebBrowserView: View {
                         Image(systemName: "arrow.clockwise")
                         .frame(maxWidth: .infinity)
                     }
+                    .accessibilityIdentifier("ReloadButton")
+                    
                     Button(action: {
                         UIApplication.shared.open(url!)
                     }) {
                         Image(systemName: "safari")
                         .frame(maxWidth: .infinity)
                     }
+                    .accessibilityIdentifier("OpenInSafariButton")
                 }
             }
         }

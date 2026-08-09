@@ -79,4 +79,8 @@ struct ReportsService {
     func boostReportValidation(_ reportId: String, headers: Array<HTTPHeader>) async throws -> GenericResponse {
         return try await client.patch(path: "reports/validate/byUsers/\(reportId)", body: [String: String](), headers: headers, withOAuth: true)
     }
+    
+    func attachments(reportId: String, headers: Array<HTTPHeader>) async throws -> [Attachment] {
+        return try await client.get(path: "reports/\(reportId)/attachments", headers: headers, withOAuth: true)
+    }
 }

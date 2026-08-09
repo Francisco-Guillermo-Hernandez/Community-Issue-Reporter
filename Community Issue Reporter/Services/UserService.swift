@@ -75,4 +75,12 @@ struct UserService {
     func reportUser(reason: BlockUserReason, headers: [HTTPHeader]) async throws -> GenericResponse {
         return try await client.patch(path: "user/report/reason", body: reason, headers: headers, withOAuth: true)
     }
+    
+    func deleteMyAccount(headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.delete(path: "user/my-account", body: [String : String](), headers: headers, withOAuth: true)
+    }
+    
+    func logout(headers: [HTTPHeader]) async throws {
+        let _: EmptyResponse = try await client.delete(path: "auth/logout", body: [String : String](), headers: headers, withOAuth: true)
+    }
 }

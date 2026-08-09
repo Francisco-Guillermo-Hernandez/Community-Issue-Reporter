@@ -73,13 +73,12 @@ class SubscriptionManager: NSObject {
         }
     }
     
+    @MainActor
     func restorePurchases() async -> Bool {
         do {
             let customerInfo = try await Purchases.shared.restorePurchases()
-            DispatchQueue.main.async {
-                self.customerInfo = customerInfo
-                self.isPro = customerInfo.entitlements.all["Reportamelo Pro"]?.isActive == true
-            }
+            self.customerInfo = customerInfo
+            self.isPro = customerInfo.entitlements.all["Reportamelo Pro"]?.isActive == true
             return true
         } catch {
             print("Restore error: \(error.localizedDescription)")
@@ -87,14 +86,12 @@ class SubscriptionManager: NSObject {
         }
     }
     
+    @MainActor
     func handleUserLogout() async {
         do {
             let customerInfo = try await Purchases.shared.logOut()
-            
-            DispatchQueue.main.async {
-                SubscriptionManager.shared.customerInfo = customerInfo
-                SubscriptionManager.shared.isPro = false
-            }
+            self.customerInfo = customerInfo
+            self.isPro = false
         } catch {
             print("RevenueCat logout error: \(error.localizedDescription)")
         }

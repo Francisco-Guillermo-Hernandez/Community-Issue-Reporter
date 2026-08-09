@@ -40,7 +40,7 @@ enum ServiceError: Error {
     case httpStatus(Int)
     case badRequest(GenericResponse)
     case unauthorized(String)
-    case forbidden
+    case forbidden(GenericResponse)
     case notFound
     case notAllowed
     case notAcceptable
@@ -199,7 +199,7 @@ struct ServiceClient {
         case 401:
             throw ServiceError.unauthorized(genericResponse.code)
         case 403:
-            throw ServiceError.forbidden
+            throw ServiceError.forbidden(genericResponse)
         case 404:
             throw ServiceError.notFound
         case 405:
@@ -372,7 +372,16 @@ struct ServiceClient {
         }
        
         try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
-       
+        
+        // Check for HTTP 204 or empty data before decoding
+        if httpResponse.statusCode == 204 || data.isEmpty {
+            if let emptyResult = EmptyResponse() as? V {
+                return emptyResult
+            } else {
+                throw ServiceError.invalidResponse // or a custom decoding error
+            }
+        }
+
         return try decode(V.self, from: data)
     }
     

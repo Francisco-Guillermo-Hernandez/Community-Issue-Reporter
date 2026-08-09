@@ -12,6 +12,7 @@ enum ThemedButtonType {
     case primary
     case secondary
     case outline
+    case danger
 }
 
 enum ThemedButtonStyle {
@@ -107,6 +108,8 @@ struct ButtonStyleMapper: ViewModifier {
             content.buttonStyle(ThemedSecondaryButtonStyle())
         case .outline:
             content.buttonStyle(ThemedButtonOutlineStyle(style: style))
+        case .danger:
+            content.buttonStyle(ThemedDangerButtonStyle(isLoading: isLoading))
         }
     }
 }
@@ -122,6 +125,42 @@ struct GlassBounceModifier: ViewModifier {
 }
 
 // MARK: - Button styles
+struct ThemedDangerButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) var isEnabled
+    let isLoading: Bool
+    
+    func makeBody(configuration: Configuration) -> some View {
+        configuration
+            .label
+            .background(backgroundView(isPressed: configuration.isPressed))
+            .foregroundStyle(Color.white)
+            .contentShape(Capsule())
+            .clipShape(Capsule())
+            .font(Font.body.bold())
+            .opacity(isEnabled ? 1.0 : 0.5)
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+            .animation(.easeOut(duration: 0.2), value: isEnabled)
+            .glassEffect(.regular, in: Capsule())
+            .modifier(GlassBounceModifier(isPressed: configuration.isPressed))
+    }
+    
+    @ViewBuilder
+    private func backgroundView(isPressed: Bool) -> some View {
+        if isLoading {
+            ShimmerView(
+                baseColor: backgroundColor(isPressed: isPressed),
+                shimmerColor: Color.white.opacity(0.35)
+            )
+        } else {
+            backgroundColor(isPressed: isPressed)
+        }
+    }
+    
+    private func backgroundColor(isPressed: Bool) -> Color {
+        return isPressed ? Color.red.opacity(0.8) : Color.red
+    }
+}
+
 struct ThemedPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) var isEnabled
     @Environment(\.colorScheme) var colorScheme

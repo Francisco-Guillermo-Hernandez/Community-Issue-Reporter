@@ -15,10 +15,11 @@ final class LandingController {
     
     static var shared = LandingController()
     
-    
+    var accountDeleted: Bool = false
     var userPersonalizationDataModel: UserPersonalizationDataModel
     var notifications: Notifications
     var presentAlert: Bool
+    var alertTitle: String = String(localized: "Error")
     var message: String = ""
     var path: [LandingNavigation] = []
     var isGuest: Bool = false
@@ -91,9 +92,13 @@ final class LandingController {
                         self.showAlert(message: String(localized: "SVR: \(code)"))
                     } catch CommonIntercommunicationErrors.networkError(let error) {
                         self.showAlert(message: String(localized: "There was a problem with the network: \(error)"))
+                    } catch CommonIntercommunicationErrors.forbidden(let response) {
+                        self.showAlert(title: response.code, message: response.message)
                     } catch {
                         self.showAlert(message: String(localized: "Something went wrong"))
                     }
+                    
+                    LoginController.shared.performLoginActions()
                     
                 }
             }
@@ -106,7 +111,8 @@ final class LandingController {
         _ = KeychainService.save(key: .mutation, value: sessionId)
     }
     
-    private func showAlert(message: String) -> Void {
+    private func showAlert(title: String = String(localized: "Error"), message: String) -> Void {
+        self.alertTitle = title
         self.message = message
         self.presentAlert = true
     }
@@ -192,6 +198,7 @@ final class LandingController {
         /// route to login view
         self.isLoggedIn = false
         self.isGuest = false
+        self.path.removeAll()
         
         /// Remove values from devices' keychain
         _ = KeychainService.deleteToken(key: .query)

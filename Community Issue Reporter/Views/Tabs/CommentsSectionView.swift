@@ -121,6 +121,7 @@ struct CommentsSectionView: View {
                         ProgressView().progressViewStyle(.circular)
                     }
                 }
+                .accessibilityIdentifier("addCommentButton")
                 .disabled(controller.commentInput.trimmingCharacters(in: .whitespaces).isEmpty || controller.isSubmitting)
             }
             .padding(8)

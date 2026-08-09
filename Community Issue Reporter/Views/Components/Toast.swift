@@ -94,7 +94,7 @@ struct ToastView: View {
             }
             Spacer()
         }
-        .padding(.top, 50)
+        .padding(.top, 58)
         .animation(.spring(response: 0.35, dampingFraction: 0.6), value: toast.isShowing)
         .ignoresSafeArea()
         .zIndex(100)

@@ -23,23 +23,44 @@ struct ReportsChooserView: View {
     }
     
     var body: some View {
-        ForEach(filteredReports, id: \.id) { report in
-            LazyVStack(alignment: .leading) {
-                MultipleSelectionRow(of: report, isSelected: isSelected(report)) {
-                    if let index = self.selectedReports.firstIndex(of: report.id!) {
-                        self.selectedReports.remove(at: index)
-                    } else {
-                        self.selectedReports.append(getId(from: report))
+        ZStack {
+            if filteredReports.isEmpty {
+                /// Empty state
+                ContentUnavailableView {
+                    Label(
+                        "No reports yet.",
+                        systemImage: "exclamationmark.bubble"
+                    )
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(
+                        Color.theme.foreground.opacity(0.7),
+                        Color.theme.primary,
+                        Color.theme.foreground.opacity(0.7)
+                    )
+                } description: {
+                    Text("Please sent us reports.")
+                }
+                .containerRelativeFrame(.vertical)
+            } else {
+                ForEach(filteredReports, id: \.id) { report in
+                    LazyVStack(alignment: .leading) {
+                        MultipleSelectionRow(of: report, isSelected: isSelected(report)) {
+                            if let index = self.selectedReports.firstIndex(of: report.id!) {
+                                self.selectedReports.remove(at: index)
+                            } else {
+                                self.selectedReports.append(getId(from: report))
+                            }
+                        }
+                        .cellStyle()
                     }
                 }
-                .cellStyle()
+                .listStyle(.plain)
+        //        .background(Color.theme.background)
+                .scrollContentBackground(.hidden)
+                .interactiveDismissDisabled()
+                .contentMargins(.all, 0, for: .scrollContent)
             }
         }
-        .listStyle(.plain)
-//        .background(Color.theme.background)
-        .scrollContentBackground(.hidden)
-        .interactiveDismissDisabled()
-        .contentMargins(.all, 0, for: .scrollContent)
 //        .searchable(
 //            text: $searchText,
 //            placement: .toolbar, // .navigationBarDrawer,

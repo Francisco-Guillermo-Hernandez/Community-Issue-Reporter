@@ -142,8 +142,16 @@ struct UserProfileView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 Button(role: .destructive) {
-                    controller.logout()
-                    dismiss()
+                    Task {
+                        do {
+                            
+                            _ = try await UserRepository.shared.logout()
+                            controller.logout()
+                            dismiss()
+                        } catch {
+                            print(error)
+                        }
+                    }
                 } label: {
                     Text(String(localized: "Log Out"))
                         .fontWeight(.regular)

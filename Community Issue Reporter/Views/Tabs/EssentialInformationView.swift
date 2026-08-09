@@ -13,6 +13,7 @@ struct EssentialInformationView: View {
     @Environment(\.mySettings) private var settings
     @Binding var notifications: Notifications
     @State private var isLoading: Bool = false
+    @State private var message: String = String(localized: "Configure my account")
 
     var finalStep: () -> Void
     var body: some View {
@@ -67,10 +68,12 @@ struct EssentialInformationView: View {
 
             BottomFadedView {
                 ThemedButton(
-                    message: String(localized: "Report Problems"),
+                    message: message,
                     action: {
                         completeLandingPage()
+                        initializeStats()
                         triggerFeedBack.toggle()
+                        message = String(localized: "Start reporting")
                         finalStep()
                         
                      
@@ -90,6 +93,7 @@ struct EssentialInformationView: View {
         Task {
             do {
                 isLoading = true
+                message = String(localized: "Saving my configuration")
                 let result = try await UserRepository.shared.completeLandingPage()
                 if result == .done {
                     _ = KeychainService.save(key: .landingPageComplete, value: "completion:state:successfully")
@@ -107,7 +111,7 @@ struct EssentialInformationView: View {
         Task {
             
             do {
-                try await Task.sleep(for: .milliseconds(550))
+                try await Task.sleep(for: .milliseconds(330))
                 let result = try await UserRepository.shared.modify(notifications)
                 
                 switch result {
@@ -121,6 +125,20 @@ struct EssentialInformationView: View {
             } catch {
                 
             }
+        }
+    }
+    
+    func initializeStats() {
+        Task {
+            do {
+                isLoading = true
+                message = String(localized: "Initializing Insights")
+                _ = try await InsightsRepository.shared.initialize()
+            } catch {
+                
+            }
+            
+            isLoading = false
         }
     }
 }

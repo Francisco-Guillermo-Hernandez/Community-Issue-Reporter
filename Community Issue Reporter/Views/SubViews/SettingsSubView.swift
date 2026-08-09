@@ -37,43 +37,67 @@ struct SettingsHeaderView: View {
     }
 }
 
-struct SettingsGroup<Content: View>: View {
+struct SettingsGroup<Content: View, FooterContent: View>: View {
     @Environment(\.isEnabled) var isEnabled
     let title: String
     let footerText: String?
     let content: Content
+    let footerContent: FooterContent?
     
-    // @ViewBuilder allows the closure to construct views implicitly
-    init(title: String, footerText: String? = nil, @ViewBuilder content: () -> Content) {
+    // Primary initializer supporting both content closures
+    init(
+        title: String,
+        footerText: String? = nil,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder footerContent: () -> FooterContent
+    ) {
         self.title = title
         self.footerText = footerText
         self.content = content()
+        self.footerContent = footerContent()
+    }
+    
+    // Convenience initializer when no footerContent is provided
+    init(
+        title: String,
+        footerText: String? = nil,
+        @ViewBuilder content: () -> Content
+    ) where FooterContent == EmptyView {
+        self.title = title
+        self.footerText = footerText
+        self.content = content()
+        self.footerContent = nil
     }
     
     var body: some View {
-        Group {
-            VStack(spacing: .themeSpacing * 1.5) {
-                
-                SettingsHeaderView(title)
-                    .opacity(isEnabled ? 1 : 0.5)
-                VStack {
-                    VStack(spacing: .themeSpacing * 4) {
-                        content
-                            .opacity(isEnabled ? 1 : 0.5)
-                    }
-                    .padding()
-                }
-                .customCardStyle()
-                
-                if let text = footerText {
-                    FooterText(text: text)
+        VStack(spacing: .themeSpacing * 1.5) {
+            SettingsHeaderView(title)
+                .opacity(isEnabled ? 1 : 0.5)
+            
+            VStack {
+                VStack(spacing: .themeSpacing * 4) {
+                    content
                         .opacity(isEnabled ? 1 : 0.5)
                 }
+                .padding()
+            }
+            .customCardStyle()
+            
+            if let text = footerText {
+                FooterText(text: text)
+                    .opacity(isEnabled ? 1 : 0.5)
             }
             
+            if let footerContent {
+                VStack(spacing: .themeSpacing * 4) {
+                    footerContent
+                        .padding(.leading, .themeSpacing * 2)
+                }
+            }
         }
     }
 }
+
 
 import MapKit
 import SwiftUI
@@ -98,7 +122,9 @@ struct SettingsSubView: View {
     @Environment(SubscriptionManager.self) var subscriptionManager
     @State private var isPresentingPaywall = false
     @State private var isPresentingCustomerCenter = false
+    @State private var showDeleteAlert = false
     @State private var controller: SettingsSubViewController
+    @State private var landingController = LandingController.shared
     
     init(subViewName: String) {
         self.subViewName = subViewName
@@ -168,7 +194,11 @@ struct SettingsSubView: View {
                                 Task {
                                     let success = await subscriptionManager.restorePurchases()
                                     if success {
-                                        Toast.shared.show(message: String(localized: "Purchases restored successfully"), type: .success)
+                                        if subscriptionManager.isPro {
+                                            Toast.shared.show(message: String(localized: "Purchases restored successfully"), type: .success)
+                                        } else {
+                                            Toast.shared.show(message: String(localized: "No active subscription found to restore"), type: .error)
+                                        }
                                     } else {
                                         Toast.shared.show(message: String(localized: "Failed to restore purchases"), type: .error)
                                     }
@@ -185,7 +215,7 @@ struct SettingsSubView: View {
                             .accessibilityIdentifier("RestoreSubscriptionButton")
                         }
                     }
-                    .disabled(!networkMonitor.isConnected)
+                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
                     SettingsGroup(
                         title: String(localized: "Privacy"),
@@ -232,7 +262,9 @@ struct SettingsSubView: View {
                     }
                     .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
-                    SettingsGroup(title: String(localized: "App settings")) {
+                    SettingsGroup(
+                        title: String(localized: "App settings")
+                    ) {
                         
                         Toggle("Save last location", isOn: $settings.saveLastLocation)
                             .foregroundStyle(Color.theme.inputText)
@@ -243,6 +275,61 @@ struct SettingsSubView: View {
                         
                         Toggle("Anonymous telemetry", isOn: $settings.enableAnonymousTelemetry)
                             .foregroundStyle(Color.theme.inputText)
+                        
+                    } footerContent: {
+                        LinksView(mode: .privacy)
+                    }
+                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    
+                    SettingsGroup(title: String(localized: "About")) {
+                        HStack {
+                            Text(String(localized: "Version"))
+                                .foregroundStyle(Color.theme.inputText)
+                            Spacer()
+                            Text("v1.0.0")
+                                .foregroundStyle(Color.theme.inputText)
+                        }
+                        
+                    }
+                    
+                    
+                    SettingsGroup(
+                        title: String(localized: "Dangerous zone"),
+                        footerText: String(localized: "Once your account is deleted, there is no going back.")
+                    ) {
+                        
+                        VStack(spacing: .themeSpacing * 4) {
+                            Text(String(localized: "You have control over your data and you can opt to delete your account at any time."))
+                                .foregroundStyle(Color.theme.inputText)
+                                .font(.callout)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            ThemedButton(
+                                message: String(localized: "Delete my account"),
+                                action: {
+                                    showDeleteAlert = true
+                                },
+                                type: .danger,
+                                isLoading: $controller.isDeletingAccount,
+                            )
+                            .accessibilityIdentifier("DeleteAccountButton")
+                            .alert(String(localized: "Delete Account"), isPresented: $showDeleteAlert) {
+                                Button(String(localized: "Cancel"), role: .cancel) { }
+                                Button(String(localized: "Delete"), role: .destructive) {
+                                    Task {
+                                        await controller.deleteAccount()
+                                        appState.logout()
+                                        dismiss()
+                                        landingController.logout()
+                                        landingController.accountDeleted = true
+                                    }
+                                }
+                            } message: {
+                                Text(String(localized: "Are you sure you want to permanently delete your account? This action cannot be undone."))
+                            }
+                        }
+                        .padding(.bottom, 2)
+                        
                         
                     }
                     .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())

@@ -7,19 +7,30 @@
 
 import SwiftUI
 
+enum PhotoPreviewMode {
+    case sized
+    case full
+}
+
 struct PhotoPreview: View {
     @State private var cornerRadius: CGFloat = .themeRadius * 1.4
     var height: CGFloat = 170
     var width: CGFloat = 170
     
+    var mode: PhotoPreviewMode
     var attachment: PreviewAttachment
     
-    init(_ attachment: PreviewAttachment) { self.attachment = attachment }
+    init(_ attachment: PreviewAttachment, _ mode: PhotoPreviewMode = .sized) {
+        self.attachment = attachment
+        self.mode = mode
+    }
     
     init (_ attachment: PreviewAttachment, height: CGFloat, width: CGFloat) {
+        
         self.attachment = attachment
         self.height = height
         self.width = width
+        self.mode = .sized
     }
     
     var body: some View {
@@ -28,7 +39,16 @@ struct PhotoPreview: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: height, height: width, alignment: .top)
+                    .frame(
+                        width: mode == .sized ? width : nil,
+                        height: mode == .sized ? height : nil,
+                        alignment: .top
+                    )
+                    .frame(
+                        maxWidth: mode == .full ? .infinity : nil,
+                        maxHeight: mode == .full ? .infinity : nil,
+                        alignment: .top
+                    )
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                     .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
@@ -52,12 +72,13 @@ struct PhotoPreview: View {
                             
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(userAlias(attachment.uploaderUserName))
-                                    .font(.subheadline)
+                                    .font(.caption2)
                                     .fontWeight(.bold)
                                     .foregroundColor(.white)
+                                    .lineLimit(1)
                                 
                                 Text(attachment.createdAt.formatted(date: .numeric, time: .omitted))
-                                    .font(.caption)
+                                    .font(.caption2)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white.opacity(0.8))
                             }
@@ -75,5 +96,5 @@ struct PhotoPreview: View {
 
 #Preview {
     let attachment =  PreviewAttachment(id: "24b93d66-07ff-4141-91ce-408b615123c3", type: .image, createdAtRaw: 0, updatedAtRaw: 0, uploaderUserName: "jhon.doe", validatedBy: .bot, state: .pending, fileName: "1783058838224-f02fb5e4-07d1-49d4-a9f5-742816b669c9.webp", reportContainer: "587d3ac3-0715-4958-8955-1d6d29a3d489")
-    return PhotoPreview(attachment)
+     PhotoPreview(attachment)
 }

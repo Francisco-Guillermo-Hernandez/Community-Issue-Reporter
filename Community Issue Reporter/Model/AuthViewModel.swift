@@ -121,6 +121,8 @@ class AuthViewModel: ObservableObject {
     
     func logout() {
         GIDSignIn.sharedInstance.signOut()
+        self.user = nil
+        self.isLoggedIn = false
     }
     
 }

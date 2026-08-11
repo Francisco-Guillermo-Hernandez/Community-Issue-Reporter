@@ -157,3 +157,5 @@ struct InsightsFilter {
     var year: String
     var month: String
 }
+
+struct EmptyResponse: Decodable {}

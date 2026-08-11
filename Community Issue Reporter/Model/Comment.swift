@@ -22,6 +22,8 @@ struct Comment: Identifiable, Codable {
     let message: String
     var createdAt: Date
     var updatedAt: Date?
+    let observation: String?
+    let action: String?
     
     init(
         id: String?,
@@ -32,7 +34,9 @@ struct Comment: Identifiable, Codable {
         resourceId: String,
         message: String,
         createdAt: Date,
-        updatedAt: Date?
+        updatedAt: Date?,
+        observation: String? = nil,
+        action: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -43,6 +47,8 @@ struct Comment: Identifiable, Codable {
         self.message = message
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.observation = observation
+        self.action = action
     }
     
     
@@ -52,7 +58,7 @@ struct Comment: Identifiable, Codable {
         message: String,
     ) {
         self.id = UUID().uuidString
-        self.profilePicture = ""
+        self.profilePicture = UserRepository.shared.getProfilePicture()
         self.name = UserRepository.shared.getName()
         self.userName = UserRepository.shared.getUsername()
         self.commentFor = commentFor
@@ -60,6 +66,8 @@ struct Comment: Identifiable, Codable {
         self.message = message
         self.createdAt = Date()
         self.updatedAt = nil
+        self.action = nil
+        self.observation = nil
     }
 }
 

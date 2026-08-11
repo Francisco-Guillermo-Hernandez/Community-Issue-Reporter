@@ -9,6 +9,7 @@ import SwiftUI
 
 struct StatsCardsView: View {
     @Binding var path: [InsightsNavigation]
+    @State private var enableOther = false
     var nameSpace: Namespace.ID
     var insights: MonthlyInsightsResponse
     
@@ -30,38 +31,43 @@ struct StatsCardsView: View {
                         .background(Color.theme.background)
                         .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
                 }
+            
+                if enableOther {
+                    NavigationLink(value: InsightsNavigation.myPetitions) {
+                        StatCard(
+                            description: String(localized: "I've created"),
+                            title: String(insights.totalPetitions),
+                            trend: String(localized: "Petitions this month"),
+                            timeframe: "for the last 6 months"
+                        )
+                    }
+                    .matchedTransitionSource(id: "transition:myPetitions", in: nameSpace) { configuration in
+                        configuration
+                            .background(Color.theme.background)
+                            .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
+                    }
+                }
                 
-                NavigationLink(value: InsightsNavigation.myPetitions) {
-                    StatCard(
-                        description: String(localized: "I've created"),
-                        title: String(insights.totalPetitions),
-                        trend: String(localized: "Petitions this month"),
-                        timeframe: "for the last 6 months"
-                    )
-                }
-                .matchedTransitionSource(id: "transition:myPetitions", in: nameSpace) { configuration in
-                    configuration
-                        .background(Color.theme.background)
-                        .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
-                }
             }
             
             HStack {
                 StatCard(
                     description: String(localized: "I've commented on"),
                     title: String(insights.totalComments),
-                    trend: String(localized: "Petitions"),
+                    trend: String(localized: "Reports"),
                     timeframe: "for the last 6 months"
                 )
                 .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
                 
-                StatCard(
-                    description: String(localized: "I've signed on"),
-                    title: String(insights.totalSignatures),
-                    trend: String(localized: "Incidents"),
-                    timeframe: "for the last 6 months"
-                )
-                .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
+                if enableOther {
+                    StatCard(
+                        description: String(localized: "I've signed on"),
+                        title: String(insights.totalSignatures),
+                        trend: String(localized: "Petitions"),
+                        timeframe: "for the last 6 months"
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: .themeCardCornerRadius, style: .continuous))
+                }
             }
             
             

@@ -65,7 +65,7 @@ struct LinksView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .kerning(-0.2)
             .environment(\.openURL, OpenURLAction { url in
-                print("[debug]: Opening URL: \(url)")
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 webViewURL = url
                 showWebView = true
                 return .handled

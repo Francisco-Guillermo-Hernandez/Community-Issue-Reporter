@@ -50,6 +50,8 @@ final class UserRepository {
             }
         } catch ServiceError.badRequest(let response) {
             throw CommonIntercommunicationErrors.invalidPetition(response.code)
+        } catch ServiceError.forbidden(let response) {
+            throw CommonIntercommunicationErrors.forbidden(response)
         } catch ServiceError.serverError(let message) {
           throw CommonIntercommunicationErrors.serverError(message)
         } catch {
@@ -143,7 +145,11 @@ final class UserRepository {
     }
     
     func getAvatar() -> URL? {
-        UserDefaults.standard.string(forKey: "avatar_url").flatMap(URL.init(string:))
+        guard let urlStr = UserDefaults.standard.string(forKey: "avatar_url"), !urlStr.isEmpty else { return nil }
+        if urlStr.hasPrefix("http") {
+            return URL(string: urlStr)
+        }
+        return getURL(from: urlStr)
     }
     
     
@@ -339,6 +345,40 @@ final class UserRepository {
             } else {
                 throw CommonIntercommunicationErrors.genericError(result.code)
             }
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
+    func deleteMyAccount() async throws -> SuccessfulResult {
+        do {
+            let result = try await self.service.deleteMyAccount(headers: headers)
+            if result.code == "ACCOUNT_DELETED" {
+                return .updated
+            } else {
+                throw CommonIntercommunicationErrors.genericError(result.code)
+            }
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
+    func logout() async throws -> SuccessfulResult {
+        do {
+            _ = try await self.service.logout(headers: headers)
+            return .deleted
         } catch ServiceError.unauthorized {
             throw CommonIntercommunicationErrors.notAuthorized
         } catch ServiceError.forbidden {

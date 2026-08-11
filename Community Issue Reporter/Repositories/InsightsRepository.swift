@@ -15,6 +15,29 @@ final class InsightsRepository {
         self.service = InsightsService()
     }
     
+    func initialize() async throws -> SuccessfulResult {
+        do {
+            let response = try await service.initialize()
+            if response.code == "USER_INSIGHTS_INITIALIZED" {
+                return .created
+            } else {
+                throw CommonIntercommunicationErrors.invalidPetition(response.message)
+            }
+        } catch ServiceError.badRequest(let error) {
+            throw CommonIntercommunicationErrors.invalidPetition(error.message)
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch {
+            print(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+        
+    }
+    
     func insightsForThisMonth() async throws -> MonthlyInsightsResponse {
         let filter = InsightsFilter(year: getFullYear(), month: getMonthName())
         return try await service.getMonthlyInsights(filter)

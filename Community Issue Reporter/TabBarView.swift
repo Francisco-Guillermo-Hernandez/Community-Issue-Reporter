@@ -24,10 +24,10 @@ struct TabBarView: View {
             }
             .accessibilityIdentifier("MapExplorerTab")
             
-            Tab(String(localized: "Petitions"), systemImage: "signature", value: 2) {
-               SignRequestsView()
-            }
-            .accessibilityIdentifier("SignRequestsTab")
+//            Tab(String(localized: "Petitions"), systemImage: "signature", value: 2) {
+//               SignRequestsView()
+//            }
+//            .accessibilityIdentifier("SignRequestsTab")
             
             Tab(String(localized: "Insights"), systemImage: "sparkles", value: 3) {
                 InsightsView()

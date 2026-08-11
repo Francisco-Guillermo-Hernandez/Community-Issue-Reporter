@@ -26,6 +26,7 @@ struct LoginView: View {
                 
                 VStack(alignment: .center) {
                     Text("Repórtamelo")
+                        .fontWeight(.medium)
                         .font(.custom("Lora", size: 24, relativeTo: .title))
                         .padding(.top, 16)
                         .kerning(0.6)
@@ -85,7 +86,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView() { _, _ in
-        
-    }
+    LoginView() { _, _ in }
 }

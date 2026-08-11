@@ -12,6 +12,9 @@ import Observation
 @Observable
 final class SettingsSubViewController {
 
+    var showDeleteAlert: Bool = false
+    var showActiveSubscriptionAlert = false
+    var showManageSubscriptions = false
     var selectedCity: FriendlyCityDistribution = .init(
         cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619",
         firstLevel: "El Salvador",
@@ -27,6 +30,7 @@ final class SettingsSubViewController {
     private var settings: SettingsStore?
     private var notificationManager: NotificationManager?
     var showNetworkError: Bool = false
+    var isDeletingAccount: Bool = false
     
     func inject(_ settings: SettingsStore, _ notificationManager: NotificationManager) {
         self.settings = settings
@@ -113,6 +117,30 @@ final class SettingsSubViewController {
             }
             
             isDeviceTokenUpdated = true
+        }
+    }
+    
+    func deleteAccount() async {
+        do {
+            isDeletingAccount = true
+            _ = try await UserRepository.shared.deleteMyAccount()
+        } catch CommonIntercommunicationErrors.networkError {
+            showNetworkError = true
+        } catch {
+            print("Failed to delete account: \(error)")
+        }
+        
+        isDeletingAccount = false
+    }
+    
+    
+    func handleDeleteRequest(isPro: Bool) {
+        /// Validate against the 'isPro' property you already set up
+        if isPro {
+            showActiveSubscriptionAlert = true
+        } else {
+            /// No active subscription, safe to prompt for deletion
+            showDeleteAlert = true
         }
     }
 }

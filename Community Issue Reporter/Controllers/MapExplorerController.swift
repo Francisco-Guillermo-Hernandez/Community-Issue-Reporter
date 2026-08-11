@@ -56,10 +56,19 @@ final class MapExplorerController {
                 countryCode: .SV,
                 cityId: authViewModel.selectedCity?.cityId ?? "1"
             )
+        } catch CommonIntercommunicationErrors.invalidPetition(let code) {
+            Toast.shared.show(message: String(localized: "Invalid request (\(code))"), type: .error)
+        } catch CommonIntercommunicationErrors.notFound {
+            Toast.shared.show(message: String(localized: "Reports not found"), type: .error)
+        } catch CommonIntercommunicationErrors.serverError(let code) {
+            Toast.shared.show(message: String(localized: "Server error (\(code))"), type: .error)
         } catch CommonIntercommunicationErrors.networkError(let message) {
-            /// TODO: show message
+            Toast.shared.show(message: String(localized: "Network error: \(message)"), type: .error)
+        } catch CommonIntercommunicationErrors.genericError(let message) {
+            Toast.shared.show(message: String(localized: "Error: \(message)"), type: .error)
         } catch {
             print(error)
+            Toast.shared.show(message: String(localized: "An unexpected error occurred"), type: .error)
         }
     }
     
@@ -83,10 +92,19 @@ final class MapExplorerController {
                 countryCode: .SV,
                 cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619"
             )
+        } catch CommonIntercommunicationErrors.invalidPetition(let code) {
+            Toast.shared.show(message: String(localized: "Invalid request (\(code))"), type: .error)
+        } catch CommonIntercommunicationErrors.notFound {
+            Toast.shared.show(message: String(localized: "Reports not found"), type: .error)
+        } catch CommonIntercommunicationErrors.serverError(let code) {
+            Toast.shared.show(message: String(localized: "Server error (\(code))"), type: .error)
         } catch CommonIntercommunicationErrors.networkError(let message) {
-          /// TODO: show error
+            Toast.shared.show(message: String(localized: "Network error: \(message)"), type: .error)
+        } catch CommonIntercommunicationErrors.genericError(let message) {
+            Toast.shared.show(message: String(localized: "Error: \(message)"), type: .error)
         } catch {
             print(error)
+            Toast.shared.show(message: String(localized: "An unexpected error occurred"), type: .error)
         }
     }
     
@@ -105,9 +123,25 @@ final class MapExplorerController {
                     )
                 )
             }
+        } catch CommonIntercommunicationErrors.invalidPetition(let code) {
+            self.searchedReportOverview = nil
+            Toast.shared.show(message: String(localized: "Invalid request (\(code))"), type: .error)
+        } catch CommonIntercommunicationErrors.notFound {
+            self.searchedReportOverview = nil
+            Toast.shared.show(message: String(localized: "Report not found"), type: .error)
+        } catch CommonIntercommunicationErrors.serverError(let code) {
+            self.searchedReportOverview = nil
+            Toast.shared.show(message: String(localized: "Server error (\(code))"), type: .error)
+        } catch CommonIntercommunicationErrors.networkError(let message) {
+            self.searchedReportOverview = nil
+            Toast.shared.show(message: String(localized: "Network error: \(message)"), type: .error)
+        } catch CommonIntercommunicationErrors.genericError(let message) {
+            self.searchedReportOverview = nil
+            Toast.shared.show(message: String(localized: "Error: \(message)"), type: .error)
         } catch {
             print("Failed to fetch report overview: \(error)")
             self.searchedReportOverview = nil
+            Toast.shared.show(message: String(localized: "An unexpected error occurred"), type: .error)
         }
     }
     

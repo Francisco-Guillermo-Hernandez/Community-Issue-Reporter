@@ -60,64 +60,64 @@ struct customBottomToolbar: View {
             .contentShape(Rectangle())
             .buttonSizing(.flexible)
             
-            Button(action: performAffectedActions) {
-                VStack(spacing: 2) {
-                    Image(systemName: "hand.thumbsdown.hand.thumbsup.filled")
-                        .font(.system(size: 18, weight: .semibold))
-                        .background(Color.black.opacity(0.001))
-                        .symbolRenderingMode(.palette )
-                        .foregroundStyle(
-                            affectedState ? .red : .primary,
-                            colorScheme == .dark ? .white : .black
-                        )
-                        .contentTransition(
-                            .symbolEffect(.replace.magic(fallback: .upUp.byLayer),
-                            options: .nonRepeating)
-                        )
-                    
-                    Text("Vote")
-                        .font(.footnote)
-                }
-                .frame(width: 64, height: 64)
-                    
-            }
-            .accessibilityLabel("AffectedButton")
-            .buttonStyle(.plain)
-            .contentShape(Rectangle())
-            .buttonSizing(.flexible)
-            .popover(isPresented: $affectedState) {
-                HStack {
-                    Button {
-                        
-                    } label: {
-                        VStack {
-                            Image(systemName: "hand.thumbsup.fill")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.black)
-                            
-                            Text(String(localized: "This report affects me"))
-                                .font(.footnote)
-                        }
-                    }
-                    
-                    
-                    Button {
-                        
-                    } label: {
-                        VStack {
-                            Image(systemName: "hand.thumbsdown.fill")
-                                .symbolRenderingMode(.monochrome)
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.red)
-                            
-                            Text(String(localized: "This report is helpful"))
-                                .font(.footnote)
-                        }
-                    }
-                }
-                .frame(width: 128, height: 64)
-                .presentationCompactAdaptation(.popover)
-            }
+//            Button(action: performAffectedActions) {
+//                VStack(spacing: 2) {
+//                    Image(systemName: "hand.thumbsdown.hand.thumbsup.filled")
+//                        .font(.system(size: 18, weight: .semibold))
+//                        .background(Color.black.opacity(0.001))
+//                        .symbolRenderingMode(.palette )
+//                        .foregroundStyle(
+//                            affectedState ? .red : .primary,
+//                            colorScheme == .dark ? .white : .black
+//                        )
+//                        .contentTransition(
+//                            .symbolEffect(.replace.magic(fallback: .upUp.byLayer),
+//                            options: .nonRepeating)
+//                        )
+//                    
+//                    Text("Vote")
+//                        .font(.footnote)
+//                }
+//                .frame(width: 64, height: 64)
+//                    
+//            }
+//            .accessibilityLabel("AffectedButton")
+//            .buttonStyle(.plain)
+//            .contentShape(Rectangle())
+//            .buttonSizing(.flexible)
+//            .popover(isPresented: $affectedState) {
+//                HStack {
+//                    Button {
+//                        
+//                    } label: {
+//                        VStack {
+//                            Image(systemName: "hand.thumbsup.fill")
+//                                .font(.system(size: 18, weight: .semibold))
+//                                .foregroundStyle(.black)
+//                            
+//                            Text(String(localized: "This report affects me"))
+//                                .font(.footnote)
+//                        }
+//                    }
+//                    
+//                    
+//                    Button {
+//                        
+//                    } label: {
+//                        VStack {
+//                            Image(systemName: "hand.thumbsdown.fill")
+//                                .symbolRenderingMode(.monochrome)
+//                                .font(.system(size: 18, weight: .semibold))
+//                                .foregroundStyle(.red)
+//                            
+//                            Text(String(localized: "This report is helpful"))
+//                                .font(.footnote)
+//                        }
+//                    }
+//                }
+//                .frame(width: 128, height: 64)
+//                .presentationCompactAdaptation(.popover)
+//            }
             
             Button(action: performNotificationActions) {
                 

@@ -9,18 +9,10 @@ import SwiftUI
 
 struct CitizenProfile: View {
      
-    @State private var scrollProgress: CGFloat = 0
-    @State private var scrollPosition: ScrollPosition = .init()
-    @State private var containerSize: CGSize = .zero
-    
-    @State private var petitionsPublished: Int = 33
-    @State private var reportsSubmitted: Int = 12
-    @State private var citizen: User = .init(names: "Guest Citizen", userName: "guest", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "guest")
+    @State private var controller = CitizenProfileController()
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
-    
-    @State private var showBlockUserSheet: Bool = false
     
     var profileId: String
     
@@ -42,28 +34,28 @@ struct CitizenProfile: View {
                     .padding(.top, 24)
                     
                 
-                Text(citizen.names)
+                Text(controller.citizen.names)
                     .font(.title)
                     .fontWeight(.bold)
                     .padding(.top, 8)
                 
                 
                 HStack(spacing: 16) {
-                    Text("**\(reportsSubmitted)** Reports submitted")
+                    Text("**\(controller.reportsSubmitted)** Reports submitted")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
-                    Text("**\(petitionsPublished)** Petitions published")
+                    Text("**\(controller.petitionsPublished)** Petitions published")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
                 .padding(.bottom, 24)
                 
-                XStyleTabBar<AppTab>(progress: scrollProgress) { tab in
+                XStyleTabBar<AppTab>(progress: controller.scrollProgress) { tab in
                     /// Updating ScrollView
                     withAnimation(.easeInOut(duration: 0.25)) {
                         let index = AppTab.allCases.firstIndex(of: tab) ?? 0
-                        scrollPosition.scrollTo(x: CGFloat(index) * containerSize.width)
+                        controller.scrollPosition.scrollTo(x: CGFloat(index) * controller.containerSize.width)
                     }
                 }
                 .padding(.horizontal, 24)
@@ -89,21 +81,21 @@ struct CitizenProfile: View {
                 }
                 .scrollIndicators(.hidden)
                 .scrollTargetBehavior(.paging)
-                .scrollPosition($scrollPosition)
+                .scrollPosition($controller.scrollPosition)
                 /// Calculating Scroll Progress
                 .onScrollGeometryChange(for: CGFloat.self) {
                     ($0.contentOffset.x + $0.contentInsets.leading) / $0.containerSize.width
                 } action: { oldValue, newValue in
-                    scrollProgress = newValue
+                    controller.scrollProgress = newValue
                 }
                 .onScrollGeometryChange(for: CGSize.self) {
                     $0.containerSize
                 } action: { oldValue, newValue in
-                    containerSize = newValue
+                    controller.containerSize = newValue
                 }
             }
         }
-        .sheet(isPresented: $showBlockUserSheet) {
+        .sheet(isPresented: $controller.showBlockUserSheet) {
             BlockUserSheet(profileId: profileId)
         }
         .background {
@@ -119,7 +111,7 @@ struct CitizenProfile: View {
             .ignoresSafeArea()
         }
         .task {
-            citizen =  User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9")
+            await controller.fetchCitizenPublicProfile(profileId)
         }
         .background(Color.theme.background)
         .navigationTitle("Profile")
@@ -132,7 +124,7 @@ struct CitizenProfile: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
                     Button(role: .destructive) {
-                        showBlockUserSheet.toggle()
+                        controller.showBlockUserSheet.toggle()
                     } label: {
                         Label("Report User", systemImage: "hand.raised.slash.fill")
                     }
@@ -150,6 +142,7 @@ struct CitizenProfile: View {
 
 }
 
+// MARK: - Definitions:  enums
 enum ReportReason: String, CaseIterable, Identifiable, Encodable {
     // Existing
     case wrongInformation
@@ -240,6 +233,8 @@ enum AppTab: String, XStyleTabItem {
     }
 }
 
+
+// MARK: - Sheet
 struct BlockUserSheet: View {
     let profileId: String
     @Environment(\.dismiss) private var dismiss
@@ -322,7 +317,7 @@ struct BlockUserSheet: View {
 
 #Preview {
     @Previewable @State var isLoading: Bool = false
-    var profileId: String = "123456789"
+    let profileId: String = "123456789"
     NavigationStack {
         
         CitizenProfile(with: profileId)

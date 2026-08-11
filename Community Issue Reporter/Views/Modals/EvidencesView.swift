@@ -15,16 +15,13 @@ struct EvidencesView: View {
     @State private var cameraCompletion: ((UIImage) -> Void)? = nil
     @State private var isCameraPresented: Bool = false
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @State private var page: Int = 1
+    @State private var isLoading: Bool = false
+    @State private var response: PaginatedResponse<PreviewAttachment> = .init(documents: [], total: 0, page: 1, hasNext: false, hasPrev: false)
     
     @Environment(\.dismiss) var dismiss
     
-    @State private var photos: [PhotoSample] = [
-        PhotoSample(id: "1", photo: "a", published: Date(), user: "Jane Doe"),
-        PhotoSample(id: "2", photo: "b", published: Date(), user: "John Smith"),
-        PhotoSample(id: "3", photo: "c", published: Date(), user: "Michael Brown"),
-        PhotoSample(id: "4", photo: "d", published: Date(), user: "Emily Davis"),
-        PhotoSample(id: "5", photo: "d", published: Date(), user: "Emily Davis"),
-    ]
+    @State private var photos: [PreviewAttachment] = []
     
     @Namespace private var nameSpace
     @State private var previewID: String = ""
@@ -37,22 +34,22 @@ struct EvidencesView: View {
     
     var body: some View {
         ScrollView(.vertical) {
-//            LazyVGrid(columns: gridColumns, spacing: 4) {
-//                ForEach(photos, id: \.id) { photo in
-//                    NavigationLink(value: photo) {
-//                        photoPreview(photo)
-//                            .matchedTransitionSource(id: photo.id, in: nameSpace)
-//                    }
-//                    .buttonStyle(.plain)
-//                    .simultaneousGesture(TapGesture().onEnded {
-//                        previewID = photo.id
-//                    })
-//                }
-//            }
-//            .padding(.horizontal, .themePadding)
+            LazyVGrid(columns: gridColumns, spacing: 4) {
+                ForEach(response.documents ?? [], id: \.id) { photo in
+                    NavigationLink(value: photo) {
+                        PhotoPreview(photo, .full)
+                            .matchedTransitionSource(id: photo.id, in: nameSpace)
+                    }
+                    .buttonStyle(.plain)
+                    .simultaneousGesture(TapGesture().onEnded {
+                        previewID = photo.id
+                    })
+                }
+            }
+            .padding(.horizontal, .themePadding)
         }
-        .navigationDestination(for: PhotoSample.self) { photo in
-            PhotoDetailView(photos: photos, previewID: $previewID, nameSpace: nameSpace)
+        .navigationDestination(for: PreviewAttachment.self) { photo in
+            PhotoDetailView(photos: response.documents ?? [], previewID: $previewID, nameSpace: nameSpace)
                 .navigationTransition(.zoom(sourceID: previewID, in: nameSpace))
         }
         .scrollContentBackground(.hidden)
@@ -68,6 +65,13 @@ struct EvidencesView: View {
                 isCameraPresented = false
             })
             .edgesIgnoringSafeArea(.all)
+        }
+        .task {
+            do {
+              response = try await ReportRepository.shared.fetchAttachments(id, page: page)
+            } catch {
+                
+            }
         }
         .toolbar {
             

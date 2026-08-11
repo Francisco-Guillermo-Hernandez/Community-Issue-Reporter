@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct FooterText: View {
     var text: String
@@ -122,7 +123,6 @@ struct SettingsSubView: View {
     @Environment(SubscriptionManager.self) var subscriptionManager
     @State private var isPresentingPaywall = false
     @State private var isPresentingCustomerCenter = false
-    @State private var showDeleteAlert = false
     @State private var controller: SettingsSubViewController
     @State private var landingController = LandingController.shared
     
@@ -161,61 +161,61 @@ struct SettingsSubView: View {
                     SettingsGroup(
                         title: String(localized: "Subscription"),
                         footerText: String(localized: "You can help us to improve the app by supporting us.")) {
-                        if subscriptionManager.isPro {
-                            HStack {
-                                Text("Reportamelo Pro")
-                                    .foregroundStyle(Color.green)
-                                Spacer()
-                                Text("Active")
-                                    .foregroundStyle(.secondary)
-                            }
-                            
-                            Button(action: {
-                                isPresentingCustomerCenter = true
-                            }) {
-                                Text(String(localized: "Manage Subscription"))
-                                    .foregroundStyle(Color.accentColor)
-                            }
-                        } else {
-                            Button(action: {
-                                isPresentingPaywall = true
-                            }) {
+                            if subscriptionManager.isPro {
                                 HStack {
                                     Text("Reportamelo Pro")
-                                        .foregroundStyle(Color.theme.inputText)
+                                        .foregroundStyle(Color.green)
                                     Spacer()
-                                    Text("Upgrade")
+                                    Text("Active")
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                Button(action: {
+                                    isPresentingCustomerCenter = true
+                                }) {
+                                    Text(String(localized: "Manage Subscription"))
                                         .foregroundStyle(Color.accentColor)
                                 }
-                            }
-                            .accessibilityIdentifier("UpgradeSubscriptionButton")
-                            
-                            Button(action: {
-                                Task {
-                                    let success = await subscriptionManager.restorePurchases()
-                                    if success {
-                                        if subscriptionManager.isPro {
-                                            Toast.shared.show(message: String(localized: "Purchases restored successfully"), type: .success)
-                                        } else {
-                                            Toast.shared.show(message: String(localized: "No active subscription found to restore"), type: .error)
-                                        }
-                                    } else {
-                                        Toast.shared.show(message: String(localized: "Failed to restore purchases"), type: .error)
+                            } else {
+                                Button(action: {
+                                    isPresentingPaywall = true
+                                }) {
+                                    HStack {
+                                        Text("Reportamelo Pro")
+                                            .foregroundStyle(Color.theme.inputText)
+                                        Spacer()
+                                        Text("Upgrade")
+                                            .foregroundStyle(Color.accentColor)
                                     }
                                 }
-                            }) {
-                                HStack {
-                                    Text("Do you have a subscription?")
-                                        .foregroundStyle(Color.theme.inputText)
-                                    Spacer()
-                                    Text("Restore")
-                                        .foregroundStyle(Color.accentColor)
+                                .accessibilityIdentifier("UpgradeSubscriptionButton")
+                                
+                                Button(action: {
+                                    Task {
+                                        let success = await subscriptionManager.restorePurchases()
+                                        if success {
+                                            if subscriptionManager.isPro {
+                                                Toast.shared.show(message: String(localized: "Purchases restored successfully"), type: .success)
+                                            } else {
+                                                Toast.shared.show(message: String(localized: "No active subscription found to restore"), type: .error)
+                                            }
+                                        } else {
+                                            Toast.shared.show(message: String(localized: "Failed to restore purchases"), type: .error)
+                                        }
+                                    }
+                                }) {
+                                    HStack {
+                                        Text("Do you have a subscription?")
+                                            .foregroundStyle(Color.theme.inputText)
+                                        Spacer()
+                                        Text("Restore")
+                                            .foregroundStyle(Color.accentColor)
+                                    }
                                 }
+                                .accessibilityIdentifier("RestoreSubscriptionButton")
                             }
-                            .accessibilityIdentifier("RestoreSubscriptionButton")
                         }
-                    }
-                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                        .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
                     SettingsGroup(
                         title: String(localized: "Privacy"),
@@ -260,7 +260,7 @@ struct SettingsSubView: View {
                                 controller.updateNotificationSettings()
                             }
                     }
-                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                                  .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
                     SettingsGroup(
                         title: String(localized: "App settings")
@@ -307,13 +307,37 @@ struct SettingsSubView: View {
                             ThemedButton(
                                 message: String(localized: "Delete my account"),
                                 action: {
-                                    showDeleteAlert = true
+                                    
+                                    controller.handleDeleteRequest(isPro: subscriptionManager.isPro)
                                 },
                                 type: .danger,
                                 isLoading: $controller.isDeletingAccount,
                             )
                             .accessibilityIdentifier("DeleteAccountButton")
-                            .alert(String(localized: "Delete Account"), isPresented: $showDeleteAlert) {
+                            /// The Interceptor Alert
+                            .alert(String(localized: "You have an active subscription"), isPresented: $controller.showActiveSubscriptionAlert) {
+                                Button(String(localized: "Manage Subscriptions")) {
+                                    /// Triggers RevenueCat's fallback-safe manager
+                                    Task {
+                                        do {
+                                            try await Purchases.shared.showManageSubscriptions()
+                                        } catch {
+                                            print("Failed to show manage subscriptions: \(error)")
+                                        }
+                                    }
+                                }
+                                Button(String(localized: "Delete anyway"), role: .destructive) {
+                                    /// If they insist on deleting without canceling, proceed
+                                    controller.showDeleteAlert = true
+                                }
+                                
+                                Button(String(localized: "Cancel"), role: .cancel) {}
+                                
+                            } message: {
+                                Text(String(localized: "You currently have an active Reportamelo Pro subscription. Deleting your account will NOT stop your monthly App Store billing. Please cancel your subscription first."))
+                            }
+                            
+                            .alert(String(localized: "Delete Account"), isPresented: $controller.showDeleteAlert) {
                                 Button(String(localized: "Cancel"), role: .cancel) { }
                                 Button(String(localized: "Delete"), role: .destructive) {
                                     Task {

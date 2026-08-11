@@ -7,11 +7,14 @@
 
 import SwiftUI
 import CoreLocation
+import GoogleMobileAds
+@_spi(Experimental) import RevenueCatAdMob
 
 struct CommentsSectionView: View {
     @State private var controller: CommentsController
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(SubscriptionManager.self) var subscriptionManager
     @FocusState private var isTextFieldFocused: Bool
     @State private var title: String
     @State private var subtitle: String
@@ -40,7 +43,7 @@ struct CommentsSectionView: View {
                     }
                     .containerRelativeFrame(.vertical)
                 } else {
-                    ForEach(controller.comments) { c in
+                    ForEach(Array(controller.comments.enumerated()), id: \.element.id) { index, c in
                         CommentRow(comment: c)
                         
                         Divider()
@@ -49,6 +52,15 @@ struct CommentsSectionView: View {
                         .task {
                             if let lastComment = controller.comments.last, c.id == lastComment.id {
                                 await controller.loadMoreComments()
+                            }
+                        }
+                        
+                        if !subscriptionManager.isPro, AdBackoffUtils.shouldShowAd(at: index), controller.comments.count > 10 {
+                            if let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_NATIVE_AD_UNIT") as? String, !adUnitID.isEmpty {
+                                AdMobNativeAdView(adUnitID: adUnitID)
+                                    .frame(height: 120)
+                                    .padding(.horizontal)
+                                    .padding(.bottom, .themeSpacing * 4)
                             }
                         }
                     }
@@ -144,4 +156,5 @@ struct CommentsSectionView: View {
     NavigationStack {
         CommentsSectionView(for: .report, with: "", title: "", subtitle: "")
     }
+    .environment(SubscriptionManager.shared)
 }

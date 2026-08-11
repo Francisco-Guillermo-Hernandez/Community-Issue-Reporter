@@ -29,6 +29,7 @@ struct MapExplorerView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var router = DeepLinkRouter.shared
     @State private var showLocationAlert = false
+    @State private var monetizationManager = MonetizationManager.shared
     
     private let animation = Animation.easeInOut(duration: 0.25)
     
@@ -117,7 +118,7 @@ struct MapExplorerView: View {
         .task {
             await appState.checkStatus()
             await SubscriptionManager.shared.performLogin()
-            
+            monetizationManager.requestTrackingAuthorization()
         }
         .onChange(of: controller.locationManager.lastLocation) { _, newLocation in
             // Handled or observed if needed

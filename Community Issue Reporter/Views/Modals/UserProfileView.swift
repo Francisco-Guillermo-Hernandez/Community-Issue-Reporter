@@ -41,18 +41,25 @@ struct UserProfileView: View {
             icon: "text.bubble.fill",
             color: Color.orange
         ),
-        ProfileOption(
-            id: "op:signPetitions",
-            title: String(localized: "My Sign petitions"),
-            icon: "signature",
-            color: Color.purple
-        ),
+//        ProfileOption(
+//            id: "op:signPetitions",
+//            title: String(localized: "My Sign petitions"),
+//            icon: "signature",
+//            color: Color.purple
+//        ),
         ProfileOption(
             id: "op:settings",
             title: String(localized: "Settings"),
             icon: "gear",
             color: Color.gray
         ),
+        
+//        ProfileOption(
+//            id: "op:",
+//            title: String(localized: "Licenses"),
+//            icon: "text.page.fill",
+//            color: Color.green
+//        ),
         ProfileOption(
             id: "op:licenses",
             title: String(localized: "Licenses"),

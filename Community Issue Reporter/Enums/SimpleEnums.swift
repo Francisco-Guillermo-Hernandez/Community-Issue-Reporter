@@ -68,6 +68,7 @@ enum CommonIntercommunicationErrors: Error {
     case invalidPetition(String)
     case serverError(String)
     case notAuthorized
+    case forbidden(GenericResponse)
     case networkError(String)
     case genericError(String)
     case notImplemented

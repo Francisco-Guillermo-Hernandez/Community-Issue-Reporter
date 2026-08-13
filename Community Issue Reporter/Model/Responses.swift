@@ -58,6 +58,7 @@ struct Settings: Decodable {
 
 ///
 struct PublicUserData: Decodable {
+    let profileId: String
     let userId: String
     let userName: String
     let names: String
@@ -158,4 +159,16 @@ struct InsightsFilter {
     var month: String
 }
 
-struct EmptyResponse: Decodable {}
+struct EmptyResponse: Codable {}
+
+struct PublicStats: Decodable {
+    let totalReports: Int
+    let totalSignatures: Int
+    let totalComments: Int
+    let totalPetitions: Int
+}
+
+struct citizenProfile: Decodable {
+    let user: User
+    let stats: PublicStats
+}

@@ -59,6 +59,31 @@ final class UserRepository {
         }
     }
     
+    func signInOrLoginWithApple(payload: AuthPayload) async throws -> (UserOAuthResultState, String, PublicUserData)  {
+        do {
+        
+            let result = try await self.service.signInOrLoginWithApple(payload: payload, headers: headers)
+            
+            if result.code == "TOKEN_GENERATED" {
+                return (.existing, result.authSessionId, result.publicUserData)
+            } else if result.code == "USER_CREATED_WITH_TOKEN" {
+                return (.firstLogin, result.authSessionId, result.publicUserData)
+            } else {
+                throw CommonIntercommunicationErrors.invalidPetition(result.code)
+            }
+        } catch ServiceError.badRequest(let response) {
+            throw CommonIntercommunicationErrors.invalidPetition(response.code)
+        } catch ServiceError.forbidden(let response) {
+            throw CommonIntercommunicationErrors.forbidden(response)
+        } catch ServiceError.serverError(let message) {
+          throw CommonIntercommunicationErrors.serverError(message)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
+    
+    
     /// We are going to let users to report as a guests
     /// this feature offers a limited features compared to registered users
     func loginAsGuest() async throws -> (UserOAuthResultState, String) {
@@ -125,23 +150,39 @@ final class UserRepository {
         UserDefaults.standard.set(url, forKey: "avatar_url")
     }
     
+    
+    
     ///
-    func getPublicInformation() -> UserProfile? {
+    func getPublicInformation(authMethod: AuthMethod) -> UserProfile? {
         
-        guard let user = GIDSignIn.sharedInstance.currentUser,
-              let profile = user.profile,
-              let email = user.profile?.email,
-              let username = user.profile?.name,
-              profile.hasImage else { return nil }
+        if authMethod == .Google {
+            guard let user = GIDSignIn.sharedInstance.currentUser,
+                  let profile = user.profile,
+                  let email = user.profile?.email,
+                  let username = user.profile?.name,
+                  profile.hasImage else { return nil }
+            
+             
+           return UserProfile(
+                username: username,
+                avatar: profile.imageURL(withDimension: 200),
+                email: email,
+                profileId: ""
+               
+            )
+        }
         
-         
-       return UserProfile(
-            username: username,
-            avatar: profile.imageURL(withDimension: 200),
-            email: email,
-            profileId: ""
-           
-        )
+        if authMethod == .Apple {
+            return UserProfile(
+                 username: "",
+                 avatar: nil,
+                 email: "",
+                 profileId: ""
+                
+             )
+        }
+        
+        return nil
     }
     
     func getAvatar() -> URL? {
@@ -296,6 +337,12 @@ final class UserRepository {
         return token == UserType.guest.description
     }
     
+    /// Let's check if a user is visiting his own profile
+    func isOwnProfile(_ profileId: String) -> Bool {
+        let storedProfileId = KeychainService.getToken(.profileId)
+        return !storedProfileId.isEmpty && storedProfileId == profileId
+    }
+    
     /// Privacy settings to show or hide their profile / userName.
     func privacy(settings: PrivacySettings) async throws {
         do {
@@ -390,6 +437,19 @@ final class UserRepository {
         }
     }
     
+    func citizenProfile(id: String) async throws -> User {
+        do {
+            return try await self.service.citizenProfile(id: id, headers: headers)
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
 }
 
 enum DeviceType: String, Decodable, Encodable {

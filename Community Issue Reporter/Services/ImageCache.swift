@@ -33,6 +33,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
         @ViewBuilder content: @escaping (Image) -> Content,
         @ViewBuilder placeholder: @escaping () -> Placeholder
     ) {
+        print("[DEBUG] URL: \(url)")
         self.url = url
         self.scale = scale
         self.content = content

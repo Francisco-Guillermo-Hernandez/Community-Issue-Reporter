@@ -110,7 +110,7 @@ struct GroupedAttachmentPayload: Codable {
     let notes: String
 }
 
-struct PreviewAttachment: Decodable, Identifiable, Equatable, Hashable {
+struct PreviewAttachment: Codable, Identifiable, Equatable, Hashable {
     let id: String
     let type: AttachmentType
     let createdAtRaw: Int64

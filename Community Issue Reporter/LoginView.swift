@@ -13,7 +13,7 @@ struct LoginView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var controller = LoginController.shared
     
-    let onTokenReceived: (String, LoginType) -> Void
+    let onTokenReceived: (AuthPayload, LoginType) -> Void
     var body: some View {
         
         ZStack(alignment: .bottom) {
@@ -38,26 +38,38 @@ struct LoginView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 
-                
-                GooglePillButton(action: {
-                    controller.loginWithGoogle(onTokenReceived: onTokenReceived)
-                })
+                VStack(spacing: .themeRadius * 1) {
+                    LoginWithAppleButton { (result, error) in
+                        
+                        if let result = result {
+                            controller.loginWithApple(result, onTokenReceived: onTokenReceived)
+                        }
+                        
+                        if let error = error {
+                            print(error)
+                        }
+                    }
+                    
+                    GooglePillButton(action: {
+                        controller.loginWithGoogle(onTokenReceived: onTokenReceived)
+                    })
+                    .disabled(controller.disableLoginButtons)
+                    .accessibilityIdentifier("LoginWithGoogle")
+                    
+                    ThemedButton(
+                        message: String(localized: "Login as a Guest"),
+                        action: {
+                            controller.loginAsGuest(onTokenReceived: onTokenReceived)
+                        },
+                        type: .outline,
+                        style: .normal
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: 40)
+                    .disabled(controller.disableLoginButtons)
+                    .accessibilityIdentifier("LoginAsGuest")
+                }
                 .padding(.top, 8)
-                .disabled(controller.disableLoginButtons)
-                .accessibilityIdentifier("LoginWithGoogle")
-                
-                ThemedButton(
-                    message: String(localized: "Login as a Guest"),
-                    action: {
-                        controller.loginAsGuest(onTokenReceived: onTokenReceived)
-                    },
-                    type: .outline,
-                    style: .normal
-                )
-                .frame(maxWidth: .infinity, maxHeight: 40)
-                .disabled(controller.disableLoginButtons)
-                .padding(.bottom, 20)
-                .accessibilityIdentifier("LoginAsGuest")
+                .padding(.bottom, 16)
                 
                 /// Terms and conditions
                 LinksView()

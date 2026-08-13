@@ -80,6 +80,12 @@ final class ProfileDataModel {
             .store(in: &cancellables)
     }
     
+    func setDefaultAvatar() async {
+        if selectedAvatarOptionView == .GoogleAuth, let url = UserRepository.shared.getProfilePictureURL() {
+            UserDefaults.standard.set(url, forKey: "avatar_url")
+        }
+    }
+    
     func applyGoogleAvatar(completion: @escaping () -> Void) {
         guard let url = UserRepository.shared.getProfilePictureURL() else { return }
         isUploading = true

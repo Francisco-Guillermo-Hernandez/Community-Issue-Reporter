@@ -27,6 +27,7 @@ struct UserProfileView: View {
     @State var controller = LandingController.shared
     @State private var profile = ProfileDataModel()
     @State private var profileRouter = ProfileRouter.shared
+    @State private var isLoading: Bool = false
     
     let options: [ProfileOption] = [
         ProfileOption(
@@ -148,28 +149,27 @@ struct UserProfileView: View {
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                Button(role: .destructive) {
-                    Task {
-                        do {
-                            
-                            _ = try await UserRepository.shared.logout()
-                            controller.logout()
-                            dismiss()
-                        } catch {
-                            print(error)
+                
+                ThemedButton(
+                    message: String(localized: "Log Out"),
+                    action: {
+                        Task {
+                            do {
+                                isLoading.toggle()
+                                
+                                _ = try await UserRepository.shared.logout()
+                                controller.logout()
+                                dismiss()
+                            } catch {
+                                Toast.shared.show(message: error.localizedDescription, type: .error)
+                            }
+                            isLoading.toggle()
                         }
-                    }
-                } label: {
-                    Text(String(localized: "Log Out"))
-                        .fontWeight(.regular)
-                        .frame(maxWidth: .infinity)
-                        .fontWeight(.bold)
-                        .padding(8)
-                }
-                .accessibilityIdentifier("LogoutButton")
-                .buttonSizing(.flexible)
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
+                    },
+                    type: .outline,
+                    style: .normal,
+                    isLoading: $isLoading
+                )
                 .padding()
                 .padding(.top, 0)
                

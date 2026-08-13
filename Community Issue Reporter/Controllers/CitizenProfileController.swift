@@ -21,9 +21,13 @@ final class CitizenProfileController {
     var petitions: [PetitionPost]
     var scrollProgress: CGFloat
     var scrollPosition: ScrollPosition
+    var isLoading: Bool
+    var reports: [Report]
     
     init () {
+        self.isLoading = false 
         self.petitions = []
+        self.reports = []
         self.scrollProgress = 0
         self.scrollPosition = .init()
         self.containerSize = .zero
@@ -39,6 +43,23 @@ final class CitizenProfileController {
     }
     
     func fetchCitizenPublicProfile(_ profileId: String) async {
-        self.citizen = User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9")
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            self.citizen = try await UserRepository.shared.citizenProfile(id: profileId)
+        } catch {
+            print("Error fetching citizen public profile: \(error)")
+        }
+    }
+    
+    func fetchReports(_ profileId: String) async {
+        do {
+            let documents = try await ReportRepository.shared.listByProfile(profileId)
+            self.reports = documents.map { $0.toModel() }
+            self.reportsSubmitted = reports.count
+        } catch {
+            print("Error fetching reports by profile: \(error)")
+        }
     }
 }

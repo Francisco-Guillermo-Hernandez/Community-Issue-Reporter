@@ -28,7 +28,8 @@ final class MapExplorerMockedData {
             cellIndex: "",
             createdAtRaw: 1780036575602,
             updatedAtRaw: 1780036575602,
-            reportedBy: "john.doe",
+            reportedBy: "aXWsaxls",
+            userName: "jhon.doe",
             cityId: "",
             petitionId: "",
             shareUrl: "",
@@ -39,7 +40,8 @@ final class MapExplorerMockedData {
             ],
             assignedTo: nil,
             institutionId: nil,
-            reportContainer: ""
+            reportContainer: "",
+            profileId: "06d3df5f06d3df5f"
         )
         
         

@@ -9,7 +9,7 @@ import Foundation
 
 /// 
 let titleMinCharacters: Int = 5
-let titleMaxCharacters: Int = 30
+let titleMaxCharacters: Int = 36
 let titleValidator: [Validator] = [
     Validator(
         name: "Isn't empty",

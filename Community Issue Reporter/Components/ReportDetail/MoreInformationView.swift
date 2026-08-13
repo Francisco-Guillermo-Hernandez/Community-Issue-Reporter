@@ -37,19 +37,20 @@ struct MoreInformationView: View {
                 }
                 .listRowBackground(Color.clear)
                 
-                HStack {
-                    Text("Reported by:")
-                        .font(.caption)
-                        .opacity(opacity)
-                        .fontWeight(.medium)
-                        
-                    Spacer()
-                    Text("@\(report.reportedBy)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                }
-                .listRowBackground(Color.clear)
                 
+                NavigationLink(value: DetailNavigationDestination.citizenProfile(profileId: report.profileId)) {
+                    HStack {
+                        Text("Reported by:")
+                            .font(.caption)
+                            .opacity(opacity)
+                            .fontWeight(.medium)
+                            
+                        Spacer()
+                        Text("@\(report.userName)")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                    }
+                }
                 
                 HStack {
                     Text("Created on:")

@@ -107,7 +107,7 @@ struct ButtonStyleMapper: ViewModifier {
         case .secondary:
             content.buttonStyle(ThemedSecondaryButtonStyle())
         case .outline:
-            content.buttonStyle(ThemedButtonOutlineStyle(style: style))
+            content.buttonStyle(ThemedButtonOutlineStyle(style: style, isLoading: isLoading))
         case .danger:
             content.buttonStyle(ThemedDangerButtonStyle(isLoading: isLoading))
         }
@@ -244,11 +244,12 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.isEnabled) var isEnabled
     let style: ThemedButtonStyle
+    let isLoading: Bool
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(style == .normal ? .system(size: 14, weight: .regular) : Font.body.bold())
-            .background(backgroundColor(isPressed: configuration.isPressed))
+            .background(backgroundView(isPressed: configuration.isPressed))
             .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
             .contentShape(Capsule())
             .clipShape(Capsule())
@@ -268,6 +269,18 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
             return Color.theme.inputBackground.mix(with: .white, by: 0.67).opacity(isPressed ? 0.2 : 0.1)
         } else {
             return isPressed ? Color.theme.accent : Color.white
+        }
+    }
+    
+    @ViewBuilder
+    private func backgroundView(isPressed: Bool) -> some View {
+        if isLoading {
+            ShimmerView(
+                baseColor: backgroundColor(isPressed: isPressed),
+                shimmerColor: Color.theme.primary.opacity(0.25)
+            )
+        } else {
+            backgroundColor(isPressed: isPressed)
         }
     }
     
@@ -312,7 +325,7 @@ struct LinkButtonStyle: ButtonStyle {
         
         ThemedButton(message: "Get Started", action: {}, type: .secondary)
         
-        ThemedButton(message: "Get Started", action: {}, type: .outline)
+        ThemedButton(message: "Get Started", action: {}, type: .outline, isLoading: .constant(false))
         
         ThemedButton(message: "Take a photo", action: {}, type: .outline, style: .normal, icon: "camera")
         

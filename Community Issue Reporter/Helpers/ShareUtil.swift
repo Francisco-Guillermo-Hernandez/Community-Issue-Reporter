@@ -7,13 +7,13 @@
 
 import UIKit
 
-func shareFromClosure(item: Any) {
+func shareFromClosure(item: URL?) {
        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
              let rootViewController = windowScene.windows.first?.rootViewController else {
            return
        }
        
-       let activityVC = UIActivityViewController(activityItems: [item], applicationActivities: nil)
+       let activityVC = UIActivityViewController(activityItems: [item as Any], applicationActivities: nil)
        
        // Needed for iPad compatibility to prevent crashing
        if let popoverController = activityVC.popoverPresentationController {

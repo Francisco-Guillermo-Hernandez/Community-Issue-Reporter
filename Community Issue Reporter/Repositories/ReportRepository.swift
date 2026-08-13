@@ -71,6 +71,15 @@ final class ReportRepository {
         }
     }
     
+    func listByProfile(_ profileId: String) async throws -> [ReportDAO] {
+        do {
+           return try await self.reportsService.fetchReportsByProfile(id: profileId, headers: self.headers)
+        } catch {
+            print(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
     func delete(_ reportId: String) async throws -> SuccessfulResult {
         do {
             

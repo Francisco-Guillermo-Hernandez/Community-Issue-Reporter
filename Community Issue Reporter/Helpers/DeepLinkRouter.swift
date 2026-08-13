@@ -36,13 +36,15 @@ class DeepLinkRouter {
         createdAtRaw: 0,
         updatedAtRaw: 0,
         reportedBy: "",
+        userName: "",
         cityId: "",
         petitionId: "",
         shareUrl: "",
         attachments: [],
         assignedTo: nil,
         institutionId: nil,
-        reportContainer: ""
+        reportContainer: "",
+        profileId: "",
     )
     var presentAlert: Bool = false
     var isReadyToRoute: Bool = false

@@ -112,6 +112,7 @@ struct ReportCellView: View {
                 
                 if enableChevron {
                     Image(systemName: "chevron.compact.right")
+                        .foregroundStyle(Color(.secondaryLabel))
                 }
                 
             }
@@ -156,7 +157,7 @@ struct MyReportsSubView: View {
                     ForEach(controller.reports, id: \.id) { report in
                         if mode == .listAndModify {
                             NavigationLink(destination: showWizard(report)) {
-                                ReportCellView(report: report)
+                                ReportCellView(report: report, enableChevron: true)
                                     .cellStyle()
                             }
                             .listRowInsets(themeCellEdgeInsets)
@@ -170,12 +171,41 @@ struct MyReportsSubView: View {
                                     Label("Delete", systemImage: "trash")
                                 }
                             }
+                            .contentShape(
+                                   .contextMenuPreview,
+                                   RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
+                            )
+                            .contextMenu {
+                                Button {
+                                    UIPasteboard.general.string = report.id
+                                } label: {
+                                    Label("Copy ID", systemImage: "document.on.document")
+                                }
+                                .accessibilityIdentifier("CopyIDButton")
+                                
+                                Button {
+                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                    shareFromClosure(item: buildShareURL(for: report.shareUrl!))
+                                } label: {
+                                    Label("Share Report", systemImage: "square.and.arrow.up")
+                                }
+                                .accessibilityIdentifier("ShareReportURLButton")
+                                
+                                Button {
+                                    controller.reportToDelete = report
+                                    controller.showDeleteAlert = true
+                                } label: {
+                                    Label("Delete", systemImage: "document.on.trash")
+                                }
+                                
+                            }
                         } else {
                             ReportCellView(report: report)
                                 .cellStyle()
                         }
                     }
                 }
+                .navigationLinkIndicatorVisibility(.hidden)
                 .listStyle(.plain)
             }
 

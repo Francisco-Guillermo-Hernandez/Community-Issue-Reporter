@@ -25,7 +25,8 @@ struct MapExplorerReport: Identifiable, Decodable, Hashable {
     let cellIndex: String
     let createdAtRaw: Int64
     let updatedAtRaw: Int64
-    let reportedBy: String
+    let reportedBy: String?
+    let userName: String
     let cityId: String
     let petitionId: String?
     let shareUrl: String
@@ -33,6 +34,7 @@ struct MapExplorerReport: Identifiable, Decodable, Hashable {
     let assignedTo: String?
     let institutionId: String?
     let reportContainer: String
+    let profileId: String
     var clLocation: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: lat, longitude: lng)
     }

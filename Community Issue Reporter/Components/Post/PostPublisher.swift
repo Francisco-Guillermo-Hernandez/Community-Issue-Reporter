@@ -20,7 +20,7 @@ struct User: Decodable {
     let profilePicture: String
     let profileId: String
     var profilePictureURL: URL? {
-        getURL(from: profilePicture)
+        urlFromString(profilePicture)
     }
 }
 

@@ -68,6 +68,9 @@ enum TokenType: String {
     case deviceId = "deviceId"
     case userType = "userType"
     case userId = "userId"
+    case profileId = "profileId"
+    case email = "email"
+    case name = "name"
 }
 
 extension KeychainService {

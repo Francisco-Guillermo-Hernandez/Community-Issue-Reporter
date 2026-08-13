@@ -20,8 +20,8 @@ struct LandingView: View {
     var body: some View {
         NavigationStack(path: $controller.path) {
 
-            LoginView() { session, type in
-                controller.handleLogin(for: session, with: type, appState)
+            LoginView { payload, type in
+                controller.handleLogin(for: payload, with: type, appState)
             }
             .navigationDestination(for: LandingNavigation.self) { destination in
                 switch destination {
@@ -68,6 +68,16 @@ struct LandingView: View {
             if let savedCity = appState.selectedCity {
                 controller.selectedCity = savedCity
             }
+        }
+        .alert(String(localized: "Account Deleted"), isPresented: $controller.accountDeleted) {
+            Button(String(localized: "OK"), role: .cancel) { }
+        } message: {
+            Text(String(localized: "Your account was deleted, but you can register again whenever you want. "))
+        }
+        .alert(controller.alertTitle, isPresented: $controller.presentAlert) {
+            Button(String(localized: "OK"), role: .cancel) { }
+        } message: {
+            Text(controller.message)
         }
     }
     

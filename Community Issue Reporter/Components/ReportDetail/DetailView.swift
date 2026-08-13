@@ -12,6 +12,7 @@ enum DetailNavigationDestination: Hashable {
     case comment(String)
     case reportFollowUp(Report)
     case moreEvidences(String)
+    case citizenProfile(profileId: String)
 }
 
 struct ReportFollowUpView: View {
@@ -216,6 +217,9 @@ struct DetailView: View {
                     ReportFollowUpView(report: report)
                 case .moreEvidences(let id):
                     EvidencesView(with: id)
+                case .citizenProfile(let profileId):
+                    CitizenProfile(with: profileId)
+                    
                 }
             }
             .overlay(alignment: .bottom) {
@@ -257,6 +261,23 @@ struct DetailView: View {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
                 }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(role: .destructive) {
+                           
+                        } label: {
+                            Label("Report content", systemImage: "hand.raised.slash.fill")
+                        }
+                        .accessibilityIdentifier("ReportCitizenButton")
+                    } label: {
+                        Image(systemName: "ellipsis")
+    //                        .foregroundColor(colorScheme == .dark ? .white : .black)
+    //                        .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
+                    }
+                }
+                
+                
             }
 
         }

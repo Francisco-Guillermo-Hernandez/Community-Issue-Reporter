@@ -108,7 +108,7 @@ struct PhotoChooser: View {
                         .frame(maxWidth: .infinity, maxHeight: 48)
                     }
                     .disabled(disableOnMaxImagesCompleted)
-                    .buttonStyle(ThemedButtonOutlineStyle(style: .prominent))
+                    .buttonStyle(ThemedButtonOutlineStyle(style: .prominent, isLoading: false))
                     .onChange(of: selectedPhotoItems) { _, newItems in
                         guard !newItems.isEmpty else { return }
                         

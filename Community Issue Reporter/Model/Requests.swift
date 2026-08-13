@@ -80,3 +80,101 @@ struct BlockUserReason: Encodable {
     let reason: String
     let blockedReasonId: ReportReason
 }
+
+struct ReportContentWithViolation: Encodable {
+    let attachment: PreviewAttachment
+    let reason: String
+    let blockedReasonId: String
+}
+
+struct ReportCommentWithViolation: Encodable {
+    let comment: CommentToBlock
+    let reason: String
+    let blockedReasonId: String
+}
+
+
+enum TypeOfContentToReport: String, CaseIterable, Codable {
+    case image
+    case report
+    case video
+    case comment
+    case petition
+}
+
+enum ReportViolationStatus: String, CaseIterable, Codable {
+    case approved
+    case rejected
+    case pending
+    case appealing
+    case sentToModeration
+    
+    var description: String {
+        switch self {
+            case .approved: return String(localized: "Approved")
+            case .rejected: return String(localized: "Rejected")
+            case .pending: return String(localized: "Pending")
+            case .appealing: return String(localized: "Appealing")
+            case .sentToModeration: return String(localized: "Sent to Moderation")
+        }
+    }
+}
+
+struct ReportViolation<T: Codable>: Codable {
+    let id: String?
+    let type: TypeOfContentToReport
+    let content: T
+    let contentAuthorProfileId: String
+    let reason: String
+    let blockedReasonId: String
+    let status: ReportViolationStatus
+    let observation: String?
+    let createdAt: Date?
+    let updatedAt: Date?
+    
+    init(
+        type: TypeOfContentToReport,
+        content: T,
+        profileId: String,
+        reason: String,
+        blockedReasonId: String,
+        status: ReportViolationStatus,
+    ) {
+        self.id = nil
+        self.type = type
+        self.content = content
+        self.contentAuthorProfileId = profileId
+        self.reason = reason
+        self.blockedReasonId = blockedReasonId
+        self.status = status
+        self.observation = nil
+        self.createdAt = nil
+        self.updatedAt = nil
+    }
+    
+    init(
+        id: String,
+        type: TypeOfContentToReport,
+        content: T,
+        profileId: String,
+        reason: String,
+        blockedReasonId: String,
+        status: ReportViolationStatus,
+        observation: String,
+        createdAt: Date,
+        updatedAt: Date
+    ) {
+        self.id = id
+        self.type = type
+        self.content = content
+        self.contentAuthorProfileId = profileId
+        self.reason = reason
+        self.blockedReasonId = blockedReasonId
+        self.status = status
+        self.observation = observation
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+    
+    
+}

@@ -54,6 +54,9 @@ func buildPreviewAttachmentURL(_ reportContainer: String, _ fileName: String, _ 
 }
 
 func urlFromString(_ string: String) -> URL? {
-    return URL(string: string)
+    if string.hasPrefix("http") {
+        return URL(string: string)
+    }
+    return getURL(from: string)
 }
 

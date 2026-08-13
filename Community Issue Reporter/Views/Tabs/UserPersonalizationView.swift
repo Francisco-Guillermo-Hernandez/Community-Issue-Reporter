@@ -121,6 +121,9 @@ struct UserPersonalizationView: View {
                 
             }
         }
+        .task {
+            await profile.setDefaultAvatar()
+        }
         .task(id: model.userName) {
         
         
@@ -176,7 +179,7 @@ struct UserPersonalizationView: View {
         .navigationTitle(Text("Personalize your profile"))
         .background(Color.theme.background)
         .task {
-            user = UserRepository.shared.getPublicInformation()
+            user = UserRepository.shared.getPublicInformation(authMethod: .Google)
             
             guard let user = user else { return }
             

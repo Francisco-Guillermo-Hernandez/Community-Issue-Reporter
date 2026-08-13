@@ -9,6 +9,10 @@ import Foundation
 import Observation
 import GoogleSignIn
 import GoogleSignInSwift
+import AuthenticationServices
+
+typealias OnTokenReceived = (AuthPayload, LoginType) -> Void
+
 
 @MainActor
 @Observable
@@ -25,13 +29,13 @@ final class LoginController {
         enableBorderBeam.toggle()
     }
     
-    func loginAsGuest(onTokenReceived: @escaping (String, LoginType) -> Void) {
+    func loginAsGuest(onTokenReceived: @escaping OnTokenReceived) {
         Task {
             do {
                 performLoginActions()
                 let (state, sessionId) = try await UserRepository.shared.loginAsGuest()
                 userOAuthState = state
-                onTokenReceived(sessionId, .guest)
+                onTokenReceived(.init(token: sessionId), .guest)
                 
             } catch {
                 
@@ -41,7 +45,7 @@ final class LoginController {
         }
     }
     
-    func loginWithGoogle(onTokenReceived: @escaping (String, LoginType) -> Void) {
+    func loginWithGoogle(onTokenReceived: @escaping OnTokenReceived) {
         Task {
             /// Find the current window scene.
             performLoginActions()
@@ -61,7 +65,6 @@ final class LoginController {
                 return
             }
             
-            
             do {
                 let signInResult = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
                 let user = signInResult.user
@@ -69,11 +72,38 @@ final class LoginController {
                     performLoginActions()
                     return
                 }
-                onTokenReceived(tokenString, .user)
+                
+                onTokenReceived(.init(token: tokenString), .user(authMethod: .Google))
             } catch {
                 performLoginActions()
             }
         }
     }
     
+    func loginWithApple(_ authResults: ASAuthorization, onTokenReceived: @escaping OnTokenReceived) {
+        
+        Task {
+            guard let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
+                  let identityTokenData = appleIDCredential.identityToken,
+                  let identityToken = String(data: identityTokenData, encoding: .utf8) else {
+                
+                return
+            }
+            
+            /// These are ONLY populated on the very first login.
+            /// If they are nil, it means the user has logged in before.
+            let email = appleIDCredential.email
+            let firstName = appleIDCredential.fullName?.givenName
+            let lastName = appleIDCredential.fullName?.familyName
+            let fullName = [firstName, lastName].compactMap { $0 }.joined(separator: " ")
+            
+            let payload = AuthPayload(
+                token: identityToken,
+                name: fullName.isEmpty ? nil : fullName,
+                email: email
+            )
+            
+            onTokenReceived(payload, .user(authMethod: .Apple))
+        }
+    }
 }

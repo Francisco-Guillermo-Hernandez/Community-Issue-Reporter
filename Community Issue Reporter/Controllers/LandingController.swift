@@ -52,58 +52,113 @@ final class LandingController {
         self.settings = settings
     }
     
-    func handleLogin(for session: String, with type: LoginType, _ appState: AuthViewModel) {
-        if !session.isEmpty {
+    func handleLogin(for payload: AuthPayload, with type: LoginType, _ appState: AuthViewModel) {
+        if !payload.token.isEmpty {
             if type == .guest {
-                saveIntoKeychain(session)
+                saveIntoKeychain(payload.token)
                 self.isGuest = true
             } else {
-                Task {
-                    
-                    do {
-                        let (state, sessionId, data) = try await UserRepository.shared.login(session)
-                        
-                        self.userOAuthState = state
-                        /// Validates if the first time user login
-                        if state == .firstLogin {
-                            self.setIntoKeychain(data)
-                            self.path.append(.selectCity)
-                        } else {
-                            
-                            if data.landingPageCompleted {
-                                /// Set preferences
-                                self.setSettingsFromAuthenticatedUser(with: data)
-                                self.setCameraPositionByCityId(appState)
-                                await SubscriptionManager.shared.performUserLogin(data.userId)
-                                self.isLoggedIn = true
-                            } else {
-                                
-                                /// Uncompleted landing process
-                                self.path.append(.selectCity)
-                            }
-                            
-                        }
-                        
-                        self.saveIntoKeychain(sessionId)
-                        
-                    } catch CommonIntercommunicationErrors.invalidPetition(let code) {
-                        self.showAlert(message: "CLNT: \(code)")
-                    } catch CommonIntercommunicationErrors.serverError(let code) {
-                        self.showAlert(message: String(localized: "SVR: \(code)"))
-                    } catch CommonIntercommunicationErrors.networkError(let error) {
-                        self.showAlert(message: String(localized: "There was a problem with the network: \(error)"))
-                    } catch CommonIntercommunicationErrors.forbidden(let response) {
-                        self.showAlert(title: response.code, message: response.message)
-                    } catch {
-                        self.showAlert(message: String(localized: "Something went wrong"))
-                    }
-                    
-                    LoginController.shared.performLoginActions()
-                    
+                
+                if type == .user(authMethod: .Apple) {
+                    performLoginActionsWithAppleProvider(payload, appState)
+                }
+                
+                if type == .user(authMethod: .Google) {
+                    performLoginActionsWithGoogleProvider(payload.token, appState)
                 }
             }
         } else {
             self.showAlert(message: String(localized: "Something went wrong"))
+        }
+    }
+    
+    private func performLoginActionsWithAppleProvider(_ payload: AuthPayload, _ appState: AuthViewModel) -> Void {
+        Task {
+            do {
+                let (state, sessionId, data) = try await UserRepository.shared.signInOrLoginWithApple(payload: payload)
+                
+                self.userOAuthState = state
+                /// Validates if the first time user login
+                if state == .firstLogin {
+                    self.setIntoKeychain(data)
+                    self.path.append(.selectCity)
+                } else {
+                    
+                    if data.landingPageCompleted {
+                        /// Set preferences
+                        self.setSettingsFromAuthenticatedUser(with: data)
+                        self.setCameraPositionByCityId(appState)
+                        await SubscriptionManager.shared.performUserLogin(data.userId)
+                        self.isLoggedIn = true
+                    } else {
+                        
+                        /// Uncompleted landing process
+                        self.path.append(.selectCity)
+                    }
+                    
+                }
+                
+                self.saveIntoKeychain(sessionId)
+                
+            } catch CommonIntercommunicationErrors.invalidPetition(let code) {
+                self.showAlert(message: "CLNT: \(code)")
+            } catch CommonIntercommunicationErrors.serverError(let code) {
+                self.showAlert(message: String(localized: "SVR: \(code)"))
+            } catch CommonIntercommunicationErrors.networkError(let error) {
+                self.showAlert(message: String(localized: "There was a problem with the network: \(error)"))
+            } catch CommonIntercommunicationErrors.forbidden(let response) {
+                self.showAlert(title: response.code, message: response.message)
+            } catch {
+                self.showAlert(message: String(localized: "Something went wrong"))
+            }
+            
+            LoginController.shared.performLoginActions()
+        }
+    }
+    
+    private func performLoginActionsWithGoogleProvider(_ session: String, _ appState: AuthViewModel) -> Void {
+        Task {
+            
+            do {
+                let (state, sessionId, data) = try await UserRepository.shared.login(session)
+                
+                self.userOAuthState = state
+                /// Validates if the first time user login
+                if state == .firstLogin {
+                    self.setIntoKeychain(data)
+                    self.path.append(.selectCity)
+                } else {
+                    
+                    if data.landingPageCompleted {
+                        /// Set preferences
+                        self.setSettingsFromAuthenticatedUser(with: data)
+                        self.setCameraPositionByCityId(appState)
+                        await SubscriptionManager.shared.performUserLogin(data.userId)
+                        self.isLoggedIn = true
+                    } else {
+                        
+                        /// Uncompleted landing process
+                        self.path.append(.selectCity)
+                    }
+                    
+                }
+                
+                self.saveIntoKeychain(sessionId)
+                
+            } catch CommonIntercommunicationErrors.invalidPetition(let code) {
+                self.showAlert(message: "CLNT: \(code)")
+            } catch CommonIntercommunicationErrors.serverError(let code) {
+                self.showAlert(message: String(localized: "SVR: \(code)"))
+            } catch CommonIntercommunicationErrors.networkError(let error) {
+                self.showAlert(message: String(localized: "There was a problem with the network: \(error)"))
+            } catch CommonIntercommunicationErrors.forbidden(let response) {
+                self.showAlert(title: response.code, message: response.message)
+            } catch {
+                self.showAlert(message: String(localized: "Something went wrong"))
+            }
+            
+            LoginController.shared.performLoginActions()
+            
         }
     }
     
@@ -152,10 +207,8 @@ final class LandingController {
     }
     
     private func setIntoKeychain(_ data: PublicUserData) -> Void {
-        print("[DEBUG] Saving userId: \(data.userId) in keychain]")
-        print("[DEBUG] Saving userType: \(data.userType.description) in keychain]")
-        
         _ = KeychainService.save(key: .userId, value: data.userId)
+        _ = KeychainService.save(key: .profileId, value: data.profileId)
         _ = KeychainService.save(key: .userType, value: data.userType.description)
     }
     
@@ -187,6 +240,10 @@ final class LandingController {
     
     private func setAvatar(url: String, _ createdFrom: AvatarCreatedFrom) -> Void {
         self.profile.selectedAvatarOptionView = createdFrom
+        
+        if createdFrom == .GoogleAuth {
+            UserRepository.shared.setAvatar(url: url)
+        }
     }
     
     func checkStatus() {
@@ -205,6 +262,7 @@ final class LandingController {
         _ = KeychainService.deleteToken(key: .userId)
         _ = KeychainService.deleteToken(key: .mutation)
         _ = KeychainService.deleteToken(key: .userType)
+        _ = KeychainService.deleteToken(key: .profileId)
         _ = KeychainService.deleteToken(key: .sessionStateVerification)
         
         
@@ -221,6 +279,11 @@ final class LandingController {
         UserDefaults.standard.set(nil, forKey: "selected_city")
         UserDefaults.standard.set(nil, forKey: "map_latitude")
         UserDefaults.standard.set(nil, forKey: "map_longitude")
+        UserDefaults.standard.set(nil, forKey: "cityId")
+        UserDefaults.standard.set(nil, forKey: "countryCode")
+        UserDefaults.standard.set(nil, forKey: "enableEmailNotifications")
+        UserDefaults.standard.set(nil, forKey: "showMyUseNameWhenShare")
+        UserDefaults.standard.set(nil, forKey: "enableEmailNotifications")
         
         print("[UserDefaults] - Cleared user data from UserDefaults]")
         

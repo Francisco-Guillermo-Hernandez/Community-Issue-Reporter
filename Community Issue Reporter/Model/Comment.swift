@@ -12,6 +12,13 @@ enum CommentForType: String, Codable {
     case petition
 }
 
+struct CommentToBlock: Codable {
+    let id: String
+    let message: String
+    let commentFor: CommentForType
+    let resourceId: String
+}
+
 struct Comment: Identifiable, Codable {
     var id: String?
     let name: String

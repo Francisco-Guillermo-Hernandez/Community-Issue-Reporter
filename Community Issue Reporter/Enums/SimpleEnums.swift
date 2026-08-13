@@ -14,9 +14,15 @@ enum ViewOptions: String {
 }
 
 // MARK: - Login options presented in the LoginView page
-enum LoginType: Sendable {
+
+enum AuthMethod: String, Hashable {
+    case Apple
+    case Google
+}
+
+enum LoginType: Sendable, Hashable {
     case guest
-    case user
+    case user(authMethod: AuthMethod)
 }
 
 enum TextBasedAvatarOptions: String {

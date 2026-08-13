@@ -80,7 +80,11 @@ struct ReportsService {
         return try await client.patch(path: "reports/validate/byUsers/\(reportId)", body: [String: String](), headers: headers, withOAuth: true)
     }
     
-    func attachments(reportId: String, headers: Array<HTTPHeader>) async throws -> [Attachment] {
-        return try await client.get(path: "reports/\(reportId)/attachments", headers: headers, withOAuth: true)
+    func fetchAttachments(of reportId: String, query: PaginatedRequestQueryParams,  headers: Array<HTTPHeader>) async throws -> PaginatedResponse<PreviewAttachment> {
+        return try await client.get(path: "report-attachments/report/\(reportId)", query: query, headers: headers, withOAuth: true)
+    }
+    
+    func fetchReportsByProfile(id: String, headers: Array<HTTPHeader>) async throws -> [ReportDAO] {
+        return try await client.get(path: "reports/byProfile/\(id)", headers: headers, withOAuth: true)
     }
 }

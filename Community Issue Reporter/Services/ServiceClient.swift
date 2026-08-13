@@ -199,6 +199,9 @@ struct ServiceClient {
         case 401:
             throw ServiceError.unauthorized(genericResponse.code)
         case 403:
+            /// redirect to login
+            Toast.shared.show(message: String(localized: "Your session has expired. Please login again."), type: .info)
+            LandingController.shared.logout()
             throw ServiceError.forbidden(genericResponse)
         case 404:
             throw ServiceError.notFound

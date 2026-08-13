@@ -12,7 +12,7 @@ let userAgent = "Reportamelo/1.0"
 enum Endpoints {
     static var baseURL: URL {
         if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
-            return URL(string: "https://localhost")! // Fallback domain for canvas
+            return URL(string: "https://development-api.reportamelo.app")! // Fallback domain for canvas
         }
         
         guard let urlString = Bundle.main.object(forInfoDictionaryKey: "API_URL") as? String,

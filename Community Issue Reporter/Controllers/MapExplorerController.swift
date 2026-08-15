@@ -14,6 +14,7 @@ import SwiftUI
 @Observable
 @MainActor
 final class MapExplorerController {
+    static let shared = MapExplorerController()
     var authViewModel: AuthViewModel?
     var settings: SettingsStore?
     
@@ -37,13 +38,17 @@ final class MapExplorerController {
     init() {
         self.searchItems = IssueStatus.allCases.map(\.title)
     }
+    private var currentFetchID = UUID()
     
     func loadReports() async {
         guard let authViewModel = authViewModel else { return }
         
+        let fetchID = UUID()
+        self.currentFetchID = fetchID
+        
         let query = MapExplorerQueryParams(
-            lat: authViewModel.selectedCity?.coordinates.lat ?? 13.868268,
-            lng: authViewModel.selectedCity?.coordinates.lng ?? -89.850968,
+            lat: authViewModel.cameraPosition.region?.center.latitude ?? authViewModel.selectedCity?.coordinates.lat ?? 13.868268,
+            lng: authViewModel.cameraPosition.region?.center.longitude ?? authViewModel.selectedCity?.coordinates.lng ?? -89.850968,
             radius: 300,
             issueTypeIds: [1],
             severityIds: [1],
@@ -51,11 +56,13 @@ final class MapExplorerController {
         )
         
         do {
-            self.reports = try await MapExplorerRepository.shared.listReports(
+            let fetchedReports = try await MapExplorerRepository.shared.listReports(
                 for: query,
                 countryCode: .SV,
                 cityId: authViewModel.selectedCity?.cityId ?? "1"
             )
+            guard self.currentFetchID == fetchID else { return }
+            self.reports = fetchedReports
         } catch CommonIntercommunicationErrors.invalidPetition(let code) {
             Toast.shared.show(message: String(localized: "Invalid request (\(code))"), type: .error)
         } catch CommonIntercommunicationErrors.notFound {
@@ -72,8 +79,10 @@ final class MapExplorerController {
         }
     }
     
-    /// Load near reports by using coordinates and
     func loadReportsWith(_ coordinates: CLLocationCoordinate2D) async {
+        let fetchID = UUID()
+        self.currentFetchID = fetchID
+        
         do {
             let query = MapExplorerQueryParams(
                 lat: coordinates.latitude,
@@ -87,11 +96,13 @@ final class MapExplorerController {
             print("[QUERY] : debugging")
             dump(query)
             
-            self.reports = try await MapExplorerRepository.shared.listReports(
+            let fetchedReports = try await MapExplorerRepository.shared.listReports(
                 for: query,
                 countryCode: .SV,
-                cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619"
+                cityId: authViewModel?.selectedCity?.cityId ?? "1"
             )
+            guard self.currentFetchID == fetchID else { return }
+            self.reports = fetchedReports
         } catch CommonIntercommunicationErrors.invalidPetition(let code) {
             Toast.shared.show(message: String(localized: "Invalid request (\(code))"), type: .error)
         } catch CommonIntercommunicationErrors.notFound {

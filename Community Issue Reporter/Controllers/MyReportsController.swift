@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Observation
+import MapKit
 
 
 @MainActor
@@ -71,6 +72,51 @@ final class MyReportsController {
             } catch {
                 
             }
+        }
+    }
+    
+    func openInMaps(_ coordinate: Coordinate) {
+        Task {
+            /// load maps
+            await MapExplorerController.shared.loadReportsWith(
+                CLLocationCoordinate2D(
+                    latitude: coordinate.lat,
+                    longitude: coordinate.lng
+                )
+            )
+            
+            ///
+            let span = MKCoordinateSpan(
+                latitudeDelta:  0.000392298826163122953,
+                longitudeDelta: 0.0003914447804127257768
+            )
+            
+            /// set camera position
+            AuthViewModel.shared.cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: CLLocationCoordinate2D(
+                        latitude: coordinate.lat,
+                        longitude: coordinate.lng
+                    ),
+                    span: span
+                )
+            )
+            
+            /// route to first tab
+            DeepLinkRouter.shared.activeTab = 1
+        }
+    }
+    
+    func openDetails(of reportId: String, cityId: String) {
+        Task {
+            
+            do {
+                let result = try await MapExplorerRepository.shared.report(reportId, countryCode: .SV, cityId: cityId)
+//                MapExplorerController.shared.expandedItem = result
+            } catch {
+                
+            }
+            
         }
     }
 }

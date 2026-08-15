@@ -59,6 +59,10 @@ final class LandingController {
                 self.isGuest = true
             } else {
                 
+                print("payload")
+                print(payload)
+                dump(payload)
+                
                 if type == .user(authMethod: .Apple) {
                     performLoginActionsWithAppleProvider(payload, appState)
                 }
@@ -75,6 +79,20 @@ final class LandingController {
     private func performLoginActionsWithAppleProvider(_ payload: AuthPayload, _ appState: AuthViewModel) -> Void {
         Task {
             do {
+                
+                /// Lets check if its the first login attempt and lets set email
+                if let email = payload.email, !email.isEmpty {
+                    _ = KeychainService.save(key: .email, value: email)
+                }
+                
+                /// Lets check if its the first login attempt and lets set  name
+                if let name = payload.name, !name.isEmpty {
+                    _ = KeychainService.save(key: .name, value: name)
+                }
+                
+                _ = KeychainService.save(key: .authMethod, value: AuthMethod.Apple.rawValue)
+                
+                ///
                 let (state, sessionId, data) = try await UserRepository.shared.signInOrLoginWithApple(payload: payload)
                 
                 self.userOAuthState = state
@@ -121,6 +139,8 @@ final class LandingController {
             
             do {
                 let (state, sessionId, data) = try await UserRepository.shared.login(session)
+                
+                _ = KeychainService.save(key: .authMethod, value: AuthMethod.Google.rawValue)
                 
                 self.userOAuthState = state
                 /// Validates if the first time user login

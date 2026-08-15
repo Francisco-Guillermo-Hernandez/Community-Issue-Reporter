@@ -122,7 +122,7 @@ struct UserProfileView: View {
                             
                             Text(option.title)
                                 .fontWeight(.medium)
-                                .foregroundStyle(Color.theme.inputText)
+                                .foregroundColor(.primary)
                             
                             Spacer()
                             

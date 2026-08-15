@@ -190,6 +190,8 @@ struct SettingsSubView: View {
                                 }
                                 .accessibilityIdentifier("UpgradeSubscriptionButton")
                                 
+                                Divider()
+
                                 Button(action: {
                                     Task {
                                         let success = await subscriptionManager.restorePurchases()
@@ -227,6 +229,8 @@ struct SettingsSubView: View {
                                 controller.updatePrivacySettings()
                             }
                         
+                        Divider()
+                        
                         Toggle(String(localized: "Show my user name when I share"), isOn: $settings.showMyUseNameWhenShare)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.showMyUseNameWhenShare) { oldValue, newValue in
@@ -254,6 +258,8 @@ struct SettingsSubView: View {
                                 }
                             }
                         
+                        Divider()
+
                         Toggle("Email notifications", isOn: $settings.enableEmailNotifications)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enableEmailNotifications) { oldValue, newValue in
@@ -268,10 +274,13 @@ struct SettingsSubView: View {
                         
                         Toggle("Save last location", isOn: $settings.saveLastLocation)
                             .foregroundStyle(Color.theme.inputText)
-                        
+
+                        Divider()
                         
                         Toggle("Use my current location", isOn: $settings.useMyCurrentLocation)
                             .foregroundStyle(Color.theme.inputText)
+                        
+                        Divider()
                         
                         Toggle("Anonymous telemetry", isOn: $settings.enableAnonymousTelemetry)
                             .foregroundStyle(Color.theme.inputText)
@@ -281,16 +290,19 @@ struct SettingsSubView: View {
                     }
                     .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
-                    SettingsGroup(title: String(localized: "About")) {
-                        HStack {
-                            Text(String(localized: "Version"))
-                                .foregroundStyle(Color.theme.inputText)
-                            Spacer()
-                            Text("v1.0.0")
-                                .foregroundStyle(Color.theme.inputText)
+                    SettingsGroup(title: String(localized: "Community")) {
+                        NavigationLink(destination: ReportsAndViolationsCenterView()) {
+                            HStack {
+                                Text(String(localized: "Reports and violations center"))
+                                    .foregroundStyle(Color.theme.inputText)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.secondary)
+                            }
                         }
-                        
                     }
+                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
                     
                     SettingsGroup(
@@ -336,7 +348,6 @@ struct SettingsSubView: View {
                             } message: {
                                 Text(String(localized: "You currently have an active Reportamelo Pro subscription. Deleting your account will NOT stop your monthly App Store billing. Please cancel your subscription first."))
                             }
-                            
                             .alert(String(localized: "Delete Account"), isPresented: $controller.showDeleteAlert) {
                                 Button(String(localized: "Cancel"), role: .cancel) { }
                                 Button(String(localized: "Delete"), role: .destructive) {
@@ -357,6 +368,17 @@ struct SettingsSubView: View {
                         
                     }
                     .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    
+                    /// About
+                    SettingsGroup(title: String(localized: "About")) {
+                        HStack {
+                            Text(String(localized: "Version"))
+                                .foregroundStyle(Color.theme.inputText)
+                            Spacer()
+                            Text("v1.0.0")
+                                .foregroundStyle(Color.theme.inputText)
+                        }
+                    }
                     
                 }
             }

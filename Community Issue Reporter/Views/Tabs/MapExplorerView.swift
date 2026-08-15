@@ -19,7 +19,7 @@ struct MapExplorerView: View {
     @Environment(SettingsStore.self) var settings
     @State private var profile = ProfileDataModel()
     
-    @State private var controller = MapExplorerController()
+    @State private var controller = MapExplorerController.shared
     @State private var searchCompleter = SearchCompleter()
     @FocusState private var isSearchFocused: Bool
     @FocusState private var isOverlaySearchFocused: Bool
@@ -80,7 +80,7 @@ struct MapExplorerView: View {
             VStack(spacing: 16) {
 //                Text("Repórtamelo")
 //                    .font(.custom("Lora", size: 16, relativeTo: .title))
-////                    .padding(.top, 16)
+//                    .padding(.top, 16)
 //                    .padding(.horizontal)
 //                    .kerning(0.6)
 //                    .frame(maxWidth: .infinity, alignment: .leading)
@@ -276,11 +276,12 @@ struct MapExplorerView: View {
             .aspectRatio(contentMode: .fit)
             .foregroundStyle(.black)
             .padding(isSelected ? 8 : 3)
-            .frame(width: isSelected ? 50 : 20, height: isSelected ? 50 : 20)
+            .frame(width: isSelected ? 50 : 28, height: isSelected ? 50 : 28)
             .background {
                 Circle()
+                    .stroke(Color.theme.inputBorder.opacity(0.4), lineWidth: 2)
                     .fill(.white)
-                    .padding(-1)
+//                    .padding(-1)
             }
             .animation(animation, value: isSelected)
             .background {
@@ -288,6 +289,8 @@ struct MapExplorerView: View {
                     PulseRingView(tint: issue.status.color, size: 80)
                 }
             }
+            .frame(minWidth: 44, minHeight: 44)
+//                .contentShape(Rectangle())
             .contentShape(.rect)
             .onTapGesture {
                 controller.expandedItem = issue
@@ -334,7 +337,6 @@ private struct StatusFilterRow: View {
                                         .foregroundStyle(status.color)
                                         .font(.subheadline.weight(.semibold))
                                 }
-//                                .foregroundStyle(isSelected ? Color.white : Color.primary)
                                 .padding(.vertical, 12)
                                 .padding(.horizontal, 16)
                                 .background(
@@ -343,11 +345,6 @@ private struct StatusFilterRow: View {
 //                                        .brightness(-0.2)
                                 )
                                 .glassEffect(.regular.interactive(), in: .capsule)
-//                                .transition(.blurReplace)
-//                                .overlay(
-//                                    Capsule()
-//                                        .stroke(status.color.opacity(isSelected ? 0.0 : 0.7), lineWidth: 1)
-//                                )
                             }
                             .sensoryFeedback(.selection, trigger: isSelected)
                         }

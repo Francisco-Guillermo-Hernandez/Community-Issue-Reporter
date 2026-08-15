@@ -45,7 +45,7 @@ struct UserPersonalizationView: View {
     @State private var isPresented: Bool = false
     @State private var triggerFeedBack: Bool = false
     @Binding var model: UserPersonalizationDataModel
-   
+    @State private var showNameError: Bool = false
     @State private var user: UserProfile?
     
     let appState = AuthViewModel()
@@ -179,8 +179,13 @@ struct UserPersonalizationView: View {
         .navigationTitle(Text("Personalize your profile"))
         .background(Color.theme.background)
         .task {
-            user = UserRepository.shared.getPublicInformation(authMethod: .Google)
+            ///
+            guard let authMethod = UserRepository.shared.getAuthMethod() else { return }
             
+            ///
+            user = UserRepository.shared.getPublicInformation(authMethod: authMethod)
+            
+            ///
             guard let user = user else { return }
             
             if let email = user.email {
@@ -281,6 +286,7 @@ struct UserPersonalizationView: View {
     UserPersonalizationView(model: $model, nextStep: {
         
     })
+    .environment(SubscriptionManager.shared)
 }
 
 

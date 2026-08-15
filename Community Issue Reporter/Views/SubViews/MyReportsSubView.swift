@@ -177,6 +177,14 @@ struct MyReportsSubView: View {
                             )
                             .contextMenu {
                                 Button {
+                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                    controller.openInMaps(report.coordinate)
+                                } label: {
+                                    Label("Open in Maps", systemImage: "map")
+                                }
+                                .accessibilityIdentifier("OpenInMapsButton")
+                                
+                                Button {
                                     UIPasteboard.general.string = report.id
                                 } label: {
                                     Label("Copy ID", systemImage: "document.on.document")
@@ -191,7 +199,13 @@ struct MyReportsSubView: View {
                                 }
                                 .accessibilityIdentifier("ShareReportURLButton")
                                 
-                                Button {
+//                                Button {
+//                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+//                                } label: {
+//                                    Label("Details", systemImage: "document.badge.ellipsis")
+//                                }
+                                
+                                Button(role: .destructive) {
                                     controller.reportToDelete = report
                                     controller.showDeleteAlert = true
                                 } label: {
@@ -210,7 +224,6 @@ struct MyReportsSubView: View {
             }
 
         }
-//        .ignoresSafeArea(edges: .all)
         .background(Color.theme.background)
         .scrollContentBackground(.hidden)
         .alert("Delete report", isPresented: $controller.showDeleteAlert) {

@@ -13,7 +13,7 @@ import SwiftUI
 struct ReportWizardContainer: View {
     @Bindable var model: ReportDataModel
     @Environment(\.dismiss) private var dismiss
-    @State private var uploadTrackers: [PhotoUploadTracker] = []
+//    @State private var uploadTrackers: [PhotoUploadTracker] = []
     @State private var controller: ReportController
     @FocusState private var focusedField: WizardElements?
     
@@ -77,7 +77,7 @@ struct ReportWizardContainer: View {
                                         case .location:
                                             LocationStepView(model)
                                         case .media:
-                                            MediaStepView(model, $uploadTrackers)
+                                            MediaStepView(model, $model.uploadTrackers)
                                         case .details:
                                             DetailsView(model, $focusedField)
                                         case .confirmation:
@@ -161,7 +161,7 @@ struct ReportWizardContainer: View {
             await self.controller.startRePorting(model)
             
             if model.report.reportState == .modifying {
-                uploadTrackers = model.getAttachmentsAsTrackers()
+                model.uploadTrackers = model.getAttachmentsAsTrackers()
             }
         }
         .alert("Status Update", isPresented: $controller.presentAlert) {
@@ -198,7 +198,7 @@ struct ReportWizardContainer: View {
                 ThemedButton(
                     message: controller.buttonMessage,
                     action: {
-                        controller.submit(model, uploadTrackers)
+                        controller.submit(model, model.uploadTrackers)
                     },
                     type: .primary,
                     style: .prominent,
@@ -229,7 +229,7 @@ struct ReportWizardContainer: View {
     }
  
     var isReadyToContinue: Bool {
-        !uploadTrackers.isEmpty && uploadTrackers.allSatisfy { $0.phase == .success }
+        !model.uploadTrackers.isEmpty && model.uploadTrackers.allSatisfy { $0.phase == .success }
     }
     
     var areDetailsValid: Bool {

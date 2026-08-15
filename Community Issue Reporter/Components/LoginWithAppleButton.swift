@@ -35,6 +35,25 @@ struct AuthPayload: Codable {
 }
 
 
+func checkAppleSignInState(forUserID userId: String) {
+    let provider = ASAuthorizationAppleIDProvider()
+    provider.getCredentialState(forUserID: userId) { state, error in
+        DispatchQueue.main.async {
+            switch state {
+            case .authorized:
+                // Keep user logged in
+                break
+            case .revoked, .notFound:
+                // Perform local sign out / reset UI
+                break
+            @unknown default:
+                break
+            }
+        }
+    }
+}
+
+
 struct LoginWithAppleButton: View {
     @Environment(\.colorScheme) var colorScheme
     var action: (ASAuthorization?, AppleAuthError?) -> Void
@@ -54,7 +73,7 @@ struct LoginWithAppleButton: View {
         .clipShape(Capsule())
         .buttonBorderShape(.capsule)
         .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-        .frame(height: 40)
+        .frame(height: 44)
         .overlay(
             Capsule()
                 .stroke(borderColor, lineWidth: 1)

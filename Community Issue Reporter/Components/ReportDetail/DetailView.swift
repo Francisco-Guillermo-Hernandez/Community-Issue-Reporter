@@ -5,8 +5,59 @@
 //  Created by Francisco Hernandez on 2/4/26.
 //
 
-import CoreLocation
 import SwiftUI
+import Observation
+import CoreLocation
+
+
+@MainActor
+@Observable
+final class DetailController {
+    
+    var selectedOption = "None"
+    var showPopover = false
+    var presentAlert: Bool = false
+    var reason: String = ""
+    let options = DetailReportOptions.allCases.map(\.description)
+    func report(_ id: String) -> Void {
+        Task {
+            let blockedReasonId = DetailReportOptions.allCases.first(where: { $0.description == selectedOption })?.rawValue ?? DetailReportOptions.other.rawValue
+           
+            
+           
+        }
+    }
+}
+
+
+// MARK: - Definitions
+
+enum DetailReportOptions: String, Codable, CaseIterable {
+    case wrongInformation
+    case explicitContent
+    case spam
+    case violence
+    case privacyIssues
+    case other
+    
+    var description: String {
+        switch self  {
+        case .wrongInformation:
+                return String(localized: "Wrong Information")
+            case .explicitContent:
+                return String(localized: "Explicit Content")
+            case .spam:
+                return String(localized: "Spam")
+            case .violence:
+                return String(localized: "Violence")
+            case .privacyIssues:
+                return String(localized: "Privacy issue")
+            case .other:
+                return String(localized: "Other")
+            
+        }
+    }
+}
 
 enum DetailNavigationDestination: Hashable {
     case comment(String)
@@ -45,6 +96,7 @@ struct PhotoSample: Identifiable, Hashable {
     }
 }
 
+// MARK: - View
 struct DetailView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
@@ -117,6 +169,8 @@ struct DetailView: View {
 
                     ///
                     BasicInformationView(for: report)
+                        .padding(.leading, -8)
+                        .padding(.trailing, 8)
 
                     ///
                     EvidenceOfTheReportView(report.attachments, id: report.id)

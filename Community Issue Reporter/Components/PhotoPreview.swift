@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Observation
 
 // MARK: - Enum definitions
 
@@ -38,15 +39,45 @@ enum ContentViolationReportOptions: String, Codable, CaseIterable {
     }
 }
 
-// MARK: Views
-struct PhotoPreview: View {
+// MARK: - Controller
+
+@MainActor
+@Observable
+class PhotoPreviewController {
+    var selectedOption = "None"
+    var showPopover = false
+    var presentAlert: Bool = false
+    var reason: String = ""
     let options = ContentViolationReportOptions.allCases.map(\.description)
+    func report(_ attachment: PreviewAttachment) -> Void {
+        Task {
+            let blockedReasonId = ContentViolationReportOptions.allCases.first(where: { $0.description == selectedOption })?.rawValue ?? ContentViolationReportOptions.other.rawValue
+            let type = TypeOfContentToReport(rawValue: attachment.type.rawValue) ?? .image
+            
+            let violation = ReportViolation(
+                type: type,
+                content: attachment,
+                profileId: attachment.uploaderUserName,
+                reason: reason.isEmpty ? selectedOption : reason,
+                blockedReasonId: blockedReasonId,
+                status: .sentToModeration
+            )
+            
+            do {
+                _ = try await ModerationRepository.shared.moderateContent(reason: violation, type: type)
+            } catch {
+                Toast.shared.show(message: String(localized: "friendly message"), type: .error)
+            }
+        }
+    }
+}
+
+// MARK: - Views
+struct PhotoPreview: View {
     
-    @State private var selectedOption = "None"
-    @State private var showPopover = false
-    @State private var presentAlert: Bool = false
+    @State private var controller = PhotoPreviewController()
     @State private var cornerRadius: CGFloat = .themeRadius * 1.4
-    @State private var reason: String = ""
+    @State private var completed: Bool = false
     var height: CGFloat = 170
     var width: CGFloat = 170
     
@@ -82,9 +113,21 @@ struct PhotoPreview: View {
                         maxHeight: mode == .full ? .infinity : nil,
                         alignment: .top
                     )
+                    .blur(radius: completed ? 0 : 4)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                     .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                    .overlay  {
+                        if !completed {
+                            ZStack {
+                                
+                                Image(systemName: "hourglass")
+                                    .font(.system(size: 36, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                            
+                    }
                     .overlay {
                         ZStack(alignment: .bottomLeading) {
                             
@@ -121,27 +164,27 @@ struct PhotoPreview: View {
                     .overlay(alignment: .topTrailing) {
                           
                         Button {
-                            showPopover.toggle()
+                            controller.showPopover.toggle()
                         } label: {
                             Image(systemName: "ellipsis")
                                 .padding(6)
                         }
                         .buttonBorderShape(.circle)
                         .buttonStyle(.glass)
-                        .popover(isPresented: $showPopover, arrowEdge: .top) {
+                        .popover(isPresented: $controller.showPopover, arrowEdge: .top) {
                             VStack(alignment: .leading, spacing: 15) {
                                 Text("Content options")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                                     .padding(.bottom, 5)
                                 
-                                ForEach(options, id: \.self) { option in
+                                ForEach(controller.options, id: \.self) { option in
                                     Button(action: {
                                         Task {
-                                            selectedOption = option
-                                            showPopover = false /// Closes popover upon selection
+                                            controller.selectedOption = option
+                                            controller.showPopover = false /// Closes popover upon selection
                                             try? await Task.sleep(for: .milliseconds(128))
-                                            presentAlert.toggle()
+                                            controller.presentAlert.toggle()
                                         }
                                     }) {
                                         HStack {
@@ -153,7 +196,7 @@ struct PhotoPreview: View {
                                     }
                                     .foregroundColor(.primary)
                                     
-                                    if option != options.last {
+                                    if option != controller.options.last {
                                         Divider() /// Visual separator between choices
                                     }
                                 }
@@ -163,22 +206,20 @@ struct PhotoPreview: View {
                             .presentationCompactAdaptation(.popover) /// Forces popover look on iPhone
                         }
                         .padding(.top, 10)
-//                        .padding(.trailing, 8)
-                        .alert(String(localized: "Confirm content blocking"), isPresented: $presentAlert) {
+                        .alert(String(localized: "Confirm content blocking"), isPresented: $controller.presentAlert) {
                             
-                            TextField(String(localized: "Type your reason"), text: $reason)
+                            TextField(String(localized: "Type your reason"), text: $controller.reason)
                             
                             Button(String(localized: "Cancel"), role: .cancel) { }
                             Button(String(localized: "Block"), role: .destructive) {
-                                Task {
-                                    
-                                }
+                                controller.report(attachment)
                             }
                         } message: {
                             Text(String(localized: "I confirm that this content violates our community guidelines."))
                         }
                         
                     }
+            
                    
             } placeholder: {
                 ProgressView()

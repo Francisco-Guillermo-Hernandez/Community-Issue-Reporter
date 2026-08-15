@@ -12,7 +12,7 @@ struct BasicInformationView: View {
     private var opacity: Double = 0.85
     init(for report: MapExplorerReport) { self.report = report }
     var body: some View {
-        HStack(spacing: .themeSpacing * 7) {
+        HStack(spacing: .themeSpacing) {
             
             Group {
                 
@@ -25,6 +25,12 @@ struct BasicInformationView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
+                .frame(height: 44)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.1, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1.1, style: .continuous))
 
                 VStack {
                     Text("Severity")
@@ -35,6 +41,13 @@ struct BasicInformationView: View {
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
+                .frame(height: 44)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.1, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1.1, style: .continuous))
+      
 
                 VStack {
                     Text("Status")
@@ -46,6 +59,12 @@ struct BasicInformationView: View {
                         .fontWeight(.semibold)
 
                 }
+                .frame(height: 44)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+                .background(.thinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.1, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 1.1, style: .continuous))
             }
         }
         .frame(maxWidth: .infinity)

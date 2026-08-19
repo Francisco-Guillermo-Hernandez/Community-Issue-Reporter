@@ -7,6 +7,7 @@ enum ProfileDestinations: Hashable {
     case signPetitions
     case settings
     case licenses
+    case moderation
 }
 
 @Observable

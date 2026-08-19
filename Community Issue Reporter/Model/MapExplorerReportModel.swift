@@ -10,7 +10,7 @@ import CoreLocation
 
 let miliSeconds: Double = 1000
 
-struct MapExplorerReport: Identifiable, Decodable, Hashable {
+struct MapExplorerReport: Identifiable, Codable, Hashable {
     let id: String
     let lat: Double
     let lng: Double

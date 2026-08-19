@@ -15,8 +15,25 @@ enum CommentForType: String, Codable {
 struct CommentToBlock: Codable {
     let id: String
     let message: String
+    let profileId: String
     let commentFor: CommentForType
     let resourceId: String
+    
+    init(id: String, message: String, profileId: String, commentFor: CommentForType, resourceId: String) {
+        self.id = id
+        self.message = message
+        self.profileId = profileId
+        self.commentFor = commentFor
+        self.resourceId = resourceId
+    }
+    
+    init(_ comment: Comment) {
+        self.id = comment.id ?? ""
+        self.message = comment.message
+        self.profileId = comment.profileId
+        self.commentFor = comment.commentFor
+        self.resourceId = comment.resourceId
+    }
 }
 
 struct Comment: Identifiable, Codable {
@@ -24,6 +41,7 @@ struct Comment: Identifiable, Codable {
     let name: String
     let userName: String
     let profilePicture: String
+    let profileId: String
     let commentFor: CommentForType
     let resourceId: String
     let message: String
@@ -37,6 +55,7 @@ struct Comment: Identifiable, Codable {
         name: String,
         userName: String,
         profilePicture: String,
+        profileId: String,
         commentFor: CommentForType,
         resourceId: String,
         message: String,
@@ -49,6 +68,7 @@ struct Comment: Identifiable, Codable {
         self.name = name
         self.userName = userName
         self.profilePicture = profilePicture
+        self.profileId = profileId
         self.commentFor = commentFor
         self.resourceId = resourceId
         self.message = message
@@ -66,6 +86,7 @@ struct Comment: Identifiable, Codable {
     ) {
         self.id = UUID().uuidString
         self.profilePicture = UserRepository.shared.getProfilePicture()
+        self.profileId = "currentUser"
         self.name = UserRepository.shared.getName()
         self.userName = UserRepository.shared.getUsername()
         self.commentFor = commentFor

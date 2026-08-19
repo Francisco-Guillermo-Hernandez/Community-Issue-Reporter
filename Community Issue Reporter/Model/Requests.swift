@@ -100,6 +100,16 @@ enum TypeOfContentToReport: String, CaseIterable, Codable {
     case video
     case comment
     case petition
+    
+    var description: String {
+        switch self {
+            case .image: return String(localized: "Image")
+            case .report: return String(localized: "Report")
+            case .video: return String(localized: "Video")
+            case .comment: return String(localized: "Comment")
+            case .petition: return String(localized: "Petition")
+        }
+    }
 }
 
 enum ReportViolationStatus: String, CaseIterable, Codable {

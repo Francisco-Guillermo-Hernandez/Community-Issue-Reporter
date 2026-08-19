@@ -161,6 +161,55 @@ struct InsightsFilter {
 
 struct EmptyResponse: Codable {}
 
+
+struct ModeratedContent: Codable {
+    let id: String
+    let commentFor: String?
+    let message: String?
+    let profileId: String?
+    let resourceId: String?
+    let createdAtRaw: Int64?
+    let createdAt: Int64?
+    let updatedAt: Int64?
+    let fileName: String?
+    let reportContainer: String?
+    let state: String?
+    let type: String?
+    let uploaderUserName: String?
+    
+    init(
+        id: String,
+        commentFor: String? = nil,
+        message: String? = nil,
+        profileId: String? = nil,
+        resourceId: String? = nil,
+        createdAtRaw: Int64? = nil,
+        createdAt: Int64? = nil,
+        updatedAt: Int64? = nil,
+        fileName: String? = nil,
+        reportContainer: String? = nil,
+        state: String? = nil,
+        type: String? = nil,
+        uploaderUserName: String? = nil
+    ) {
+        self.id = id
+        self.commentFor = commentFor
+        self.message = message
+        self.profileId = profileId
+        self.resourceId = resourceId
+        self.createdAtRaw = createdAtRaw
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        self.fileName = fileName
+        self.reportContainer = reportContainer
+        self.state = state
+        self.type = type
+        self.uploaderUserName = uploaderUserName
+    }
+}
+
+
+
 struct PublicStats: Decodable {
     let totalReports: Int
     let totalSignatures: Int
@@ -171,4 +220,10 @@ struct PublicStats: Decodable {
 struct citizenProfile: Decodable {
     let user: User
     let stats: PublicStats
+}
+
+struct ReportAttachmentGrouping: Decodable {
+    let attachmentId: String
+    let attachmentContainer: String
+    let key: String
 }

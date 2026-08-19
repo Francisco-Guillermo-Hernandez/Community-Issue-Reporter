@@ -11,11 +11,9 @@ struct FollowUpSectionView: View {
     @State private var opacity: Double = 0.85
     
     var report: MapExplorerReport
-    var resolution: Resolution?
     
-    init(for report: MapExplorerReport, resolution: Resolution? = nil) {
+    init(for report: MapExplorerReport) {
         self.report = report
-        self.resolution = resolution
     }
     
     private var isFollowUpDisabled: Bool {
@@ -55,7 +53,7 @@ struct FollowUpSectionView: View {
                 }
                 .listRowBackground(Color.clear)
                 
-                NavigationLink(destination: IssueTimelineView(of: resolution)) {
+                NavigationLink(destination: IssueTimelineView(reportId: report.id)) {
                     HStack {
                         Text("Details of the progress")
                             .font(.caption)

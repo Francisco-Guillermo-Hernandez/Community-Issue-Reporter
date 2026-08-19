@@ -26,15 +26,12 @@ struct CustomBadgeView: View {
         
         HStack {
             Image(systemName: badge.icon)
-//                .foregroundStyle(Color.secondary)
                 .foregroundStyle(Color.theme.inputText)
 
             Text(badge.title)
                 .fixedSize()
                 .font(.caption)
-//                .foregroundColor(.secondary)
                 .foregroundStyle(Color.theme.inputText)
-                .fontWeight(.bold)
         }
         .frame(maxWidth: .infinity)
         .frame(height: 24)
@@ -43,11 +40,8 @@ struct CustomBadgeView: View {
         .padding(.horizontal)
         .background(
             Capsule()
-//                .fill(Color.clear)
-//                .fill(badge.color)
                 .fill(Color.theme.cardBackground)
                 .glassEffect(in: .capsule)
-//                .brightness(colorScheme == .dark ? (-0.9) : 1)
         )
         .overlay {
             Capsule()

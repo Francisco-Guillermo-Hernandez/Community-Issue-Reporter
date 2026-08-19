@@ -65,8 +65,13 @@ class PhotoPreviewController {
             
             do {
                 _ = try await ModerationRepository.shared.moderateContent(reason: violation, type: type)
+                Toast.shared.show(message: String(localized: "Your moderation petition was sent"), type: .info)
+            } catch CommonIntercommunicationErrors.serverError(_) {
+                Toast.shared.show(message: String(localized: "Server Error"), type: .error)
+            } catch CommonIntercommunicationErrors.networkError(_) {
+                Toast.shared.show(message: String(localized: "It looks like that your network is experiencing some delays, please try again."), type: .error)
             } catch {
-                Toast.shared.show(message: String(localized: "friendly message"), type: .error)
+                Toast.shared.show(message: String(localized: "Error"), type: .error)
             }
         }
     }
@@ -113,15 +118,42 @@ struct PhotoPreview: View {
                         maxHeight: mode == .full ? .infinity : nil,
                         alignment: .top
                     )
-                    .blur(radius: completed ? 0 : 4)
+                    .blur(radius: attachment.state == .confirmed ? 0 : 3)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                     .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                     .overlay  {
-                        if !completed {
+                        if self.attachment.state == .pending {
                             ZStack {
                                 
                                 Image(systemName: "hourglass")
+                                    .font(.system(size: 36, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        
+                        if self.attachment.state == .inappropriate {
+                            ZStack {
+                                Color.theme.destructive
+                                Image(systemName: "nosign")
+                                    .font(.system(size: 36, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        
+                        if self.attachment.state == .deleted {
+                            ZStack {
+                                
+                                Image(systemName: "xmark.bin.circle.fill")
+                                    .font(.system(size: 36, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        
+                        if self.attachment.state == .manualRevision {
+                            ZStack {
+                                
+                                Image(systemName: "rectangle.and.hand.point.up.left.filled")
                                     .font(.system(size: 36, weight: .bold))
                                     .foregroundColor(.white)
                             }

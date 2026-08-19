@@ -19,12 +19,30 @@ final class DetailController {
     var presentAlert: Bool = false
     var reason: String = ""
     let options = DetailReportOptions.allCases.map(\.description)
-    func report(_ id: String) -> Void {
+    func report(_ report: MapExplorerReport) -> Void {
         Task {
             let blockedReasonId = DetailReportOptions.allCases.first(where: { $0.description == selectedOption })?.rawValue ?? DetailReportOptions.other.rawValue
-           
+            let type: TypeOfContentToReport = .report
             
-           
+            let violation = ReportViolation(
+                type: type,
+                content: report,
+                profileId: report.profileId,
+                reason: reason.isEmpty ? selectedOption : reason,
+                blockedReasonId: blockedReasonId,
+                status: .sentToModeration
+            )
+            
+            do {
+                _ = try await ModerationRepository.shared.moderateReport(reason: violation, type: type)
+                Toast.shared.show(message: String(localized: "Your moderation petition was sent"), type: .info)
+            } catch CommonIntercommunicationErrors.serverError(_) {
+                Toast.shared.show(message: String(localized: "Server Error"), type: .error)
+            } catch CommonIntercommunicationErrors.networkError(_) {
+                Toast.shared.show(message: String(localized: "It looks like that your network is experiencing some delays, please try again."), type: .error)
+            } catch {
+                Toast.shared.show(message: String(localized: "Error"), type: .error)
+            }
         }
     }
 }
@@ -74,27 +92,6 @@ struct ReportFollowUpView: View {
     }
 }
 
-struct PhotoSample: Identifiable, Hashable {
-    let id: String
-    let photo: String
-    let published: Date
-    let user: String
-    var more: Bool
-
-    init(
-        id: String,
-        photo: String,
-        published: Date,
-        user: String,
-        more: Bool = false
-    ) {
-        self.id = id
-        self.photo = photo
-        self.published = published
-        self.user = user
-        self.more = more
-    }
-}
 
 // MARK: - View
 struct DetailView: View {
@@ -118,7 +115,7 @@ struct DetailView: View {
     @State private var type: AlertType = .success
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var comments: Comments = .init(documents: [], hasNext: false, hasPrev: false)
-    @State private var resolution: Resolution?
+    @State private var controller = DetailController()
 
     init(report: MapExplorerReport) {
         self.report = report
@@ -176,7 +173,7 @@ struct DetailView: View {
                     EvidenceOfTheReportView(report.attachments, id: report.id)
 
                     ///
-                    FollowUpSectionView(for: report, resolution: resolution)
+                    FollowUpSectionView(for: report)
                     
                     ///
                     MoreInformationView(report: report)
@@ -186,15 +183,6 @@ struct DetailView: View {
 
                 }
                 .padding(.leading, 16)
-            }
-            .task(id: activeDetent) {
-                guard activeDetent == .medium || activeDetent == .large else { return }
-                guard report.institutionId != nil && report.assignedTo != nil else { return }
-                do {
-                    self.resolution = try await ReportRepository.shared.fetchResolutionByReport(report.id)
-                } catch {
-                    print("Error fetching resolution: \(error)")
-                }
             }
             .task(id: activeDetent) {
                 
@@ -210,7 +198,6 @@ struct DetailView: View {
                 if activeDetent == .large {
                     customBottomToolbar(
                         commentAction: {
-                        
                             path.append(DetailNavigationDestination.comment(self.report.id))
                         },
                         addPhotoAction: {
@@ -304,6 +291,19 @@ struct DetailView: View {
             }
             .toolbar {
 
+                ToolbarItem(placement: .navigation) {
+                    Button(role: .none) {
+                        if activeDetent == .fraction(0.3) {
+                            activeDetent = .large
+                        } else {
+                            activeDetent = .fraction(0.3)
+                        }
+                    } label: {
+                        Image(systemName: activeDetent == .large ?  "chevron.down" : "chevron.up" )
+                    }
+                    .accessibilityIdentifier("ExpandCollapseSheetButton")
+                }
+                
                 ToolbarItem(placement: .cancellationAction) {
                     Button(role: .close) {
                         dismiss()
@@ -316,21 +316,66 @@ struct DetailView: View {
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button(role: .destructive) {
-                           
+                if !UserRepository.shared.isOwnProfile(report.profileId) {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+                            
+                            Button(role: .destructive) {
+                                controller.showPopover.toggle()
+                            } label: {
+                                Label("Report content", systemImage: "hand.raised.slash.fill")
+                            }
+                            .accessibilityIdentifier("ReportThisContentButton")
                         } label: {
-                            Label("Report content", systemImage: "hand.raised.slash.fill")
+                            Image(systemName: "ellipsis")
                         }
-                        .accessibilityIdentifier("ReportCitizenButton")
-                    } label: {
-                        Image(systemName: "ellipsis")
-    //                        .foregroundColor(colorScheme == .dark ? .white : .black)
-    //                        .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
+                        .popover(isPresented: $controller.showPopover, arrowEdge: .top) {
+                            VStack(alignment: .leading, spacing: 15) {
+                                Text(String(localized: "Content options"))
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                    .padding(.bottom, 5)
+                                
+                                ForEach(controller.options, id: \.self) { option in
+                                    Button(action: {
+                                        Task {
+                                            controller.selectedOption = option
+                                            controller.showPopover = false
+                                            try? await Task.sleep(for: .milliseconds(128))
+                                            controller.presentAlert.toggle()
+                                        }
+                                    }) {
+                                        HStack {
+                                            Text(option)
+                                            Spacer()
+                                        }
+                                        .contentShape(Rectangle())
+                                    }
+                                    .foregroundColor(.primary)
+                                    
+                                    if option != controller.options.last {
+                                        Divider()
+                                    }
+                                }
+                            }
+                            .padding()
+                            .frame(width: 256)
+                            .presentationCompactAdaptation(.popover)
+                        }
+                        .alert(String(localized: "Confirm content reporting"), isPresented: $controller.presentAlert) {
+                            if controller.selectedOption == DetailReportOptions.other.description {
+                                TextField(String(localized: "Type your reason"), text: $controller.reason)
+                            }
+                            
+                            Button(String(localized: "Cancel"), role: .cancel) { }
+                            Button(String(localized: "Report"), role: .destructive) {
+                                controller.report(report)
+                            }
+                        } message: {
+                            Text(String(localized: "I confirm that this report violates our community guidelines."))
+                        }
                     }
                 }
-                
                 
             }
 
@@ -338,12 +383,12 @@ struct DetailView: View {
         .toolbarTitleDisplayMode(.inlineLarge)
         .presentationDetents([.fraction(0.30), .medium, .large], selection: $activeDetent)
         .presentationDragIndicator(.visible)
+//        .withToast()
     }
 
     private func hideAlert() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.250) {
             self.showAlert = false
-
         }
     }
 }

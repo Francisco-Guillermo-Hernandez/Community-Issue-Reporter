@@ -321,7 +321,7 @@ struct LinkButtonStyle: ButtonStyle {
         
         ThemedButton(message: "Next Step", action: {}, type: .primary).disabled(true)
         Spacer()
-        ThemedButton(message: "Get Started", action: {}, type: .primary, isLoading: .constant(true))
+        ThemedButton(message: "Get Started", action: {}, type: .primary, isLoading: .constant(false))
         
         ThemedButton(message: "Get Started", action: {}, type: .secondary)
         

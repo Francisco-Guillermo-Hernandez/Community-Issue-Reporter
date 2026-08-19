@@ -66,8 +66,15 @@ class CommentRowController {
             
             do {
                 _ = try await ModerationRepository.shared.moderateComment(reason: violation, type: .comment)
+                Toast.shared.show(message: String(localized: "Your moderation petition was sent"), type: .info)
+                print("moderation sent")
+            } catch CommonIntercommunicationErrors.serverError(_) {
+                Toast.shared.show(message: String(localized: "Server Error"), type: .error)
+            } catch CommonIntercommunicationErrors.networkError(_) {
+                Toast.shared.show(message: String(localized: "It looks like that your network is experiencing some delays, please try again."), type: .error)
             } catch {
-                Toast.shared.show(message: String(localized: "friendly message"), type: .error)
+                print(error)
+                Toast.shared.show(message: String(localized: "Error"), type: .error)
             }
         }
     }
@@ -128,60 +135,66 @@ struct CommentRow: View {
                 
                 Spacer(minLength: 0)
                 
-                Button {
-                    controller.showPopover.toggle()
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .padding(6)
-                }
-                .frame(width: 24, height: 24, alignment: .top)
-                .disabled(controller.disableReportViolationButton(comment.profileId))
-                .buttonStyle(.borderless)
-                .foregroundColor(.primary)
-                .popover(isPresented: $controller.showPopover, arrowEdge: .top) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Comment report options")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                            .padding(.bottom, 5)
-                        
-                        ForEach(controller.options, id: \.self) { option in
-                            Button(action: {
-                                Task {
-                                    controller.selectedOption = option
-                                    controller.showPopover = false /// Closes popover upon selection
-                                    try? await Task.sleep(for: .milliseconds(128))
-                                    controller.presentAlert.toggle()
-                                }
-                            }) {
-                                HStack {
-                                    Text(option)
-                                    
-                                    Spacer()
-                                }
-                                .contentShape(Rectangle()) /// Ensures the whole row is clickable
-                            }
-                            .foregroundColor(.primary)
+                
+                if !controller.disableReportViolationButton(comment.profileId) {
+                    Button {
+                        controller.showPopover.toggle()
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .padding(6)
+                    }
+                    .frame(width: 24, height: 24, alignment: .top)
+                    .disabled(controller.disableReportViolationButton(comment.profileId))
+                    .buttonStyle(.borderless)
+                    .buttonStyle(.borderless)
+                    .foregroundColor(.primary)
+                    .popover(isPresented: $controller.showPopover, arrowEdge: .top) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Comment report options")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                                .padding(.bottom, 5)
                             
-                            if option != controller.options.last {
-                                Divider() /// Visual separator between choices
+                            ForEach(controller.options, id: \.self) { option in
+                                Button(action: {
+                                    Task {
+                                        controller.selectedOption = option
+                                        controller.showPopover = false /// Closes popover upon selection
+                                        try? await Task.sleep(for: .milliseconds(128))
+                                        controller.presentAlert.toggle()
+                                    }
+                                }) {
+                                    HStack {
+                                        Text(option)
+                                        
+                                        Spacer()
+                                    }
+                                    .contentShape(Rectangle()) /// Ensures the whole row is clickable
+                                }
+                                .foregroundColor(.primary)
+                                
+                                if option != controller.options.last {
+                                    Divider() /// Visual separator between choices
+                                }
                             }
                         }
+                        .padding()
+                        .frame(width: 290) /// Sets a fixed width for desktop/iPad presentation
+                        .presentationCompactAdaptation(.popover) /// Forces popover look on iPhone
                     }
-                    .padding()
-                    .frame(width: 290) /// Sets a fixed width for desktop/iPad presentation
-                    .presentationCompactAdaptation(.popover) /// Forces popover look on iPhone
-                }
-                .padding(.top, 10)
-                .alert(String(localized: "Confirm content blocking"), isPresented: $controller.presentAlert) {
-                    
-                    Button(String(localized: "Cancel"), role: .cancel) { }
-                    Button(String(localized: "Block"), role: .destructive) {
-                        controller.report(comment)
+                    .padding(.top, 10)
+                    .alert(String(localized: "Confirm content blocking"), isPresented: $controller.presentAlert) {
+                        
+                        Button(String(localized: "Cancel"), role: .cancel) { }
+                        Button(String(localized: "Block"), role: .destructive) {
+                            controller.report(comment)
+                        }
+                    } message: {
+                        Text(String(localized: "I confirm that this content violates our community guidelines."))
                     }
-                } message: {
-                    Text(String(localized: "I confirm that this content violates our community guidelines."))
                 }
+                
+                
             }
             .padding(.bottom, 8)
             
@@ -223,4 +236,5 @@ struct CommentRow: View {
         .padding()
         .background(Color.theme.background)
     }
+    .withToast()
 }

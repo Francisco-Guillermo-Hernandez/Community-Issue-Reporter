@@ -52,16 +52,19 @@ struct TimelineNode<Content: View>: View {
 
 // MARK: - Multiline
 struct IssueTimelineView: View {
-    let resolution: Resolution?
+    let reportId: String
     
-    init(of resolution: Resolution?) {
-        self.resolution = resolution
-    }
+    @State private var isLoading: Bool = false
+    @State private var resolution: Resolution?
     
     var body: some View {
         ScrollView {
            
             VStack(alignment: .leading, spacing: 0) {
+                
+                if isLoading {
+                    LoadingView()
+                }
                 
                if let resolution {
                    /// 1. Reported
@@ -147,6 +150,16 @@ struct IssueTimelineView: View {
                 }
             }
             .padding()
+            .task {
+                do {
+                    self.isLoading = true
+                    self.resolution = try await ReportRepository.shared.fetchResolutionByReport(reportId)
+                } catch {
+                    print("Error fetching resolution: \(error)")
+                }
+                
+                self.isLoading = false
+            }
         }
         .toolbarTitleDisplayMode(.large)
         .navigationTitle("Report follow up")
@@ -214,7 +227,8 @@ struct AttachmentDetailView: View {
 #Preview {
     
     NavigationStack {
-        IssueTimelineView(of: .resolution)
+        IssueTimelineView(reportId: "")
+        //of: .resolution
         
         Button("showJson") {
             do {

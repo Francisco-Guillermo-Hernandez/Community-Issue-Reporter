@@ -8,17 +8,39 @@
 import SwiftUI
 
 enum LinkType {
+    case termsAndConditions
     case full
     case privacy
+    case policies
+    case endUserLicenseAgreement
 }
 
 struct LinksView: View {
     @State private var webViewURL = URL(string: "https://reportamelo.app/legal/terms")
     @State private var showWebView = false
     
-    var mode: LinkType = .full
+    var type: LinkType = .termsAndConditions
     
-    var underlinedMarkdown: AttributedString {
+    var fullMarkdown: AttributedString {
+        let rawMarkdown = String(localized: "You can review our [Terms of Service](https://reportamelo.app/legal/terms), [Privacy Policy](https://reportamelo.app/legal/privacy), [EULA](https://reportamelo.app/legal/eula) and [Policies](https://reportamelo.app/legal/policies).")
+        
+        /// Parse the raw Markdown string
+        guard var attributedString = try? AttributedString(markdown: rawMarkdown) else {
+            return AttributedString(rawMarkdown)
+        }
+        
+        /// Loop through all segments to find links
+        for run in attributedString.runs {
+            if run.link != nil {
+                /// Apply the underline style to the link range
+                attributedString[run.range].underlineStyle = .single
+            }
+        }
+        
+        return attributedString
+    }
+    
+    var termsAndConditionsMarkdown: AttributedString {
         let rawMarkdown = String(localized: "By continuing, you agree to our [Terms of Service](https://reportamelo.app/legal/terms) and [Privacy Policy](https://reportamelo.app/legal/privacy).")
         
         /// Parse the raw Markdown string
@@ -56,13 +78,50 @@ struct LinksView: View {
         
         return attributedString
     }
+    
+    var policiesMarkdown: AttributedString {
+        let rawMarkdown = String(localized: "If you have doubts, please review our [Policies](https://reportamelo.app/legal/policies).")
+        
+        /// Parse the raw Markdown string
+        guard var attributedString = try? AttributedString(markdown: rawMarkdown) else {
+            return AttributedString(rawMarkdown)
+        }
+        
+        /// Loop through all segments to find links
+        for run in attributedString.runs {
+            if run.link != nil {
+                /// Apply the underline style to the link range
+                attributedString[run.range].underlineStyle = .single
+            }
+        }
+        
+        return attributedString
+    }
 
+    var endUserLicenseAgreementMarkdown: AttributedString {
+        let rawMarkdown = String(localized: "If you have doubts, please review our [End User License Agreement](https://reportamelo.app/legal/eula).")
+        
+        /// Parse the raw Markdown string
+        guard var attributedString = try? AttributedString(markdown: rawMarkdown) else {
+            return AttributedString(rawMarkdown)
+        }
+        
+        /// Loop through all segments to find links
+        for run in attributedString.runs {
+            if run.link != nil {
+                /// Apply the underline style to the link range
+                attributedString[run.range].underlineStyle = .single
+            }
+        }
+        
+        return attributedString
+    }
+    
     var body: some View {
-        Text(mode == .full ? underlinedMarkdown : privacyMarkdown)
+        Text(getLinks(type))
             .font(.footnote)
             .foregroundColor(.secondary)
             .tint(Color.theme.primary.mix(with: .white, by: 0.1))
-            .frame(maxWidth: .infinity, alignment: .center)
             .kerning(-0.2)
             .environment(\.openURL, OpenURLAction { url in
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -74,6 +133,22 @@ struct LinksView: View {
                 WebBrowserView(url: $webViewURL)
             }
     }
+    
+    private func getLinks(_ type: LinkType) -> AttributedString {
+        switch type {
+            case .full:
+                return fullMarkdown
+            case .privacy:
+                return privacyMarkdown
+            case .policies:
+                return policiesMarkdown
+            case .endUserLicenseAgreement:
+                return endUserLicenseAgreementMarkdown
+            case .termsAndConditions:
+                return termsAndConditionsMarkdown
+            
+        }
+    }
 }
 
 
@@ -82,5 +157,5 @@ struct LinksView: View {
     
     Divider()
     
-    LinksView(mode: .privacy)
+    LinksView(type: .privacy)
 }

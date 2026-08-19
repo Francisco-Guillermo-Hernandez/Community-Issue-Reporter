@@ -71,6 +71,8 @@ enum TokenType: String {
     case profileId = "profileId"
     case email = "email"
     case name = "name"
+    case authMethod = "authMethod"
+    case authenticationMethod = "authenticationMethod"
 }
 
 extension KeychainService {

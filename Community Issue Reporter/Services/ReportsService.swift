@@ -68,7 +68,7 @@ struct ReportsService {
         return try await client.patch(path: "reports/\(reportId)", body: report.toDao(), headers: headers, withOAuth: true)
     }
     
-    func submitGroupedAttachments(attachments: [GroupedAttachmentPayload], headers: Array<HTTPHeader>) async throws -> GenericResponse {
+    func submitGroupedAttachments(attachments: [GroupedAttachmentPayload], headers: Array<HTTPHeader>) async throws -> CustomizedResponse<[ReportAttachmentGrouping]> {
         return try await client.post(path: "report-attachments/group/by/container", body: attachments, headers: headers, withOAuth: true)
     }
     

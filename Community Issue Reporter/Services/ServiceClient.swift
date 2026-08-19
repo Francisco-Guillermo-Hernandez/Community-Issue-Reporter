@@ -165,7 +165,7 @@ struct ServiceClient {
             return GenericResponse(id: "", message: "", code: "NO_CONTENT")
         }
         if let jsonString = String(data: body, encoding: .utf8) {
-            print("URL: \(url) Error Response Body: \(jsonString)")
+            print("URL: \(url) --- Response Body: \(jsonString)")
         }
         
         do {
@@ -567,6 +567,15 @@ struct ServiceClient {
         
         decoder.dateDecodingStrategy = .custom { decoder in
             let container = try decoder.singleValueContainer()
+            
+            if let timestamp = try? container.decode(Double.self) {
+                if timestamp > 10000000000 {
+                    return Date(timeIntervalSince1970: timestamp / 1000.0)
+                } else {
+                    return Date(timeIntervalSince1970: timestamp)
+                }
+            }
+            
             let value = try container.decode(String.self)
             
             /// Formatter with fractional seconds (e.g., 2026-05-22T20:55:00.000Z)

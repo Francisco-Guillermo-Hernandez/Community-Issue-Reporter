@@ -173,13 +173,15 @@ final class UserRepository {
         }
         
         if authMethod == .Apple {
+            let email = KeychainService.getToken(.email)
+            let name = KeychainService.getToken(.name)
+            
             return UserProfile(
-                 username: "",
-                 avatar: nil,
-                 email: "",
-                 profileId: ""
-                
-             )
+                username: name,
+                avatar: urlFromString("https://development-api.reportamelo.app/avatars/1b11fcde-1fe1-1cca-11e1-111111111111.png"),
+                email: email,
+                profileId: ""
+            )
         }
         
         return nil
@@ -325,6 +327,12 @@ final class UserRepository {
         return token.contains("completion:state:successfully")
     }
     
+    func getAuthMethod() -> AuthMethod? {
+        let token = KeychainService.getToken(.authMethod)
+        guard !token.isEmpty else { return nil }
+        return AuthMethod(rawValue: token)
+    }
+    
     /// Lets check if user has a valid session
     func isSessionValid() -> Bool {
         let token = KeychainService.getToken(.sessionStateVerification)
@@ -462,11 +470,13 @@ struct DeviceTokenRequest: Encodable, Decodable {
     let deviceToken: String
     let deviceId:    String
     let platform:    DeviceType
+    let isActive:    Bool
     
-    init(deviceToken: String, deviceId: String, platform: DeviceType) {
+    init(deviceToken: String, deviceId: String, platform: DeviceType, isActive: Bool = true) {
         self.deviceToken = deviceToken
         self.deviceId = deviceId
         self.platform = platform
+        self.isActive = isActive
     }
 }
 

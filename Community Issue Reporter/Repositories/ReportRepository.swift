@@ -154,7 +154,7 @@ final class ReportRepository {
         }
     }
 
-    func submitGroupedAttachments(attachments: [GroupedAttachmentPayload]) async throws -> SuccessfulResult {
+    func submitGroupedAttachments(attachments: [GroupedAttachmentPayload]) async throws -> CustomizedResponse<[ReportAttachmentGrouping]> {
         do {
             let response = try await self.reportsService.submitGroupedAttachments(
                 attachments: attachments,
@@ -162,7 +162,7 @@ final class ReportRepository {
             )
             
             if response.code == "ATTACHMENTS_SAVED" {
-                return .created
+                return response
             } else {
                 throw CommonIntercommunicationErrors.genericError("Error submitting report attachments")
             }

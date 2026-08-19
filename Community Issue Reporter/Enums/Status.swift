@@ -14,6 +14,10 @@ enum IssueStatus: String, CaseIterable, Identifiable {
     case petitionToSign = "signature"
     case fixed = "wrench.and.screwdriver"
     case assigned = "person.badge.plus"
+    case rejected = "xmark.bin"
+    case rectification = "eraser.trianglebadge.exclamationmark"
+    case humanReview = "person.crop.circle.badge.plus"
+    case underReview = "person.fill.checkmark"
     
     var id: String { self.rawValue }
     
@@ -27,6 +31,10 @@ enum IssueStatus: String, CaseIterable, Identifiable {
             case .petitionToSign: return String(localized: "Petition to Sign")
             case .fixed: return String(localized: "Fixed")
             case .assigned: return String(localized: "Assigned")
+            case .rejected: return String(localized: "Rejected")
+            case .rectification: return String(localized: "Rectification")
+            case .humanReview: return String(localized: "Human Review")
+            case .underReview: return String(localized: "Under Review")
         }
     }
     
@@ -38,6 +46,10 @@ enum IssueStatus: String, CaseIterable, Identifiable {
             case .petitionToSign: return .purple
             case .confirmed: return .green
             case .assigned: return .yellow
+            case .rejected: return .red
+            case .rectification: return .gray
+            case .humanReview: return .cyan
+            case .underReview: return .blue
         }
     }
     
@@ -55,6 +67,14 @@ enum IssueStatus: String, CaseIterable, Identifiable {
                 return 5
             case .assigned:
                 return 6
+            case .rejected:
+                return 7
+            case .rectification:
+                return 8
+            case .humanReview:
+                return 9
+            case .underReview:
+                return 10
         }
     }
 }

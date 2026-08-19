@@ -21,7 +21,7 @@ struct Community_Issue_ReporterApp: App {
     let container: ModelContainer
     
     /// Inject auth view model to persist data related with Google auth
-    @StateObject private var authViewModel = AuthViewModel()
+    @StateObject private var authViewModel = AuthViewModel.shared
     
     /// Inject settings store
     @State private var settingsStore = SettingsStore.shared

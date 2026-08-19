@@ -49,12 +49,14 @@ struct LoginView: View {
                             print(error)
                         }
                     }
+                    .disabled(controller.disableLoginButtons)
                     
                     GooglePillButton(action: {
                         controller.loginWithGoogle(onTokenReceived: onTokenReceived)
                     })
                     .disabled(controller.disableLoginButtons)
                     .accessibilityIdentifier("LoginWithGoogle")
+                    .frame(maxWidth: .infinity, maxHeight: 44)
                     
                     ThemedButton(
                         message: String(localized: "Login as a Guest"),
@@ -64,7 +66,7 @@ struct LoginView: View {
                         type: .outline,
                         style: .normal
                     )
-                    .frame(maxWidth: .infinity, maxHeight: 40)
+                    .frame(maxWidth: .infinity, maxHeight: 44)
                     .disabled(controller.disableLoginButtons)
                     .accessibilityIdentifier("LoginAsGuest")
                 }
@@ -91,7 +93,7 @@ struct LoginView: View {
                     .glassEffect(in:  RoundedRectangle(cornerRadius: 52, style: .continuous))
             )
             .padding(.horizontal, 8)
-            .padding(.bottom, 9)
+            .padding(.bottom, 8)
         }
         .ignoresSafeArea(edges: .bottom)
     }

@@ -47,12 +47,44 @@
         }
       }
     },
+    "**Content type:** %@" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Tipo de contenido:** %@"
+          }
+        }
+      }
+    },
+    "**Content type:** Attachment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Tipo de contenido:** Adjunto"
+          }
+        }
+      }
+    },
+    "**Content type:** Comment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "**Tipo de contenido:** Comentario"
+          }
+        }
+      }
+    },
     "%@ of %lld signatures" : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ of %2$lld signatures"
+            "state" : "translated",
+            "value" : "%1$@ de %2$lld firmas"
           }
         }
       }
@@ -128,6 +160,9 @@
         }
       }
     },
+    "8466b51" : {
+
+    },
     "About" : {
       "localizations" : {
         "es-419" : {
@@ -175,7 +210,7 @@
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Agregar un comentario"
+            "value" : "Agregá un comentario"
           }
         }
       }
@@ -319,7 +354,14 @@
       }
     },
     "An unexpected error occurred" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un error inesperado ha ocurrido"
+          }
+        }
+      }
     },
     "Anonymous telemetry" : {
       "comment" : "A toggle that allows the user to enable or disable anonymous telemetry.",
@@ -356,11 +398,45 @@
         }
       }
     },
+    "Appeal" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apelar"
+          }
+        }
+      }
+    },
     "Appealing" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apelando"
+          }
+        }
+      }
     },
     "Approved" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aprovado"
+          }
+        }
+      }
+    },
+    "Are you sure you want to appeal for removal of this report?" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estas seguro que quieres apelar para remove este reporte?"
+          }
+        }
+      }
     },
     "Are you sure you want to delete ? This action cannot be undone." : {
       "comment" : "An alert message displayed when a user attempts to delete a report.",
@@ -406,6 +482,7 @@
       }
     },
     "Assigned" : {
+      "comment" : "Reported description text at the report section",
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
@@ -441,6 +518,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adjuntá fotos"
+          }
+        }
+      }
+    },
+    "Attachment" : {
+      "comment" : "Selected type: attachment",
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjunto"
           }
         }
       }
@@ -741,11 +830,22 @@
       }
     },
     "Comment" : {
+      "comment" : "selected type: comment",
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comenta"
+          }
+        }
+      }
+    },
+    "Comment report options" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones para reportar un comentario"
           }
         }
       }
@@ -771,6 +871,20 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comentarios para: %@"
+          }
+        }
+      }
+    },
+    "Commit" : {
+
+    },
+    "Community" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comunidad"
           }
         }
       }
@@ -801,6 +915,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Confirmación de bloqueo de contenido"
+          }
+        }
+      }
+    },
+    "Confirm content reporting" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmar el reporte"
           }
         }
       }
@@ -873,7 +997,14 @@
       }
     },
     "Content options" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opciones del tipo de contenido"
+          }
+        }
+      }
     },
     "Coordinates" : {
       "localizations" : {
@@ -1271,6 +1402,16 @@
         }
       }
     },
+    "Do you want to appeal for removal" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quieres apelar?"
+          }
+        }
+      }
+    },
     "Do you want to open this on Google Maps?" : {
       "comment" : "A message displayed in a confirmation dialog when the user taps the \"Coordinates\" button in the \"More Information\" section of the detail view.",
       "isCommentAutoGenerated" : true,
@@ -1523,6 +1664,16 @@
         }
       }
     },
+    "Find information related with your content such as images, comments, reports, and petitions that violate our Community Guidelines. If you believe your we've mistakenly taken action , you can submit an appeal to have the action reversed." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscá información relacionada con tu contenido como imágenes, comentarios y peticiones que violan nuestras directrices de la comunidad. Si tú crees que hemos actuado por error, puede presentar una apelación para que se revierta la medida."
+          }
+        }
+      }
+    },
     "Fixed" : {
       "localizations" : {
         "es-419" : {
@@ -1639,7 +1790,7 @@
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Acoso o buying"
+            "value" : "Acoso o bullying"
           }
         }
       }
@@ -1702,6 +1853,9 @@
         }
       }
     },
+    "Human Review" : {
+
+    },
     "Hybrid" : {
       "localizations" : {
         "es-419" : {
@@ -1722,6 +1876,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Confirmo que este contenido viola nuestras políticas."
+          }
+        }
+      }
+    },
+    "I confirm that this report violates our community guidelines." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirmo que este informe infringe nuestras normas de la comunidad."
           }
         }
       }
@@ -1780,6 +1944,32 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Si tienes dudas acerca como nosotros usamos tus tatos puedes revisar nuestra [Política de privacidad](https://reportamelo.app/legal/privacy)."
+          }
+        }
+      }
+    },
+    "If you have doubts, please review our [End User License Agreement](https://reportamelo.app/legal/eula)." : {
+
+    },
+    "If you have doubts, please review our [Policies](https://reportamelo.app/legal/policies)." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sí tienes dudas, por favor revisá nuestras [Políticas](https://reportamelo.app/legal/policies)."
+          }
+        }
+      }
+    },
+    "If your are using Login with Apple you have to revoke the access to your account from Apple to delete your access to this app." : {
+
+    },
+    "Image" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ímagen"
           }
         }
       }
@@ -1882,7 +2072,14 @@
       "isCommentAutoGenerated" : true
     },
     "Invalid request (%@)" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petición invalida"
+          }
+        }
+      }
     },
     "Is the capital of %@" : {
       "comment" : "A label indicating that a city is the capital of a country.",
@@ -1934,7 +2131,6 @@
       }
     },
     "Issue type" : {
-      "extractionState" : "stale",
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
@@ -1950,8 +2146,8 @@
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Tipos de problemas"
+            "state" : "translated",
+            "value" : "Tipo de problema"
           }
         }
       }
@@ -1988,6 +2184,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Problemas de este mes"
+          }
+        }
+      }
+    },
+    "It looks like that your network is experiencing some delays, please try again." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parece que tu conexión es inestable por favor envíalo otra vez."
           }
         }
       }
@@ -2039,6 +2245,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Última actualización:"
+          }
+        }
+      }
+    },
+    "Last updated" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última actualización"
           }
         }
       }
@@ -2259,6 +2475,29 @@
       "comment" : "Description of a matter to solve related to a missing or damaged street sign, or a request to place one.",
       "isCommentAutoGenerated" : true
     },
+    "Moderation Center" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Centro de moderación"
+          }
+        }
+      }
+    },
+    "Moderation ID copied to clipboard" : {
+
+    },
+    "Moderator" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderador"
+          }
+        }
+      }
+    },
     "Modify" : {
       "comment" : "A button to modify a report.",
       "extractionState" : "stale",
@@ -2436,7 +2675,14 @@
       }
     },
     "Network error: %@" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error de red"
+          }
+        }
+      }
     },
     "Network Unavailable" : {
       "localizations" : {
@@ -2547,6 +2793,9 @@
         }
       }
     },
+    "No evidences found." : {
+
+    },
     "No matches found." : {
       "comment" : "Message displayed when there are no search results.",
       "isCommentAutoGenerated" : true,
@@ -2615,6 +2864,29 @@
         }
       }
     },
+    "No violations yet." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu cuenta aún no tiene ninguna infracción."
+          }
+        }
+      }
+    },
+    "No, cancel" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "None" : {
+
+    },
     "Not assigned yet." : {
       "localizations" : {
         "es-419" : {
@@ -2661,6 +2933,9 @@
         }
       }
     },
+    "Observations" : {
+
+    },
     "OK" : {
       "comment" : "The label of a button that dismisses an alert.",
       "isCommentAutoGenerated" : true
@@ -2681,6 +2956,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Una vez que la cuenta ha sido borrada no hay vuelta atrás."
+          }
+        }
+      }
+    },
+    "Open in Maps" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir en el mapa"
           }
         }
       }
@@ -2742,7 +3027,14 @@
       }
     },
     "Pending" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En progreso"
+          }
+        }
+      }
     },
     "Personalize your profile" : {
       "comment" : "The title of the screen that allows the user to personalize their profile.",
@@ -2752,6 +3044,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Personaliza tu perfil"
+          }
+        }
+      }
+    },
+    "Petition" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petición"
           }
         }
       }
@@ -3064,7 +3366,7 @@
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Espacios públicos"
+            "value" : "Esp. públicos"
           }
         }
       }
@@ -3108,6 +3410,9 @@
           }
         }
       }
+    },
+    "Rectification" : {
+
     },
     "Refresh" : {
       "comment" : "The title of a button that refreshes the current view.",
@@ -3336,6 +3641,9 @@
         }
       }
     },
+    "Reporter" : {
+
+    },
     "Reports" : {
       "comment" : "A label displayed above the section where the user can choose reports.",
       "isCommentAutoGenerated" : true,
@@ -3344,6 +3652,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reportes"
+          }
+        }
+      }
+    },
+    "Reports and violations center" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Centro de moderación"
           }
         }
       }
@@ -3500,7 +3818,14 @@
       }
     },
     "Saving my configuration" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardando mi configuración"
+          }
+        }
+      }
     },
     "Search" : {
       "comment" : "A placeholder text for a search bar.",
@@ -3617,7 +3942,24 @@
       }
     },
     "Sent to Moderation" : {
-
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar a moderación"
+          }
+        }
+      }
+    },
+    "Server Error" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error del servidor"
+          }
+        }
+      }
     },
     "Server error (%@)" : {
 
@@ -4213,6 +4555,9 @@
         }
       }
     },
+    "There are no evidences attached to this report yet." : {
+
+    },
     "There was a problem with the network: %@" : {
       "localizations" : {
         "es-419" : {
@@ -4277,6 +4622,9 @@
         }
       }
     },
+    "Timeline" : {
+
+    },
     "Title" : {
       "comment" : "Label for the title field.",
       "isCommentAutoGenerated" : true,
@@ -4312,12 +4660,36 @@
         }
       }
     },
+    "Type" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo"
+          }
+        }
+      }
+    },
     "Type your reason" : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dinos la razón por qué bloqueas este contenido."
+          }
+        }
+      }
+    },
+    "Under Review" : {
+
+    },
+    "Unknown" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desconocido"
           }
         }
       }
@@ -4395,6 +4767,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Usar mi ubicación"
+          }
+        }
+      }
+    },
+    "User" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuario"
           }
         }
       }
@@ -4497,6 +4879,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mira la evidencia final"
+          }
+        }
+      }
+    },
+    "Violation" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo de violación de los términos."
           }
         }
       }
@@ -4673,6 +5065,26 @@
         }
       }
     },
+    "Wrong Information" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Información falsa"
+          }
+        }
+      }
+    },
+    "Yes, remove" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover"
+          }
+        }
+      }
+    },
     "You can enable or disable push notifications in order to receive updates when authorities are resolving your report or petition." : {
       "localizations" : {
         "es-419" : {
@@ -4689,6 +5101,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tú nos puedes ayudar a mejorar la App con tu soporte."
+          }
+        }
+      }
+    },
+    "You can review our [Terms of Service](https://reportamelo.app/legal/terms), [Privacy Policy](https://reportamelo.app/legal/privacy), [EULA](https://reportamelo.app/legal/eula) and [Policies](https://reportamelo.app/legal/policies)." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu puedes revisor nuestros [Términos del servicio](https://reportamelo.app/legal/terms), [Política de privacidad](https://reportamelo.app/legal/privacy), [EULA](https://reportamelo.app/legal/eula) y las [Normas de la comunidad](https://reportamelo.app/legal/policies)."
           }
         }
       }
@@ -4788,6 +5210,9 @@
         }
       }
     },
+    "You have not submitted any reports." : {
+
+    },
     "You have unsaved information in this report." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4795,6 +5220,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tienes información pendiente en este reporte."
+          }
+        }
+      }
+    },
+    "Your account" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu cuenta"
+          }
+        }
+      }
+    },
+    "Your account is in good standing." : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu cuenta esta al día."
           }
         }
       }
@@ -4809,12 +5254,32 @@
         }
       }
     },
+    "Your appeal has been sent" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu apelación ha sido enviada"
+          }
+        }
+      }
+    },
     "Your email is invalid" : {
       "localizations" : {
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu email es inválido"
+          }
+        }
+      }
+    },
+    "Your moderation petition was sent" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su petición de moderación ha sido enviada."
           }
         }
       }
@@ -4835,6 +5300,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Su reporte ha sido enviado"
+          }
+        }
+      }
+    },
+    "Your reports" : {
+      "localizations" : {
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus reportes"
           }
         }
       }

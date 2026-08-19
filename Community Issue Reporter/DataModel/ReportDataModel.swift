@@ -16,6 +16,7 @@ final class ReportDataModel {
     var locator: Locator
     private let settings = SettingsStore.shared
    
+    var uploadTrackers: [PhotoUploadTracker] = []
     var isAddressValid: Bool = false
     var isTitleValid: Bool = false
     var isDescriptionValid: Bool = false
@@ -190,7 +191,7 @@ final class ReportDataModel {
             lat = selectedCity.coordinates.lat
             lng = selectedCity.coordinates.lng
         }
-        
+        self.uploadTrackers.removeAll()
         self.isAddressValid = false
         self.isDifferentLocation = false
         self.report = Report(

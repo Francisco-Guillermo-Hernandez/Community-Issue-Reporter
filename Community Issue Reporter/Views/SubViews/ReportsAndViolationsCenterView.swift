@@ -7,6 +7,20 @@
 
 import SwiftUI
 
+enum ModerationRole: String, CaseIterable {
+    case moderator
+    case user
+    case reporter
+    
+    var description: String {
+        switch self {
+            case .moderator: return String(localized: "Moderator")
+            case .user: return String(localized: "User")
+            case .reporter: return String(localized: "Reporter")
+        }
+    }
+}
+
 struct ReportsAndViolationsCenterView: View {
     
     @State private var selectedTab: Int = 0
@@ -15,27 +29,42 @@ struct ReportsAndViolationsCenterView: View {
     @State private var myComplaints: [ReportViolation<ModeratedContent>] = []
     @State private var indictedAttachments: [ReportViolation<PreviewAttachment>] = []
     @State private var indictedComments: [ReportViolation<CommentToBlock>] = []
+    @State private var indictedModeratedContent: [ReportViolation<ModeratedContent>] = []
     
     @State private var isLoading = false
     @State private var errorMessage: String?
     
+    @State private var showAlert: Bool = false
+    
     enum ViolationContentType: String, CaseIterable {
         case attachment = "Attachments"
         case comment = "Comments"
+        
+        var description: String {
+            switch self {
+                case .attachment: return String(localized: "Attachments")
+                case .comment: return String(localized: "Comments")
+            }
+        }
     }
     
     var body: some View {
         VStack(spacing: 0) {
             
-            // Header
+            /// Header
             VStack(alignment: .leading, spacing: 8) {
                 Text("Find information related with your content such as images, comments, reports, and petitions that violate our Community Guidelines. If you believe your we've mistakenly taken action , you can submit an appeal to have the action reversed.")
                     .font(.footnote)
                     .foregroundColor(.secondary)
+                
+                LinksView(type: .policies)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+           
             
-            // Tabs
+            /// Tabs
             HStack(spacing: 32) {
                 Button(action: { selectedTab = 0 }) {
                     VStack {
@@ -75,37 +104,81 @@ struct ReportsAndViolationsCenterView: View {
             } else {
                 ScrollView {
                     if selectedTab == 0 {
-                        // Your account
-                        VStack {
-                            Picker("Type", selection: $selectedType) {
-                                ForEach(ViolationContentType.allCases, id: \.self) { type in
-                                    Text(type.rawValue).tag(type)
-                                }
+                        /// Your account
+                        if indictedModeratedContent.isEmpty {
+                            ContentUnavailableView {
+                                Label(
+                                    String(localized: "No violations yet."),
+                                    systemImage: "checkmark.shield"
+                                )
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(
+                                    Color.theme.foreground.opacity(0.7),
+                                    Color.green.opacity(0.7),
+                                    Color.theme.foreground.opacity(0.7)
+                                )
+                            } description: {
+                                Text(String(localized: "Your account is in good standing."))
                             }
-                            .pickerStyle(SegmentedPickerStyle())
-                            .padding()
-                            .onChange(of: selectedType) { _, _ in
-                                Task { await loadIndictedData() }
-                            }
-                            
-                            if selectedType == .attachment {
-                                ForEach(indictedAttachments, id: \.id) { violation in
-                                    violationRow(status: violation.status.description, reason: violation.reason, date: violation.updatedAt)
+                            .containerRelativeFrame(.vertical)
+                        } else {
+                            VStack {
+                                
+                                ForEach(indictedModeratedContent, id: \.id) { violation in
+                                    if let id = violation.id {
+                                        violationRow(
+                                            id: id,
+                                            status: violation.status,
+                                            reason: violation.reason,
+                                            date: violation.updatedAt,
+                                            profileId: violation.contentAuthorProfileId,
+                                            type: violation.type,
+                                            role: .user,
+                                            observation: violation.observation,
+                                        )
+                                    }
                                 }
-                            } else {
-                                ForEach(indictedComments, id: \.id) { violation in
-                                    violationRow(status: violation.status.description, reason: violation.reason, date: violation.updatedAt)
-                                }
+                                
                             }
+                            .padding(.top)
                         }
                     } else {
-                        // Your reports
-                        VStack {
-                            ForEach(myComplaints, id: \.id) { violation in
-                                violationRow(status: violation.status.description, reason: violation.reason, date: violation.updatedAt)
+                        /// Your reports
+                        if myComplaints.isEmpty {
+                            ContentUnavailableView {
+                                Label(
+                                    String(localized: "No reports yet."),
+                                    systemImage: "info.bubble"
+                                )
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(
+                                    Color.theme.foreground.opacity(0.7),
+                                    Color.theme.secondary,
+                                    Color.theme.foreground.opacity(0.7)
+                                )
+                            } description: {
+                                Text(String(localized: "You have not submitted any reports."))
                             }
+                            .containerRelativeFrame(.vertical)
+                        } else {
+                            VStack {
+                                ForEach(myComplaints, id: \.id) { violation in
+                                    if let id = violation.id {
+                                        violationRow(
+                                            id: id,
+                                            status: violation.status,
+                                            reason: violation.reason,
+                                            date: violation.updatedAt,
+                                            profileId: violation.contentAuthorProfileId,
+                                            type: violation.type,
+                                            role: .reporter,
+                                            observation: violation.observation
+                                        )
+                                    }
+                                }
+                            }
+                            .padding(.top)
                         }
-                        .padding(.top)
                     }
                 }
             }
@@ -120,7 +193,16 @@ struct ReportsAndViolationsCenterView: View {
     }
     
     @ViewBuilder
-    private func violationRow(status: String, reason: String, date: Date?) -> some View {
+    private func violationRow(
+        id: String,
+        status: ReportViolationStatus,
+        reason: String,
+        date: Date? = nil,
+        profileId: String,
+        type: TypeOfContentToReport,
+        role: ModerationRole,
+        observation: String? = nil
+    ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 16) {
                 RoundedRectangle(cornerRadius: 12)
@@ -131,14 +213,60 @@ struct ReportsAndViolationsCenterView: View {
                             .font(.system(size: 24))
                             .foregroundColor(.gray)
                     )
-                
-                Text(selectedType == .attachment ? "Attachment" : "Comment")
+                                
+                Text("**Content type:** \(type.description)")
                     .font(.subheadline)
+               
                 
                 Spacer()
                 
-                Image(systemName: "ellipsis")
-                    .foregroundColor(.secondary)
+                if role == .user {
+                    // Indicted user actions
+                    
+                    Menu {
+                        
+                        Button {
+                            showAlert.toggle()
+                            print("show appeal")
+                        } label: {
+                            Label("Appeal", systemImage: "text.badge.minus")
+                        }
+                        .accessibilityIdentifier("AppealForRemovalButton")
+                        .disabled(!UserRepository.shared.isOwnProfile(profileId) || disableButtonByStatus(status))
+                        
+                    
+                        Button {
+                            UIPasteboard.general.string = id
+                            Toast.shared.show(message: String(localized: "Moderation ID copied to clipboard"), type: .info)
+                        } label: {
+                            Label("Copy ID", systemImage: "doc.on.doc")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            
+                    }
+                    .foregroundColor(UserRepository.shared.isOwnProfile(profileId) ? .primary : .gray)
+                    .alert(String(localized: "Do you want to appeal for removal"), isPresented: $showAlert) {
+                        
+                        Button(role: .cancel) {
+                            
+                        } label: {
+                            Text(String(localized: "No, cancel", comment: ""))
+                        }
+                        
+                        Button(role: .confirm) {
+                            appealForReportRemoval(id, type)
+                        } label: {
+                            Text(String(localized: "Yes, remove", comment: ""))
+                        }
+                        
+                    } message: {
+                        Text(String(localized: "Are you sure you want to appeal for removal of this report?", comment: ""))
+                    }
+                    
+                
+                }
+                
             }
             
             VStack(spacing: 8) {
@@ -146,7 +274,7 @@ struct ReportsAndViolationsCenterView: View {
                     Text("Status")
                         .fontWeight(.semibold)
                     Spacer()
-                    Text(status)
+                    Text(status.description)
                 }
                 
                 HStack {
@@ -154,7 +282,7 @@ struct ReportsAndViolationsCenterView: View {
                         .fontWeight(.semibold)
                     Spacer()
                     Text(reason)
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.theme.secondary)
                 }
                 
                 HStack {
@@ -167,6 +295,23 @@ struct ReportsAndViolationsCenterView: View {
                         Text("Unknown")
                     }
                 }
+                
+                VStack {
+                    Text("Observations")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    if let observation = observation {
+                        Text(observation)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .lineSpacing(4)
+                    } else {
+                        Text("None")
+                            .frame(maxWidth: .infinity)
+                            
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
             .font(.subheadline)
             
@@ -196,6 +341,7 @@ struct ReportsAndViolationsCenterView: View {
     }
     
     private func loadIndictedData() async {
+        
         let profileId = KeychainService.getToken(.profileId)
         guard !profileId.isEmpty else { return }
         
@@ -203,19 +349,48 @@ struct ReportsAndViolationsCenterView: View {
         defer { isLoading = false }
         
         do {
-            if selectedType == .attachment {
-                let response = try await ModerationRepository.shared.indictedModeratedContent(profileId: profileId, type: .image)
-                if let docs = response.documents {
-                    indictedAttachments = docs
-                }
-            } else {
-                let response = try await ModerationRepository.shared.indictedModeratedMessages(profileId: profileId, type: .comment)
-                if let docs = response.documents {
-                    indictedComments = docs
-                }
+            
+            let response = try await ModerationRepository.shared.indictedModeratedContent()
+            if let documents = response.documents {
+                indictedModeratedContent = documents
             }
+            
         } catch {
             errorMessage = error.localizedDescription
         }
     }
+    
+    private func appealForReportRemoval(_ id: String, _ type: TypeOfContentToReport) {
+        Task {
+            do {
+                let _ = try await ModerationRepository.shared.appeal(id: id, type: type)
+                Toast.shared.show(
+                    message: String(localized: "Your appeal has been sent"),
+                    type: .success
+                )
+            } catch {
+                Toast.shared.show(
+                    message: error.localizedDescription,
+                    type: .error
+                )
+            }
+        }
+    }
+    
+    private func disableButtonByStatus(_ status: ReportViolationStatus) -> Bool {
+        switch status {
+            case .rejected:
+                return true
+            case .appealing:
+                return true
+            case .approved:
+                return true
+            default:
+                return false
+        }
+    }
+}
+
+#Preview {
+    ReportsAndViolationsCenterView()
 }

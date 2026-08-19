@@ -13,6 +13,15 @@ struct ProfileOption: Identifiable, Hashable {
     let title: String
     let icon: String
     let color: Color
+    var disabled: Bool
+    
+    init(id: String, title: String, icon: String, color: Color, disabled: Bool = false) {
+        self.id = id
+        self.title = title
+        self.icon = icon
+        self.color = color
+        self.disabled = disabled
+    }
 }
 
 struct UserProfileView: View {
@@ -55,12 +64,13 @@ struct UserProfileView: View {
             color: Color.gray
         ),
         
-//        ProfileOption(
-//            id: "op:",
-//            title: String(localized: "Licenses"),
-//            icon: "text.page.fill",
-//            color: Color.green
-//        ),
+        ProfileOption(
+            id: "op:moderationCenter",
+            title: String(localized: "Moderation Center"),
+            icon: "person.badge.shield.checkmark.fill",
+            color: Color.red
+        ),
+        
         ProfileOption(
             id: "op:licenses",
             title: String(localized: "Licenses"),
@@ -103,6 +113,8 @@ struct UserProfileView: View {
                             profileRouter.goTo(.settings)
                         case "op:licenses":
                             profileRouter.goTo(.licenses)
+                        case "op:moderationCenter":
+                            profileRouter.goTo(.moderation)
                         default:
                             break
                         }
@@ -131,6 +143,8 @@ struct UserProfileView: View {
                                 .foregroundStyle(Color(uiColor: .tertiaryLabel))
                         }
                     }
+                    .disabled(UserRepository.shared.isGuestUser())
+                    
                 }
                 .frame(height: 500)
                 .contentMargins(.top, 16, for: .scrollContent)
@@ -150,28 +164,33 @@ struct UserProfileView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 
-                ThemedButton(
-                    message: String(localized: "Log Out"),
-                    action: {
-                        Task {
-                            do {
+                VStack {
+                    ThemedButton(
+                        message: String(localized: "Log Out"),
+                        action: {
+                            Task {
+                                do {
+                                    isLoading.toggle()
+                                    
+                                    _ = try await UserRepository.shared.logout()
+                                    controller.logout()
+                                    dismiss()
+                                } catch {
+                                    Toast.shared.show(message: error.localizedDescription, type: .error)
+                                }
                                 isLoading.toggle()
-                                
-                                _ = try await UserRepository.shared.logout()
-                                controller.logout()
-                                dismiss()
-                            } catch {
-                                Toast.shared.show(message: error.localizedDescription, type: .error)
                             }
-                            isLoading.toggle()
-                        }
-                    },
-                    type: .outline,
-                    style: .normal,
-                    isLoading: $isLoading
-                )
+                        },
+                        type: .outline,
+                        style: .normal,
+                        isLoading: $isLoading
+                    )
+                    .padding(.top, 0)
+                    
+                    LinksView(type: .full)
+                        .padding(.bottom, 8)
+                }
                 .padding()
-                .padding(.top, 0)
                
             }
             .task {
@@ -201,6 +220,8 @@ struct UserProfileView: View {
             CommentsSubView(subViewName: String(localized: "My Comments"), mode: .listAndModify)
         case .reports:
             MyReportsSubView(path: $navigationPath, subViewName: String(localized: "My Reports"), mode: .listAndModify)
+        case .moderation:
+            ReportsAndViolationsCenterView()
         case .signPetitions:
             MyPetitionsSubView(path: $navigationPath, subViewName: String(localized: "My Sign petitions"), mode: .listAndModify)
         }

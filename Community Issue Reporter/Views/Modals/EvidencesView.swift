@@ -33,20 +33,41 @@ struct EvidencesView: View {
     }
     
     var body: some View {
-        ScrollView(.vertical) {
-            LazyVGrid(columns: gridColumns, spacing: 4) {
-                ForEach(response.documents ?? [], id: \.id) { photo in
-                    NavigationLink(value: photo) {
-                        PhotoPreview(photo, .full)
-                            .matchedTransitionSource(id: photo.id, in: nameSpace)
+        ZStack {
+            if isLoading {
+                LoadingView()
+            } else if (response.documents ?? []).isEmpty {
+                ContentUnavailableView {
+                    Label(
+                        String(localized: "No evidences found."),
+                        systemImage: "photo.badge.exclamationmark"
+                    )
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(
+                        Color.theme.foreground.opacity(0.7),
+                        Color.theme.primary,
+                        Color.theme.foreground.opacity(0.7)
+                    )
+                } description: {
+                    Text(String(localized: "There are no evidences attached to this report yet."))
+                }
+            } else {
+                ScrollView(.vertical) {
+                    LazyVGrid(columns: gridColumns, spacing: 4) {
+                        ForEach(response.documents ?? [], id: \.id) { photo in
+                            NavigationLink(value: photo) {
+                                PhotoPreview(photo, .full)
+                                    .matchedTransitionSource(id: photo.id, in: nameSpace)
+                            }
+                            .buttonStyle(.plain)
+                            .simultaneousGesture(TapGesture().onEnded {
+                                previewID = photo.id
+                            })
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .simultaneousGesture(TapGesture().onEnded {
-                        previewID = photo.id
-                    })
+                    .padding(.horizontal, .themePadding)
                 }
             }
-            .padding(.horizontal, .themePadding)
         }
         .navigationDestination(for: PreviewAttachment.self) { photo in
             PhotoDetailView(photos: response.documents ?? [], previewID: $previewID, nameSpace: nameSpace)
@@ -67,8 +88,20 @@ struct EvidencesView: View {
             .edgesIgnoringSafeArea(.all)
         }
         .task {
+            isLoading = true
+            defer { isLoading = false }
             do {
-              response = try await ReportRepository.shared.fetchAttachments(id, page: page)
+                let res = try await ReportRepository.shared.fetchAttachments(id, page: page)
+                let filteredDocs = res.documents?.filter { $0.state != .deleted && $0.state != .inappropriate }
+                response = PaginatedResponse(
+                    documents: filteredDocs,
+                    total: res.total,
+                    page: res.page,
+                    documentsPerPage: res.documentsPerPage,
+                    totalPages: res.totalPages,
+                    hasNext: res.hasNext,
+                    hasPrev: res.hasPrev
+                )
             } catch {
                 
             }

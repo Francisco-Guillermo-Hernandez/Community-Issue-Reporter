@@ -103,10 +103,8 @@ struct MyPetitionsSubView: View {
             guard let documents = result.documents else { return }
             petitions = documents
 
-           
-            
         } catch {
-            
+            Toast.shared.show(message: error.localizedDescription, type: .error)
         }
         
         isLoading = false

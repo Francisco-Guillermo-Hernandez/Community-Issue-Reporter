@@ -128,10 +128,12 @@ struct MapExplorerView: View {
         }
         .sheet(item: $controller.expandedItem) { report in
             DetailView(report: report)
+                .withToast()
         }
         .sheet(isPresented: $router.isPresented) {
             DetailView(report: router.report)
                 .skeleton(isRedacted: router.isLoading)
+                .withToast()
         }
         .overlay {
             ZStack {

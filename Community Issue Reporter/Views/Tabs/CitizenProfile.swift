@@ -90,6 +90,11 @@ struct CitizenProfile: View {
                             
                             if tab == .reports {
                                 
+                                if controller.fetchingReports && controller.reports.isEmpty {
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                        .controlSize(.large)
+                                }
                                 
                                 if controller.reports.isEmpty {
                                     VStack {
@@ -210,6 +215,13 @@ struct CitizenProfile: View {
                     
                 }
             }
+            
+//            ToolbarItem(placement: .topBarTrailing) {
+//                Button(role: .close) {
+//                    dismiss()
+//                    dismiss()
+//                }
+//            }
         }
         .navigationBarTitleDisplayMode(.inline)
     }

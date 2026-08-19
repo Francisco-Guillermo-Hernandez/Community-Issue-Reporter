@@ -7,6 +7,32 @@
 
 import SwiftUI
 
+struct HeaderText: View {
+    init(_ text: String) {
+        self.text = text
+    }
+    var text: String
+    var body: some View {
+        Text(text)
+            .font(.caption)
+            .fontWeight(.bold)
+            .fixedSize()
+    }
+}
+
+struct BottomText: View {
+    init(_ text: String) {
+        self.text = text
+    }
+    var text: String
+    var body: some View {
+        Text(text)
+            .font(.caption)
+            .foregroundColor(.secondary)
+            .fixedSize()
+    }
+}
+
 // MARK: - GenericDatePresenterView
 struct GenericDatePresenterView: View {
     var text: String
@@ -20,15 +46,9 @@ struct GenericDatePresenterView: View {
             }
             VStack(alignment: .leading ) {
                 
-                Text(text)
-                    .font(.caption)
-                    .fontWeight(.bold)
-                    .fixedSize()
+                HeaderText(text)
                 
-                Text(when)
-                    .fixedSize()
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                BottomText(when)
             }
             
             
@@ -71,7 +91,7 @@ struct ReportCellView: View {
                         )
                         
                         GenericDatePresenterView(
-                            text: String(localized: "Reported", comment: "Reported description text at the report section"),
+                            text: String(localized: "Assigned", comment: "Reported description text at the report section"),
                             when: report.reportedDate
                         )
                         
@@ -79,34 +99,52 @@ struct ReportCellView: View {
                     .padding(.top, .themeSpacing)
                     .padding(.bottom, .themeSpacing)
                     
-                    /// Badges to identify the report
-                    HStack(spacing: .themeSpacing * 4) {
-                        CustomBadgeView(
-                            badge: .init(
-                                color: report.severity.color,
-                                title: report.severity.title,
-                                icon: report.severity.iconName
-                            )
-                        )
-                        
-                        CustomBadgeView(
-                            badge: .init(
-                                color: report.status.color,
-                                title: report.status.title,
-                                icon: report.status.iconName
-                            )
-                        )
-                        
-                        CustomBadgeView(
-                            badge: .init(
-                                color: report.issueType.color,
-                                title: report.issueType.title,
-                                icon: report.issueType.iconName
-                            )
-                        )
-                        
-                       
+                    VStack(spacing: 0) {
+                        HStack {
+                            VStack {
+                                HeaderText(String(localized: "Issue type"))
+                                    .frame(maxWidth: .infinity)
+                                
+                                CustomBadgeView(
+                                    badge: .init(
+                                        color: report.issueType.color,
+                                        title: report.issueType.title,
+                                        icon: report.issueType.iconName
+                                    )
+                                )
+                                
+                            }
+                            
+                            VStack {
+                                HeaderText(String(localized: "Severity"))
+                                    .frame(maxWidth: .infinity)
+                                
+                                CustomBadgeView(
+                                    badge: .init(
+                                        color: report.severity.color,
+                                        title: report.severity.title,
+                                        icon: report.severity.iconName
+                                    )
+                                )
+                                
+                            }
+                            
+                            VStack {
+                                HeaderText(String(localized: "Status"))
+                                    .frame(maxWidth: .infinity)
+                                
+                                CustomBadgeView(
+                                    badge: .init(
+                                        color: report.status.color,
+                                        title: report.status.title,
+                                        icon: report.status.iconName
+                                    )
+                                )
+                                
+                            }
+                        }
                     }
+                    .padding(.top, .themeSpacing)
                     
                 }
                 
@@ -155,68 +193,96 @@ struct MyReportsSubView: View {
             } else {
                 List {
                     ForEach(controller.reports, id: \.id) { report in
-                        if mode == .listAndModify {
-                            NavigationLink(destination: showWizard(report)) {
-                                ReportCellView(report: report, enableChevron: true)
+                        Group {
+                            if mode == .listAndModify {
+                                let disableNavigation: Bool = [.fixed, .assigned, .humanReview, .underReview].contains(report.status)
+                                
+                                Group {
+                                    if disableNavigation {
+                                        ReportCellView(report: report, enableChevron: false)
+                                            .cellStyle()
+                                    } else {
+                                        NavigationLink(destination: showWizard(report)) {
+                                            ReportCellView(report: report, enableChevron: true)
+                                                .cellStyle()
+                                        }
+                                    }
+                                }
+                                .listRowInsets(themeCellEdgeInsets)
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button(role: .destructive) {
+                                        controller.reportToDelete = report
+                                        controller.showDeleteAlert = true
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
+                                .contentShape(
+                                       .contextMenuPreview,
+                                       RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
+                                )
+                                .contextMenu {
+                                    Button {
+                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                        controller.openInMaps(report.coordinate)
+                                    } label: {
+                                        Label("Open in Maps", systemImage: "map")
+                                    }
+                                    .accessibilityIdentifier("OpenInMapsButton")
+                                    
+                                    Button {
+                                        UIPasteboard.general.string = report.id
+                                    } label: {
+                                        Label("Copy ID", systemImage: "document.on.document")
+                                    }
+                                    .accessibilityIdentifier("CopyIDButton")
+                                    
+                                    Button {
+                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                        shareFromClosure(item: buildShareURL(for: report.shareUrl!))
+                                    } label: {
+                                        Label("Share Report", systemImage: "square.and.arrow.up")
+                                    }
+                                    .accessibilityIdentifier("ShareReportURLButton")
+                                    
+                                    Button {
+                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                    } label: {
+                                        Label("Timeline", systemImage: "calendar.badge.clock")
+                                    }
+                                    
+                                    Button(role: .destructive) {
+                                        controller.reportToDelete = report
+                                        controller.showDeleteAlert = true
+                                    } label: {
+                                        Label("Delete", systemImage: "document.on.trash")
+                                    }
+                                    
+                                }
+                            } else {
+                                ReportCellView(report: report)
                                     .cellStyle()
                             }
-                            .listRowInsets(themeCellEdgeInsets)
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button(role: .destructive) {
-                                    controller.reportToDelete = report
-                                    controller.showDeleteAlert = true
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
-                            .contentShape(
-                                   .contextMenuPreview,
-                                   RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-                            )
-                            .contextMenu {
-                                Button {
-                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                    controller.openInMaps(report.coordinate)
-                                } label: {
-                                    Label("Open in Maps", systemImage: "map")
-                                }
-                                .accessibilityIdentifier("OpenInMapsButton")
-                                
-                                Button {
-                                    UIPasteboard.general.string = report.id
-                                } label: {
-                                    Label("Copy ID", systemImage: "document.on.document")
-                                }
-                                .accessibilityIdentifier("CopyIDButton")
-                                
-                                Button {
-                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                    shareFromClosure(item: buildShareURL(for: report.shareUrl!))
-                                } label: {
-                                    Label("Share Report", systemImage: "square.and.arrow.up")
-                                }
-                                .accessibilityIdentifier("ShareReportURLButton")
-                                
-//                                Button {
-//                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-//                                } label: {
-//                                    Label("Details", systemImage: "document.badge.ellipsis")
-//                                }
-                                
-                                Button(role: .destructive) {
-                                    controller.reportToDelete = report
-                                    controller.showDeleteAlert = true
-                                } label: {
-                                    Label("Delete", systemImage: "document.on.trash")
-                                }
-                                
-                            }
-                        } else {
-                            ReportCellView(report: report)
-                                .cellStyle()
                         }
+                        .onAppear {
+                            if report.id == controller.reports.last?.id {
+                                Task {
+                                    await controller.fetchReports(loadMore: true)
+                                }
+                            }
+                        }
+                    }
+                    
+                    if controller.isLoadingMore {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                            Spacer()
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     }
                 }
                 .navigationLinkIndicatorVisibility(.hidden)

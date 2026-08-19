@@ -191,6 +191,7 @@ struct SettingsSubView: View {
                                 .accessibilityIdentifier("UpgradeSubscriptionButton")
                                 
                                 Divider()
+                                    .opacity(0.67)
 
                                 Button(action: {
                                     Task {
@@ -224,14 +225,19 @@ struct SettingsSubView: View {
                         footerText: String(localized: "You can show or hide your profile and your username when you share your reports and petitions with others.")
                     ) {
                         Toggle("Show my profile", isOn: $settings.showMyProfile)
+                            .tint(Color.theme.primary)
+                            .accessibilityIdentifier("ShowMyProfileToggle")
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.showMyProfile) { oldValue, newValue in
                                 controller.updatePrivacySettings()
                             }
                         
                         Divider()
+                            .opacity(0.67)
                         
                         Toggle(String(localized: "Show my user name when I share"), isOn: $settings.showMyUseNameWhenShare)
+                            .accessibilityIdentifier("ShowMyUserNameWhenShareToggle")
+                            .tint(Color.theme.primary)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.showMyUseNameWhenShare) { oldValue, newValue in
                                 controller.updatePrivacySettings()
@@ -243,6 +249,8 @@ struct SettingsSubView: View {
                     SettingsGroup(title: String(localized: "Notifications"),
                                   footerText: String(localized: "You can enable or disable push notifications in order to receive updates when authorities are resolving your report or petition.")) {
                         Toggle("Push notifications", isOn: $settings.enablePushNotifications)
+                            .accessibilityIdentifier("PushNotificationsToggle")
+                            .tint(Color.theme.primary)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enablePushNotifications) { oldValue, newValue in
                                 controller.updateNotificationSettings()
@@ -259,8 +267,11 @@ struct SettingsSubView: View {
                             }
                         
                         Divider()
+                            .opacity(0.67)
 
                         Toggle("Email notifications", isOn: $settings.enableEmailNotifications)
+                            .accessibilityIdentifier("EmailNotificationsToggle")
+                            .tint(Color.theme.primary)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enableEmailNotifications) { oldValue, newValue in
                                 controller.updateNotificationSettings()
@@ -273,36 +284,44 @@ struct SettingsSubView: View {
                     ) {
                         
                         Toggle("Save last location", isOn: $settings.saveLastLocation)
+                            .accessibilityIdentifier("SaveLastLocationToggle")
+                            .tint(Color.theme.primary)
                             .foregroundStyle(Color.theme.inputText)
 
                         Divider()
+                            .opacity(0.67)
                         
                         Toggle("Use my current location", isOn: $settings.useMyCurrentLocation)
+                            .accessibilityIdentifier("UseMyCurrentLocationToggle")
+                            .tint(Color.theme.primary)
                             .foregroundStyle(Color.theme.inputText)
                         
                         Divider()
+                            .opacity(0.67)
                         
                         Toggle("Anonymous telemetry", isOn: $settings.enableAnonymousTelemetry)
+                            .accessibilityIdentifier("AnonymousTelemetryToggle")
+                            .tint(Color.theme.primary)
                             .foregroundStyle(Color.theme.inputText)
                         
                     } footerContent: {
-                        LinksView(mode: .privacy)
+                        LinksView(type: .privacy)
                     }
                     .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
-                    SettingsGroup(title: String(localized: "Community")) {
-                        NavigationLink(destination: ReportsAndViolationsCenterView()) {
-                            HStack {
-                                Text(String(localized: "Reports and violations center"))
-                                    .foregroundStyle(Color.theme.inputText)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 12))
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+//                    SettingsGroup(title: String(localized: "Community")) {
+//                        NavigationLink(destination: ReportsAndViolationsCenterView()) {
+//                            HStack {
+//                                Text(String(localized: "Reports and violations center"))
+//                                    .foregroundStyle(Color.theme.inputText)
+//                                Spacer()
+//                                Image(systemName: "chevron.right")
+//                                    .font(.system(size: 12))
+//                                    .foregroundColor(.secondary)
+//                            }
+//                        }
+//                    }
+//                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
                     
                     
                     SettingsGroup(
@@ -312,6 +331,11 @@ struct SettingsSubView: View {
                         
                         VStack(spacing: .themeSpacing * 4) {
                             Text(String(localized: "You have control over your data and you can opt to delete your account at any time."))
+                                .foregroundStyle(Color.theme.inputText)
+                                .font(.callout)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            Text(String(localized: "If your are using Login with Apple you have to revoke the access to your account from Apple to delete your access to this app."))
                                 .foregroundStyle(Color.theme.inputText)
                                 .font(.callout)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -376,9 +400,29 @@ struct SettingsSubView: View {
                                 .foregroundStyle(Color.theme.inputText)
                             Spacer()
                             Text("v1.0.0")
+                                .font(.system(.caption, design: .monospaced))
+                                .kerning(0.69)
+                                .textSelection(.enabled)
+                                .foregroundStyle(Color.theme.inputText)
+                        }
+                        
+                        Divider()
+                        
+                        HStack {
+                            Text(String(localized: "Commit"))
+                                .foregroundStyle(Color.theme.inputText)
+                            Spacer()
+                            Text("8466b51")
+                                .font(.system(.caption, design: .monospaced))
+                                .kerning(0.69)
+                                .textSelection(.enabled)
                                 .foregroundStyle(Color.theme.inputText)
                         }
                     }
+                    
+                    Spacer()
+                    
+                    Spacer()
                     
                 }
             }

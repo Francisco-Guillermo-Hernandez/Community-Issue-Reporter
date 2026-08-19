@@ -36,7 +36,13 @@ final class MapExplorerController {
     var searchItems: [String] = []
     
     init() {
-        self.searchItems = IssueStatus.allCases.map(\.title)
+        self.searchItems = [
+            IssueStatus.confirmed.title,
+            IssueStatus.inProgress.title,
+            IssueStatus.fixed.title,
+            IssueStatus.petitionToSign.title,
+            IssueStatus.assigned.title,
+        ] // IssueStatus.allCases.map(\.title)
     }
     private var currentFetchID = UUID()
     
@@ -49,7 +55,7 @@ final class MapExplorerController {
         let query = MapExplorerQueryParams(
             lat: authViewModel.cameraPosition.region?.center.latitude ?? authViewModel.selectedCity?.coordinates.lat ?? 13.868268,
             lng: authViewModel.cameraPosition.region?.center.longitude ?? authViewModel.selectedCity?.coordinates.lng ?? -89.850968,
-            radius: 300,
+            radius: 600,
             issueTypeIds: [1],
             severityIds: [1],
             statusIds: [1]

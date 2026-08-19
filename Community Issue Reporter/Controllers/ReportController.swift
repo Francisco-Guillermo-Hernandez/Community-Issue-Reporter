@@ -20,6 +20,7 @@ class ReportController {
     var shareableLink: String = ""
     var doneTrigger: Bool = false
     var currentStep: ReportStep = .location
+    var reportAttachmentGrouping: [ReportAttachmentGrouping]? = nil
     
     func startRePorting(_ model: ReportDataModel) async {
         do {
@@ -121,9 +122,10 @@ class ReportController {
             
             let result = try await ReportRepository.shared.submitGroupedAttachments(attachments: payload)
             
-            if result == .created {
-                print("created")
-            }
+            
+            print("result grouping :")
+            print(result)
+            
         } catch CommonIntercommunicationErrors.invalidPetition(let code) {
             showAlert(message: code)
         } catch CommonIntercommunicationErrors.networkError(let error) {

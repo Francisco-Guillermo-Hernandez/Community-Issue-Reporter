@@ -22,18 +22,47 @@ final class MyReportsController {
     
     let model = ReportDataModel.shared
     
-    func fetchReports() async {
-        isLoading = true
-        do {
-            
-            let result = try await ReportRepository.shared.listByUser(page: 1)
-            guard let documents = result.documents else { return }
-            self.reports = documents.map { $0.toModel() }
-        } catch {
-            print(error)
+    var currentPage: Int = 1
+    var hasNext: Bool = false
+    var isLoadingMore: Bool = false
+    
+    func fetchReports(loadMore: Bool = false) async {
+        if loadMore {
+            guard hasNext, !isLoadingMore else { return }
+            isLoadingMore = true
+            currentPage += 1
+        } else {
+            isLoading = true
+            currentPage = 1
         }
         
-        isLoading = false
+        do {
+            let result = try await ReportRepository.shared.listByUser(page: currentPage)
+            self.hasNext = result.hasNext
+            guard let documents = result.documents else {
+                if loadMore { isLoadingMore = false } else { isLoading = false }
+                return
+            }
+            
+            let newReports = documents.map { $0.toModel() }
+            
+            if loadMore {
+                self.reports.append(contentsOf: newReports)
+            } else {
+                self.reports = newReports
+            }
+        } catch {
+            print(error)
+            if loadMore {
+                currentPage -= 1
+            }
+        }
+        
+        if loadMore {
+            isLoadingMore = false
+        } else {
+            isLoading = false
+        }
     }
     
     func confirmDeletion(of id: String) {

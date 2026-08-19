@@ -23,10 +23,12 @@ final class CitizenProfileController {
     var scrollPosition: ScrollPosition
     var isLoading: Bool
     var reports: [Report]
+    var fetchingReports: Bool
     
     init () {
         self.isLoading = false 
         self.petitions = []
+        self.fetchingReports = false
         self.reports = []
         self.scrollProgress = 0
         self.scrollPosition = .init()
@@ -55,11 +57,14 @@ final class CitizenProfileController {
     
     func fetchReports(_ profileId: String) async {
         do {
+            self.fetchingReports = true
             let documents = try await ReportRepository.shared.listByProfile(profileId)
             self.reports = documents.map { $0.toModel() }
             self.reportsSubmitted = reports.count
         } catch {
             print("Error fetching reports by profile: \(error)")
         }
+        
+        self.fetchingReports = false
     }
 }

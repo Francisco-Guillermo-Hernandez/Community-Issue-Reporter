@@ -1,12 +1,49 @@
 import SwiftUI
 import WebKit
 import Observation
+import SafariServices
 
 // private var domains = ["https://reportamelo.app/", "://reportamelo.app/"]
 
+struct SafariWebView: UIViewControllerRepresentable {
+    @Binding var url: URL?
+    
+    init(_ url: Binding<URL?> = .constant(URL(string: "https://reportamelo.app/"))) {
+        self._url = url
+    }
+
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        return SFSafariViewController(url: url!)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {
+        // Leave empty for standard usage
+    }
+}
+
+
 @Observable
-class WebViewModel {
+class WebViewModel: NSObject, WKNavigationDelegate {
     let webView = WKWebView()
+    
+    override init() {
+        super.init()
+        webView.navigationDelegate = self
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if let url = navigationAction.request.url {
+            if let host = url.host, host.contains("reportamelo.app") {
+                decisionHandler(.allow)
+                return
+            } else if url.scheme == "http" || url.scheme == "https" {
+                UIApplication.shared.open(url)
+                decisionHandler(.cancel)
+                return
+            }
+        }
+        decisionHandler(.cancel)
+    }
 }
 
 struct WebBrowserView: View {
@@ -97,34 +134,36 @@ struct WebViewRepresentable: UIViewRepresentable {
     }
 }
 
-import SwiftUI
-import WebKit
 
-struct WebView: UIViewRepresentable {
-    // 1. Pass the URL as a SwiftUI state/binding dependency
-    let url: URL
-
-    // 2. Create the UIKit view instance
-    func makeUIView(context: Context) -> WKWebView {
-        return WKWebView()
-    }
-
-    // 3. Update the UIKit view when SwiftUI state changes
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        let request = URLRequest(url: url)
-        uiView.load(request)
-    }
+#Preview {
+    WebBrowserView(url: .constant(URL(string: "https://reportamelo.app/")!))
 }
 
-// Usage in SwiftUI
-struct ContentView: View {
+
+struct SafariContentView: View {
+    @State private var isBrowserPresented = false
+    @State private var url: URL?
+    
+    init(url: URL?) {
+        if let url {
+            self.url = url
+        } else {
+            self.url = URL(string: "https://reportamelo.app/")!
+        }
+    }
+
     var body: some View {
-        WebView(url: URL(string: "https://reportamelo.app/")!)
-            .edgesIgnoringSafeArea(.all)
+        Button("Open Web View") {
+            isBrowserPresented = true
+        }
+        .sheet(isPresented: $isBrowserPresented) {
+            SafariWebView($url)
+                .ignoresSafeArea(edges: [.bottom, .top])
+        }
     }
 }
 
 
 #Preview {
-    WebBrowserView(url: .constant(URL(string: "https://reportamelo.app/")!))
+    SafariContentView(url: URL(string: "https://reportamelo.app/")!)
 }

@@ -21,7 +21,7 @@ struct AvatarOption: Identifiable, Hashable {
 // MARK: - Options
 let options: [AvatarOption] = [
     .init(title: String(localized: "Google Auth"), associatedView: .GoogleAuth),
-//    .init(title: String(localized: "Avatar"), associatedView: .avatar),
+//    .init(title: String(localized: "Memoji"), associatedView: .Memoji),
     .init(title: String(localized: "Monogram"), associatedView: .monogram),
     .init(title: String(localized: "Initials"), associatedView: .initials),
     .init(title: String(localized: "Photo"), associatedView: .photo),
@@ -468,7 +468,8 @@ struct ProfileImage: View {
             }
         }
         .frame(width: 130, height: 130)
-        .clipShape(Circle())
+        .clipShape(.circle)
+        .glassEffect()
         .overlay(alignment: .bottomTrailing) {
             Button {
                 viewModel.showPicker.toggle()
@@ -480,6 +481,7 @@ struct ProfileImage: View {
                     .foregroundColor(viewModel.isGuest ? .accentColor.mix(with: .black, by: 0.5) : .accentColor)
             }
             .accessibilityIdentifier("ShowImagePickerButton")
+            .accessibilityLabel("Show Image Picker Button")
             .disabled(viewModel.isGuest)
             .symbolColorRenderingMode(.gradient)
         }

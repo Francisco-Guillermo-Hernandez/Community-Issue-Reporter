@@ -13,7 +13,6 @@ import SwiftUI
 struct ReportWizardContainer: View {
     @Bindable var model: ReportDataModel
     @Environment(\.dismiss) private var dismiss
-//    @State private var uploadTrackers: [PhotoUploadTracker] = []
     @State private var controller: ReportController
     @FocusState private var focusedField: WizardElements?
     

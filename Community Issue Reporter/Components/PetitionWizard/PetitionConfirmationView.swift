@@ -26,7 +26,7 @@ struct PetitionConfirmationView: View {
                     .symbolEffect(.drawOn, isActive: isAnimating)
                     .task {
                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.675) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.375) {
                             isAnimating = false
                         }
                     }

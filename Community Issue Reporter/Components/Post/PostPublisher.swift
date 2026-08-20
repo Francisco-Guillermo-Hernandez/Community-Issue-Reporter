@@ -19,6 +19,8 @@ struct User: Decodable {
     let userName: String
     let profilePicture: String
     let profileId: String
+    let userSince: Date
+    let hideProfile: Bool
     var profilePictureURL: URL? {
         urlFromString(profilePicture)
     }
@@ -150,7 +152,7 @@ struct PostPublisher: View {
         updatedAt: nil,
         reportsIds: [],
         postMetadata: .init(audience: "", visibility: .published, countryCode: .SV, city: "San Salvador", cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619", language: "es", shareLink: ""),
-        postPublisher: .init(names: "John Doe", userName: "jonh.doe", profilePicture: "/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg", profileId: "G6abo3sSu1zcQ1U9"),
+        postPublisher: .init(names: "John Doe", userName: "jonh.doe", profilePicture: "/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg", profileId: "G6abo3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
         postSigners: .init(),
         progress: 10.0
     )
@@ -165,9 +167,9 @@ struct PostPublisher: View {
 
 #Preview("Signers") {
     let users: [User] = [
-        User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9"),
-        User(names: "Martha Doe", userName: "martha.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "ieq3sSu1zcQ1U9"),
-        User(names: "Michael Brown", userName: "michael.brown", profilePicture: "/avatars/019f4f22-1464-79bc-a712-acf20b7b3664.png", profileId: "l33sSu1zcQ1U9"),
+        User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
+        User(names: "Martha Doe", userName: "martha.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "ieq3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
+        User(names: "Michael Brown", userName: "michael.brown", profilePicture: "/avatars/019f4f22-1464-79bc-a712-acf20b7b3664.png", profileId: "l33sSu1zcQ1U9", userSince: Date(), hideProfile: false),
     ]
     
     ScrollView {

@@ -57,11 +57,11 @@ struct FollowUpSectionView: View {
                     HStack {
                         Text("Details of the progress")
                             .font(.caption)
-                            .opacity(isFollowUpDisabled ? 0.4 : opacity)
+                            .opacity(opacity)
                             .fontWeight(.medium)
                     }
                 }
-                .disabled(isFollowUpDisabled)
+//                .disabled(isFollowUpDisabled)
             }
             .scrollDisabled(true)
             .scrollContentBackground(.hidden)

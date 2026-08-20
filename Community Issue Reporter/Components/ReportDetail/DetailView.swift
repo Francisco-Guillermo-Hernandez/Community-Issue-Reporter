@@ -310,15 +310,29 @@ struct DetailView: View {
                     }
                 }
 
-                ToolbarItem(placement: .automatic) {
-                    ShareLink(item: buildShareURL(for: report.shareUrl)!) {
-                        Label("Share", systemImage: "square.and.arrow.up")
+                if  report.status == .assigned       ||
+                    report.status == .inProgress     ||
+                    report.status == .confirmed      ||
+                    report.status == .petitionToSign {
+                    
+                    ToolbarItem(placement: .automatic) {
+                        ShareLink(item: buildShareURL(for: report.shareUrl)!) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
                     }
                 }
                 
                 if !UserRepository.shared.isOwnProfile(report.profileId) {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Menu {
+                            
+                            Button {
+                                UIPasteboard.general.string = report.id
+                                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            } label: {
+                                Label("Copy Report ID", systemImage: "document.on.document")
+                            }
+                            .accessibilityIdentifier("CopyReportIdButton")
                             
                             Button(role: .destructive) {
                                 controller.showPopover.toggle()

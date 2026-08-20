@@ -130,7 +130,8 @@ struct LinksView: View {
                 return .handled
             })
             .sheet(isPresented: $showWebView) {
-                WebBrowserView(url: $webViewURL)
+                SafariWebView($webViewURL)
+//                WebBrowserView(url: $webViewURL)
             }
     }
     

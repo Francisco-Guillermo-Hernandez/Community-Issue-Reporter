@@ -98,6 +98,7 @@ final class PetitionController {
         if currentStep == .signatures {
             self.goNext()
         } else {
+            print("otherSteps")
             self.goNext()
         }
     }

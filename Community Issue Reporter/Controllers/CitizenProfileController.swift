@@ -40,7 +40,9 @@ final class CitizenProfileController {
             names: "Guest Citizen",
             userName: "guest",
             profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png",
-            profileId: "guest"
+            profileId: "guest",
+            userSince: Date(),
+            hideProfile: false
         )
     }
     

@@ -32,6 +32,10 @@ final class SettingsSubViewController {
     var showNetworkError: Bool = false
     var isDeletingAccount: Bool = false
     
+    var updatingPrivacySettingsLoading: Bool = false
+    var updatingNotificationSettingsLoading: Bool = false
+    
+    
     func inject(_ settings: SettingsStore, _ notificationManager: NotificationManager) {
         self.settings = settings
         self.notificationManager = notificationManager
@@ -40,11 +44,11 @@ final class SettingsSubViewController {
     var isPrivacySettingsUpdated: Bool = false
     func updatePrivacySettings() {
         Task {
-            print("update privacy settings")
             do {
                 
                 guard let settings else { return }
                 
+                self.updatingPrivacySettingsLoading = true
                 /// Debouncing
                 try await Task.sleep(for: .milliseconds(128))
                 try await UserRepository.shared.privacy(
@@ -54,15 +58,20 @@ final class SettingsSubViewController {
                     )
                 )
                 
+                print("refreshing")
+                
+                /// Refresh token
+                try await UserRepository.shared.refresh()
                 isPrivacySettingsUpdated = true
+                
             } catch CommonIntercommunicationErrors.networkError(let error) {
                 print(error)
                 showNetworkError = true
             } catch {
-                
+                print(error)
             }
-            
-            isPrivacySettingsUpdated = false
+            self.updatingPrivacySettingsLoading = false
+            self.isPrivacySettingsUpdated = false
         }
     }
     
@@ -72,6 +81,7 @@ final class SettingsSubViewController {
             
             do {
                 guard let settings else { return }
+                self.updatingNotificationSettingsLoading = true
                 
                 try await Task.sleep(for: .milliseconds(128))
                 let result = try await UserRepository.shared.modify(
@@ -84,7 +94,10 @@ final class SettingsSubViewController {
                 
                 switch result {
                 case .success(let message):
+                    try await UserRepository.shared.refresh()
                     isNotificationSettingsUpdated = true
+                    Toast.shared.show(message: message, type: .info)
+                    
                     print(message)
                     
                 case .failure(let error):
@@ -94,10 +107,11 @@ final class SettingsSubViewController {
             } catch CommonIntercommunicationErrors.networkError {
                 showNetworkError = true
             } catch {
-                
+                print(error)
             }
             
             isNotificationSettingsUpdated = true
+            self.updatingNotificationSettingsLoading = false
         }
     }
     

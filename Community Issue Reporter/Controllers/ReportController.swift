@@ -20,7 +20,7 @@ class ReportController {
     var shareableLink: String = ""
     var doneTrigger: Bool = false
     var currentStep: ReportStep = .location
-    var reportAttachmentGrouping: [ReportAttachmentGrouping]? = nil
+    var groupingResult: CustomizedResponse<[ReportAttachmentGrouping]>? = nil
     
     func startRePorting(_ model: ReportDataModel) async {
         do {
@@ -62,85 +62,50 @@ class ReportController {
         }
     }
     
-    func createShareableLink(_ model: ReportDataModel) async {
-        do {
-           
-            let url = try await ShareRepository.shared.createShareableLink(using: model)
-            shareableLink = url
-        }  catch CommonIntercommunicationErrors.invalidPetition(let code) {
-            showAlert(message: code)
-        } catch CommonIntercommunicationErrors.networkError(let error) {
-            showAlert(message: error)
-        } catch CommonIntercommunicationErrors.serverError {
-          showAlert(message: "Something went wrong, please try again later")
-        } catch {
-            print(error)
-        }
+    func createShareableLink(_ model: ReportDataModel) async throws {
+        let url = try await ShareRepository.shared.createShareableLink(using: model)
+        shareableLink = url
     }
     
-    func createReport(using model: ReportDataModel) async {
-        do {
-            let result = try await ReportRepository.shared.create(using: model)
-            model.report.id = result
-            reportId = result
-            
-        } catch CommonIntercommunicationErrors.invalidPetition(let code) {
-            showAlert(message: code)
-        } catch CommonIntercommunicationErrors.networkError(let error) {
-            showAlert(message: error)
-        } catch CommonIntercommunicationErrors.serverError {
-          showAlert(message: "Something went wrong, please try again later")
-        } catch {
-            print(error)
-        }
+    func createReport(using model: ReportDataModel) async throws {
+        let result = try await ReportRepository.shared.create(using: model)
+        model.report.id = result
+        self.reportId = result
     }
     
-    func submitGroupedAttachments(with attachments: [PhotoUploadTracker], using model: ReportDataModel) async {
-        do {
-            let newAttachments = attachments.filter { !$0.isExisting }
-            guard !newAttachments.isEmpty else { return }
-            
-            var reportId = model.buildReportId()
-            
-            if model.report.reportState == .modifying, let id = model.report.id {
-                reportId = id
-            }
-            
-            print("reportId: \(reportId)")
-            print("AttachmentContainer: \(model.reportSession.reportContainer)")
-            
-            let payload = newAttachments.map { tracker in
-                GroupedAttachmentPayload(
-                    attachmentContainer: model.reportSession.reportContainer,
-                    key: tracker.key,
-                    previewFileName: "preview_\(tracker.name)",
-                    fileName: tracker.name,
-                    reportId: reportId,
-                    notes: ""
-                )
-            }
-            
-            let result = try await ReportRepository.shared.submitGroupedAttachments(attachments: payload)
-            
-            
-            print("result grouping :")
-            print(result)
-            
-        } catch CommonIntercommunicationErrors.invalidPetition(let code) {
-            showAlert(message: code)
-        } catch CommonIntercommunicationErrors.networkError(let error) {
-            showAlert(message: error)
-        } catch CommonIntercommunicationErrors.serverError {
-            showAlert(message: "Something went wrong, please try again later")
-        } catch {
-            showAlert(message: error.localizedDescription)
+    func submitGroupedAttachments(with attachments: [PhotoUploadTracker], using model: ReportDataModel) async throws -> CustomizedResponse<[ReportAttachmentGrouping]>? {
+        
+        let newAttachments = attachments.filter { !$0.isExisting }
+        guard !newAttachments.isEmpty else { return nil }
+        
+        var reportId = model.buildReportId()
+        
+        if model.report.reportState == .modifying, let id = model.report.id {
+            reportId = id
         }
+        
+        print("reportId: \(reportId)")
+        print("AttachmentContainer: \(model.reportSession.reportContainer)")
+        
+        let payload = newAttachments.map { tracker in
+            GroupedAttachmentPayload(
+                attachmentContainer: model.reportSession.reportContainer,
+                key: tracker.key,
+                previewFileName: "preview_\(tracker.name)",
+                fileName: tracker.name,
+                reportId: reportId,
+                notes: ""
+            )
+        }
+        
+        return try await ReportRepository.shared.submitGroupedAttachments(attachments: payload)
+        
     }
     
     func modify(using model: ReportDataModel, with attachments: [PhotoUploadTracker]) async {
         do {
             guard let id = model.report.id else { return }
-            reportId = id
+            self.reportId = id
             
             guard let url = model.report.shareUrl else { return }
             
@@ -148,7 +113,7 @@ class ReportController {
             
             let result = try await ReportRepository.shared.update(model.report)
             if result == .updated {
-                await submitGroupedAttachments(with: attachments, using: model)
+                _ = try await submitGroupedAttachments(with: attachments, using: model)
             }
         } catch {
             showAlert(message: error.localizedDescription)
@@ -158,17 +123,41 @@ class ReportController {
     func submitReport(_ model: ReportDataModel, attachments: [PhotoUploadTracker], onComplete: @escaping () -> Void) {
         Task {
             isLoading = true
+            
             model.addAttachments(attachments)
             
             if model.report.reportState == .modifying {
-               await modify(using: model, with: attachments)
+               
+                await modify(using: model, with: attachments)
                
             } else {
-                async let a = createShareableLink(model)
-                async let b = createReport(using: model)
-                async let c = submitGroupedAttachments(with: attachments, using: model)
                 
-                _ = await (a, b, c)
+                do {
+                    try await withThrowingTaskGroup(of: Void.self) { group in
+                        
+                        group.addTask {
+                            let result = try await self.submitGroupedAttachments(with: attachments, using: model)
+                            if let data = result {
+                                await model.setAttachmentId(data.data)
+                            }
+                            try await self.createReport(using: model)
+                        }
+                        
+                        group.addTask {
+                            try await self.createShareableLink(model)
+                        }
+                        
+                        for try await _ in group {}
+                    }
+                } catch CommonIntercommunicationErrors.invalidPetition(let code) {
+                    showAlert(message: code)
+                } catch CommonIntercommunicationErrors.networkError(let error) {
+                    showAlert(message: error)
+                } catch CommonIntercommunicationErrors.serverError {
+                    showAlert(message: "Something went wrong, please try again later")
+                } catch {
+                    showAlert(message: error.localizedDescription)
+                }
             }
             
             model.removeAttachments()
@@ -214,3 +203,6 @@ class ReportController {
         }
     }
 }
+
+
+

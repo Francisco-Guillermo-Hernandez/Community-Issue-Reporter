@@ -88,6 +88,7 @@ struct UserProfileView: View {
                     
                     ProfileImage(viewModel: profile)
                         .padding(.bottom, 8)
+                        .padding(.top, 0)
                         .disabled(controller.isGuest)
                     
                     Text(UserRepository.shared.getName())
@@ -128,6 +129,7 @@ struct UserProfileView: View {
                                     Image(systemName: option.icon)
                                         .font(Font.system(size: 16, weight: .medium))
                                         .foregroundStyle( Color.white)
+                                        .symbolColorRenderingMode(.gradient)
                                 }
                                 .padding(.trailing, 8)
                             
@@ -155,12 +157,28 @@ struct UserProfileView: View {
                 }
                 
             }
-            .background(Color.theme.background)
             .overlay {
                 if profile.showPicker {
                     CustomBlurryOverlay(show: $profile.showPicker)
                         
                 }
+            }
+            .background {
+                ZStack(alignment: .top) {
+                    GeometryReader { geo in
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
+                                Color.theme.background
+                            ]),
+                            center: .topLeading,
+                            startRadius: 0,
+                            endRadius: geo.size.width * 0.54
+                        )
+                        
+                    }
+                }
+                .ignoresSafeArea()
             }
             .safeAreaInset(edge: .bottom) {
                 
@@ -188,7 +206,7 @@ struct UserProfileView: View {
                     .padding(.top, 0)
                     
                     LinksView(type: .full)
-                        .padding(.bottom, 8)
+                        .padding(.top, 8)
                 }
                 .padding()
                
@@ -224,6 +242,8 @@ struct UserProfileView: View {
             ReportsAndViolationsCenterView()
         case .signPetitions:
             MyPetitionsSubView(path: $navigationPath, subViewName: String(localized: "My Sign petitions"), mode: .listAndModify)
+        case .timeline(let reportId):
+            IssueTimelineView(reportId: reportId, mode: .navigation)
         }
     }
     
@@ -251,9 +271,9 @@ struct UserProfileView: View {
 extension Color {
     var slantedGradient: LinearGradient {
         LinearGradient(
-            colors: [self, self.opacity(0.8)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
+            colors: [self.opacity(0.67), self],
+            startPoint: .top,
+            endPoint: .bottom
         )
     }
 }

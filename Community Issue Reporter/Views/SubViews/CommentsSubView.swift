@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CommentsSubView: View {
     
+    @Environment(\.colorScheme) private var colorScheme
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var comments: [Comment] = []
     @Environment(\.dismiss) private var dismiss
@@ -103,7 +104,24 @@ struct CommentsSubView: View {
             
             isLoading = false
         }
-        .background(Color.theme.background)
+//        .background(Color.theme.background)
+        .background {
+            ZStack(alignment: .top) {
+                GeometryReader { geo in
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
+                            Color.theme.background
+                        ]),
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: geo.size.width * 0.54
+                    )
+                    
+                }
+            }
+            .ignoresSafeArea()
+        }
         .scrollContentBackground(.hidden)
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("My Comments")

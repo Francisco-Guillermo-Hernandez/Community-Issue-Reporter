@@ -12,6 +12,7 @@ import GoogleMobileAds
 
 struct CommentsSectionView: View {
     @State private var controller: CommentsController
+    @State private var mapExplorerController = MapExplorerController.shared
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @Environment(SubscriptionManager.self) var subscriptionManager
@@ -80,9 +81,15 @@ struct CommentsSectionView: View {
         } message: {
             Text(controller.message)
         }
-        .background(Color.theme.background)
         .task {
             await controller.fetchComments()
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(role: .close) {
+                    mapExplorerController.expandedItem = nil
+                }
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("Comments for: \(title)")

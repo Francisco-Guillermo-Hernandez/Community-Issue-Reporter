@@ -10,7 +10,7 @@ import SwiftUI
 struct CitizenProfile: View {
     
     @State private var controller = CitizenProfileController()
-    
+    @State private var mapExplorerController = MapExplorerController.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     
@@ -43,9 +43,10 @@ struct CitizenProfile: View {
                 }
                 .frame(width: 130, height: 130)
                 .clipShape(.circle)
-                .overlay(Circle().stroke(Color.white, lineWidth: 4))
-                .shadow(color: .black.opacity(0.1), radius: 10, y: 5)
-                .padding(.top, 24)
+                .glassEffect()
+//                .overlay(Circle().stroke(.white, lineWidth: 4))
+//                .shadow(color: .black.opacity(0.1), radius: 16, y: 8)
+                .padding(.top, 16)
                 
                 
                 Text(controller.citizen.names)
@@ -177,20 +178,37 @@ struct CitizenProfile: View {
             BlockUserSheet(profileId: profileId)
         }
         .background {
-            VStack {
+            
+            ZStack(alignment: .top) {
+                GeometryReader { geo in
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.3).opacity(0.85),
+                            Color.theme.secondary.opacity(0)
+                            
+                        ]),
+                        center: .topTrailing,
+                        startRadius: 0,
+                        endRadius: geo.size.width * 0.8
+                    )
+                    
+                }
+                
                 LinearGradient(
-                    colors: [Color.theme.secondary.opacity(0.6), Color.theme.background],
+                    colors: [Color.theme.secondary.opacity(0.11), Color.theme.background],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: 300)
-                Spacer()
+                .frame(height: 350)
             }
             .ignoresSafeArea()
         }
         .task {
             await controller.fetchCitizenPublicProfile(profileId)
-            await controller.fetchReports(profileId)
+            
+            if !controller.citizen.hideProfile {
+                await controller.fetchReports(profileId)
+            }
         }
         .background(Color.theme.background)
         .navigationTitle("Profile")
@@ -201,6 +219,15 @@ struct CitizenProfile: View {
             if !UserRepository.shared.isOwnProfile(profileId) {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
+                        
+                        Button {
+                            UIPasteboard.general.string = controller.citizen.profileId
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        } label: {
+                            Label("Copy Profile ID", systemImage: "document.on.document")
+                        }
+                        .accessibilityIdentifier("CopyProfileIDButton")
+                        
                         Button(role: .destructive) {
                             controller.showBlockUserSheet.toggle()
                         } label: {
@@ -216,12 +243,11 @@ struct CitizenProfile: View {
                 }
             }
             
-//            ToolbarItem(placement: .topBarTrailing) {
-//                Button(role: .close) {
-//                    dismiss()
-//                    dismiss()
-//                }
-//            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(role: .close) {
+                    mapExplorerController.expandedItem = nil
+                }
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
     }

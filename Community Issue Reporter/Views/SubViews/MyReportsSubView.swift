@@ -21,17 +21,22 @@ struct HeaderText: View {
 }
 
 struct BottomText: View {
-    init(_ text: String) {
-        self.text = text
-    }
     var text: String
+    var multiline: Bool
+    
+    init(_ text: String, multiline: Bool = false) {
+        self.text = text
+        self.multiline = multiline
+    }
+    
     var body: some View {
         Text(text)
             .font(.caption)
             .foregroundColor(.secondary)
-            .fixedSize()
+            .fixedSize(horizontal: !multiline, vertical: true)
     }
 }
+
 
 // MARK: - GenericDatePresenterView
 struct GenericDatePresenterView: View {
@@ -84,20 +89,39 @@ struct ReportCellView: View {
                             text: String(localized: "Created", comment: "Created description text at the report section"),
                             when: report.createdDate
                         )
+                        .accessibilityElement(children: .combine)
                         
                         GenericDatePresenterView(
                             text: String(localized: "Updated", comment: "Updated description text at the report section"),
                             when: report.updatedDate
                         )
+                        .accessibilityElement(children: .combine)
                         
                         GenericDatePresenterView(
                             text: String(localized: "Assigned", comment: "Reported description text at the report section"),
                             when: report.reportedDate
                         )
+                        .accessibilityElement(children: .combine)
                         
                     }
                     .padding(.top, .themeSpacing)
                     .padding(.bottom, .themeSpacing)
+                    
+                    Group {
+                        if let observations = report.observations, !observations.isEmpty && (report.status == .rejected || report.status == .humanReview) {
+                            VStack {
+                                HeaderText(String(localized: "Observations"))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                
+                                BottomText(observations, multiline: true)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .font(.caption)
+                            }
+                            .padding(.leading)
+                            .padding(.top, .themeSpacing)
+                            .padding(.bottom, .themeSpacing)
+                        }
+                    }
                     
                     VStack(spacing: 0) {
                         HStack {
@@ -114,6 +138,8 @@ struct ReportCellView: View {
                                 )
                                 
                             }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("Issue type: \(report.issueType.title)")
                             
                             VStack {
                                 HeaderText(String(localized: "Severity"))
@@ -128,6 +154,8 @@ struct ReportCellView: View {
                                 )
                                 
                             }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("Severity: \(report.severity.title)")
                             
                             VStack {
                                 HeaderText(String(localized: "Status"))
@@ -142,6 +170,8 @@ struct ReportCellView: View {
                                 )
                                 
                             }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("Status: \(report.status.title)")
                         }
                     }
                     .padding(.top, .themeSpacing)
@@ -195,16 +225,18 @@ struct MyReportsSubView: View {
                     ForEach(controller.reports, id: \.id) { report in
                         Group {
                             if mode == .listAndModify {
-                                let disableNavigation: Bool = [.fixed, .assigned, .humanReview, .underReview].contains(report.status)
+                                let disableNavigation: Bool = [.reported, .rectification].contains(report.status)
                                 
                                 Group {
-                                    if disableNavigation {
+                                    if !disableNavigation {
                                         ReportCellView(report: report, enableChevron: false)
                                             .cellStyle()
+                                            .padding(.themeSpacing)
                                     } else {
                                         NavigationLink(destination: showWizard(report)) {
                                             ReportCellView(report: report, enableChevron: true)
                                                 .cellStyle()
+                                                .padding(.themeSpacing)
                                         }
                                     }
                                 }
@@ -224,49 +256,16 @@ struct MyReportsSubView: View {
                                        RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
                                 )
                                 .contextMenu {
-                                    Button {
-                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                        controller.openInMaps(report.coordinate)
-                                    } label: {
-                                        Label("Open in Maps", systemImage: "map")
-                                    }
-                                    .accessibilityIdentifier("OpenInMapsButton")
-                                    
-                                    Button {
-                                        UIPasteboard.general.string = report.id
-                                    } label: {
-                                        Label("Copy ID", systemImage: "document.on.document")
-                                    }
-                                    .accessibilityIdentifier("CopyIDButton")
-                                    
-                                    Button {
-                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                        shareFromClosure(item: buildShareURL(for: report.shareUrl!))
-                                    } label: {
-                                        Label("Share Report", systemImage: "square.and.arrow.up")
-                                    }
-                                    .accessibilityIdentifier("ShareReportURLButton")
-                                    
-                                    Button {
-                                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                                    } label: {
-                                        Label("Timeline", systemImage: "calendar.badge.clock")
-                                    }
-                                    
-                                    Button(role: .destructive) {
-                                        controller.reportToDelete = report
-                                        controller.showDeleteAlert = true
-                                    } label: {
-                                        Label("Delete", systemImage: "document.on.trash")
-                                    }
-                                    
+                                    reportContextMenu(report)
                                 }
                             } else {
                                 ReportCellView(report: report)
                                     .cellStyle()
                             }
                         }
-                        .onAppear {
+                        .accessibilityElement(children: .contain)
+                        .accessibilityLabel("Report")
+                        .task {
                             if report.id == controller.reports.last?.id {
                                 Task {
                                     await controller.fetchReports(loadMore: true)
@@ -291,6 +290,23 @@ struct MyReportsSubView: View {
 
         }
         .background(Color.theme.background)
+//        .background {
+//            ZStack(alignment: .top) {
+//                GeometryReader { geo in
+//                    RadialGradient(
+//                        gradient: Gradient(colors: [
+//                            Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
+//                            Color.theme.background
+//                        ]),
+//                        center: .topLeading,
+//                        startRadius: 0,
+//                        endRadius: geo.size.width * 0.54
+//                    )
+//                    
+//                }
+//            }
+//            .ignoresSafeArea()
+//        }
         .scrollContentBackground(.hidden)
         .alert("Delete report", isPresented: $controller.showDeleteAlert) {
             Button("Delete", role: .destructive) {
@@ -309,6 +325,53 @@ struct MyReportsSubView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)
+    }
+    
+    @ViewBuilder
+    private func reportContextMenu(_ report: Report) -> some View {
+        Button {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            controller.openInMaps(report.coordinate)
+        } label: {
+            Label("Open in Maps", systemImage: "map")
+        }
+        .accessibilityIdentifier("OpenInMapsButton")
+        
+        Button {
+            UIPasteboard.general.string = report.id
+        } label: {
+            Label("Copy ID", systemImage: "document.on.document")
+        }
+        .accessibilityIdentifier("CopyIDButton")
+        
+        Button {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            shareFromClosure(item: buildShareURL(for: report.shareUrl!))
+        } label: {
+            Label("Share Report", systemImage: "square.and.arrow.up")
+        }
+        .accessibilityIdentifier("ShareReportURLButton")
+        
+        Button {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            if let reportId = report.id {
+                ProfileRouter.shared.goTo(.timeline(reportId: reportId))
+            }
+        } label: {
+            Label("Timeline", systemImage: "calendar.badge.clock")
+        }
+        .accessibilityIdentifier("OpenTimelineButton")
+        
+        Divider()
+        
+        Button(role: .destructive) {
+            controller.reportToDelete = report
+            controller.showDeleteAlert = true
+        } label: {
+            Label("Delete", systemImage: "document.on.trash")
+        }
+        .accessibilityIdentifier("DeleteReportButton")
+        .accessibilityLabel("Delete")
     }
     
     @ViewBuilder

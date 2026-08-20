@@ -23,18 +23,28 @@ struct FooterText: View {
 
 struct SettingsHeaderView: View {
     var title: String
+    var isLoading: Binding<Bool>
     
-    init(_ title: String) {
+    init(_ title: String, _ isLoading: Binding<Bool>) {
         self.title = title
+        self.isLoading = isLoading
     }
     
     var body: some View {
-        Text(title)
-            .font(.headline)
-            .fontWeight(.bold)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.leading, .themeSpacing * 4.5)
-            .foregroundStyle(.secondary)
+        HStack(spacing: .themeSpacing * 2) {
+            Text(title)
+                .font(.headline)
+                .fontWeight(.bold)
+                .padding(.leading, .themeSpacing * 4.5)
+                .foregroundStyle(.secondary)
+            
+            if isLoading.wrappedValue {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .controlSize(.small)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -44,11 +54,13 @@ struct SettingsGroup<Content: View, FooterContent: View>: View {
     let footerText: String?
     let content: Content
     let footerContent: FooterContent?
+    var isLoading: Binding<Bool>
     
     // Primary initializer supporting both content closures
     init(
         title: String,
         footerText: String? = nil,
+        isLoading: Binding<Bool> = .constant(false),
         @ViewBuilder content: () -> Content,
         @ViewBuilder footerContent: () -> FooterContent
     ) {
@@ -56,23 +68,26 @@ struct SettingsGroup<Content: View, FooterContent: View>: View {
         self.footerText = footerText
         self.content = content()
         self.footerContent = footerContent()
+        self.isLoading = isLoading
     }
     
     // Convenience initializer when no footerContent is provided
     init(
         title: String,
         footerText: String? = nil,
+        isLoading: Binding<Bool> = .constant(false),
         @ViewBuilder content: () -> Content
     ) where FooterContent == EmptyView {
         self.title = title
         self.footerText = footerText
         self.content = content()
         self.footerContent = nil
+        self.isLoading = isLoading
     }
     
     var body: some View {
         VStack(spacing: .themeSpacing * 1.5) {
-            SettingsHeaderView(title)
+            SettingsHeaderView(title, isLoading)
                 .opacity(isEnabled ? 1 : 0.5)
             
             VStack {
@@ -156,6 +171,8 @@ struct SettingsSubView: View {
                         }
                     }
                     .disabled(!networkMonitor.isConnected)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Location")
                     
                     /// Subscription group
                     SettingsGroup(
@@ -219,10 +236,13 @@ struct SettingsSubView: View {
                             }
                         }
                         .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                        .accessibilityElement(children: .contain)
+                        .accessibilityLabel("Subscription")
                     
                     SettingsGroup(
                         title: String(localized: "Privacy"),
-                        footerText: String(localized: "You can show or hide your profile and your username when you share your reports and petitions with others.")
+                        footerText: String(localized: "You can show or hide your profile and your username when you share your reports and petitions with others."),
+                        isLoading: $controller.updatingPrivacySettingsLoading
                     ) {
                         Toggle("Show my profile", isOn: $settings.showMyProfile)
                             .tint(Color.theme.primary)
@@ -244,10 +264,14 @@ struct SettingsSubView: View {
                             }
                     }
                     .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Privacy")
                     
                     /// Notifications group
                     SettingsGroup(title: String(localized: "Notifications"),
-                                  footerText: String(localized: "You can enable or disable push notifications in order to receive updates when authorities are resolving your report or petition.")) {
+                                  footerText: String(localized: "You can enable or disable push notifications in order to receive updates when authorities are resolving your report or petition."),
+                                  isLoading: $controller.updatingNotificationSettingsLoading
+                    ) {
                         Toggle("Push notifications", isOn: $settings.enablePushNotifications)
                             .accessibilityIdentifier("PushNotificationsToggle")
                             .tint(Color.theme.primary)
@@ -277,7 +301,9 @@ struct SettingsSubView: View {
                                 controller.updateNotificationSettings()
                             }
                     }
-                                  .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Notifications")
                     
                     SettingsGroup(
                         title: String(localized: "App settings")
@@ -308,20 +334,8 @@ struct SettingsSubView: View {
                         LinksView(type: .privacy)
                     }
                     .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
-                    
-//                    SettingsGroup(title: String(localized: "Community")) {
-//                        NavigationLink(destination: ReportsAndViolationsCenterView()) {
-//                            HStack {
-//                                Text(String(localized: "Reports and violations center"))
-//                                    .foregroundStyle(Color.theme.inputText)
-//                                Spacer()
-//                                Image(systemName: "chevron.right")
-//                                    .font(.system(size: 12))
-//                                    .foregroundColor(.secondary)
-//                            }
-//                        }
-//                    }
-//                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("App settings")
                     
                     
                     SettingsGroup(
@@ -392,6 +406,8 @@ struct SettingsSubView: View {
                         
                     }
                     .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Dangerous zone")
                     
                     /// About
                     SettingsGroup(title: String(localized: "About")) {
@@ -419,11 +435,11 @@ struct SettingsSubView: View {
                                 .foregroundStyle(Color.theme.inputText)
                         }
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("About Section")
                     
                     Spacer()
-                    
-                    Spacer()
-                    
+              
                 }
             }
             .padding(.horizontal)

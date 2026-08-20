@@ -10,7 +10,7 @@ import PhotosUI
 
 struct EvidencesView: View {
     @State var orientation = UIDevice.current.orientation
-    
+    @State private var mapExplorerController = MapExplorerController.shared
     @State private var selectedImages: UIImage? = nil
     @State private var cameraCompletion: ((UIImage) -> Void)? = nil
     @State private var isCameraPresented: Bool = false
@@ -151,9 +151,14 @@ struct EvidencesView: View {
                 .accessibilityLabel("Add more Evidences by taking a photo")
             }
             
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(role: .close) {
+                    mapExplorerController.expandedItem = nil
+                }
+            }
+            
             
         }
-//        .background(Color.theme.background)
         .toolbarTitleDisplayMode(.large)
         .navigationTitle("Evidences")
         .navigationSubtitle("You can take a look of what is happening")

@@ -3,8 +3,6 @@ import WebKit
 import Observation
 import SafariServices
 
-// private var domains = ["https://reportamelo.app/", "://reportamelo.app/"]
-
 struct SafariWebView: UIViewControllerRepresentable {
     @Binding var url: URL?
     

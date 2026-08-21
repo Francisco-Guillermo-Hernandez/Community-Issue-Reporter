@@ -19,11 +19,11 @@ struct GooglePillButton: View {
                         .frame(width: 20, height: 20)
                     
                     Text("Sign in with Google")
-                        .font(.custom("Roboto-Bold", size: 14))
+                        .font(.custom("Roboto-Bold", size: 16))
                         .foregroundColor(Color("Google_font_color"))
                 }
                 .padding(.horizontal, 12)
-                .frame(maxWidth: .infinity, maxHeight: 40)
+                .frame(maxWidth: .infinity, maxHeight: 44)
             }
         }
         .buttonSizing(.flexible)

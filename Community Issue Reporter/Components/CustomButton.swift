@@ -248,7 +248,7 @@ struct ThemedButtonOutlineStyle: ButtonStyle {
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(style == .normal ? .system(size: 16, weight: .medium) : Font.body.bold())
+            .font(style == .normal ? .system(size: 16, weight: .regular) : Font.body.bold())
             .background(backgroundView(isPressed: configuration.isPressed))
             .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
             .contentShape(Capsule())

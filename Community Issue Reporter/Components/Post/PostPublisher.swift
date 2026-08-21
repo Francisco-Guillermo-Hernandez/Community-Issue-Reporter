@@ -14,7 +14,7 @@ struct UserProfile: Decodable {
     let profileId: String
 }
 
-struct User: Decodable {
+struct User: Codable {
     let names: String
     let userName: String
     let profilePicture: String

@@ -186,13 +186,16 @@ struct DetailView: View {
             }
             .task(id: activeDetent) {
                 
-                guard activeDetent == .large else { return }
-                do {
-                    self.comments = try await CommentsRepository.shared.list(report.id, page: 1)
-                    
-                } catch {
-                    
+                if !UserRepository.shared.isGuestUser() {
+                    guard activeDetent == .large else { return }
+                    do {
+                        self.comments = try await CommentsRepository.shared.list(report.id, page: 1)
+                        
+                    } catch {
+                        
+                    }
                 }
+                
             }
             .safeAreaInset(edge: .bottom) {
                 if activeDetent == .large {

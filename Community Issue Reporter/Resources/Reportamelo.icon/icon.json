@@ -1,28 +1,37 @@
 {
-  "fill" : "system-light",
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.54356,0.35734,0.89292,1.00000",
+      "display-p3:0.28866,0.23084,0.53046,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.7
+      }
+    }
+  },
   "groups" : [
     {
       "layers" : [
         {
-          "blend-mode-specializations" : [
-            {
-              "appearance" : "dark",
-              "value" : "normal"
-            }
-          ],
-          "glass" : true,
-          "hidden" : false,
-          "image-name" : "megaphone.fill 1.svg",
-          "name" : "megaphone.fill 1",
-          "opacity-specializations" : [
-            {
-              "appearance" : "dark",
-              "value" : 1
-            }
-          ]
+          "blend-mode" : "normal",
+          "glass" : false,
+          "image-name" : "Reportamelo.png",
+          "name" : "Reportamelo",
+          "position" : {
+            "scale" : 0.5,
+            "translation-in-points" : [
+              -0.5,
+              -15.292293930984044
+            ]
+          }
         }
       ],
-      "name" : "Group",
       "shadow" : {
         "kind" : "neutral",
         "opacity" : 0.5

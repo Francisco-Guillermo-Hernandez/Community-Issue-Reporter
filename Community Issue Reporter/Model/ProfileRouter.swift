@@ -8,9 +8,11 @@ enum ProfileDestinations: Hashable {
     case settings
     case licenses
     case moderation
+    case timeline(reportId: String)
 }
 
 @Observable
+@MainActor
 final class ProfileRouter {
     static let shared = ProfileRouter()
     

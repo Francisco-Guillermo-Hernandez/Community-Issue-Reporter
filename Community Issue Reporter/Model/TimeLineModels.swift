@@ -120,6 +120,19 @@ struct PreviewAttachment: Codable, Identifiable, Equatable, Hashable {
     let state: ReportAttachmentState
     let fileName: String
     let reportContainer: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case createdAtRaw
+        case updatedAtRaw
+        case uploaderUserName
+        case validatedBy
+        case state
+        case fileName
+        case reportContainer
+    }
+    
     var createdAt: Date { Date(timeIntervalSince1970: Double(createdAtRaw) / miliSeconds) }
     var updatedAt: Date? {
         guard let updatedAtRaw else { return nil }
@@ -150,6 +163,7 @@ struct PreviewAttachment: Codable, Identifiable, Equatable, Hashable {
 
 
 struct PreviewAttachmentRequest: Codable {
+    var attachmentId: String
     let fileName: String
     let type: AttachmentType
     let key: String

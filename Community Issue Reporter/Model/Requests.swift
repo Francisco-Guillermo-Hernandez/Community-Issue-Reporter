@@ -100,6 +100,7 @@ enum TypeOfContentToReport: String, CaseIterable, Codable {
     case video
     case comment
     case petition
+    case account
     
     var description: String {
         switch self {
@@ -108,6 +109,7 @@ enum TypeOfContentToReport: String, CaseIterable, Codable {
             case .video: return String(localized: "Video")
             case .comment: return String(localized: "Comment")
             case .petition: return String(localized: "Petition")
+            case .account: return String(localized: "Account")
         }
     }
 }
@@ -150,7 +152,7 @@ struct ReportViolation<T: Codable>: Codable {
         blockedReasonId: String,
         status: ReportViolationStatus,
     ) {
-        self.id = nil
+        self.id = UUID().uuidString
         self.type = type
         self.content = content
         self.contentAuthorProfileId = profileId

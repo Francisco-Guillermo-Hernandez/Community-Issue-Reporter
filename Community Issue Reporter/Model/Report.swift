@@ -51,6 +51,7 @@ final class Report: Identifiable, Codable, Hashable {
     var cityId: String?
     var reportContainer: String?
     var shareUrl: String?
+    var observations: String?
     init(
             id: String? = nil,
             coordinate: Coordinate,
@@ -73,7 +74,8 @@ final class Report: Identifiable, Codable, Hashable {
             attachments: [PreviewAttachmentRequest] = [],
             cityId: String? = nil,
             reportContainer: String? = nil,
-            shareUrl: String? = nil
+            shareUrl: String? = nil,
+            observations: String? = nil
         ) {
             self.id = id
             self.coordinate = coordinate
@@ -97,6 +99,7 @@ final class Report: Identifiable, Codable, Hashable {
             self.cityId = cityId
             self.reportContainer = reportContainer
             self.shareUrl = shareUrl
+            self.observations = observations
         }
 }
 
@@ -125,6 +128,7 @@ struct ReportDAO: Identifiable, Codable {
     var cityId: String?
     var reportContainer: String?
     var shareUrl: String?
+    var observations: String?
     
     init(_ report: Report) {
         self.id = report.id
@@ -149,6 +153,7 @@ struct ReportDAO: Identifiable, Codable {
         self.cityId = report.cityId
         self.reportContainer = report.reportContainer
         self.shareUrl = report.shareUrl
+        self.observations = report.observations
     }
     
     func toModel() -> Report {
@@ -174,7 +179,8 @@ struct ReportDAO: Identifiable, Codable {
             attachments: self.attachments,
             cityId: self.cityId,
             reportContainer: self.reportContainer,
-            shareUrl: self.shareUrl
+            shareUrl: self.shareUrl,
+            observations: self.observations,
         )
     }
 }

@@ -21,7 +21,7 @@ struct AvatarOption: Identifiable, Hashable {
 // MARK: - Options
 let options: [AvatarOption] = [
     .init(title: String(localized: "Google Auth"), associatedView: .GoogleAuth),
-    .init(title: String(localized: "Memoji"), associatedView: .Memoji),
+//    .init(title: String(localized: "Memoji"), associatedView: .Memoji),
     .init(title: String(localized: "Monogram"), associatedView: .monogram),
     .init(title: String(localized: "Initials"), associatedView: .initials),
     .init(title: String(localized: "Photo"), associatedView: .photo),

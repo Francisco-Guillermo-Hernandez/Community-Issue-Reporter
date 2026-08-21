@@ -26,6 +26,10 @@ struct ModerationService {
         return try await client.post(path: "user-generated-content/moderation/\(type.rawValue)", body: reason, headers: headers, withOAuth: true)
     }
     
+    func moderateAccount(reason: ReportViolation<User>, type: TypeOfContentToReport, headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.post(path: "user-generated-content/moderation/\(type.rawValue)", body: reason, headers: headers, withOAuth: true)
+    }
+    
     /// List request complaints that a user do agains a content or comment
     func myComplaints(headers: [HTTPHeader]) async throws -> PaginatedResponse<ReportViolation<ModeratedContent>> {
         return try await client.get(path: "user-generated-content/moderation/my-complaints", headers: headers, withOAuth: true)

@@ -26,6 +26,10 @@ struct UserService {
         return try await client.post(path: "auth/Apple/tokenSignInOrLogin", body: payload, headers: headers, withOAuth: true)
     }
     
+    func refresh(headers: [HTTPHeader]) async throws {
+        let _: EmptyResponse = try await client.get(path: "auth/refresh/token", headers: headers, withOAuth: true)
+    }
+    
     func checkAvailability(of userName: String, _ headers: [HTTPHeader]) async throws -> GenericResponse {
         return try await client.post(path: "user/check/availability", body: ["userName": userName], headers: headers, withOAuth: true)
     }

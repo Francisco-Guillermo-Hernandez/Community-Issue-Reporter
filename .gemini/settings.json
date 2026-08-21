@@ -5,6 +5,12 @@
       "args": [
         "mcpbridge"
       ]
+    },
+    "xcode": {
+      "command": "xcrun",
+      "args": [
+        "mcpbridge"
+      ]
     }
   }
 }

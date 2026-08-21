@@ -1,0 +1,21 @@
+//
+//  Development.xcconfig
+//  Community Issue Reporter
+//
+//  Created by Francisco Hernandez on 25/6/26.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+API_URL = development-api.reportamelo.app/
+SHARE_URL = development-share.reportamelo.app/
+
+// AdMob Configuration (Test Units)
+ADMOB_APP_ID = ca-app-pub-3940256099942544~1458002511
+ADMOB_REPORT_VALIDATION_AD_UNIT = ca-app-pub-3940256099942544/1712485313
+ADMOB_SIGN_PETITION_AD_UNIT = ca-app-pub-3940256099942544/1712485313
+ADMOB_NATIVE_AD_UNIT = ca-app-pub-3940256099942544/3986624511
+
+// RevenueCat Configuration (Test Unit)
+REVENUECAT_API_KEY = test_WiMrbEnooYxnMyEFtalwTZyrZye

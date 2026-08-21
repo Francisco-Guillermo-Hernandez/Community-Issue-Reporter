@@ -88,7 +88,9 @@ struct UserAvatarPersonalizationSheet: View {
                     Text("Google auth")
                     
                 case .Memoji:
-                    Text("Memoji")
+                    memojiView()
+                        .geometryGroup()
+                        .transition(.blurReplace(.downUp))
                 }
             }
             .geometryGroup()
@@ -185,6 +187,23 @@ struct UserAvatarPersonalizationSheet: View {
 
                     VStack {
                         Group {
+                            if option.associatedView == .Memoji {
+                                
+                                Button {
+                                    withAnimation(animation) {
+                                        currentView = .Memoji
+                                    }
+                                } label: {
+                                    getMemojiAvatar()
+                                        .frame(width: 80, height: 80)
+                                        
+                                }
+                                .buttonStyle(.glass)
+                                .buttonBorderShape(.circle)
+                                .accessibilityIdentifier("ChooseMemojiButton")
+                                
+                            }
+                            
                             if option.associatedView == .GoogleAuth {
                                 
                                 Button {
@@ -346,6 +365,59 @@ struct UserAvatarPersonalizationSheet: View {
                 Text("Hello")
             }
         }
+    }
+
+    @ViewBuilder
+    func memojiView() -> some View {
+        VStack(spacing: .themeSpacing * 5) {
+            
+            SheetHeaderView(
+                title: String(localized: "Set your Memoji"),
+                onClose: {
+                    currentView = .optionsSelector
+                }
+            )
+            .padding(.bottom, 10)
+
+            VStack(spacing: .themeSpacing * 4) {
+                Text("Tap below to open the keyboard and select a Memoji sticker.")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                
+                MemojiInputView { image in
+                    viewModel.selectedAvatarOptionView = .Memoji
+                    onSelect(image)
+                }
+                .frame(width: 150, height: 150)
+                .background(Color.theme.secondary.opacity(0.1))
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Color.theme.primary.opacity(0.5), lineWidth: 2))
+                
+                Spacer()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func getMemojiAvatar() -> some View {
+        Group {
+            if viewModel.selectedAvatarOptionView == .Memoji, let url = viewModel.avatarURL ?? UserRepository.shared.getAvatar() {
+                CachedAsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    ProgressView()
+                }
+            } else {
+                Image("user_b")
+                    .resizable()
+            }
+        }
+        .clipShape(Circle())
+        .aspectRatio(contentMode: .fill)
     }
     
     @ViewBuilder
@@ -553,4 +625,48 @@ private struct DynamicSheetWrapper: View {
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .background(Color.theme.cardBackground)
+}
+
+struct MemojiInputView: UIViewRepresentable {
+    var onImageReceived: (UIImage) -> Void
+    
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.delegate = context.coordinator
+        textView.allowsEditingTextAttributes = true
+        textView.backgroundColor = .clear
+        textView.textAlignment = .center
+        textView.tintColor = .clear
+        return textView
+    }
+    
+    func updateUIView(_ uiView: UITextView, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImageReceived: onImageReceived)
+    }
+    
+    class Coordinator: NSObject, UITextViewDelegate {
+        var onImageReceived: (UIImage) -> Void
+        init(onImageReceived: @escaping (UIImage) -> Void) {
+            self.onImageReceived = onImageReceived
+        }
+        
+        func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+            if text == "\n" {
+                textView.resignFirstResponder()
+                return false
+            }
+            return true
+        }
+        
+        func textViewDidChange(_ textView: UITextView) {
+            textView.attributedText.enumerateAttribute(.attachment, in: NSRange(location: 0, length: textView.attributedText.length), options: []) { value, range, stop in
+                if let attachment = value as? NSTextAttachment, let image = attachment.image {
+                    self.onImageReceived(image)
+                    textView.attributedText = NSAttributedString(string: "")
+                }
+            }
+        }
+    }
 }

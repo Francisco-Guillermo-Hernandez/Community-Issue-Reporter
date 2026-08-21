@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "56E42B4F2F46BC8C00AC84C7"
-               BuildableName = "Community Issue Reporter.app"
+               BuildableName = "Reportamelo.app"
                BlueprintName = "Community Issue Reporter"
                ReferencedContainer = "container:Community Issue Reporter.xcodeproj">
             </BuildableReference>
@@ -76,7 +76,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "56E42B4F2F46BC8C00AC84C7"
-            BuildableName = "Community Issue Reporter.app"
+            BuildableName = "Reportamelo.app"
             BlueprintName = "Community Issue Reporter"
             ReferencedContainer = "container:Community Issue Reporter.xcodeproj">
          </BuildableReference>
@@ -97,7 +97,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "56E42B4F2F46BC8C00AC84C7"
-            BuildableName = "Community Issue Reporter.app"
+            BuildableName = "Reportamelo.app"
             BlueprintName = "Community Issue Reporter"
             ReferencedContainer = "container:Community Issue Reporter.xcodeproj">
          </BuildableReference>

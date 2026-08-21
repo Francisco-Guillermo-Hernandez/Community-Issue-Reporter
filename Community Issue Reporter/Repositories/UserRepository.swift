@@ -198,7 +198,11 @@ final class UserRepository {
     
     func changeAvatar(_ image: UIImage, _ from: AvatarCreatedFrom) async throws -> String {
         
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        ///  Define your target avatar size
+        let targetSize = image.downscaled(to: .init(width: 250, height: 250))
+      
+        /// Compress
+        guard let imageData = targetSize.jpegData(compressionQuality: 0.85) else {
             throw ImageError.unknownError("Failed to get image data")
         }
         
@@ -357,7 +361,7 @@ final class UserRepository {
             
             let result = try await self.service.privacy(settings, headers)
 
-            if result.code == "PRIVACY_SETTINGS_UPDATED" {
+            if result.code != "PRIVACY_SETTINGS_UPDATED" {
                 throw CommonIntercommunicationErrors.genericError(result.code)
             }
         } catch ServiceError.unauthorized {
@@ -445,6 +449,28 @@ final class UserRepository {
         }
     }
     
+    func signOutFromGoogle() {
+        GIDSignIn.sharedInstance.signOut()
+    }
+    
+    func refresh() async throws {
+        do {
+            _ = try await self.service.refresh(headers: headers)
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        } catch {
+            print("refresh")
+            print(error)
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
     func citizenProfile(id: String) async throws -> User {
         do {
             return try await self.service.citizenProfile(id: id, headers: headers)
@@ -504,4 +530,20 @@ enum ImageError: Error {
 enum ReportError: Error {
     case noIdentifier
     case noCityIdentifier
+}
+
+
+extension UIImage {
+    func downscaled(to boundingSize: CGSize) -> UIImage {
+        let aspectWidth = boundingSize.width / size.width
+        let aspectHeight = boundingSize.height / size.height
+        let scaleFactor = min(aspectWidth, aspectHeight)
+        
+        let scaledSize = CGSize(width: size.width * scaleFactor, height: size.height * scaleFactor)
+        
+        let renderer = UIGraphicsImageRenderer(size: scaledSize)
+        return renderer.image { _ in
+            self.draw(in: CGRect(origin: .zero, size: scaledSize))
+        }
+    }
 }

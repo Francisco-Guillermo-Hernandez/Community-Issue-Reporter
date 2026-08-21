@@ -101,6 +101,22 @@ final class ModerationRepository {
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
+    
+    func moderateAccount(reason: ReportViolation<User>, type: TypeOfContentToReport) async throws -> GenericResponse {
+        do {
+            return try await service.moderateAccount(reason: reason, type: type, headers: self.headers)
+        } catch ServiceError.badRequest(let result) {
+            throw CommonIntercommunicationErrors.invalidPetition(result.code)
+        } catch ServiceError.notFound {
+            throw CommonIntercommunicationErrors.notFound
+        } catch ServiceError.serverError(let code) {
+            throw CommonIntercommunicationErrors.serverError(code)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
 
     func appeal(id: String, type: TypeOfContentToReport) async throws -> GenericResponse {
         do {

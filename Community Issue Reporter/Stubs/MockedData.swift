@@ -136,7 +136,7 @@ final class PetitionsPostMockedData {
                     )
                 ],
                 postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, city: "Santa Tecla", cityId: "d25de983-c87c-4bf0-bb7f-9203c3755985", language: "es", shareLink: "/kAp82ybCuDE67hello/petition/20260706/SSC/SV/recarpet-of-big-potholes-on-the-road"),
-                postPublisher: .init(names: "John Doe", userName: "jonh.doe", profilePicture: "/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg", profileId: "G6abo3sSu1zcQ1U9"),
+                postPublisher: .init(names: "John Doe", userName: "jonh.doe", profilePicture: "/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg", profileId: "G6abo3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
                 postSigners: .init(),
                 progress: 10.0
             ),
@@ -165,11 +165,11 @@ final class PetitionsPostMockedData {
                 ],
                 attachments: [],
                 postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, city: "Cojutepeque", cityId: "60c3a7b8-f778-4883-b5b2-257dd98deae0", language: "es", shareLink: "/11Ap82ybCuDE67oeu/petition/20260706/SSC/SV/un-semafor-no-esta-funcionando-en-la-avenida"),
-                postPublisher: .init(names: "John Doe", userName: "jonh.doe", profilePicture: "/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg", profileId: "G6abo3sSu1zcQ1U9"),
+                postPublisher: .init(names: "John Doe", userName: "jonh.doe", profilePicture: "/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg", profileId: "G6abo3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
                 postSigners: .init(latestsSigners: [
-                    User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9"),
-                    User(names: "Martha Doe", userName: "martha.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "ieq3sSu1zcQ1U9"),
-                    User(names: "Michael Brown", userName: "michael.brown", profilePicture: "/avatars/019f4f22-1464-79bc-a712-acf20b7b3664.png", profileId: "l33sSu1zcQ1U9"),
+                    User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
+                    User(names: "Martha Doe", userName: "martha.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "ieq3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
+                    User(names: "Michael Brown", userName: "michael.brown", profilePicture: "/avatars/019f4f22-1464-79bc-a712-acf20b7b3664.png", profileId: "l33sSu1zcQ1U9", userSince: Date(), hideProfile: false),
                 ]),
                 progress: 10.0
             ),
@@ -198,11 +198,11 @@ final class PetitionsPostMockedData {
                 ],
                 attachments: [],
                 postMetadata: .init(audience: "", visibility: .draft, countryCode: .SV, city: "San Salvador", cityId: "a67b90f9-1d76-4835-a994-03cd04f1d619", language: "es", shareLink: "/kAp82ybCuDE67oeu/petition/20260706/SSC/SV/fuga-de-agua-en-la-colonia"),
-                postPublisher: .init(names: "John Doe", userName: "jonh.doe", profilePicture: "/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg", profileId: "G6abo3sSu1zcQ1U9"),
+                postPublisher: .init(names: "John Doe", userName: "jonh.doe", profilePicture: "/avatars/8e2d458a-8f85-4d92-a220-c19fa6d89883.jpg", profileId: "G6abo3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
                 postSigners: .init(hasCurrentUserSigned: true, latestsSigners: [
-                    User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9"),
-                    User(names: "Martha Doe", userName: "martha.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "ieq3sSu1zcQ1U9"),
-                    User(names: "Michael Brown", userName: "michael.brown", profilePicture: "/avatars/019f4f22-1464-79bc-a712-acf20b7b3664.png", profileId: "l33sSu1zcQ1U9"),
+                    User(names: "Jane Doe", userName: "jane.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "uiEw3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
+                    User(names: "Martha Doe", userName: "martha.doe", profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png", profileId: "ieq3sSu1zcQ1U9", userSince: Date(), hideProfile: false),
+                    User(names: "Michael Brown", userName: "michael.brown", profilePicture: "/avatars/019f4f22-1464-79bc-a712-acf20b7b3664.png", profileId: "l33sSu1zcQ1U9", userSince: Date(), hideProfile: false),
                 ]),
                 progress: 10.0
             ),

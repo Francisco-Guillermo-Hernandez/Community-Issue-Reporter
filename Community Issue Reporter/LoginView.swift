@@ -38,7 +38,7 @@ struct LoginView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .center)
                 
-                VStack(spacing: .themeRadius * 1) {
+                VStack(spacing: .themeRadius) {
                     LoginWithAppleButton { (result, error) in
                         
                         if let result = result {
@@ -56,6 +56,8 @@ struct LoginView: View {
                     })
                     .disabled(controller.disableLoginButtons)
                     .accessibilityIdentifier("LoginWithGoogle")
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel(String(localized: "Sign in with Google"))
                     .frame(maxWidth: .infinity, maxHeight: 44)
                     
                     ThemedButton(
@@ -69,6 +71,8 @@ struct LoginView: View {
                     .frame(maxWidth: .infinity, maxHeight: 44)
                     .disabled(controller.disableLoginButtons)
                     .accessibilityIdentifier("LoginAsGuest")
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel(String(localized: "Login as a Guest"))
                 }
                 .padding(.top, 8)
                 .padding(.bottom, 16)

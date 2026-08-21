@@ -59,10 +59,6 @@ final class LandingController {
                 self.isGuest = true
             } else {
                 
-                print("payload")
-                print(payload)
-                dump(payload)
-                
                 if type == .user(authMethod: .Apple) {
                     performLoginActionsWithAppleProvider(payload, appState)
                 }
@@ -271,18 +267,20 @@ final class LandingController {
     }
     
     func logout() {
-        
-        /// route to login view
-        self.isLoggedIn = false
-        self.isGuest = false
-        self.path.removeAll()
+        UserRepository.shared.signOutFromGoogle()
+        AuthViewModel.shared.selectedCity = nil
         
         /// Remove values from devices' keychain
+        _ = KeychainService.deleteToken(key: .name)
+        _ = KeychainService.deleteToken(key: .email)
         _ = KeychainService.deleteToken(key: .query)
         _ = KeychainService.deleteToken(key: .userId)
+        _ = KeychainService.deleteToken(key: .deviceId)
+        _ = KeychainService.deleteToken(key: .authMethod)
         _ = KeychainService.deleteToken(key: .mutation)
         _ = KeychainService.deleteToken(key: .userType)
         _ = KeychainService.deleteToken(key: .profileId)
+        _ = KeychainService.deleteToken(key: .landingPageComplete)
         _ = KeychainService.deleteToken(key: .sessionStateVerification)
         
         
@@ -306,6 +304,11 @@ final class LandingController {
         UserDefaults.standard.set(nil, forKey: "enableEmailNotifications")
         
         print("[UserDefaults] - Cleared user data from UserDefaults]")
+        
+        /// route to login view
+        self.isLoggedIn = false
+        self.isGuest = false
+        self.path.removeAll()
         
         Task {
             await SubscriptionManager.shared.handleUserLogout()

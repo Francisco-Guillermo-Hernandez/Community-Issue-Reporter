@@ -59,6 +59,7 @@ struct LandingView: View {
                         finalStep: {
                             _ = KeychainService.save(key: .sessionStateVerification, value: "session:state:valid")
                             controller.isLoggedIn.toggle()
+                            DeepLinkRouter.shared.activeTab = 1
                         }
                     )
                 }

@@ -13,6 +13,8 @@ struct WelcomeView: View {
     
     @EnvironmentObject var appState: AuthViewModel
     
+    @State private var showGuestCitySelection: Bool = false
+    
     var body: some View {
         ZStack {
             
@@ -23,22 +25,30 @@ struct WelcomeView: View {
                     TabBarView()
                 } else {
                     NavigationStack {
-                        CitySelectionView(
-                            countryCode: controller.countryCode,
-                            selectedCity: $controller.selectedCity,
-                            nextStep: {
-                                
-                                _ = KeychainService.save(key: .userType, value: UserType.guest.description)
-                                
-                                appState.selectedCity = controller.selectedCity
-                               
-                                appState.setCameraPosition(
-                                    to: controller.selectedCity.coordinates,
-                                    latitudeDelta:  0.005738743213994368,
-                                    longitudeDelta: 0.003718218254761041
-                                )
-                            }
-                        )
+                        AcceptanceView(nextStep: {
+                            showGuestCitySelection = true
+                        })
+                        .navigationDestination(isPresented: $showGuestCitySelection) {
+                            CitySelectionView(
+                                countryCode: controller.countryCode,
+                                selectedCity: $controller.selectedCity,
+                                nextStep: {
+                                    
+                                    _ = KeychainService.save(key: .userType, value: UserType.guest.description)
+                                    
+                                    appState.selectedCity = controller.selectedCity
+                                   
+                                    appState.setCameraPosition(
+                                        to: controller.selectedCity.coordinates,
+                                        latitudeDelta:  0.005738743213994368,
+                                        longitudeDelta: 0.003718218254761041
+                                    )
+                                    
+                                    DeepLinkRouter.shared.activeTab = 1
+                                }
+                            )
+                            .navigationBarBackButtonHidden()
+                        }
                     }
                 }
             } else {

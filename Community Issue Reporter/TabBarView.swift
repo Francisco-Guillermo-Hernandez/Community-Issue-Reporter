@@ -23,6 +23,7 @@ struct TabBarView: View {
                 MapExplorerView()
             }
             .accessibilityIdentifier("MapExplorerTab")
+            .accessibilityLabel(String(localized: "Issues"))
             
 //            Tab(String(localized: "Petitions"), systemImage: "signature", value: 2) {
 //               SignRequestsView()
@@ -33,17 +34,20 @@ struct TabBarView: View {
                 InsightsView()
             }
             .accessibilityIdentifier("ShowInsightsTab")
+            .accessibilityLabel(String(localized: "Insights"))
             .disabled(UserRepository.shared.isGuestUser())
             
             Tab(String(localized: "Profile"), systemImage: "person.fill", value: 4) {
                 UserProfileView()
             }
             .accessibilityIdentifier("UserProfileTab")
+            .accessibilityLabel(String(localized: "Profile"))
             
             Tab(String(localized: "Add"), systemImage: "plus", value: 5, role: .search) {
                 CreateReportView()
             }
             .accessibilityIdentifier("CreateReportTab")
+            .accessibilityLabel(String(localized: "Add"))
         }
         .alert("Status Update", isPresented: $router.presentAlert) {
             Button("OK", role: .cancel) {
@@ -69,19 +73,20 @@ struct TabBarView: View {
             if newValue {
                 openReportFromShortcut = false
                 showShortcutReport = true
+                router.activeTab = 5
             }
         }
-        .fullScreenCover(isPresented: $showShortcutReport) {
-           
-            ReportWizardContainer(model: model, onCompletion: { incomingMessage, alertType in
-                router.message = incomingMessage
-                router.presentAlert = true
-            }, showCancelButton: true)
-            .task {
-                model.setMatterToSolve(mattersToResolve.first!)
-            }
-        }
-        .sensoryFeedback(.selection, trigger: router.activeTab)
+//        .fullScreenCover(isPresented: $showShortcutReport) {
+//           
+//            ReportWizardContainer(model: model, onCompletion: { incomingMessage, alertType in
+//                router.message = incomingMessage
+//                router.presentAlert = true
+//            }, showCancelButton: true)
+//            .task {
+//                model.setMatterToSolve(mattersToResolve.first!)
+//            }
+//        }
+//        .sensoryFeedback(.selection, trigger: router.activeTab)
     }
 }
 

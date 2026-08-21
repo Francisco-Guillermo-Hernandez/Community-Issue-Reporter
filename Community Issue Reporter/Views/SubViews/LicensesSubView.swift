@@ -28,9 +28,7 @@ struct LicensesSubView: View {
               let url = Bundle.main.url(forResource: String(components[0]), withExtension: String(components[1])) else {
             return "License text not available."
         }
-        
-        print(url)
-        
+       
         return (try? String(contentsOf: url, encoding: .utf8)) ?? "License text not available."
     }
     var body: some View {

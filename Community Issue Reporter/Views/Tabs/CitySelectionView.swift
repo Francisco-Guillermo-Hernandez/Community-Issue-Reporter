@@ -67,38 +67,29 @@ struct CitySelectionView: View {
 
     var body: some View {
         VStack {
-            ScrollView(.vertical) {
-                LazyVStack(spacing: .themeSpacing * 4) {
-
-                    if controller.cities.isEmpty && !controller.isLoading {
-                        /// No content state
-                        noContent
-                    } else {
+            Group {
+                GeometryReader { geometry in
+                    let scrollViewFrame = geometry.frame(in: .local)
+                    
+                    
+                    ScrollView {
                         
-                        ForEach(controller.cities, id: \.self.cityId) { city in
-                            Button {
-                                selectedCity = city
-                            } label: {
-                                CityCellView(city: city)
-                                    .cellStyle() /// Apply custom style
-                                    .overlay {
-                                        /// Provides a visual feedback about what element is selected
-                                        RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-                                            .stroke(
-                                                selectedCity.cityId == city.cityId ?
-                                                Color.theme.primary.opacity(0.65) : .clear, lineWidth: 2
-                                            )
-                                    }
-                            }
-                            .sensoryFeedback(
-                                .impact(weight: .light, intensity: 0.5),
-                                trigger: selectedCity.cityId == city.cityId
-                            )
+                        
+                        ForEach(Array(controller.cities.enumerated()), id: \.offset) { offset, city in
+                            RowContentBoth(offset: offset, scrollViewFrame: scrollViewFrame, city: city, isSelected: selectedCity.cityId == city.cityId)
+                                .onTapGesture {
+                                    selectedCity = city
+                                }
+                                .sensoryFeedback(
+                                    .impact(weight: .light, intensity: 0.5),
+                                    trigger: selectedCity.cityId == city.cityId
+                                )
+                                .padding(.bottom, 4)
                         }
-                        
+                        .padding(.horizontal)
                     }
                 }
-                .padding(.horizontal, 16)
+                .background(Color.theme.background)
             }
             .toolbarTitleDisplayMode(.inline)
             .navigationTitle("Select a city")
@@ -251,38 +242,60 @@ struct BottomFadedView<Content: View>: View {
 
 // MARK: -
 
-struct ScrollingStackDemoBoth: View {
-    var body: some View {
-        
-        GeometryReader { geometry in
-            let scrollViewFrame = geometry.frame(in: .local)
-            
-            
-            ScrollView {
-                
-                
-                
-                ForEach(0..<100) { offset in
-                    RowContentBoth(offset: offset, scrollViewFrame: scrollViewFrame)
-                }
-                .padding(.horizontal)
-            }
-        }
-    }
-}
+//struct ScrollingStackDemoBoth: View {
+//    var body: some View {
+//        
+//        GeometryReader { geometry in
+//            let scrollViewFrame = geometry.frame(in: .local)
+//            
+//            
+//            ScrollView {
+//                
+//                
+//                
+//                ForEach(0..<100) { offset in
+//                    RowContentBoth(offset: offset, scrollViewFrame: scrollViewFrame, )
+////                        .cellStyle() /// Apply custom style
+//                }
+//                .padding(.horizontal)
+//            }
+//        }
+//        .background(Color.theme.background)
+//    }
+//}
 
 //
 
 private struct RowContentBoth: View {
     let offset: Int
     let scrollViewFrame: CGRect
+    let city: FriendlyCityDistribution
+    let isSelected: Bool
     @State var zIndex: Double = 0
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 24)
+        RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
            
-            .fill(.blue)
-            .frame(height: 100.0)
+            .fill(Color.theme.cardBackground)
+            .frame(height: 90.0)
+            .overlay(
+                RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
+                    .stroke(Color.theme.border, lineWidth: 1)
+            )
+            .overlay {
+                CityCellView(city: city)
+                    .padding()
+            }
+            .overlay {
+                if isSelected {
+                        RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
+                            .stroke(Color.theme.primary.opacity(0.65), lineWidth: 4)
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: isSelected)
+            .contentShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
+            .glassEffect( in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .scrollView) } action: { newValue in
                 zIndex = min(newValue.minY, min(scrollViewFrame.midY - newValue.midY, 0))
             }
@@ -293,15 +306,15 @@ private struct RowContentBoth: View {
                 let distance2 = scrollViewFrame.maxY - frame.maxY
                 let distance = min(distance1, min(distance2, 0))
                 return content
-                    .hueRotation(.degrees(frame.origin.y / 5))
+//                    .hueRotation(.degrees(frame.origin.y / 5))
                     .scaleEffect(max(1 + distance / 1000, 0))
                     .offset(y: distance1 < 0 ? -distance : distance)
-                    .brightness(distance1 < 0 ? -distance / 500 : -distance / 200)
+//                    .brightness(distance1 < 0 ? -distance / 500 : -distance / 200)
             }
         
     }
 }
-
-#Preview("Both edge") {
-    ScrollingStackDemoBoth()
-}
+//
+//#Preview("Both edge") {
+//    ScrollingStackDemoBoth()
+//}

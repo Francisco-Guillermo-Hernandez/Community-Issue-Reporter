@@ -405,7 +405,7 @@ struct SettingsSubView: View {
                         
                         
                     }
-                    .disabled(!networkMonitor.isConnected || UserRepository.shared.isGuestUser())
+                    .disabled(!networkMonitor.isConnected)
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel("Dangerous zone")
                     

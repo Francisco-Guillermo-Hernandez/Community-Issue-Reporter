@@ -8,6 +8,59 @@
 import SwiftUI
 import PhotosUI
 
+struct ProfileCellView: View {
+    @Environment(\.isEnabled) var isEnabled
+    @State private var profileRouter = ProfileRouter.shared
+    
+    let option: ProfileOption
+    var body: some View {
+        Button {
+            switch option.id {
+            case "op:reports":
+                profileRouter.goTo(.reports)
+            case "op:comments":
+                profileRouter.goTo(.comments)
+            case "op:signPetitions":
+                profileRouter.goTo(.signPetitions)
+            case "op:settings":
+                profileRouter.goTo(.settings)
+            case "op:licenses":
+                profileRouter.goTo(.licenses)
+            case "op:moderationCenter":
+                profileRouter.goTo(.moderation)
+            default:
+                break
+            }
+        } label: {
+            HStack {
+                
+                RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
+                    .fill(option.color.slantedGradient)
+                    .frame(width: 36, height: 36)
+                    .overlay {
+                        Image(systemName: option.icon)
+                            .font(Font.system(size: 16, weight: .medium))
+                            .foregroundStyle( Color.white)
+                            .symbolColorRenderingMode(.gradient)
+                    }
+                    .padding(.trailing, 8)
+                
+                
+                Text(option.title)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color(uiColor: .tertiaryLabel))
+            }
+        }
+        .opacity(isEnabled ? 1 : 0.5)
+    }
+}
+
 struct ProfileOption: Identifiable, Hashable {
     let id: String
     let title: String
@@ -102,51 +155,8 @@ struct UserProfileView: View {
                 
                 List(options, id: \.self) { option in
                     
-                    Button {
-                        switch option.id {
-                        case "op:reports":
-                            profileRouter.goTo(.reports)
-                        case "op:comments":
-                            profileRouter.goTo(.comments)
-                        case "op:signPetitions":
-                            profileRouter.goTo(.signPetitions)
-                        case "op:settings":
-                            profileRouter.goTo(.settings)
-                        case "op:licenses":
-                            profileRouter.goTo(.licenses)
-                        case "op:moderationCenter":
-                            profileRouter.goTo(.moderation)
-                        default:
-                            break
-                        }
-                    } label: {
-                        HStack {
-                            
-                            RoundedRectangle(cornerRadius: .themeRadius, style: .continuous)
-                                .fill(option.color.slantedGradient)
-                                .frame(width: 36, height: 36)
-                                .overlay {
-                                    Image(systemName: option.icon)
-                                        .font(Font.system(size: 16, weight: .medium))
-                                        .foregroundStyle( Color.white)
-                                        .symbolColorRenderingMode(.gradient)
-                                }
-                                .padding(.trailing, 8)
-                            
-                            
-                            Text(option.title)
-                                .fontWeight(.medium)
-                                .foregroundColor(.primary)
-                            
-                            Spacer()
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Color(uiColor: .tertiaryLabel))
-                        }
-                    }
-                    .disabled(UserRepository.shared.isGuestUser())
-                    
+                    ProfileCellView(option: option)
+                        .disabled(disableCellButton(option.id))
                 }
                 .frame(height: 500)
                 .contentMargins(.top, 16, for: .scrollContent)
@@ -256,6 +266,14 @@ struct UserProfileView: View {
         return region.countries.first(where: { $0.id == settings.selectedCountry })?.name ?? "Earth"
     }
     
+    
+    private func disableCellButton(_ id: String) -> Bool {
+        if UserRepository.shared.isGuestUser() {
+            return !(id == "op:settings" || id == "op:licenses")
+        }
+        
+        return false
+    }
 }
 
 #Preview {

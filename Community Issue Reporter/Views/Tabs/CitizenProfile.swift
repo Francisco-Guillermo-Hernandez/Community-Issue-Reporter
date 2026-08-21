@@ -89,71 +89,72 @@ struct CitizenProfile: View {
                     LazyHStack(spacing: 12) {
                         ForEach(AppTab.allCases, id: \.rawValue) { tab in
                             
-                            if tab == .reports {
-                                
-                                if controller.fetchingReports && controller.reports.isEmpty {
-                                    ProgressView()
-                                        .progressViewStyle(.circular)
-                                        .controlSize(.large)
+                            Group {
+                                if tab == .reports {
+                                    
+                                    if controller.fetchingReports && controller.reports.isEmpty {
+                                        ProgressView()
+                                            .progressViewStyle(.circular)
+                                            .controlSize(.large)
+                                    }
+                                    
+                                    if controller.reports.isEmpty {
+                                        VStack {
+                                            ContentUnavailableView {
+                                                Label(
+                                                    "No reports yet.",
+                                                    systemImage: "exclamationmark.bubble"
+                                                )
+                                                .symbolRenderingMode(.palette)
+                                                .foregroundStyle(
+                                                    Color.theme.foreground.opacity(0.7),
+                                                    Color.theme.primary,
+                                                    Color.theme.foreground.opacity(0.7)
+                                                )
+                                            } description: {
+                                                Text("Please sent us reports.")
+                                            }
+                                        }
+                                        .frame(width: controller.containerSize.width, alignment: .leading)
+                                    } else {
+                                        VStack(spacing: 16) {
+                                            
+                                            ForEach(controller.reports) { report in
+                                                ReportCellView(report: report)
+                                                    .cellStyle()
+                                            }
+                                        }
+                                        .padding(.top, 16)
+                                        .padding(.horizontal, 16)
+                                        .frame(width: controller.containerSize.width, alignment: .leading)
+                                        
+                                    }
                                 }
                                 
-                                if controller.reports.isEmpty {
+                                if tab == .petitions {
                                     VStack {
                                         ContentUnavailableView {
-                                            Label(
-                                                "No reports yet.",
-                                                systemImage: "exclamationmark.bubble"
-                                            )
-                                            .symbolRenderingMode(.palette)
-                                            .foregroundStyle(
-                                                Color.theme.foreground.opacity(0.7),
-                                                Color.theme.primary,
-                                                Color.theme.foreground.opacity(0.7)
-                                            )
+                                            Label("No petitions yet.", systemImage: "person.bubble")
+                                                .symbolRenderingMode(.palette)
+                                                .foregroundStyle(
+                                                    Color.theme.foreground.opacity(0.7),
+                                                    Color.theme.primary,
+                                                    Color.theme.foreground.opacity(0.7)
+                                                )
                                         } description: {
-                                            Text("Please sent us reports.")
+                                            Text(
+                                                "Please create petitions in order to accelerate the process of ..."
+                                            )
                                         }
-                                    }
-                                    .frame(width: controller.containerSize.width, alignment: .leading)
-                                } else {
-                                    VStack(spacing: 16) {
                                         
-                                        ForEach(controller.reports) { report in
-                                            ReportCellView(report: report)
-                                                .cellStyle()
-                                        }
+                                        
                                     }
                                     .padding(.top, 16)
                                     .padding(.horizontal, 16)
-                                    .frame(width: controller.containerSize.width, alignment: .leading)
-                                    
+    //                                .frame(maxWidth: .infinity)
+//                                    .frame(width: controller.containerSize.width, alignment: .center)
                                 }
                             }
-                            
-                            if tab == .petitions {
-                                VStack {
-                                    ContentUnavailableView {
-                                        Label("No petitions yet.", systemImage: "person.bubble")
-                                            .symbolRenderingMode(.palette)
-                                            .foregroundStyle(
-                                                Color.theme.foreground.opacity(0.7),
-                                                Color.theme.primary,
-                                                Color.theme.foreground.opacity(0.7)
-                                            )
-                                    } description: {
-                                        Text(
-                                            "Please create petitions in order to accelerate the process of ..."
-                                        )
-                                    }
-                                    
-                                    
-                                }
-                                .padding(.top, 16)
-                                .padding(.horizontal, 16)
-//                                .frame(maxWidth: .infinity)
-//                                .frame(width: controller.containerSize.width, alignment: .trailing)
-                            }
-                            
                             
                         }
                     }
@@ -175,7 +176,7 @@ struct CitizenProfile: View {
             }
         }
         .sheet(isPresented: $controller.showBlockUserSheet) {
-            BlockUserSheet(profileId: profileId)
+            BlockUserSheet(controller.citizen)
         }
         .background {
             
@@ -348,15 +349,24 @@ enum AppTab: String, XStyleTabItem {
 
 // MARK: - Sheet
 struct BlockUserSheet: View {
-    let profileId: String
+    
     @Environment(\.dismiss) private var dismiss
     
     @State private var reason: String = ""
     @State private var isReasonValid: Bool = false
     @State private var blockedReasonId: ReportReason = .wrongInformation
     @State private var isLoading: Bool = false
+    @State private var message: String = String(localized: "Block User")
+    @State private var showAlert: Bool = false
+    @State private var showErrorAlert: Bool = false
+    @State private var wasSend: Bool = false
     
-
+    let user: User
+    
+    init (_ user: User) {
+        self.user = user
+    }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -392,40 +402,77 @@ struct BlockUserSheet: View {
             }
             .safeAreaInset(edge: .bottom) {
                 ThemedButton(
-                    message: String(localized: "Block User"),
+                    message: message,
                     action: {
-                        reportUser()
+                        showAlert.toggle()
                     },
                     type: .danger,
                     isLoading: $isLoading
                 )
-                .disabled(!isReasonValid)
+                .disabled(!isReasonValid || wasSend)
                 .padding()
                 .padding(.top, 0)
             }
             .padding(.horizontal)
             .navigationTitle("Block User")
             .navigationBarTitleDisplayMode(.inline)
+            .alert(String(localized: "Block User"), isPresented: $showAlert) {
+                
+                Button(String(localized: "Cancel"), role: .cancel) {}
+                
+                Button(String(localized: "Send Request"), role: .confirm) {
+                    report(user)
+                }
+            } message: {
+                Text(String(localized: "Are you sure you want to block this user?"))
+            }
+            .alert(String(localized: "An error occurred while reporting the user"), isPresented: $showErrorAlert) {
+                
+                Button(String(localized: "Cancel"), role: .cancel) {}
+                Button(String(localized: "Send Request Again"), role: .confirm) {
+                    report(user)
+                }
+            } message: {
+                Text(String(localized: "Failed to report user, please try again"))
+            }
+            .alert(String(localized: "We've received your report"), isPresented: $wasSend) {
+                
+                Button(String(localized: "Ok"), role: .close) {
+                    dismiss()
+                }
+            }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .cancel) { dismiss() }
                 }
             }
         }
     }
     
-    private func reportUser() {
+    private func report(_ user: User) {
         isLoading = true
         Task {
             do {
-                let payload = BlockUserReason(profileId: profileId, reason: reason, blockedReasonId: blockedReasonId)
-                _ = try await UserRepository.shared.reportUser(payload)
-                isLoading = false
-                dismiss()
+                
+                let payload: ReportViolation = .init(
+                    type: .account,
+                    content: user ,
+                    profileId: user.profileId,
+                    reason: reason,
+                    blockedReasonId: blockedReasonId.rawValue,
+                    status:  .pending
+                )
+            
+               _ = try await ModerationRepository.shared.moderateAccount(reason: payload, type: .account)
+                
+                reason = ""
+                message = String(localized: "Your report has been submitted")
+                wasSend.toggle()
             } catch {
-                isLoading = false
-                Toast.shared.show(message: String(localized: "An error occurred while reporting the user"), type: .error)
+                showErrorAlert.toggle()
             }
+            
+            isLoading = false
         }
     }
 }
@@ -442,5 +489,14 @@ struct BlockUserSheet: View {
 }
 
 #Preview("BlockSheet") {
-    BlockUserSheet(profileId: "")
+    BlockUserSheet(
+        User(
+            names: "Jane Doe",
+            userName: "jane.doe",
+            profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png",
+            profileId: "uiEw3sSu1zcQ1U9",
+            userSince: Date(),
+            hideProfile: false
+        )
+    )
 }

@@ -27,8 +27,13 @@ func getURL(from path: String) -> URL? {
 
 func buildPreviewAttachmentURL(_ reportContainer: String, _ fileName: String, _ state: ReportAttachmentState, _ updatedAtRaw: Int64? = nil) -> URL? {
     
+    var version: Int64 = 1
     if state == .inappropriate || state == .deleted {
-        return nil
+        version = Int64.random(in: 2...100)
+    }
+    
+    if let updatedAtRaw {
+        version = updatedAtRaw
     }
     
     var fragment: String = ""
@@ -38,11 +43,11 @@ func buildPreviewAttachmentURL(_ reportContainer: String, _ fileName: String, _ 
         case .confirmed:
             fragment = "validated"
         default:
-            break
+            fragment = "review"
     }
     
     let params: [URLQueryItem] = [
-        URLQueryItem(name: "v", value: String(updatedAtRaw ?? 1))
+        URLQueryItem(name: "v", value: String(version))
     ]
     
     return Endpoints.baseURL

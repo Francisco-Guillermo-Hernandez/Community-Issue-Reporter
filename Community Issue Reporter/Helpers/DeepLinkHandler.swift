@@ -7,6 +7,13 @@
 
 import Foundation
 
+
+func profileDeepLinkHandler(_ url: URL) -> ProfileLink? {
+    guard url.path.contains("profile") else { return nil }
+    return ProfileLink(profileId: "")
+}
+
+
 func deepLinkHandler(_ url: URL) -> DeepLink? {
 
     let components = url.pathComponents.filter { $0 != "/" }
@@ -15,8 +22,6 @@ func deepLinkHandler(_ url: URL) -> DeepLink? {
     // components[1] = "report"
     // components[2] = "a-big-pothole-in-the-middle-of-the-street"
     
-    print(components)
-
     guard components.count >= 3 else { return nil }
     
     let resourceHash = components[0]
@@ -34,6 +39,10 @@ func deepLinkHandler(_ url: URL) -> DeepLink? {
         in: cityCode,
         on: countryCode
     )
+}
+
+struct ProfileLink: Codable {
+    let profileId: String
 }
 
 struct DeepLink {

@@ -11,6 +11,7 @@ import SwiftUI
 protocol XStyleTabItem: CaseIterable, Hashable {
     var title: String { get }
     var symbol: String { get }
+    var description: String { get }
 }
 
 struct XStyleTabBar<Value: XStyleTabItem>: View {
@@ -57,8 +58,8 @@ struct XStyleTabBar<Value: XStyleTabItem>: View {
                             tabLocation[tab] = newRect
                         }
                         
-                        Text(tab.title)
-                            .padding(.leading, 8)
+                        Text(tab.description)
+                            .padding(.leading, .themeSpacing * 2)
                             .font(.system(size: 16, weight: .semibold))
                             .opacity(1 - tabProgress)
                             .fixedSize(horizontal: true, vertical: false)
@@ -69,8 +70,9 @@ struct XStyleTabBar<Value: XStyleTabItem>: View {
                             .lineLimit(1)
                             .mask {
                                 Rectangle()
+                                    .opacity(0.5 - tabProgress)
                                     .blur(radius: 5 * min(tabProgress * 5, 1))
-                                    .padding(-2)
+                                    .padding(-16)
                             }
                     }
                     .contentShape(.rect)

@@ -9,16 +9,24 @@ import Foundation
 import SwiftUI
 import RevenueCat
 import GoogleMobileAds
+//import FirebaseCore
+import Firebase
 
 @_spi(Experimental) import RevenueCatAdMob
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     // Shared reference accessible across the app
+    
+    private var settings = SettingsStore.shared
     static var sharedNotificationManager = NotificationManager()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(settings.enableAnonymousTelemetry)
+        
         MobileAds.shared.requestConfiguration.testDeviceIdentifiers = [ "242e9920ddb7197466af627199f82ebf" ]
-        MobileAds.shared.start { _ in }
+        MobileAds.shared.start { _ in }        
         return true
     }
 

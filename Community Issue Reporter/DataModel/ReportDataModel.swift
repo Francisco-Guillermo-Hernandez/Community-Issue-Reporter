@@ -149,6 +149,7 @@ final class ReportDataModel {
         let newAttachments = attachments.filter { !$0.isExisting }
         let payload = newAttachments.map { attachment in
             PreviewAttachmentRequest(
+                attachmentId: "",
                 fileName: attachment.name,
                 type: .image,
                 key: attachment.key,
@@ -157,6 +158,22 @@ final class ReportDataModel {
             )
         }
         
+        self.report.attachments.append(contentsOf: payload)
+    }
+    
+    func setAttachmentId(_ groupings: [ReportAttachmentGrouping]) {
+        let payload = self.report.attachments.map { attachment in
+            PreviewAttachmentRequest(
+                attachmentId: findAttachmentId(groupings, for: attachment.key),
+                fileName: attachment.fileName,
+                type: attachment.type,
+                key: attachment.key,
+                notes: attachment.notes,
+                reportContainer: attachment.reportContainer,
+            )
+        }
+        
+        self.report.attachments.removeAll()
         self.report.attachments.append(contentsOf: payload)
     }
     
@@ -212,5 +229,13 @@ final class ReportDataModel {
     
     func buildReportId() -> String {
         return "\(locator.countryCode)-\(locator.groupingNameCode)-\(self.reportSession.reportCreationOn)-\(self.reportSession.shareIndexHash)"
+    }
+    
+    private func findAttachmentId(_ groupings: [ReportAttachmentGrouping], for key: String) -> String {
+        if let grouping = groupings.first(where: { $0.key == key }) {
+            return grouping.attachmentId
+        } else {
+            return ""
+        }
     }
 }

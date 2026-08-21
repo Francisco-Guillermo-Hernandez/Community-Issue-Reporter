@@ -121,7 +121,9 @@ final class ProfileDataModel {
                 
                 self.avatarURL = URL(string: urlString)
                 self.profileImage = image
-                print("Upload success: \(urlString)")
+                
+                /// Refresh settings
+                try await UserRepository.shared.refresh()
                 
             } catch {
                 print("Upload failed: \(error.localizedDescription)")
@@ -133,7 +135,6 @@ final class ProfileDataModel {
     
     @MainActor
     func getMonogram() -> String {
-        print(userName)
         return String(userName.prefix(1)).uppercased()
     }
     

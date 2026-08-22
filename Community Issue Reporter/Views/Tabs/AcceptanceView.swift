@@ -12,15 +12,51 @@ struct URLItem: Identifiable {
     let url: URL
 }
 
+struct LegalDocument: Identifiable {
+    let id = UUID()
+    let url: URL
+    let documentName: String
+}
+
 struct AcceptanceView: View {
+    
+    @Environment(\.colorScheme) var colorScheme
     @State private var selectedURLItem: URLItem?
     @State private var accepted: Bool = false
     
-    @State private var legalLinks: [URL] = [
-        URL(string: "https://reportamelo.app/legal/eula")!,
-        URL(string: "https://reportamelo.app/legal/terms")!,
-        URL(string: "https://reportamelo.app/legal/privacy")!,
-        URL(string: "https://reportamelo.app/legal/policies")!,
+    @State private var legalLinks: [LegalDocument] = [
+        LegalDocument(
+            url: URL(
+                string: "https://reportamelo.app/legal/eula"
+            )!,
+            documentName: String(
+                localized: "EULA"
+            )
+        ),
+        LegalDocument(
+            url: URL(
+                string: "https://reportamelo.app/legal/terms"
+            )!,
+            documentName: String(
+                localized: "Terms"
+            )
+        ),
+        LegalDocument(
+            url: URL(
+                string: "https://reportamelo.app/legal/privacy"
+            )!,
+            documentName: String(
+                localized: "Privacy"
+            )
+        ),
+        LegalDocument(
+            url: URL(
+                string: "https://reportamelo.app/legal/policies"
+            )!,
+            documentName: String(
+                localized: "Policies"
+            )
+        )
     ]
     
     @State private var buttonMessage: String = String(localized: "Next")
@@ -29,58 +65,77 @@ struct AcceptanceView: View {
     var nextStep: () -> Void
     
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .top) {
             
-            Text("Legal Documents")
-                .font(.title2)
-                .bold()
-                .padding(.top, 24)
-                .padding(.bottom, 8)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
+            Color.theme.background
+                .ignoresSafeArea()
             
-            List(legalLinks, id: \.self) { link in
-                Button(action: {
-                    selectedURLItem = URLItem(url: link)
-                }) {
-                    HStack {
-                        Text(link.lastPathComponent.capitalized)
-                            .foregroundColor(.primary)
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Color(uiColor: .tertiaryLabel))
+            Color.theme.secondary.opacity(0.09121)
+                .frame(height: 580)
+                .mask(
+                    LinearGradient(
+                        colors: [.white, .clear],
+                        startPoint: .topLeading,
+                        endPoint: .bottom
+                    )
+                )
+                .blur(radius: 70)
+                .ignoresSafeArea()
+            
+            VStack {
+                Text(String(localized: "Legal Documents"))
+                    .font(Font.largeTitle.bold())
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fontWeight(.bold)
+                    .padding(.top, 24)
+                    .padding(.bottom, 8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                
+                List(legalLinks) { link in
+                    Button(action: {
+                        selectedURLItem = URLItem(url: link.url)
+                    }) {
+                        HStack {
+                            Text(link.documentName)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(Color(uiColor: .tertiaryLabel))
+                        }
                     }
                 }
-            }
-            .scrollContentBackground(.hidden)
-            
-            Button(action: {
-                withAnimation(.snappy) {
-                    accepted.toggle()
+                .scrollContentBackground(.hidden)
+                
+                Button(action: {
+                    withAnimation(.snappy) {
+                        accepted.toggle()
+                    }
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: accepted ? "checkmark.square.fill" : "square")
+                            .foregroundColor(accepted ? .accentColor : .secondary)
+                            .font(.title2)
+                            .contentTransition(.symbolEffect(.replace))
+                        Text(String(localized: "I have read and accept the documents"))
+                            .foregroundColor(.primary)
+                            .font(.callout)
+                        Spacer()
+                    }
+                    .padding()
+                    .background(colorScheme == .dark ? .black.opacity(0.321) : .white.opacity(0.75))
+                    .cornerRadius(16)
                 }
-            }) {
-                HStack(spacing: 12) {
-                    Image(systemName: accepted ? "checkmark.square.fill" : "square")
-                        .foregroundColor(accepted ? .accentColor : .secondary)
-                        .font(.title2)
-                        .contentTransition(.symbolEffect(.replace))
-                    Text("I have read and accept the documents")
-                        .foregroundColor(.primary)
-                        .font(.body)
-                    Spacer()
-                }
-                .padding()
-                .background(Color(UIColor.secondarySystemBackground).cornerRadius(10))
+                .buttonStyle(.plain)
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
+                .sensoryFeedback(.selection, trigger: accepted)
+                
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal)
-            .padding(.top, 8)
-            .padding(.bottom, 24)
-            .sensoryFeedback(.selection, trigger: accepted)
-            
         }
         
         .background(Color.theme.background)

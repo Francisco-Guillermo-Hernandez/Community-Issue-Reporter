@@ -463,7 +463,20 @@ struct BlockUserSheet: View {
                     status:  .pending
                 )
             
-               _ = try await ModerationRepository.shared.moderateAccount(reason: payload, type: .account)
+                _ = try await ModerationRepository.shared
+                    .moderateAccount(
+                        reason: payload,
+                        type: .account
+                    )
+                
+                _ = try await UserRepository.shared
+                    .block(
+                        .init(
+                            profileId: user.profileId,
+                            reason: reason,
+                            blockedReasonId: blockedReasonId
+                        )
+                    )
                 
                 reason = ""
                 message = String(localized: "Your report has been submitted")

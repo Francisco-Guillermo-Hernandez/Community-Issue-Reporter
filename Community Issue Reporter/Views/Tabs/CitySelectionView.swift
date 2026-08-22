@@ -242,30 +242,6 @@ struct BottomFadedView<Content: View>: View {
 
 // MARK: -
 
-//struct ScrollingStackDemoBoth: View {
-//    var body: some View {
-//        
-//        GeometryReader { geometry in
-//            let scrollViewFrame = geometry.frame(in: .local)
-//            
-//            
-//            ScrollView {
-//                
-//                
-//                
-//                ForEach(0..<100) { offset in
-//                    RowContentBoth(offset: offset, scrollViewFrame: scrollViewFrame, )
-////                        .cellStyle() /// Apply custom style
-//                }
-//                .padding(.horizontal)
-//            }
-//        }
-//        .background(Color.theme.background)
-//    }
-//}
-
-//
-
 private struct RowContentBoth: View {
     let offset: Int
     let scrollViewFrame: CGRect
@@ -277,7 +253,7 @@ private struct RowContentBoth: View {
         RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
            
             .fill(Color.theme.cardBackground)
-            .frame(height: 90.0)
+            .frame(height: 95.0)
             .overlay(
                 RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
                     .stroke(Color.theme.border, lineWidth: 1)

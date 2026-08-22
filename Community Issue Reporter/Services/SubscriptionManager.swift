@@ -13,7 +13,12 @@ class SubscriptionManager: NSObject {
     var created: Bool = false
     
     override private init() {
-        Purchases.logLevel = .debug
+        
+        #if DEBUG
+            Purchases.logLevel = .debug
+        #else
+            Purchases.logLevel = .error
+        #endif
         
         guard let apiKey = Bundle.main.object(forInfoDictionaryKey: "REVENUECAT_API_KEY") as? String, !apiKey.isEmpty else {
             fatalError("REVENUECAT_API_KEY not found in Info.plist")
@@ -22,10 +27,7 @@ class SubscriptionManager: NSObject {
         Purchases.configure(withAPIKey: apiKey)
         super.init()
         Purchases.shared.delegate = self
-        
-//        Task {
-//           await self.performLogin()
-//        }
+   
     }
     
     func performLogin() async {

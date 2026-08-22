@@ -96,4 +96,18 @@ struct UserService {
         return try await client.get(path: "user/citizen/\(id)", headers: headers, withOAuth: true)
     }
     
+    
+    /// Block users
+    func block(_ reason: BlockUserReason, headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.post(path: "user/blocked-users/", body: reason, headers: headers, withOAuth: true)
+    }
+    
+    func listBlockedUsers(_ headers: [HTTPHeader]) async throws -> [User] {
+        return try await client.get(path: "user/blocked-users/", headers: headers, withOAuth: true)
+    }
+    
+    func unblock(_ profileId: String, headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.delete(path: "user/blocked-users/\(profileId)", body: [String: String](), headers: headers, withOAuth: true)
+    }
+    
 }

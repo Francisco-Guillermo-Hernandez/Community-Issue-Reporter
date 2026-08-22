@@ -73,6 +73,7 @@ enum TokenType: String {
     case name = "name"
     case authMethod = "authMethod"
     case authenticationMethod = "authenticationMethod"
+    case blockedUsers = "blockedUsers"
 }
 
 extension KeychainService {

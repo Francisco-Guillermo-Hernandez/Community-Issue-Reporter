@@ -24,9 +24,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp.configure()
         
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(settings.enableAnonymousTelemetry)
-        
+        #if DEBUG
         MobileAds.shared.requestConfiguration.testDeviceIdentifiers = [ "242e9920ddb7197466af627199f82ebf" ]
-        MobileAds.shared.start { _ in }        
+        #endif
+        MobileAds.shared.start { _ in }
         return true
     }
 

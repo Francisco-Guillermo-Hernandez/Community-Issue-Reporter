@@ -24,7 +24,7 @@ struct LoginView: View {
             
             VStack(spacing: .themeSpacing * 5) {
                 
-                VStack(alignment: .center) {
+                VStack(alignment: .leading) {
                     Text("Repórtamelo")
                         .fontWeight(.medium)
                         .font(.custom("Lora", size: 24, relativeTo: .title))
@@ -36,7 +36,7 @@ struct LoginView: View {
                         .font(.footnote)
                         .kerning(-0.1)
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 VStack(spacing: .themeRadius) {
                     LoginWithAppleButton { (result, error) in
@@ -56,7 +56,6 @@ struct LoginView: View {
                     })
                     .disabled(controller.disableLoginButtons)
                     .accessibilityIdentifier("LoginWithGoogle")
-                    .accessibilityElement(children: .contain)
                     .accessibilityLabel(String(localized: "Sign in with Google"))
                     .frame(maxWidth: .infinity, maxHeight: 44)
                     
@@ -93,7 +92,7 @@ struct LoginView: View {
             )
             .background(
                 RoundedRectangle(cornerRadius: 52, style: .continuous)
-                    .fill(Color.theme.cardBackground)
+                    .fill(Color.theme.background)
                     .glassEffect(in:  RoundedRectangle(cornerRadius: 52, style: .continuous))
             )
             .padding(.horizontal, 8)

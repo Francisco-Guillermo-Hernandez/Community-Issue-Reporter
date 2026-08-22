@@ -243,8 +243,12 @@ struct ReportsAndViolationsCenterView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis")
+                            .tint(Color.primary)
+                            .padding(12)
                             
                     }
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
                     .foregroundColor(UserRepository.shared.isOwnProfile(profileId) ? .primary : .gray)
                     .alert(String(localized: "Do you want to appeal for removal"), isPresented: $showAlert) {
                         
@@ -265,6 +269,32 @@ struct ReportsAndViolationsCenterView: View {
                     }
                     
                 
+                } else {
+                    Menu {
+                        
+                        if type == .account {
+                            Button {
+                                unlock(profileId: "")
+                            } label: {
+                                Label("Unlock user", systemImage: "lock.open")
+                            }
+                        } else {
+                            Button {
+                                
+                            } label: {
+                                Label("Remove from moderation", systemImage: "trash")
+                            }
+                        }
+                        
+                       
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .tint(Color.primary)
+                            .padding(12)
+                    }
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
+                    
                 }
                 
             }
@@ -387,6 +417,16 @@ struct ReportsAndViolationsCenterView: View {
                 return true
             default:
                 return false
+        }
+    }
+    
+    private func unlock(profileId: String) -> Void {
+        Task {
+            do {
+                _ = try await UserRepository.shared.unlock(profileId)
+            } catch {
+                print(error)
+            }
         }
     }
 }

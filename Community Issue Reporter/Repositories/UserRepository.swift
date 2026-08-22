@@ -465,8 +465,6 @@ final class UserRepository {
         } catch ServiceError.networkError(let error) {
             throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
-            print("refresh")
-            print(error)
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
     }
@@ -480,6 +478,38 @@ final class UserRepository {
             throw CommonIntercommunicationErrors.notAuthorized
         } catch ServiceError.serverError(let error) {
             throw CommonIntercommunicationErrors.serverError(error)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
+    func block(_ reason: BlockUserReason) async throws {
+        do {
+            _ = try await self.service.block(reason, headers: headers)
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
+    func unlock(_ profileId: String) async throws {
+        do {
+            _ = try await self.service.unblock(profileId, headers: headers)
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }

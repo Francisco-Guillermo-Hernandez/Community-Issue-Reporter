@@ -34,6 +34,7 @@ struct LinksView: View {
             if run.link != nil {
                 /// Apply the underline style to the link range
                 attributedString[run.range].underlineStyle = .single
+                attributedString[run.range].font = .system(.footnote, weight: .semibold)
             }
         }
         
@@ -53,6 +54,7 @@ struct LinksView: View {
             if run.link != nil {
                 /// Apply the underline style to the link range
                 attributedString[run.range].underlineStyle = .single
+                attributedString[run.range].font = .system(.footnote, weight: .semibold)
             }
         }
         
@@ -73,6 +75,7 @@ struct LinksView: View {
             if run.link != nil {
                 /// Apply the underline style to the link range
                 attributedString[run.range].underlineStyle = .single
+                attributedString[run.range].font = .system(.footnote, weight: .semibold)
             }
         }
         
@@ -92,6 +95,7 @@ struct LinksView: View {
             if run.link != nil {
                 /// Apply the underline style to the link range
                 attributedString[run.range].underlineStyle = .single
+                attributedString[run.range].font = .system(.footnote, weight: .semibold)
             }
         }
         
@@ -111,6 +115,7 @@ struct LinksView: View {
             if run.link != nil {
                 /// Apply the underline style to the link range
                 attributedString[run.range].underlineStyle = .single
+                attributedString[run.range].font = .system(.footnote, weight: .semibold)
             }
         }
         
@@ -121,7 +126,7 @@ struct LinksView: View {
         Text(getLinks(type))
             .font(.footnote)
             .foregroundColor(.secondary)
-            .tint(Color.theme.primary.mix(with: .white, by: 0.1))
+            .tint(Color.theme.primary)
             .kerning(-0.2)
             .environment(\.openURL, OpenURLAction { url in
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()

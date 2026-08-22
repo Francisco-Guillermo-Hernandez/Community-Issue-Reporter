@@ -25,6 +25,7 @@ struct GooglePillButton: View {
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity, maxHeight: 44)
             }
+            .accessibilityElement(children:  .ignore)
         }
         .buttonSizing(.flexible)
         .buttonStyle(GooglePillButtonStyle())

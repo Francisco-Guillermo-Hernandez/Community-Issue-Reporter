@@ -92,12 +92,21 @@ struct AcceptanceView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
                 
+                Text(String(localized: "We take your privacy seriously, \nplease take time to read our documents."))
+                    .font(.callout)
+                    .foregroundColor(.primary)
+                    .opacity(0.85)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                
                 List(legalLinks) { link in
                     Button(action: {
                         selectedURLItem = URLItem(url: link.url)
                     }) {
                         HStack {
                             Text(link.documentName)
+                                .font(.callout)
+                                .fontWeight(.medium)
                                 .foregroundColor(.primary)
                             
                             Spacer()

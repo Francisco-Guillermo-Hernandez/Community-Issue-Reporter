@@ -368,6 +368,8 @@ struct BlockUserSheet: View {
     }
     
     var body: some View {
+        
+        
         NavigationStack {
             ScrollView {
                 
@@ -446,7 +448,9 @@ struct BlockUserSheet: View {
                     Button(role: .cancel) { dismiss() }
                 }
             }
+            .background(Color.theme.background)
         }
+        
     }
     
     private func report(_ user: User) {
@@ -480,6 +484,9 @@ struct BlockUserSheet: View {
                 
                 reason = ""
                 message = String(localized: "Your report has been submitted")
+                
+                _ = KeychainService.addToArray(key: .blockedUsers, element: user.profileId)
+                
                 wasSend.toggle()
             } catch {
                 showErrorAlert.toggle()

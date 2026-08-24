@@ -6,7 +6,115 @@
 //
 
 import SwiftUI
+import Observation
 
+// MAK: - Controller
+
+@Observable
+final class ModerationController {
+    
+    var isLoading = false
+    var errorMessage: String?
+    var showAlert: Bool = false
+    var showReportRemovalAlert: Bool = false
+    var showAlertError: Bool = false
+    var selectedTab: Int = 0
+    var selectedType: ViolationContentType = .attachment
+    var showConfirmationOfRemoval: Bool = false
+    var indictedModeratedContent: [ReportViolation<ModeratedContent>] = []
+    var myComplaints: [ReportViolation<ModeratedContent>] = []
+    
+    var selectedReportId: String = ""
+    var selectedReportType: TypeOfContentToReport? = nil
+    var selectedProfileId: String = ""
+    
+    func unlock(_ profileId: String, reportId: String) -> Void {
+        Task {
+            do {
+                _ = try await UserRepository.shared.unlock(profileId)
+                
+                _ = KeychainService.removeFromArray(key: .blockedUsers, element: profileId)
+                _ = try await ModerationRepository.shared.remove(id: reportId, type: .account)
+                showConfirmationOfRemoval.toggle()
+            } catch {
+                print(error)
+                showAlertError.toggle()
+            }
+        }
+    }
+    
+    func remove(reportId: String, type: TypeOfContentToReport) -> Void {
+        Task {
+            do {
+                _ = try await ModerationRepository.shared.remove(id: reportId, type: type)
+                showConfirmationOfRemoval.toggle()
+            } catch {
+                print(error)
+                showAlertError.toggle()
+            }
+        }
+    }
+    
+    func appealForReportRemoval(_ id: String, _ type: TypeOfContentToReport) {
+        Task {
+            do {
+                let _ = try await ModerationRepository.shared.appeal(id: id, type: type)
+                Toast.shared.show(
+                    message: String(localized: "Your appeal has been sent"),
+                    type: .success
+                )
+            } catch {
+                Toast.shared.show(
+                    message: error.localizedDescription,
+                    type: .error
+                )
+            }
+        }
+    }
+    
+    func loadComplaints() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let response = try await ModerationRepository.shared.myComplaints()
+            
+            if let docs = response.documents {
+                myComplaints = docs
+                
+                print(myComplaints)
+            }
+        } catch CommonIntercommunicationErrors.networkError(let error) {
+            Toast.shared.show(message: error, type: .error)
+        } catch {
+            print(error)
+            errorMessage = error.localizedDescription
+        }
+    }
+    
+    func loadIndictedData() async {
+        
+        let profileId = KeychainService.getToken(.profileId)
+        guard !profileId.isEmpty else { return }
+        
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            
+            let response = try await ModerationRepository.shared.indictedModeratedContent()
+            if let documents = response.documents {
+                indictedModeratedContent = documents
+            }
+            
+        } catch CommonIntercommunicationErrors.networkError(let error) {
+            Toast.shared.show(message: error, type: .error)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+
+// MARK: - definitions
 enum ModerationRole: String, CaseIterable {
     case moderator
     case user
@@ -21,32 +129,23 @@ enum ModerationRole: String, CaseIterable {
     }
 }
 
-struct ReportsAndViolationsCenterView: View {
+enum ViolationContentType: String, CaseIterable {
+    case attachment = "Attachments"
+    case comment = "Comments"
     
-    @State private var selectedTab: Int = 0
-    @State private var selectedType: ViolationContentType = .attachment
-    
-    @State private var myComplaints: [ReportViolation<ModeratedContent>] = []
-    @State private var indictedAttachments: [ReportViolation<PreviewAttachment>] = []
-    @State private var indictedComments: [ReportViolation<CommentToBlock>] = []
-    @State private var indictedModeratedContent: [ReportViolation<ModeratedContent>] = []
-    
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-    
-    @State private var showAlert: Bool = false
-    
-    enum ViolationContentType: String, CaseIterable {
-        case attachment = "Attachments"
-        case comment = "Comments"
-        
-        var description: String {
-            switch self {
-                case .attachment: return String(localized: "Attachments")
-                case .comment: return String(localized: "Comments")
-            }
+    var description: String {
+        switch self {
+            case .attachment: return String(localized: "Attachments")
+            case .comment: return String(localized: "Comments")
         }
     }
+}
+
+
+// MARK: - View
+struct ReportsAndViolationsCenterView: View {
+    
+    @State private var controller = ModerationController()
     
     var body: some View {
         VStack(spacing: 0) {
@@ -66,28 +165,28 @@ struct ReportsAndViolationsCenterView: View {
             
             /// Tabs
             HStack(spacing: 32) {
-                Button(action: { selectedTab = 0 }) {
+                Button(action: { controller.selectedTab = 0 }) {
                     VStack {
                         Text("Your account")
                             .font(.subheadline)
-                            .fontWeight(selectedTab == 0 ? .semibold : .regular)
-                            .foregroundColor(selectedTab == 0 ? .primary : .secondary)
+                            .fontWeight(controller.selectedTab == 0 ? .semibold : .regular)
+                            .foregroundColor(controller.selectedTab == 0 ? .primary : .secondary)
                         
                         Rectangle()
-                            .fill(selectedTab == 0 ? Color.primary : Color.clear)
+                            .fill(controller.selectedTab == 0 ? Color.primary : Color.clear)
                             .frame(height: 2)
                     }
                 }
                 
-                Button(action: { selectedTab = 1 }) {
+                Button(action: { controller.selectedTab = 1 }) {
                     VStack {
                         Text("Your reports")
                             .font(.subheadline)
-                            .fontWeight(selectedTab == 1 ? .semibold : .regular)
-                            .foregroundColor(selectedTab == 1 ? .primary : .secondary)
+                            .fontWeight(controller.selectedTab == 1 ? .semibold : .regular)
+                            .foregroundColor(controller.selectedTab == 1 ? .primary : .secondary)
                         
                         Rectangle()
-                            .fill(selectedTab == 1 ? Color.primary : Color.clear)
+                            .fill(controller.selectedTab == 1 ? Color.primary : Color.clear)
                             .frame(height: 2)
                     }
                 }
@@ -98,14 +197,14 @@ struct ReportsAndViolationsCenterView: View {
             
             Divider()
             
-            if isLoading {
+            if controller.isLoading {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    if selectedTab == 0 {
+                    if controller.selectedTab == 0 {
                         /// Your account
-                        if indictedModeratedContent.isEmpty {
+                        if controller.indictedModeratedContent.isEmpty {
                             ContentUnavailableView {
                                 Label(
                                     String(localized: "No violations yet."),
@@ -124,7 +223,7 @@ struct ReportsAndViolationsCenterView: View {
                         } else {
                             VStack {
                                 
-                                ForEach(indictedModeratedContent, id: \.id) { violation in
+                                ForEach(controller.indictedModeratedContent, id: \.id) { violation in
                                     if let id = violation.id {
                                         violationRow(
                                             id: id,
@@ -144,7 +243,7 @@ struct ReportsAndViolationsCenterView: View {
                         }
                     } else {
                         /// Your reports
-                        if myComplaints.isEmpty {
+                        if controller.myComplaints.isEmpty {
                             ContentUnavailableView {
                                 Label(
                                     String(localized: "No reports yet."),
@@ -162,7 +261,7 @@ struct ReportsAndViolationsCenterView: View {
                             .containerRelativeFrame(.vertical)
                         } else {
                             VStack {
-                                ForEach(myComplaints, id: \.id) { violation in
+                                ForEach(controller.myComplaints, id: \.id) { violation in
                                     if let id = violation.id {
                                         violationRow(
                                             id: id,
@@ -174,6 +273,7 @@ struct ReportsAndViolationsCenterView: View {
                                             role: .reporter,
                                             observation: violation.observation
                                         )
+                                        .disabled(violation.status == .removed)
                                     }
                                 }
                             }
@@ -187,8 +287,48 @@ struct ReportsAndViolationsCenterView: View {
         .navigationBarTitleDisplayMode(.inline)
         .background(Color.theme.background)
         .task {
-            await loadComplaints()
-            await loadIndictedData()
+            await controller.loadComplaints()
+            await controller.loadIndictedData()
+        }
+        .alert(String(localized: "Do you want to appeal for removal"), isPresented: $controller.showAlert) {
+            Button(role: .cancel) {} label: {
+                Text(String(localized: "No, cancel", comment: ""))
+            }
+            Button(role: .confirm) {
+                if let type = controller.selectedReportType {
+                    controller.appealForReportRemoval(controller.selectedReportId, type)
+                }
+            } label: {
+                Text(String(localized: "Yes, remove", comment: ""))
+            }
+        } message: {
+            Text(String(localized: "Are you sure you want to appeal for removal of this report?", comment: ""))
+        }
+        .alert(String(localized: "Moderation report"), isPresented: $controller.showReportRemovalAlert) {
+            Button(role: .cancel) {} label: {
+                Label("No, cancel", systemImage: "xmark.circle.fill")
+            }
+            Button(role: .confirm) {
+                if let type = controller.selectedReportType {
+                    if type == .account {
+                        controller.unlock(controller.selectedProfileId, reportId: controller.selectedReportId)
+                    } else {
+                        controller.remove(reportId: controller.selectedReportId, type: type)
+                    }
+                }
+            } label: {
+                Text(String(localized: "Yes, remove", comment: ""))
+            }
+            .accessibilityIdentifier("ConfirmRemoveModerationReport")
+        } message: {
+            Text(String(localized: "Are you sure you want to remove this moderation report?", comment: ""))
+        }
+        .alert(String(localized: "Moderation report"), isPresented: $controller.showConfirmationOfRemoval) {
+            Button(role: .cancel) {} label: {
+                Text(String(localized: "Close"))
+            }
+        } message: {
+            Text(String(localized: "Your report has been removed."))
         }
     }
     
@@ -209,7 +349,7 @@ struct ReportsAndViolationsCenterView: View {
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 60, height: 80)
                     .overlay(
-                        Image(systemName: "slash.circle")
+                        Image(systemName: type.icon)
                             .font(.system(size: 24))
                             .foregroundColor(.gray)
                     )
@@ -221,12 +361,15 @@ struct ReportsAndViolationsCenterView: View {
                 Spacer()
                 
                 if role == .user {
-                    // Indicted user actions
+                    /// Indicted user actions
                     
                     Menu {
                         
                         Button {
-                            showAlert.toggle()
+                            controller.selectedReportId = id
+                            controller.selectedReportType = type
+                            controller.selectedProfileId = profileId
+                            controller.showAlert.toggle()
                             print("show appeal")
                         } label: {
                             Label("Appeal", systemImage: "text.badge.minus")
@@ -250,40 +393,34 @@ struct ReportsAndViolationsCenterView: View {
                     .frame(minWidth: 44, minHeight: 44)
                     .contentShape(Rectangle())
                     .foregroundColor(UserRepository.shared.isOwnProfile(profileId) ? .primary : .gray)
-                    .alert(String(localized: "Do you want to appeal for removal"), isPresented: $showAlert) {
-                        
-                        Button(role: .cancel) {
-                            
-                        } label: {
-                            Text(String(localized: "No, cancel", comment: ""))
-                        }
-                        
-                        Button(role: .confirm) {
-                            appealForReportRemoval(id, type)
-                        } label: {
-                            Text(String(localized: "Yes, remove", comment: ""))
-                        }
-                        
-                    } message: {
-                        Text(String(localized: "Are you sure you want to appeal for removal of this report?", comment: ""))
-                    }
                     
                 
                 } else {
+                    
+                    /// My reports actions
                     Menu {
                         
                         if type == .account {
                             Button {
-                                unlock(profileId: "")
+                                controller.selectedReportId = id
+                                controller.selectedReportType = type
+                                controller.selectedProfileId = profileId
+                                controller.showReportRemovalAlert.toggle()
                             } label: {
                                 Label("Unlock user", systemImage: "lock.open")
                             }
+                            .accessibilityIdentifier("UnlockUserButton")
+                            
                         } else {
                             Button {
-                                
+                                controller.selectedReportId = id
+                                controller.selectedReportType = type
+                                controller.selectedProfileId = profileId
+                                controller.showReportRemovalAlert.toggle()
                             } label: {
                                 Label("Remove from moderation", systemImage: "trash")
                             }
+                            .accessibilityIdentifier("RemoveFromModerationButton")
                         }
                         
                        
@@ -349,63 +486,10 @@ struct ReportsAndViolationsCenterView: View {
         }
         .padding(.horizontal)
         .padding(.top, 8)
+        .opacity(status == .removed ? 0.3 : 1)
     }
     
-    private func loadComplaints() async {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            let response = try await ModerationRepository.shared.myComplaints()
-            
-            print("my complaints")
-            print(response)
-            if let docs = response.documents {
-                myComplaints = docs
-                
-                print(myComplaints)
-            }
-        } catch {
-            print(error)
-            errorMessage = error.localizedDescription
-        }
-    }
     
-    private func loadIndictedData() async {
-        
-        let profileId = KeychainService.getToken(.profileId)
-        guard !profileId.isEmpty else { return }
-        
-        isLoading = true
-        defer { isLoading = false }
-        
-        do {
-            
-            let response = try await ModerationRepository.shared.indictedModeratedContent()
-            if let documents = response.documents {
-                indictedModeratedContent = documents
-            }
-            
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-    
-    private func appealForReportRemoval(_ id: String, _ type: TypeOfContentToReport) {
-        Task {
-            do {
-                let _ = try await ModerationRepository.shared.appeal(id: id, type: type)
-                Toast.shared.show(
-                    message: String(localized: "Your appeal has been sent"),
-                    type: .success
-                )
-            } catch {
-                Toast.shared.show(
-                    message: error.localizedDescription,
-                    type: .error
-                )
-            }
-        }
-    }
     
     private func disableButtonByStatus(_ status: ReportViolationStatus) -> Bool {
         switch status {
@@ -420,15 +504,6 @@ struct ReportsAndViolationsCenterView: View {
         }
     }
     
-    private func unlock(profileId: String) -> Void {
-        Task {
-            do {
-                _ = try await UserRepository.shared.unlock(profileId)
-            } catch {
-                print(error)
-            }
-        }
-    }
 }
 
 #Preview {

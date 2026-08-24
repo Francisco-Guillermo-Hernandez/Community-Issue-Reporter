@@ -49,14 +49,13 @@ struct GenericDatePresenterView: View {
                 Image(systemName: "calendar")
                     .foregroundStyle(Color.secondary)
             }
+            
             VStack(alignment: .leading ) {
                 
                 HeaderText(text)
                 
                 BottomText(when)
             }
-            
-            
         }
         .frame(maxWidth: .infinity, alignment: .center)
     }
@@ -69,7 +68,7 @@ struct ReportCellView: View {
     var enableChevron: Bool = false
     var body: some View {
         Group {
-            HStack {
+            ZStack(alignment: .trailing) {
                 VStack(alignment: .leading) {
                     Text(report.title)
                         .font(.title2)
@@ -104,11 +103,12 @@ struct ReportCellView: View {
                         .accessibilityElement(children: .combine)
                         
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(.top, .themeSpacing)
                     .padding(.bottom, .themeSpacing)
                     
                     Group {
-                        if let observations = report.observations, !observations.isEmpty && (report.status == .rejected || report.status == .humanReview) {
+                        if let observations = report.observations, !observations.isEmpty {
                             VStack {
                                 HeaderText(String(localized: "Observations"))
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -177,15 +177,14 @@ struct ReportCellView: View {
                     .padding(.top, .themeSpacing)
                     
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 if enableChevron {
                     Image(systemName: "chevron.compact.right")
-                        .foregroundStyle(Color(.secondaryLabel))
+                        .foregroundColor(.secondary)
+                        .opacity(0.85)
                 }
-                
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
         }
     }
 }
@@ -198,10 +197,10 @@ struct MyReportsSubView: View {
     var mode: ViewOptions = .list
     var body: some View {
         ZStack {
-            if controller.isLoading {
-                /// Show in the middle of the screen
-                LoadingView()
-            }
+//            if controller.isLoading {
+//                /// Show in the middle of the screen
+//                LoadingView()
+//            }
 
             if controller.reports.isEmpty && !controller.isLoading {
                 /// Empty state
@@ -322,6 +321,15 @@ struct MyReportsSubView: View {
         .task(id: controller.refreshID) {
             guard !Task.isCancelled else { return }
             await controller.fetchReports()
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                if controller.isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .controlSize(.regular)
+                }
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)

@@ -290,6 +290,7 @@ enum TestFieldsMock: Hashable {
         TextInput(name: "hello@reportamelo.app", label: "Disabled State", isValid: .constant(true), value: .constant(""), disabled: true)
         
         TextInput(name: "Address", axis: .vertical, isValid: .constant(true), value: .constant("lorem ipsum  dosllsl sllslsl slslslls lslslsl sllsls slllls sllllslslslllslsllslsllsllslsllslsl"))
+            .frame(maxHeight: 200)
     }
     .padding()
 }

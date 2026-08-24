@@ -18,8 +18,8 @@ struct InsightsView: View {
                 Color.theme.background
                     .ignoresSafeArea()
                 
-                Color.orange.opacity(0.321)
-                    .frame(height: 280)
+                Color.theme.secondary.opacity(0.121)
+                    .frame(height: 580)
                     .mask(
                         LinearGradient(
                             colors: [.white, .clear],
@@ -27,7 +27,7 @@ struct InsightsView: View {
                             endPoint: .bottom
                         )
                     )
-                    .blur(radius: 70)
+                    .blur(radius: 10)
                     .ignoresSafeArea()
                 
                 VStack {

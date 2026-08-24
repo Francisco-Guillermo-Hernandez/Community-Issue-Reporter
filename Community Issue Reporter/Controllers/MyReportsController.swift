@@ -37,19 +37,27 @@ final class MyReportsController {
         }
         
         do {
-            let result = try await ReportRepository.shared.listByUser(page: currentPage)
-            self.hasNext = result.hasNext
-            guard let documents = result.documents else {
-                if loadMore { isLoadingMore = false } else { isLoading = false }
-                return
-            }
+            let stream = ReportRepository.shared.listByUser(page: currentPage)
             
-            let newReports = documents.map { $0.toModel() }
+            let startIndex = (currentPage - 1) * 5
             
-            if loadMore {
-                self.reports.append(contentsOf: newReports)
-            } else {
-                self.reports = newReports
+            for try await result in stream {
+                self.hasNext = result.hasNext
+                guard let documents = result.documents else {
+                    continue
+                }
+                
+                let newReports = documents.map { $0.toModel() }
+                
+                if loadMore {
+                    if self.reports.count >= startIndex {
+                        self.reports = Array(self.reports.prefix(startIndex)) + newReports
+                    } else {
+                        self.reports.append(contentsOf: newReports)
+                    }
+                } else {
+                    self.reports = newReports
+                }
             }
         } catch {
             print(error)

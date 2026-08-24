@@ -30,7 +30,13 @@ final class MapExplorerController {
     var isPresented = false
     var selectedPlaceID: String?
     var expandedItem: MapExplorerReport?
-    var selection: String = ""
+    var selection: String = "" {
+        didSet {
+            Task {
+                await loadReports()
+            }
+        }
+    }
     var isSearchExpanded: Bool = false
     var isSearchActivated: Bool = false
     var searchItems: [String] = []
@@ -42,8 +48,9 @@ final class MapExplorerController {
             IssueStatus.fixed.title,
             IssueStatus.petitionToSign.title,
             IssueStatus.assigned.title,
-        ] // IssueStatus.allCases.map(\.title)
+        ]
     }
+    
     private var currentFetchID = UUID()
     
     func loadReports() async {
@@ -52,23 +59,35 @@ final class MapExplorerController {
         let fetchID = UUID()
         self.currentFetchID = fetchID
         
+        let statusIds = self.selection.isEmpty 
+            ? [
+                IssueStatus.confirmed.identifier,
+                IssueStatus.inProgress.identifier,
+                IssueStatus.fixed.identifier,
+                IssueStatus.petitionToSign.identifier,
+                IssueStatus.assigned.identifier,
+            ]
+            : IssueStatus.allCases.filter { $0.title == self.selection }.map(\.identifier)
+        
         let query = MapExplorerQueryParams(
             lat: authViewModel.cameraPosition.region?.center.latitude ?? authViewModel.selectedCity?.coordinates.lat ?? 13.868268,
             lng: authViewModel.cameraPosition.region?.center.longitude ?? authViewModel.selectedCity?.coordinates.lng ?? -89.850968,
             radius: 600,
             issueTypeIds: [1],
             severityIds: [1],
-            statusIds: [1]
+            statusIds: statusIds
         )
         
         do {
-            let fetchedReports = try await MapExplorerRepository.shared.listReports(
+            let stream = MapExplorerRepository.shared.listReportsStream(
                 for: query,
                 countryCode: .SV,
                 cityId: authViewModel.selectedCity?.cityId ?? "1"
             )
-            guard self.currentFetchID == fetchID else { return }
-            self.reports = fetchedReports
+            for try await fetchedReports in stream {
+                guard self.currentFetchID == fetchID else { break }
+                self.reports = fetchedReports
+            }
         } catch CommonIntercommunicationErrors.invalidPetition(let code) {
             Toast.shared.show(message: String(localized: "Invalid request (\(code))"), type: .error)
         } catch CommonIntercommunicationErrors.notFound {
@@ -78,7 +97,7 @@ final class MapExplorerController {
         } catch CommonIntercommunicationErrors.networkError(let message) {
             Toast.shared.show(message: String(localized: "Network error: \(message)"), type: .error)
         } catch CommonIntercommunicationErrors.genericError(let message) {
-            Toast.shared.show(message: String(localized: "Error: \(message)"), type: .error)
+//            Toast.shared.show(message: String(localized: "Error: \(message)"), type: .error)
         } catch {
             print(error)
             Toast.shared.show(message: String(localized: "An unexpected error occurred"), type: .error)
@@ -89,6 +108,10 @@ final class MapExplorerController {
         let fetchID = UUID()
         self.currentFetchID = fetchID
         
+        let statusIds = self.selection.isEmpty 
+            ? IssueStatus.allCases.map(\.identifier)
+            : IssueStatus.allCases.filter { $0.title == self.selection }.map(\.identifier)
+            
         do {
             let query = MapExplorerQueryParams(
                 lat: coordinates.latitude,
@@ -96,19 +119,21 @@ final class MapExplorerController {
                 radius: 300,
                 issueTypeIds: IssueTypes.allCases.compactMap(\.identifier),
                 severityIds: Severity.allCases.compactMap(\.identifier),
-                statusIds: IssueStatus.allCases.compactMap(\.identifier)
+                statusIds: statusIds
             )
             
             print("[QUERY] : debugging")
             dump(query)
             
-            let fetchedReports = try await MapExplorerRepository.shared.listReports(
+            let stream = MapExplorerRepository.shared.listReportsStream(
                 for: query,
                 countryCode: .SV,
                 cityId: authViewModel?.selectedCity?.cityId ?? "1"
             )
-            guard self.currentFetchID == fetchID else { return }
-            self.reports = fetchedReports
+            for try await fetchedReports in stream {
+                guard self.currentFetchID == fetchID else { break }
+                self.reports = fetchedReports
+            }
         } catch CommonIntercommunicationErrors.invalidPetition(let code) {
             Toast.shared.show(message: String(localized: "Invalid request (\(code))"), type: .error)
         } catch CommonIntercommunicationErrors.notFound {

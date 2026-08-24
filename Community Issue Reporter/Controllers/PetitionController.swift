@@ -60,10 +60,11 @@ final class PetitionController {
     
     func fetchReports() async {
         do {
-            let result = try await ReportRepository.shared.listByUser(page: 1)
-            guard let reports = result.documents else { return }
-            self.reports = reports.map { $0.toModel() }
-            
+            let stream = ReportRepository.shared.listByUser(page: 1)
+            for try await result in stream {
+                guard let reports = result.documents else { continue }
+                self.reports = reports.map { $0.toModel() }
+            }
         } catch {
             print(error)
             print(error.localizedDescription)

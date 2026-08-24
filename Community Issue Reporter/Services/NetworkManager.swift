@@ -35,8 +35,22 @@ final class NetworkManager {
     
     /// A wrapper for session data
     func fetch(for request: URLRequest) async throws -> (Data, URLResponse) {
-        return try await session.data(for: request)
+        var finalRequest = request
+        
+        /// Check if we have a cached response for this exact URLRequest
+        if let cachedResponse = session.configuration.urlCache?.cachedResponse(for: request),
+           let httpResponse = cachedResponse.response as? HTTPURLResponse {
+            
+            /// Extract the ETag (case-insensitive fetch)
+            if let eTag = httpResponse.value(forHTTPHeaderField: "Etag") {
+                /// Inject it into the outgoing request
+                finalRequest.addValue(eTag, forHTTPHeaderField: "If-None-Match")
+            }
+        }
+        
+        return try await session.data(for: finalRequest)
     }
+
     
     /// A wrapper for session upload
     func upload(using request: URLRequest, contentOf body: Data, with delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (Data, URLResponse) {

@@ -139,6 +139,11 @@ struct ServiceClient {
             let oAuthHeader = getOAuthHeader()
             request.setValue(oAuthHeader.content, forHTTPHeaderField: oAuthHeader.name)
         }
+        
+        let blockedUsers = KeychainService.getArray(key: .blockedUsers)
+        if !blockedUsers.isEmpty {
+            request.setValue(blockedUsers.joined(separator: ","), forHTTPHeaderField: "Blocked-Users")
+        }
 
         
         let data: Data
@@ -152,6 +157,8 @@ struct ServiceClient {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ServiceError.invalidResponse
         }
+        
+        print("status code: \(httpResponse.statusCode)")
 
         try HTTPErrorHandler(for: httpResponse, with: data, request: request, url)
         
@@ -191,6 +198,7 @@ struct ServiceClient {
         case 300...303:
             break
         case 304:
+            print("cache hit")
             break
         case 305...399:
             throw ServiceError.httpStatus(httpResponse.statusCode)

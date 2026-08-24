@@ -52,4 +52,8 @@ struct ModerationService {
     func appeal(id: String, type: TypeOfContentToReport, headers: [HTTPHeader]) async throws -> GenericResponse {
         return try await client.put(path: "user-generated-content/moderation/\(id)/appeal", body: [String: String](), headers: headers, withOAuth: true)
     }
+    
+    func remove(id: String, type: TypeOfContentToReport, headers: [HTTPHeader]) async throws -> GenericResponse {
+        return try await client.delete(path: "user-generated-content/moderation/\(id)", body: [String: String](), headers: headers, withOAuth: true)
+    }
 }

@@ -55,6 +55,48 @@ class KeychainService {
         return result == noErr
     }
     
+    static func getArray(key: TokenType) -> [String] {
+        guard let jsonString = loadToken(key: key),
+              let data = jsonString.data(using: .utf8) else {
+            return []
+        }
+        do {
+            return try JSONDecoder().decode([String].self, from: data)
+        } catch {
+            return []
+        }
+    }
+    
+    static func addToArray(key: TokenType, element: String) -> Bool {
+        var array = getArray(key: key)
+        guard !array.contains(element) else { return true }
+        
+        array.append(element)
+        
+        do {
+            let data = try JSONEncoder().encode(array)
+            guard let jsonString = String(data: data, encoding: .utf8) else { return false }
+            return save(key: key, value: jsonString)
+        } catch {
+            return false
+        }
+    }
+    
+    static func removeFromArray(key: TokenType, element: String) -> Bool {
+        var array = getArray(key: key)
+        guard array.contains(element) else { return true }
+        
+        array.removeAll { $0 == element }
+        
+        do {
+            let data = try JSONEncoder().encode(array)
+            guard let jsonString = String(data: data, encoding: .utf8) else { return false }
+            return save(key: key, value: jsonString)
+        } catch {
+            return false
+        }
+    }
+    
     static func getToken(_ t: TokenType) -> String {
         return loadToken(key: t) ?? ""
     }

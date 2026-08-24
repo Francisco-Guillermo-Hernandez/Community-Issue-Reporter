@@ -54,8 +54,11 @@ class MapManager {
         )
         
         do {
-            self.reports = try await MapExplorerRepository.shared.listReports( for: query, countryCode: .SV, cityId:  "1")
-            print(reports.count)
+            let stream = MapExplorerRepository.shared.listReportsStream(for: query, countryCode: .SV, cityId: "1")
+            for try await fetchedReports in stream {
+                self.reports = fetchedReports
+                print(reports.count)
+            }
         } catch {
             print(error)
         }

@@ -48,7 +48,11 @@ class PhotoPreviewController {
     var showPopover = false
     var presentAlert: Bool = false
     var reason: String = ""
+    var showAlert: Bool = false
+    var alertMessage: String = ""
     let options = ContentViolationReportOptions.allCases.map(\.description)
+    var showSuccessfulAlert: Bool = false
+    
     func report(_ attachment: PreviewAttachment) -> Void {
         Task {
             let blockedReasonId = ContentViolationReportOptions.allCases.first(where: { $0.description == selectedOption })?.rawValue ?? ContentViolationReportOptions.other.rawValue
@@ -65,13 +69,17 @@ class PhotoPreviewController {
             
             do {
                 _ = try await ModerationRepository.shared.moderateContent(reason: violation, type: type)
-                Toast.shared.show(message: String(localized: "Your moderation petition was sent"), type: .info)
+                alertMessage = String(localized: "Your moderation petition was sent")
+                showSuccessfulAlert = true
             } catch CommonIntercommunicationErrors.serverError(_) {
-                Toast.shared.show(message: String(localized: "Server Error"), type: .error)
+                alertMessage = String(localized: "Server Error")
+                showAlert = true
             } catch CommonIntercommunicationErrors.networkError(_) {
-                Toast.shared.show(message: String(localized: "It looks like that your network is experiencing some delays, please try again."), type: .error)
+                alertMessage = String(localized: "It looks like that your network is experiencing some delays, please try again.")
+                showAlert = true
             } catch {
-                Toast.shared.show(message: String(localized: "Error"), type: .error)
+                alertMessage = String(localized: "Error")
+                showAlert = true
             }
         }
     }
@@ -248,6 +256,16 @@ struct PhotoPreview: View {
                             }
                         } message: {
                             Text(String(localized: "I confirm that this content violates our community guidelines."))
+                        }
+                        .alert(String(localized: "Error"), isPresented: $controller.showAlert) {
+                            Button(String(localized: "OK"), role: .cancel) { }
+                        } message: {
+                            Text(controller.alertMessage)
+                        }
+                        .alert(String(localized: "Confirmation"), isPresented: $controller.showSuccessfulAlert) {
+                            Button(String(localized: "OK"), role: .cancel) { }
+                        } message: {
+                            Text(controller.alertMessage)
                         }
                         
                     }

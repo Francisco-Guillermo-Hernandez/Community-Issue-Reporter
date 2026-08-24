@@ -97,7 +97,11 @@ struct CustomTabBar: View {
                     .glassEffect(.regular.interactive(), in: .capsule)
                     .contentShape(.capsule)
                     .onTapGesture {
-                        selection = item
+                        if selection == item {
+                            selection = ""
+                        } else {
+                            selection = item
+                        }
                     }
                     .disabled(isSearchExpanded)
             }
@@ -162,5 +166,9 @@ struct CustomTabBar: View {
     CustomTabBar(
         items: IssueStatus.allCases.map(\.title),
         searchHint: "",
-        selection: $selection, searchText: $searchText, isSearchExpanded: $isSearchExpanded, onSearchActivated: {_ in })
+        selection: $selection, searchText: $searchText, isSearchExpanded: $isSearchExpanded, onSearchActivated: {_ in }
+    )
+        .onChange(of: selection) { _, newValue in
+            print(newValue)
+        }
 }

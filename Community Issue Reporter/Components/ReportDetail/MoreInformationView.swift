@@ -116,19 +116,19 @@ struct MoreInformationView: View {
                 .listRowBackground(Color.clear)
                 .buttonStyle(.plain)
                 .contentShape(Rectangle())
-                .confirmationDialog(
-                    "Coordinates",
-                    isPresented: $openInMaps,
-                    titleVisibility: .visible
-                ) {
-                    Button("Confirm", role: .confirm) {
-                        Task {
-                            openOnGoogleMaps()
-                        }
+                .contextMenu {
+                    
+                    Button {
+                        openInAppleMaps(report.clLocation, title: report.title)
+                    } label: {
+                        Label(String(localized: "Open in Apple Maps"), systemImage: "mappin.and.ellipse")
                     }
-
-                } message: {
-                    Text("Do you want to open this on Google Maps?")
+                    
+                    Button {
+                        openOnGoogleMaps(report.clLocation, title: report.title)
+                    } label: {
+                        Label(String(localized: "Open in Google Maps"), systemImage: "mappin.and.ellipse")
+                    }
                 }
 
             }
@@ -144,16 +144,6 @@ struct MoreInformationView: View {
 
         }
     }
-    
-    fileprivate func openOnGoogleMaps() {
-        let urlString =
-            "comgooglemaps://?q=\(report.clLocation.latitude),\(report.clLocation.longitude)&zoom=14"
-        if let url = URL(string: urlString),
-            UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
-        }
-    }
-
 }
 
 #Preview {

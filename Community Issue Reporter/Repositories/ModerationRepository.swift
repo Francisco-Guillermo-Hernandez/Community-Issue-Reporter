@@ -134,6 +134,22 @@ final class ModerationRepository {
         }
     }
     
+    func remove(id: String, type: TypeOfContentToReport) async throws -> GenericResponse {
+        do {
+            return try await service.remove(id: id, type: type, headers: self.headers)
+        } catch ServiceError.badRequest(let result) {
+            throw CommonIntercommunicationErrors.invalidPetition(result.code)
+        } catch ServiceError.notFound {
+            throw CommonIntercommunicationErrors.notFound
+        } catch ServiceError.serverError(let code) {
+            throw CommonIntercommunicationErrors.serverError(code)
+        } catch ServiceError.networkError(let error) {
+            throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
+    }
+    
     func indictedModeratedContent() async throws -> PaginatedResponse<ReportViolation<ModeratedContent>> {
         do {
             return try await service.indictedModeratedContent(headers: self.headers)

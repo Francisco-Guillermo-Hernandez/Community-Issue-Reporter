@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreLocation
+import SwiftData
 
 typealias ErrorHandler = @Sendable (Error) -> Void
 typealias Reports = PaginatedResponse<Report>
@@ -59,16 +60,98 @@ final class ReportRepository {
         }
     }
     
-    func listByUser(page: Int) async throws -> PaginatedResponse<ReportDAO> {
-        do {
-          
-           return try await self.reportsService.fetchReportByUser(
-            q: PaginatedRequestQueryParams(page: page, limit: 5)
-           )
-        } catch {
-            print(error)
-            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+    func listByUser(page: Int) -> AsyncThrowingStream<PaginatedResponse<ReportDAO>, Error> {
+        return AsyncThrowingStream { continuation in
+            let task = Task {
+                do {
+                    let cachedResponse = await self.cachedReportsByUser(page: page)
+                    if let cached = cachedResponse, !(cached.documents?.isEmpty ?? true) {
+                        continuation.yield(cached)
+                    }
+                    
+                    let freshResponse = try await self.reportsService.fetchReportByUser(
+                        q: PaginatedRequestQueryParams(page: page, limit: 5)
+                    )
+                    
+                    await self.saveReportsByUser(freshResponse, cachedResponse: cachedResponse, page: page)
+                    
+                    continuation.yield(freshResponse)
+                    continuation.finish()
+                } catch {
+                    print(error)
+                    continuation.finish(throwing: CommonIntercommunicationErrors.genericError(error.localizedDescription))
+                }
+            }
+            
+            continuation.onTermination = { @Sendable _ in
+                task.cancel()
+            }
         }
+    }
+    
+    @MainActor
+    private func cachedReportsByUser(page: Int) async -> PaginatedResponse<ReportDAO>? {
+        guard let container = SwiftDataLocatorDAO.shared.container else { return nil }
+        let context = container.mainContext
+        
+        let descriptor = FetchDescriptor<MyReportDAOEntity>(
+            predicate: #Predicate { $0.page == page }
+        )
+        
+        do {
+            let entities = try context.fetch(descriptor)
+            if entities.isEmpty { return nil }
+            let decoder = JSONDecoder()
+            let documents = entities.compactMap { entity -> ReportDAO? in
+                return try? decoder.decode(ReportDAO.self, from: entity.data)
+            }
+            let hasNext = entities.first?.hasNext ?? false
+            return PaginatedResponse<ReportDAO>(
+                documents: documents,
+                total: nil,
+                page: page,
+                documentsPerPage: 5,
+                totalPages: nil,
+                hasNext: hasNext,
+                hasPrev: page > 1
+            )
+        } catch {
+            return nil
+        }
+    }
+    
+    @MainActor
+    private func saveReportsByUser(
+        _ freshResponse: PaginatedResponse<ReportDAO>,
+        cachedResponse: PaginatedResponse<ReportDAO>?,
+        page: Int
+    ) async {
+        guard let container = SwiftDataLocatorDAO.shared.container else { return }
+        let context = container.mainContext
+        let encoder = JSONEncoder()
+        
+        let freshDocuments = freshResponse.documents ?? []
+        let freshIds = Set(freshDocuments.compactMap { $0.id })
+        
+        if let cachedDocuments = cachedResponse?.documents {
+            for cached in cachedDocuments {
+                guard let id = cached.id else { continue }
+                if !freshIds.contains(id) {
+                    if let entity = try? context.fetch(FetchDescriptor<MyReportDAOEntity>(predicate: #Predicate { $0.id == id })).first {
+                        context.delete(entity)
+                    }
+                }
+            }
+        }
+        
+        let hasNext = freshResponse.hasNext
+        for doc in freshDocuments {
+            guard let id = doc.id, let data = try? encoder.encode(doc) else { continue }
+            let entity = MyReportDAOEntity(id: id, page: page, data: data, hasNext: hasNext)
+            context.insert(entity)
+        }
+        
+        try? context.save()
     }
     
     func listByProfile(_ profileId: String) async throws -> [ReportDAO] {

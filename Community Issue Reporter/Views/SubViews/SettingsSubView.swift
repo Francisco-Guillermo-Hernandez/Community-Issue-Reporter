@@ -281,11 +281,18 @@ struct SettingsSubView: View {
                                 
                                 if !notificationManager.isPermissionGranted {
                                     notificationManager.requestAuthorization()
+                                } else {
+                                    controller.updateDeviceToken()
                                 }
                                 
                             }
                             .onChange(of: notificationManager.isPermissionGranted) { oldValue, newValue in
-                                if oldValue != newValue && !notificationManager.deviceToken.isEmpty {
+                                if oldValue != newValue && newValue && !notificationManager.deviceToken.isEmpty {
+                                    controller.updateDeviceToken()
+                                }
+                            }
+                            .onChange(of: notificationManager.deviceToken) { oldValue, newValue in
+                                if !newValue.isEmpty && settings.enablePushNotifications {
                                     controller.updateDeviceToken()
                                 }
                             }

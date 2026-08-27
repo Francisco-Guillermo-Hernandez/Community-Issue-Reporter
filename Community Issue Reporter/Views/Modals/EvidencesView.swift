@@ -8,7 +8,120 @@
 import SwiftUI
 import PhotosUI
 
+
+struct AttachEvidencesView: View {
+    let reportId: String
+    let reportContainer: String
+    @State private var showAlert: Bool = false
+    @State private var attachingNewEvidences: Bool = true
+    @State private var showSuccessfulAlert: Bool = false
+    @State private var alertMessage: String = ""
+    @State private var publishingEvidence: Bool = false
+    @State private var uploadTrackers: [PhotoUploadTracker] = []
+    
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack() {
+           
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: .themeSpacing * 3) {
+                    #if DEBUG
+                    if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+                        Text("Image Picker Placeholder for Preview")
+                    } else {
+                        PhotoChooser(
+                            reportContainer: reportContainer,
+                            uploadTrackers: $uploadTrackers
+                        )
+                    }
+                    #else
+                    #endif
+                    
+                }
+                .padding(.top)
+                .padding(.horizontal)
+                .toolbarTitleDisplayMode(.large)
+                .navigationSubtitle(String(localized: "Attach new evidence"))
+                .navigationTitle(String(localized: "Evidences"))
+                .toolbar {
+                    ToolbarItem(placement: .automatic) {
+                        Button (role: .close) {
+                            dismiss()
+                        }
+                    }
+                }
+            }
+            
+        }
+        .alert("Notice", isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
+        .alert("Success", isPresented: $showSuccessfulAlert) {
+            Button("OK", role: .cancel) {
+                attachingNewEvidences = false
+                dismiss()
+            }
+        } message: {
+            Text(alertMessage)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            
+            ThemedButton(
+                message: String(localized: "Attach new evidence"),
+                action: {
+                    Task {
+                        self.publishingEvidence = true
+                        let payload = uploadTrackers.map { tracker in
+                            GroupedAttachmentPayload(
+                                attachmentContainer: self.reportContainer,
+                                key: tracker.key,
+                                previewFileName: "preview_\(tracker.name)",
+                                fileName: tracker.name,
+                                reportId: self.reportId,
+                                notes: ""
+                            )
+                        }
+                        do {
+                            let _ = try await EvidenceRepository.shared.publishExternalContributions(attachments: payload)
+                            alertMessage = String(localized: "Your evidence was sent")
+                            showSuccessfulAlert = true
+                        } catch CommonIntercommunicationErrors.serverError(_) {
+                            alertMessage = String(localized: "Server Error")
+                            showAlert = true
+                        } catch CommonIntercommunicationErrors.networkError(_) {
+                            alertMessage = String(localized: "It looks like that your network is experiencing some delays, please try again.")
+                            showAlert = true
+                        } catch {
+                            alertMessage = String(localized: "Error")
+                            showAlert = true
+                        }
+                        
+                        self.publishingEvidence = false
+                    }
+                },
+                type: .primary,
+                style: .prominent,
+                isLoading: $publishingEvidence
+            )
+            .disabled(!disableAttachButton)
+            .padding(.horizontal, 24)
+            .padding(.top, 0)
+            
+        }
+    }
+    
+    var disableAttachButton: Bool {
+        !uploadTrackers.isEmpty && uploadTrackers.allSatisfy { $0.phase == .success }
+    }
+}
+
 struct EvidencesView: View {
+    
+
     @State var orientation = UIDevice.current.orientation
     @State private var mapExplorerController = MapExplorerController.shared
     @State private var selectedImages: UIImage? = nil
@@ -18,6 +131,7 @@ struct EvidencesView: View {
     @State private var page: Int = 1
     @State private var isLoading: Bool = false
     @State private var response: PaginatedResponse<PreviewAttachment> = .init(documents: [], total: 0, page: 1, hasNext: false, hasPrev: false)
+    @State private var attachingNewEvidences: Bool = false
     
     @Environment(\.dismiss) var dismiss
     
@@ -27,13 +141,15 @@ struct EvidencesView: View {
     @State private var previewID: String = ""
     
     var id: String
-    
-    init(with id: String) {
+    var reportContainer: String
+    init(with id: String, reportContainer: String) {
         self.id = id
+        self.reportContainer = reportContainer
     }
     
     var body: some View {
         ZStack {
+            
             if isLoading {
                 LoadingView()
             } else if (response.documents ?? []).isEmpty {
@@ -68,6 +184,12 @@ struct EvidencesView: View {
                     .padding(.horizontal, .themePadding)
                 }
             }
+            
+            
+        }
+        .sheet(isPresented: $attachingNewEvidences) {
+            AttachEvidencesView(reportId: id, reportContainer: reportContainer)
+                
         }
         .navigationDestination(for: PreviewAttachment.self) { photo in
             PhotoDetailView(photos: response.documents ?? [], previewID: $previewID, nameSpace: nameSpace)
@@ -108,47 +230,16 @@ struct EvidencesView: View {
         }
         .toolbar {
             
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                
             
-                
-                PhotosPicker(
-                    selection: $selectedPhotoItems,
-                    maxSelectionCount: 1,
-                    matching: .any(
-                        of: [
-                            .images,
-                            .panoramas,
-                            .not(.screenshots),
-                            .not(.videos),
-                            .not(.screenRecordings),
-                            .not(.spatialMedia),
-                        ]
-                    )
-                ) {
-                    Image(systemName: "photo.on.rectangle")
-                        .font(.callout)
-
-                }
-                .accessibilityLabel("Add more Evidence from your Gallery")
-                .onChange(of: selectedPhotoItems) { _, newItems in
-                    guard !newItems.isEmpty else { return }
-//                    viewModel.selectedAvatarOptionView = option.associatedView
-                    loadSelectedImages(from: newItems) { image in
-                        if let avatar = image {
-                            onSelect(avatar)
-                        }
-                       
+            if response.documents?.count ?? 0 < 24 {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    
+                    Button {
+                        attachingNewEvidences.toggle()
+                    } label: {
+                        Label("Add Evidence", systemImage: "photo.badge.plus")
                     }
                 }
-                
-                
-                Button("Add more Evidence", systemImage: "camera") {
-                    takePhotoUsingCamera { images in
-                        onSelect(images)
-                    }
-                }
-                .accessibilityLabel("Add more Evidences by taking a photo")
             }
             
             ToolbarItem(placement: .topBarTrailing) {
@@ -207,6 +298,6 @@ struct EvidencesView: View {
 
 #Preview {
     NavigationStack {
-        EvidencesView(with: "")
+        EvidencesView(with: "", reportContainer: "")
     }
 }

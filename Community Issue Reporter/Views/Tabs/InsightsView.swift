@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct InsightsView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Namespace private var insightsNamespace
     @State private var controller = InsightsController()
  
@@ -18,8 +19,8 @@ struct InsightsView: View {
                 Color.theme.background
                     .ignoresSafeArea()
                 
-                Color.theme.secondary.opacity(0.121)
-                    .frame(height: 580)
+                Color.theme.secondary.opacity( colorScheme == .dark ? 0.421 : 0.123)
+                    .frame(height: 400)
                     .mask(
                         LinearGradient(
                             colors: [.white, .clear],

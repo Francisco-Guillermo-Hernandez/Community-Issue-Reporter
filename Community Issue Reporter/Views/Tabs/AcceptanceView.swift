@@ -70,7 +70,7 @@ struct AcceptanceView: View {
             Color.theme.background
                 .ignoresSafeArea()
             
-            Color.theme.secondary.opacity(0.09121)
+            Color.theme.secondary.opacity( colorScheme == .dark ? 0.421 : 0.123)
                 .frame(height: 580)
                 .mask(
                     LinearGradient(

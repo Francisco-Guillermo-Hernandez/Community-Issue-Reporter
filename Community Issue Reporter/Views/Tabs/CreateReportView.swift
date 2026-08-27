@@ -53,6 +53,7 @@ struct CreateReportView: View {
                             })
                         }
                     }
+                    .padding(.horizontal)
                 }
                 .sensoryFeedback(.selection, trigger: controller.feedbackTrigger)
                 .toolbar {
@@ -73,7 +74,6 @@ struct CreateReportView: View {
                         }
                     }
                 }
-                .padding(.horizontal)
                 .searchable(text: $controller.searchText, prompt: "Search")
                 .toolbar(.visible, for: .tabBar)
                 .toolbarTitleDisplayMode(.inlineLarge)
@@ -122,7 +122,7 @@ struct CardView: View {
                 VStack(alignment: .leading, spacing: .themeSpacing * 1.5) {
                     Spacer()
                     Text(matter.title)
-                        .font(.title3)
+                        .font(.headline)
                         .foregroundStyle(.white)
                         .fontWeight(.black)
                         .lineLimit(2)

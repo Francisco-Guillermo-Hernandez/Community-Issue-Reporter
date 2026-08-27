@@ -20,6 +20,7 @@ struct customBottomToolbar: View {
     
     @Binding var affectedState: Bool
     @Binding var notificationState: Bool
+    @Binding var disableBoostButton: Bool
     
     var body: some View {
         
@@ -44,15 +45,15 @@ struct customBottomToolbar: View {
             
             Button(action: performPhotoActions) {
                 VStack(spacing: 4) {
-                    Image(systemName: "photo.badge.plus")
+                    Image(systemName: "photo.stack")
                         .font(.system(size: 18, weight: .semibold))
                         .background(Color.black.opacity(0.001))
                         .symbolRenderingMode(pictureState ? .multicolor : .monochrome)
                     
-                    Text("Attach")
+                    Text("Evidences")
                         .font(.footnote)
                 }
-                .frame(width: 64, height: 64)
+                .frame(width: 72, height: 64)
                 
             }
             .accessibilityLabel("AddAttachmentsButton")
@@ -121,29 +122,50 @@ struct customBottomToolbar: View {
             
             Button(action: performNotificationActions) {
                 
-                VStack(spacing: 2) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .background(Color.black.opacity(0.001))
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(
-                            Color.theme.primary,
-                            Color.white,
-                            Color.white
-                        )
-                        .symbolEffect(
-                            .pulse,
-                            options: .repeat(.continuous),
-                            value: notificationState
-                        )
-                    
-                    Text("Boost")
-                        .font(.footnote)
+                Group {
+                    if disableBoostButton {
+                        VStack(spacing: 2) {
+                            Image(systemName: "flame.fill")
+                                .font(.system(size: 18, weight: .semibold))
+                                .background(Color.black.opacity(0.001))
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(
+                                    Color.theme.primary,
+                                    Color.white,
+                                    Color.white
+                                )
+                                .symbolEffect(
+                                    .breathe,
+                                    options: .repeat(.continuous)
+                                )
+                            Text("Boosted")
+                                .font(.footnote)
+                        }
+                    } else {
+                        VStack(spacing: 2) {
+                            Image(systemName: "flame")
+                                .font(.system(size: 18, weight: .semibold))
+                                .background(Color.black.opacity(0.001))
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(
+                                    Color.theme.primary,
+                                    Color.white,
+                                    Color.white
+                                )
+                                .symbolEffect(
+                                    .pulse,
+                                    options: .repeat(.continuous),
+                                    value: notificationState
+                                )
+                            
+                            Text("Boost")
+                                .font(.footnote)
+                        }
+                    }
                 }
-                
-                .frame(width: 64, height: 64)
+                .frame(width: 68, height: 64)
             }
-            
+            .allowsHitTesting(!disableBoostButton)
             .accessibilityLabel("BoostButton")
             .buttonStyle(.plain)
             .contentShape(Rectangle())
@@ -181,13 +203,18 @@ struct customBottomToolbar: View {
     
     @Previewable
     @State var notificationState: Bool = false
+    
+    @Previewable
+    @State var disabled: Bool = true
+    
     customBottomToolbar(
         commentAction: {},
         addPhotoAction: {},
         affectedAction: { _ in  },
         boostReportValidationAction: { _ in },
         affectedState: $affectedState,
-        notificationState: $notificationState
+        notificationState: $notificationState,
+        disableBoostButton: $disabled
     )
 }
 

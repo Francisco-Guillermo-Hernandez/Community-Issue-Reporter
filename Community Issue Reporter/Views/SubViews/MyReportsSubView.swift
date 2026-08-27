@@ -191,16 +191,17 @@ struct ReportCellView: View {
 
 // MARK: - sub view
 struct MyReportsSubView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @State private var controller = MyReportsController()
     @Binding var path: [InsightsNavigation]
     var subViewName: String
     var mode: ViewOptions = .list
     var body: some View {
         ZStack {
-//            if controller.isLoading {
-//                /// Show in the middle of the screen
-//                LoadingView()
-//            }
+            if controller.isLoading {
+                /// Show in the middle of the screen
+                LoadingView()
+            }
 
             if controller.reports.isEmpty && !controller.isLoading {
                 /// Empty state
@@ -288,25 +289,6 @@ struct MyReportsSubView: View {
             }
 
         }
-        .background(Color.theme.background)
-//        .background {
-//            ZStack(alignment: .top) {
-//                GeometryReader { geo in
-//                    RadialGradient(
-//                        gradient: Gradient(colors: [
-//                            Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
-//                            Color.theme.background
-//                        ]),
-//                        center: .topLeading,
-//                        startRadius: 0,
-//                        endRadius: geo.size.width * 0.54
-//                    )
-//                    
-//                }
-//            }
-//            .ignoresSafeArea()
-//        }
-        .scrollContentBackground(.hidden)
         .alert("Delete report", isPresented: $controller.showDeleteAlert) {
             Button("Delete", role: .destructive) {
                 controller.delete(report: controller.reportToDelete)
@@ -322,6 +304,23 @@ struct MyReportsSubView: View {
             guard !Task.isCancelled else { return }
             await controller.fetchReports()
         }
+        .background {
+            ZStack(alignment: .top) {
+                GeometryReader { geo in
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
+                            Color.theme.background
+                        ]),
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: geo.size.width * 0.54
+                    )
+                    
+                }
+            }
+            .ignoresSafeArea()
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 if controller.isLoading {
@@ -333,6 +332,7 @@ struct MyReportsSubView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)
+        
     }
     
     @ViewBuilder

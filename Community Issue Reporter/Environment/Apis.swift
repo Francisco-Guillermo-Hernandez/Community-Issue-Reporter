@@ -29,7 +29,7 @@ enum Endpoints {
     }
     
     static var apiV1: URL {
-        Self.baseURL.appending(component: "api").appending(component: "v1")
+        Self.baseURL.appending(component: "v1")
     }
     
     static var shareableURL: URL {

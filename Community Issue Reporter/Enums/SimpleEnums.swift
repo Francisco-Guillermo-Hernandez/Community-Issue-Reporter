@@ -78,6 +78,7 @@ enum CommonIntercommunicationErrors: Error {
     case networkError(String)
     case genericError(String)
     case notImplemented
+    case unProcessable
 }
 
 // MARK: - 
@@ -86,4 +87,18 @@ enum SuccessfulResult: Equatable {
     case updated
     case deleted
     case created
+}
+
+enum VotingType: String, Equatable, CaseIterable, Codable {
+    case report
+    case petition
+    
+    var description: String {
+        switch self {
+            case .petition:
+                return String(localized: "Petition")
+            case .report:
+                return String(localized: "Report")
+        }
+    }
 }

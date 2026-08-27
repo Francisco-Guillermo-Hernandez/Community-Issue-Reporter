@@ -58,7 +58,7 @@ struct Community_Issue_ReporterApp: App {
         }
         
         do {
-            container = try ModelContainer(for: District.self, Canton.self)
+            container = try ModelContainer(for: District.self, Canton.self, MapExplorerReportEntity.self, MyReportDAOEntity.self)
             SwiftDataLocatorDAO.shared.container = container
             let context = container.mainContext
             Task { @MainActor in

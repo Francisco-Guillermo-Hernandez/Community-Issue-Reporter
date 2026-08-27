@@ -58,10 +58,11 @@ struct EvidenceOfTheReportView: View {
                             }
                             
                         } else {
+                            NavigationLink(value: DetailNavigationDestination.moreEvidences(id)) {
+                                PhotoPreview(attachment)
+                                    .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+                            }
                             
-                            PhotoPreview(attachment)
-                                .glassEffect(in: RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
-                                
                         }
                     }
                 }

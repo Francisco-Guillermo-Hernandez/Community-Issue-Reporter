@@ -14,11 +14,22 @@ import CoreLocation
 @Observable
 final class DetailController {
     
+    var voteCount: Int = 0
+    var attachingNewEvidences: Bool = false
+    var showBoostAlert: Bool = false
+    var message: String = ""
+    var affectedState: Bool = false
+    var notificationState: Bool = false
+    var disableBoostButton = false
     var selectedOption = "None"
     var showPopover = false
     var presentAlert: Bool = false
     var reason: String = ""
     let options = DetailReportOptions.allCases.map(\.description)
+    var showErrorAlert: Bool = false
+    var errorMessage: String = ""
+    var showSuccessfulAlert: Bool = false
+    
     func report(_ report: MapExplorerReport) -> Void {
         Task {
             let blockedReasonId = DetailReportOptions.allCases.first(where: { $0.description == selectedOption })?.rawValue ?? DetailReportOptions.other.rawValue
@@ -35,14 +46,28 @@ final class DetailController {
             
             do {
                 _ = try await ModerationRepository.shared.moderateReport(reason: violation, type: type)
-                Toast.shared.show(message: String(localized: "Your moderation petition was sent"), type: .info)
+                self.message = String(localized: "Your moderation petition was sent")
+                self.showSuccessfulAlert = true
             } catch CommonIntercommunicationErrors.serverError(_) {
-                Toast.shared.show(message: String(localized: "Server Error"), type: .error)
+                self.errorMessage = String(localized: "Server Error")
+                self.showErrorAlert = true
             } catch CommonIntercommunicationErrors.networkError(_) {
-                Toast.shared.show(message: String(localized: "It looks like that your network is experiencing some delays, please try again."), type: .error)
+                self.errorMessage = String(localized: "It looks like that your network is experiencing some delays, please try again.")
+                self.showErrorAlert = true
             } catch {
-                Toast.shared.show(message: String(localized: "Error"), type: .error)
+                self.errorMessage = String(localized: "Error")
+                self.showErrorAlert = true
             }
+        }
+    }
+    
+    func haveIVoted(id: String) async {
+        do {
+            let resolution = try await VotingRepository.shared.havIVoted(type: .report, resourceId: id)
+            disableBoostButton = resolution.hasVoted
+            voteCount = resolution.voteCount
+        } catch {
+            
         }
     }
 }
@@ -100,19 +125,11 @@ struct DetailView: View {
     @ScaledMetric var adaptiveSpacing: CGFloat = 20
     @Environment(\.horizontalSizeClass) var sizeClass
     @State private var showMoreEvidences: Bool = false
-    @State private var attachments: [PreviewAttachment] = []
+
     var report: MapExplorerReport
     @State private var color: Color
     @State private var path = NavigationPath()
     @State private var activeDetent: PresentationDetent = .fraction(0.30)
-    @State private var showConfirmationDialogRaiseHand: Bool = false
-    @State private var showConfirmationDialogAddNotification: Bool = false
-    @State private var openInMaps: Bool = false
-    @State private var affectedState: Bool = false
-    @State private var notificationState: Bool = false
-    @State private var showAlert: Bool = false
-    @State private var message: String = ""
-    @State private var type: AlertType = .success
     @State private var paginatedResult: PaginatedResponse<Comment>
     @State private var comments: Comments = .init(documents: [], hasNext: false, hasPrev: false)
     @State private var controller = DetailController()
@@ -128,15 +145,6 @@ struct DetailView: View {
             hasNext: false,
             hasPrev: false,
         )
-    }
-
-    fileprivate func openOnGoogleMaps() {
-        let urlString =
-            "comgooglemaps://?q=\(report.clLocation.latitude),\(report.clLocation.longitude)&zoom=14"
-        if let url = URL(string: urlString),
-            UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
-        }
     }
 
     @ViewBuilder
@@ -164,16 +172,16 @@ struct DetailView: View {
                 VStack(alignment: .leading, spacing: .themeSpacing * 5) {
                     DetailsHeader(title: report.title, description: report.description)
 
-                    ///
+                    /// Informs the most basic information about the report
                     BasicInformationView(for: report)
                         .padding(.leading, -8)
                         .padding(.trailing, 8)
 
-                    ///
+                    /// This component list and show photos of the report
                     EvidenceOfTheReportView(report.attachments, id: report.id)
 
-                    ///
-                    FollowUpSectionView(for: report)
+                    /// Information related with the resolution
+                    FollowUpSectionView(for: report, $controller.voteCount)
                     
                     ///
                     MoreInformationView(report: report)
@@ -183,6 +191,11 @@ struct DetailView: View {
 
                 }
                 .padding(.leading, 16)
+            }
+            .task {
+                if !UserRepository.shared.isGuestUser() {
+                    await controller.haveIVoted(id: report.id)
+                }
             }
             .task(id: activeDetent) {
                 
@@ -207,13 +220,6 @@ struct DetailView: View {
                             path.append(DetailNavigationDestination.moreEvidences(self.report.id))
                         },
                         affectedAction: { status in
-//                            type = .info
-//                            status
-//                                ? (message = "Added to affected list")
-//                                : (message = "Removed from affected list")
-//                            showAlert = true
-//                            hideAlert()
-                            
                         },
                         boostReportValidationAction: { status in
                             Task {
@@ -224,21 +230,23 @@ struct DetailView: View {
                                     AdMobManager.shared.showRewardedAd {
                                         Task {
                                             do {
-                                                _ = try await ReportRepository.shared.boostReportValidation(self.report.id)
-                                                let wasValidated = try await ReportRepository.shared.haveReportBeenValidatedByMe(self.report.id)
+                                                let wasValidated = try await VotingRepository.shared.vote(type: .report, payload: .init(type: .report, resourceId: report.id))
                                                 
                                                 DispatchQueue.main.async {
-                                                    self.type = .info
-                                                    self.message = wasValidated ? "Boost applied and validated!" : "Boost applied."
-                                                    self.showAlert = true
-                                                    self.hideAlert()
+                                                   
+                                                    if wasValidated == .done {
+                                                        controller.message = String(localized: "Boost applied and validated!")
+                                                        controller.voteCount += 1
+                                                    }
+                                                    
+                                                    controller.message = String(localized: "Boost applied!")
+                                                    controller.showBoostAlert = true
                                                 }
                                             } catch {
                                                 DispatchQueue.main.async {
-                                                    self.type = .error
-                                                    self.message = "Failed to boost report"
-                                                    self.showAlert = true
-                                                    self.hideAlert()
+                                                   
+                                                    controller.message = String(localized: "Failed to boost report")
+                                                    controller.showBoostAlert = true
                                                 }
                                             }
                                         }
@@ -246,8 +254,9 @@ struct DetailView: View {
                                 }
                             }
                         },
-                        affectedState: $affectedState,
-                        notificationState: $notificationState
+                        affectedState: $controller.affectedState,
+                        notificationState: $controller.notificationState,
+                        disableBoostButton: $controller.disableBoostButton,
                     )
                     .transition(.move(edge: .bottom))
                 }
@@ -260,38 +269,23 @@ struct DetailView: View {
                 case .reportFollowUp(let report):
                     ReportFollowUpView(report: report)
                 case .moreEvidences(let id):
-                    EvidencesView(with: id)
+                    EvidencesView(with: id, reportContainer: report.reportContainer)
                 case .citizenProfile(let profileId):
                     CitizenProfile(with: profileId)
                     
                 }
             }
-            .overlay(alignment: .bottom) {
-                if showAlert {
-                    Group {
-                        if #available(iOS 26, *) {
-                            customAlert(message: message, type: type)
-                                .transition(
-                                    .asymmetric(
-                                        insertion: .identity,
-                                        removal: .opacity
-                                    )
-                                )
-                                .optionalGlassEffect(
-                                    colorScheme,
-                                    cornerRadius: 16
-                                )
-                                .shadow(
-                                    color: Color.black.opacity(0.115),
-                                    radius: 10,
-                                    x: 0,
-                                    y: 6
-                                )
-                        }
-                    }
-                    .offset(x: 0, y: -62)
+            .alert(String(localized: "Boosting report to give more importance to it"), isPresented: $controller.showBoostAlert) {
+                
+                Button(role: .close) {
+                    
+                } label: {
+                    Text(String(localized: "Close"))
                 }
+            } message: {
+                Text(controller.message)
             }
+            
             .toolbar {
 
                 ToolbarItem(placement: .navigation) {
@@ -337,12 +331,25 @@ struct DetailView: View {
                             }
                             .accessibilityIdentifier("CopyReportIdButton")
                             
+                            Button {
+                                openInAppleMaps(report.clLocation, title: report.title)
+                            } label: {
+                                Label(String(localized: "Open in Apple Maps"), systemImage: "mappin.and.ellipse")
+                            }
+                            
+                            Button {
+                                openOnGoogleMaps(report.clLocation, title: report.title)
+                            } label: {
+                                Label(String(localized: "Open in Google Maps"), systemImage: "mappin.and.ellipse")
+                            }
+                            
                             Button(role: .destructive) {
                                 controller.showPopover.toggle()
                             } label: {
                                 Label("Report content", systemImage: "hand.raised.slash.fill")
                             }
                             .accessibilityIdentifier("ReportThisContentButton")
+                    
                         } label: {
                             Image(systemName: "ellipsis")
                         }
@@ -391,22 +398,23 @@ struct DetailView: View {
                         } message: {
                             Text(String(localized: "I confirm that this report violates our community guidelines."))
                         }
+                        .alert(String(localized: "Error"), isPresented: $controller.showErrorAlert) {
+                            Button(String(localized: "OK"), role: .cancel) { }
+                        } message: {
+                            Text(controller.errorMessage)
+                        }
+                        .alert(String(localized: "Moderation report sent"), isPresented: $controller.showSuccessfulAlert) {
+                            Button(String(localized: "OK"), role: .cancel) { }
+                        } message: {
+                            Text(controller.message)
+                        }
                     }
                 }
-                
-            }
-
-        }
+            } // end toolbar
+        } // end NavigationStack
         .toolbarTitleDisplayMode(.inlineLarge)
         .presentationDetents([.fraction(0.30), .medium, .large], selection: $activeDetent)
         .presentationDragIndicator(.visible)
-//        .withToast()
-    }
-
-    private func hideAlert() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.250) {
-            self.showAlert = false
-        }
     }
 }
 

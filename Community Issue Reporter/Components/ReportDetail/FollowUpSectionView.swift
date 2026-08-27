@@ -11,9 +11,10 @@ struct FollowUpSectionView: View {
     @State private var opacity: Double = 0.85
     
     var report: MapExplorerReport
-    
-    init(for report: MapExplorerReport) {
+    @Binding var voteCount: Int
+    init(for report: MapExplorerReport, _ voteCount: Binding<Int>) {
         self.report = report
+        self._voteCount = voteCount
     }
     
     private var isFollowUpDisabled: Bool {
@@ -27,6 +28,15 @@ struct FollowUpSectionView: View {
             
             List {
             
+                if voteCount > 0 {
+                    HStack {
+                        Text("**\(voteCount)** citizen have boosted this report to be resolved.")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                    .listRowBackground(Color.clear)
+                }
+                
                 HStack {
                     Text("Assigned institution:")
                         .font(.caption)
@@ -61,7 +71,6 @@ struct FollowUpSectionView: View {
                             .fontWeight(.medium)
                     }
                 }
-//                .disabled(isFollowUpDisabled)
             }
             .scrollDisabled(true)
             .scrollContentBackground(.hidden)
@@ -74,8 +83,10 @@ struct FollowUpSectionView: View {
 }
 
 #Preview {
+    
+    @Previewable @State var count: Int = 0
     ScrollView {
-        FollowUpSectionView(for: MapExplorerMockedData.shared.report)
+        FollowUpSectionView(for: MapExplorerMockedData.shared.report, $count)
     }
     .background(Color.theme.background)
 }

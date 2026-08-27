@@ -13,10 +13,12 @@ struct LoadingView: View {
             ProgressView()
                 .progressViewStyle(.circular)
                 .controlSize(.large)
+            
+            Text("Loading...")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .containerRelativeFrame(.vertical)
-        .ignoresSafeArea(edges: .all)
+        .ignoresSafeArea()
     }
 }
 

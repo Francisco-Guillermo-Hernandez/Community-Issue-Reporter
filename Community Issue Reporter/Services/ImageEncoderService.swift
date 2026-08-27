@@ -23,14 +23,15 @@ struct ImageEncoderService {
             setPhase(tracker, to: .optimizing)
             
             let data = rawImage.fixedOrientation()
+            let (width, height) = downScale(image: data)
             
             let webPData = try await Task.detached(priority: .userInitiated) {
                 return try autoreleasepool {
                     try WebPEncoder().encode(
                         data,
-                        config: .preset(.photo, quality: 80), /// optimize the raw data using photo preset
-                        width: Int(data.size.width / 1.5),
-                        height: Int(data.size.height / 1.5) /// scale down
+                        config: .preset(.photo, quality: 85), /// optimize the raw data using photo preset
+                        width: width,   /// scale down
+                        height: height  /// scale down
                     )
                 }
             }.value
@@ -62,6 +63,26 @@ struct ImageEncoderService {
     @MainActor
     private func setPhase(_ tracker: PhotoUploadTracker, to phase: ImagePhase) {
         tracker.phase = phase
+    }
+    
+    private func downScale(image: UIImage) -> (Int, Int) {
+        let size = image.size
+        if size.width <= 1000 || size.height <= 1000 {
+            return (
+                Int(size.width / 1.67),
+                Int(size.height / 1.67)
+            )
+        } else if size.width <= 2000 || size.height <= 2000 {
+            return (
+                Int(size.width * 0.45),
+                Int(size.height * 0.45)
+            )
+        } else {
+            return (
+                Int(size.width * 0.22),
+                Int(size.height * 0.22)
+            )
+        }
     }
 }
 

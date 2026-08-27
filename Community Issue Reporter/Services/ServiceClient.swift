@@ -49,6 +49,7 @@ enum ServiceError: Error {
     case unavailableForLegalReasons
     case serverError(String)
     case tooManyRequests
+    case unProcessable
 }
 
 struct ServiceClient {
@@ -221,6 +222,8 @@ struct ServiceClient {
             throw ServiceError.contentLengthMissing
         case 415:
             throw ServiceError.unSupportedMediaType
+        case 422:
+            throw ServiceError.unProcessable
         case 429:
             throw ServiceError.tooManyRequests
         case 451:

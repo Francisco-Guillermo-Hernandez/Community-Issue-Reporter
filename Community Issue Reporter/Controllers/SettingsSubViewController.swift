@@ -120,7 +120,7 @@ final class SettingsSubViewController {
         Task {
             
             do {
-                guard let notificationManager else { return }
+                guard let notificationManager = notificationManager, !notificationManager.deviceToken.isEmpty else { return }
                 _ = try await UserRepository.shared.sendDevice(notificationManager.deviceToken)
                 
                 isDeviceTokenUpdated = true

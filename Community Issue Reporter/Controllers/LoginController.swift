@@ -86,7 +86,7 @@ final class LoginController {
             guard let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
                   let identityTokenData = appleIDCredential.identityToken,
                   let identityToken = String(data: identityTokenData, encoding: .utf8) else {
-                
+                performLoginActions()
                 return
             }
             
@@ -102,6 +102,7 @@ final class LoginController {
                 name: fullName.isEmpty ? nil : fullName,
                 email: email
             )
+            performLoginActions()
             
             onTokenReceived(payload, .user(authMethod: .Apple))
         }

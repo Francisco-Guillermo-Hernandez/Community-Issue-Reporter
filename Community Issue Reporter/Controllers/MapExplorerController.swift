@@ -96,7 +96,7 @@ final class MapExplorerController {
             Toast.shared.show(message: String(localized: "Server error (\(code))"), type: .error)
         } catch CommonIntercommunicationErrors.networkError(let message) {
             Toast.shared.show(message: String(localized: "Network error: \(message)"), type: .error)
-        } catch CommonIntercommunicationErrors.genericError(let message) {
+        } catch CommonIntercommunicationErrors.genericError(_) {
 //            Toast.shared.show(message: String(localized: "Error: \(message)"), type: .error)
         } catch {
             print(error)

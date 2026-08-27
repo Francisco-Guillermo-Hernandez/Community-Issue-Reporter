@@ -112,6 +112,17 @@ enum TypeOfContentToReport: String, CaseIterable, Codable {
             case .account: return String(localized: "Account")
         }
     }
+    
+    var icon: String {
+        switch self {
+            case .image: return "photo"
+            case .report: return "exclamationmark.bubble"
+            case .video: return "video"
+            case .comment: return "text.bubble"
+            case .petition: return "bubble.left.and.bubble.right"
+            case .account: return "person.crop.circle"
+        }
+    }
 }
 
 enum ReportViolationStatus: String, CaseIterable, Codable {
@@ -120,6 +131,7 @@ enum ReportViolationStatus: String, CaseIterable, Codable {
     case pending
     case appealing
     case sentToModeration
+    case removed
     
     var description: String {
         switch self {
@@ -128,6 +140,7 @@ enum ReportViolationStatus: String, CaseIterable, Codable {
             case .pending: return String(localized: "Pending")
             case .appealing: return String(localized: "Appealing")
             case .sentToModeration: return String(localized: "Sent to Moderation")
+            case .removed: return String(localized: "Removed")
         }
     }
 }
@@ -189,4 +202,17 @@ struct ReportViolation<T: Codable>: Codable {
     }
     
     
+}
+
+struct Voting: Encodable, Decodable {
+    let type: VotingType
+    let resourceId: String
+    
+    init(
+        type: VotingType,
+        resourceId: String
+    ) {
+        self.type = type
+        self.resourceId = resourceId
+    }
 }

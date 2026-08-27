@@ -247,6 +247,10 @@ extension Report {
     }
     
     var updatedDate: String {
-        formatRelativeDate(from: self.updatedAt ?? Date())
+        if let updatedAt = self.updatedAt {
+            return formatRelativeDate(from: updatedAt)
+        } else {
+            return String(localized: "Not yet")
+        }
     }
 }

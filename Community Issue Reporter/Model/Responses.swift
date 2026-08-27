@@ -227,3 +227,8 @@ struct ReportAttachmentGrouping: Decodable {
     let attachmentContainer: String
     let key: String
 }
+
+struct VotingResolution: Decodable {
+    let hasVoted: Bool
+    let voteCount: Int
+}

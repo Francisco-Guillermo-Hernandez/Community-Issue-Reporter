@@ -57,6 +57,7 @@ final class MapExplorerRepository {
         let queryLocation = CLLocation(latitude: query.lat, longitude: query.lng)
         let radius = Double(query.radius)
         
+        /// 1. Delete ghost records
         for cached in cachedReports {
             if !freshIds.contains(cached.id) {
                 let reportLocation = CLLocation(latitude: cached.lat, longitude: cached.lng)
@@ -76,19 +77,36 @@ final class MapExplorerRepository {
             }
         }
         
+        /// 2. Fetch existing entities for upsert logic
+        let descriptor = FetchDescriptor<MapExplorerReportEntity>(predicate: #Predicate { $0.cityId == cityId })
+        let existingEntities = (try? context.fetch(descriptor)) ?? []
+        let existingDict = Dictionary(existingEntities.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        
+        /// 3. Upsert reports
         for report in reports {
             if let data = try? encoder.encode(report) {
-                let entity = MapExplorerReportEntity(
-                    id: report.id,
-                    cityId: cityId,
-                    data: data,
-                    updatedAtRaw: report.updatedAtRaw
-                )
-                context.insert(entity)
+                if let existingEntity = existingDict[report.id] {
+                    // Update existing
+                    existingEntity.data = data
+                    existingEntity.updatedAtRaw = report.updatedAtRaw
+                } else {
+                    // Insert new
+                    let entity = MapExplorerReportEntity(
+                        id: report.id,
+                        cityId: cityId,
+                        data: data,
+                        updatedAtRaw: report.updatedAtRaw
+                    )
+                    context.insert(entity)
+                }
             }
         }
         
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save MapExplorerReports: \(error)")
+        }
     }
     
     func report(

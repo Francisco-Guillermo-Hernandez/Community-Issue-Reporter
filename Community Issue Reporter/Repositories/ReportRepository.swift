@@ -144,14 +144,31 @@ final class ReportRepository {
             }
         }
         
+        // Fetch existing entities for upsert logic
+        let descriptor = FetchDescriptor<MyReportDAOEntity>(predicate: #Predicate { $0.page == page })
+        let existingEntities = (try? context.fetch(descriptor)) ?? []
+        let existingDict = Dictionary(existingEntities.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        
         let hasNext = freshResponse.hasNext
         for doc in freshDocuments {
             guard let id = doc.id, let data = try? encoder.encode(doc) else { continue }
-            let entity = MyReportDAOEntity(id: id, page: page, data: data, hasNext: hasNext)
-            context.insert(entity)
+            
+            if let existingEntity = existingDict[id] {
+                // Update
+                existingEntity.data = data
+                existingEntity.hasNext = hasNext
+            } else {
+                // Insert
+                let entity = MyReportDAOEntity(id: id, page: page, data: data, hasNext: hasNext)
+                context.insert(entity)
+            }
         }
         
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save MyReportDAOEntity: \(error)")
+        }
     }
     
     func listByProfile(_ profileId: String) async throws -> [ReportDAO] {

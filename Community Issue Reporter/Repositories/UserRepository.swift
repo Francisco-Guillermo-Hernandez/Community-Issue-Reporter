@@ -29,7 +29,7 @@ final class UserRepository {
         self.headers = [
             HTTPHeader(name: "Client-Type", content: "Mobile-App"),
             HTTPHeader(name: "CountryCode", content: "SV"),
-            HTTPHeader(name: "CityId", content: "san-salvador")
+            HTTPHeader(name: "CityId", content: "a67b90f9-1d76-4835-a994-03cd04f1d619")
         ]
     }
     

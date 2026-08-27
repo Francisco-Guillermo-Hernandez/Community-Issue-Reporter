@@ -21,7 +21,7 @@ struct CardModifier: ViewModifier {
                     GeometryReader { geo in
                         RadialGradient(
                             gradient: Gradient(colors: [
-                                color.mix(with: .black, by: 0.4).opacity(0.85),
+                                color.mix(with: .black, by: 0.4).opacity(0.96),
                                 color.opacity(0)
                             ]),
                             center: .bottomLeading,

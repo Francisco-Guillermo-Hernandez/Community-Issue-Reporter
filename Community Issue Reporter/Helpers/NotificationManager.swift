@@ -52,6 +52,16 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         print("User tapped notification with data: \(userInfo)")
         
         // Handle your custom deep link logic here
+        // We're checking if the push payload contains a specific key indicating it's a follow-up.
+        // Adjust the key ("route" or "type") based on what your APNs backend actually sends.
+        if let route = userInfo["route"] as? String, route == "reports" {
+            Task { @MainActor in
+                DeepLinkRouter.shared.activeTab = 4
+                ProfileRouter.shared.popToRoot()
+                ProfileRouter.shared.goTo(.reports)
+            }
+        }
+        
         completionHandler()
     }
 }

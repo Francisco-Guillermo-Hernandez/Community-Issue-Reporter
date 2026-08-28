@@ -25,7 +25,7 @@ struct CityCellView: View {
             
             if city.isCapitalCity == 1 {
                 Text("Is the capital of \(city.firstLevel)")
-                    .font(.caption)
+                    .font(.caption2)
                     .fontWeight(.bold)
                     .foregroundStyle(Color.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -51,6 +51,7 @@ struct CityCellView: View {
 
 // MARK: - View
 struct CitySelectionView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @State private var controller: CitySelectionController
     
@@ -70,11 +71,7 @@ struct CitySelectionView: View {
             Group {
                 GeometryReader { geometry in
                     let scrollViewFrame = geometry.frame(in: .local)
-                    
-                    
                     ScrollView {
-                        
-                        
                         ForEach(Array(controller.cities.enumerated()), id: \.offset) { offset, city in
                             RowContentBoth(offset: offset, scrollViewFrame: scrollViewFrame, city: city, isSelected: selectedCity.cityId == city.cityId)
                                 .onTapGesture {
@@ -89,7 +86,23 @@ struct CitySelectionView: View {
                         .padding(.horizontal)
                     }
                 }
-                .background(Color.theme.background)
+                .background {
+                    ZStack(alignment: .top) {
+                        GeometryReader { geo in
+                            RadialGradient(
+                                gradient: Gradient(colors: [
+                                    Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
+                                    Color.theme.background
+                                ]),
+                                center: .topLeading,
+                                startRadius: 0,
+                                endRadius: geo.size.width * 0.54
+                            )
+                            
+                        }
+                    }
+                    .ignoresSafeArea()
+                }
             }
             .toolbarTitleDisplayMode(.inline)
             .navigationTitle("Select a city")
@@ -102,27 +115,25 @@ struct CitySelectionView: View {
             )
             .safeAreaInset(edge: .bottom, spacing: 0) {
 
-                BottomFadedView {
-                    ThemedButton(
-                        message: buttonMessage,
-                        action: {
-                            controller.updateCity(city: selectedCity) {
-                                
-                                nextStep()
-                                if mode == .modify {
-                                    dismiss()
-                                }
-                            }
+                ThemedButton(
+                    message: buttonMessage,
+                    action: {
+                        controller.updateCity(city: selectedCity) {
                             
-                            controller.triggerFeedBack.toggle()
-                        },
-                        type: .primary,
-                        isLoading: $controller.isLoading
-                    )
-                    .padding()
-                    .padding(.top, 0)
-                }
-
+                            nextStep()
+                            if mode == .modify {
+                                dismiss()
+                            }
+                        }
+                        
+                        controller.triggerFeedBack.toggle()
+                    },
+                    type: .primary,
+                    isLoading: $controller.isLoading
+                )
+                .padding(.horizontal, 36)
+                .padding(.bottom, 4)
+                .padding(.top)
             }
             .sensoryFeedback(
                 .impact(weight: .medium),
@@ -265,7 +276,7 @@ private struct RowContentBoth: View {
             .overlay {
                 if isSelected {
                         RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-                            .stroke(Color.theme.primary.opacity(0.65), lineWidth: 4)
+                            .stroke(Color.theme.secondary.opacity(0.67), lineWidth: 6)
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: isSelected)
@@ -290,7 +301,4 @@ private struct RowContentBoth: View {
         
     }
 }
-//
-//#Preview("Both edge") {
-//    ScrollingStackDemoBoth()
-//}
+

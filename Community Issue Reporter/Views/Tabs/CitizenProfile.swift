@@ -44,8 +44,6 @@ struct CitizenProfile: View {
                 .frame(width: 130, height: 130)
                 .clipShape(.circle)
                 .glassEffect()
-//                .overlay(Circle().stroke(.white, lineWidth: 4))
-//                .shadow(color: .black.opacity(0.1), radius: 16, y: 8)
                 .padding(.top, 16)
                 
                 
@@ -151,8 +149,6 @@ struct CitizenProfile: View {
                                     }
                                     .padding(.top, 16)
                                     .padding(.horizontal, 16)
-    //                                .frame(maxWidth: .infinity)
-//                                    .frame(width: controller.containerSize.width, alignment: .center)
                                 }
                             }
                             
@@ -176,7 +172,14 @@ struct CitizenProfile: View {
             }
         }
         .sheet(isPresented: $controller.showBlockUserSheet) {
-            BlockUserSheet(controller.citizen)
+            BlockUserSheet(controller.citizen) {
+                mapExplorerController.expandedItem = nil
+                DeepLinkRouter.shared.isPresented = false
+                
+                Task(priority: .medium) {
+                    await MapExplorerController.shared.loadReports()
+                }
+            }
         }
         .background {
             
@@ -205,10 +208,21 @@ struct CitizenProfile: View {
             .ignoresSafeArea()
         }
         .task {
-            await controller.fetchCitizenPublicProfile(profileId)
-            
-            if !controller.citizen.hideProfile {
-                await controller.fetchReports(profileId)
+            if !UserRepository.shared.isGuestUser() {
+                await controller.fetchCitizenPublicProfile(profileId)
+                
+                if !controller.citizen.hideProfile {
+                    await controller.fetchReports(profileId)
+                }
+            } else {
+                controller.citizen = .init(
+                    names: "Hidden Citizen",
+                    userName: "guest",
+                    profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png",
+                    profileId: "hidden.cicizen",
+                    userSince: Date(),
+                    hideProfile: false
+                )
             }
         }
         .background(Color.theme.background)
@@ -234,13 +248,13 @@ struct CitizenProfile: View {
                         } label: {
                             Label("Report User", systemImage: "hand.raised.slash.fill")
                         }
+                        .disabled(UserRepository.shared.isGuestUser())
                         .accessibilityIdentifier("ReportCitizenButton")
                     } label: {
                         Image(systemName: "ellipsis")
                             .foregroundColor(colorScheme == .dark ? .white : .black)
                             .shadow(color: .black.opacity(0.1), radius: 2, y: 1)
                     }
-                    
                 }
             }
             
@@ -362,20 +376,18 @@ struct BlockUserSheet: View {
     @State private var wasSend: Bool = false
     
     let user: User
+    let onConfirmation: () -> Void
     
-    init (_ user: User) {
+    init (_ user: User, onConfirmation: @escaping () -> Void) {
         self.user = user
+        self.onConfirmation = onConfirmation
     }
     
     var body: some View {
         
-        
         NavigationStack {
             ScrollView {
-                
-                
                 VStack(spacing: 12) {
-                    
                     LabelView(text: String(localized: "Reason"), isDisabled: false)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
@@ -396,9 +408,6 @@ struct BlockUserSheet: View {
                         isValid: $isReasonValid,
                         value: $reason
                     )
-                    
-                    
-                    
                 }
                 .padding()
             }
@@ -412,10 +421,10 @@ struct BlockUserSheet: View {
                     isLoading: $isLoading
                 )
                 .disabled(!isReasonValid || wasSend)
-                .padding()
-                .padding(.top, 0)
+                .padding(.horizontal, 36)
+                .padding(.bottom, 4)
+                .padding(.top)
             }
-            .padding(.horizontal)
             .navigationTitle("Block User")
             .navigationBarTitleDisplayMode(.inline)
             .alert(String(localized: "Block User"), isPresented: $showAlert) {
@@ -441,7 +450,10 @@ struct BlockUserSheet: View {
                 
                 Button(String(localized: "Ok"), role: .close) {
                     dismiss()
+                    onConfirmation()
                 }
+            } message: {
+                Text(String(localized: "You will see less content from this user"))
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -517,6 +529,9 @@ struct BlockUserSheet: View {
             profileId: "uiEw3sSu1zcQ1U9",
             userSince: Date(),
             hideProfile: false
-        )
+        ),
+        onConfirmation: {
+            
+        }
     )
 }

@@ -17,6 +17,7 @@ struct customBottomToolbar: View {
     @State private var pictureState: Bool = false
     @State private var isShowingPopover = false
 
+    @State private var isGuest: Bool = false
     
     @Binding var affectedState: Bool
     @Binding var notificationState: Bool
@@ -31,9 +32,11 @@ struct customBottomToolbar: View {
                     Image(systemName: "text.bubble")
                         .font(.system(size: 18, weight: .semibold))
                         .background(Color.black.opacity(0.001))
+                        .foregroundStyle(isGuest ? .gray.opacity(0.85) : .primary)
                     
                     Text("Comment")
                         .font(.footnote)
+                        .foregroundStyle(isGuest ? .gray.opacity(0.85) : .primary)
                 }
                 .frame(width: 64, height: 64)
             }
@@ -41,7 +44,7 @@ struct customBottomToolbar: View {
             .buttonStyle(.plain)
             .contentShape(Rectangle())
             .buttonSizing(.flexible)
-            .disabled(UserRepository.shared.isGuestUser())
+            .disabled(isGuest)
             
             Button(action: performPhotoActions) {
                 VStack(spacing: 4) {
@@ -61,64 +64,6 @@ struct customBottomToolbar: View {
             .contentShape(Rectangle())
             .buttonSizing(.flexible)
             
-//            Button(action: performAffectedActions) {
-//                VStack(spacing: 2) {
-//                    Image(systemName: "hand.thumbsdown.hand.thumbsup.filled")
-//                        .font(.system(size: 18, weight: .semibold))
-//                        .background(Color.black.opacity(0.001))
-//                        .symbolRenderingMode(.palette )
-//                        .foregroundStyle(
-//                            affectedState ? .red : .primary,
-//                            colorScheme == .dark ? .white : .black
-//                        )
-//                        .contentTransition(
-//                            .symbolEffect(.replace.magic(fallback: .upUp.byLayer),
-//                            options: .nonRepeating)
-//                        )
-//                    
-//                    Text("Vote")
-//                        .font(.footnote)
-//                }
-//                .frame(width: 64, height: 64)
-//                    
-//            }
-//            .accessibilityLabel("AffectedButton")
-//            .buttonStyle(.plain)
-//            .contentShape(Rectangle())
-//            .buttonSizing(.flexible)
-//            .popover(isPresented: $affectedState) {
-//                HStack {
-//                    Button {
-//                        
-//                    } label: {
-//                        VStack {
-//                            Image(systemName: "hand.thumbsup.fill")
-//                                .font(.system(size: 18, weight: .semibold))
-//                                .foregroundStyle(.black)
-//                            
-//                            Text(String(localized: "This report affects me"))
-//                                .font(.footnote)
-//                        }
-//                    }
-//                    
-//                    
-//                    Button {
-//                        
-//                    } label: {
-//                        VStack {
-//                            Image(systemName: "hand.thumbsdown.fill")
-//                                .symbolRenderingMode(.monochrome)
-//                                .font(.system(size: 18, weight: .semibold))
-//                                .foregroundStyle(.red)
-//                            
-//                            Text(String(localized: "This report is helpful"))
-//                                .font(.footnote)
-//                        }
-//                    }
-//                }
-//                .frame(width: 128, height: 64)
-//                .presentationCompactAdaptation(.popover)
-//            }
             
             Button(action: performNotificationActions) {
                 
@@ -140,6 +85,7 @@ struct customBottomToolbar: View {
                                 )
                             Text("Boosted")
                                 .font(.footnote)
+                                .foregroundStyle(isGuest ? .gray.opacity(0.85) : .primary)
                         }
                     } else {
                         VStack(spacing: 2) {
@@ -160,11 +106,13 @@ struct customBottomToolbar: View {
                             
                             Text("Boost")
                                 .font(.footnote)
+                                .foregroundStyle(isGuest ? .gray.opacity(0.85) : .primary)
                         }
                     }
                 }
                 .frame(width: 68, height: 64)
             }
+            .disabled(isGuest)
             .allowsHitTesting(!disableBoostButton)
             .accessibilityLabel("BoostButton")
             .buttonStyle(.plain)
@@ -174,6 +122,9 @@ struct customBottomToolbar: View {
         .padding(.horizontal, 24)
         .optionalGlassWithShape(colorScheme, shape: .capsule)
         .shadow(color: Color.black.opacity(0.125), radius: 16, x: 0, y: 6)
+        .task {
+            isGuest = UserRepository.shared.isGuestUser()
+        }
         
     }
     

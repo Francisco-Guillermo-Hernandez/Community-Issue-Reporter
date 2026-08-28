@@ -38,7 +38,7 @@ struct TailwindInputModifier: ViewModifier {
             .overlay(
                 shapeMask
                     .stroke(
-                        hasError ? Color.theme.destructive : (isFocused ? Color.theme.inputRing : Color.theme.inputBorder),
+                        hasError ? Color.theme.destructive : (isFocused ? Color.theme.inputRing : Color.gray),
                         lineWidth: 1
                     )
             )
@@ -134,8 +134,6 @@ struct TextInput: View {
         self._value = value
         self.disabled = disabled
         self.resetTrigger = resetTrigger
-        
-//        preCheck()
     }
     
     

@@ -39,6 +39,7 @@ enum PersonalizationInputs: Hashable {
 }
 
 struct UserPersonalizationView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) var dismiss
     @FocusState private var isInputFocused: Bool
     @State private var profile = ProfileDataModel()
@@ -56,7 +57,6 @@ struct UserPersonalizationView: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: .themeSpacing * 4) {
                 
-                  
                 VStack(spacing: .themeSpacing) {
 
                     ProfileImage(viewModel: profile)
@@ -70,53 +70,85 @@ struct UserPersonalizationView: View {
                     Text(userAlias(model.userName))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-
-
                 }
                 
-                VStack {
-                    VStack {
-                        Group {
-                            TextInput(
-                                name: "John Doe",
-                                label: String(localized: "User Name", comment: "User Name input"),
-                                validators: userNameValidator,
-                                regex: .customPattern(userNameRegex),
-                                isValid: $model.isUserNameValid,
-                                value: $model.userName,
-                            )
-                            .id(PersonalizationInputs.username)
-                            .focused($isInputFocused)
-                            .onChange(of: model.userName) { _, newValue in
-                                profile.userName = newValue
-                            }
-                            .onChange(of: profile.showPicker) { oldValue, newValue in
-                                if newValue {
-                                    isInputFocused = false
-                                }
-                                
-                            }
-                            
-                            showUserNameStates()
-                           
+                Group {
+                    
+                    
+                    
+                    TextInput(
+                        name: "John Doe",
+                        label: String(localized: "User Name", comment: "User Name input"),
+                        validators: userNameValidator,
+                        regex: .customPattern(userNameRegex),
+                        axis: .vertical,
+                        isValid: $model.isUserNameValid,
+                        value: $model.userName,
+                    )
+                    .id(PersonalizationInputs.username)
+                    .focused($isInputFocused)
+                    .onChange(of: model.userName) { _, newValue in
+                        profile.userName = newValue
+                    }
+                    .onChange(of: profile.showPicker) { oldValue, newValue in
+                        if newValue {
+                            isInputFocused = false
                         }
                         
-                        TextInput(
-                            name: "hello@reportamelo.app",
-                            label: String(localized: "Email", comment: "Email input"),
-                            regex: .email,
-                            isValid: $model.isEmailValid,
-                            value: $model.email,
-                            disabled: true,
-                        )
-                        .id(PersonalizationInputs.email)
                     }
-                    .padding(.horizontal, 24)
+                    
+                    showUserNameStates()
+                   
                 }
+                    .padding(.horizontal)
                 
-                .padding(.vertical, 24)
-                .customCardStyle()
-                .padding()
+                ///
+//                VStack {
+//                    VStack {
+//                        Group {
+//                            
+//                            
+//                            
+//                            TextInput(
+//                                name: "John Doe",
+//                                label: String(localized: "User Name", comment: "User Name input"),
+//                                validators: userNameValidator,
+//                                regex: .customPattern(userNameRegex),
+//                                isValid: $model.isUserNameValid,
+//                                value: $model.userName,
+//                            )
+//                            .id(PersonalizationInputs.username)
+//                            .focused($isInputFocused)
+//                            .onChange(of: model.userName) { _, newValue in
+//                                profile.userName = newValue
+//                            }
+//                            .onChange(of: profile.showPicker) { oldValue, newValue in
+//                                if newValue {
+//                                    isInputFocused = false
+//                                }
+//                                
+//                            }
+//                            
+//                            showUserNameStates()
+//                           
+//                        }
+//                        
+////                        TextInput(
+////                            name: "hello@reportamelo.app",
+////                            label: String(localized: "Email", comment: "Email input"),
+////                            regex: .email,
+////                            isValid: $model.isEmailValid,
+////                            value: $model.email,
+////                            disabled: true,
+////                        )
+////                        .id(PersonalizationInputs.email)
+//                    }
+//                    .padding(.horizontal, 24)
+//                }
+//                
+//                .padding(.vertical, 24)
+////                .customCardStyle()
+//                .padding()
                
                 
             }
@@ -177,7 +209,23 @@ struct UserPersonalizationView: View {
             }
         }
         .navigationTitle(Text("Personalize your profile"))
-        .background(Color.theme.background)
+        .background {
+            ZStack(alignment: .top) {
+                GeometryReader { geo in
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
+                            Color.theme.background
+                        ]),
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: geo.size.width * 0.54
+                    )
+                    
+                }
+            }
+            .ignoresSafeArea()
+        }
         .task {
             ///
             guard let authMethod = UserRepository.shared.getAuthMethod() else { return }
@@ -202,7 +250,8 @@ struct UserPersonalizationView: View {
              }
         }
         .safeAreaInset(edge: .bottom) {
-            BottomFadedView {
+            VStack {
+    
                 ThemedButton(
                     message: String(localized: "Next Step"),
                     action: {
@@ -213,9 +262,10 @@ struct UserPersonalizationView: View {
                     isLoading: $model.isLoading
                 )
                 .disabled(!model.isFormValid)
-                .padding()
                 .padding(.top, 0)
             }
+            .padding(.horizontal, 36)
+            .padding(.bottom, 4)
         }
         .sensoryFeedback(
             .impact(weight: .medium),

@@ -66,22 +66,6 @@ struct AcceptanceView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            
-            Color.theme.background
-                .ignoresSafeArea()
-            
-            Color.theme.secondary.opacity( colorScheme == .dark ? 0.421 : 0.123)
-                .frame(height: 580)
-                .mask(
-                    LinearGradient(
-                        colors: [.white, .clear],
-                        startPoint: .topLeading,
-                        endPoint: .bottom
-                    )
-                )
-                .blur(radius: 70)
-                .ignoresSafeArea()
-            
             VStack {
                 Text(String(localized: "Legal Documents"))
                     .font(Font.largeTitle.bold())
@@ -117,6 +101,7 @@ struct AcceptanceView: View {
                         }
                     }
                 }
+                .scrollDisabled(true)
                 .scrollContentBackground(.hidden)
                 
                 Button(action: {
@@ -135,36 +120,53 @@ struct AcceptanceView: View {
                         Spacer()
                     }
                     .padding()
-                    .background(colorScheme == .dark ? .black.opacity(0.321) : .white.opacity(0.75))
+                    .background(colorScheme == .dark ? .black.opacity(0.321) : .white.opacity(0.95))
                     .cornerRadius(16)
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal)
                 .padding(.top, 8)
-                .padding(.bottom, 24)
+                .padding(.bottom, 36)
                 .sensoryFeedback(.selection, trigger: accepted)
                 
             }
         }
-        
+        .background {
+            ZStack(alignment: .top) {
+                GeometryReader { geo in
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
+                            Color.theme.background
+                        ]),
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: geo.size.width * 0.54
+                    )
+                    
+                }
+            }
+            .ignoresSafeArea()
+        }
         .background(Color.theme.background)
         .sheet(item: $selectedURLItem) { item in
             SafariWebView(.constant(item.url))
                 .ignoresSafeArea(edges: [.bottom, .top])
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            BottomFadedView {
-                ThemedButton(
-                    message: buttonMessage,
-                    action: {
-                        nextStep()
-                    },
-                    type: .primary
-                )
-                .padding()
-                .padding(.top, 0)
-            }
+        
+            
+            ThemedButton(
+                message: buttonMessage,
+                action: {
+                    nextStep()
+                },
+                type: .primary
+            )
             .disabled(!accepted)
+            .padding(.horizontal, 36)
+            .padding(.top, 0)
+            .padding(.bottom, 4)
         }
     }
 }

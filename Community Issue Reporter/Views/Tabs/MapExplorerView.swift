@@ -382,7 +382,7 @@ private struct ReportOverviewList: View {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                             controller.isSearchExpanded = false
                         }
-                        try? await Task.sleep(for: .milliseconds(350))
+                        try? await Task.sleep(for: .milliseconds(128))
                         
                         await MainActor.run {
                             router.report = report

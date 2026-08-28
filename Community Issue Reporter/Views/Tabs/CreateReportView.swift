@@ -80,7 +80,7 @@ struct CreateReportView: View {
                 .navigationTitle("Report")
                 .navigationSubtitle("what do you want to report?")
                 .scrollContentBackground(.hidden)
-             
+                
             }
         }
     }

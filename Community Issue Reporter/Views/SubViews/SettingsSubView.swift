@@ -268,9 +268,10 @@ struct SettingsSubView: View {
                     .accessibilityLabel("Privacy")
                     
                     /// Notifications group
-                    SettingsGroup(title: String(localized: "Notifications"),
-                                  footerText: String(localized: "You can enable or disable push notifications in order to receive updates when authorities are resolving your report or petition."),
-                                  isLoading: $controller.updatingNotificationSettingsLoading
+                    SettingsGroup(
+                        title: String(localized: "Notifications"),
+                        footerText: String(localized: "You can enable or disable push notifications in order to receive updates when authorities are resolving your report or petition."),
+                        isLoading: $controller.updatingNotificationSettingsLoading
                     ) {
                         Toggle("Push notifications", isOn: $settings.enablePushNotifications)
                             .accessibilityIdentifier("PushNotificationsToggle")
@@ -302,7 +303,7 @@ struct SettingsSubView: View {
 
                         Toggle("Email notifications", isOn: $settings.enableEmailNotifications)
                             .accessibilityIdentifier("EmailNotificationsToggle")
-                            .tint(Color.theme.primary)
+                            .tint(Color.theme.secondary)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enableEmailNotifications) { oldValue, newValue in
                                 controller.updateNotificationSettings()

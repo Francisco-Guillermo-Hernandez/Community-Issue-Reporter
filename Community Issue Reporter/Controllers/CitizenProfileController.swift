@@ -52,6 +52,15 @@ final class CitizenProfileController {
         
         do {
             self.citizen = try await UserRepository.shared.citizenProfile(id: profileId)
+        } catch CommonIntercommunicationErrors.notFound {
+            self.citizen = .init(
+                names: "Deleted Citizen",
+                userName: "deleted",
+                profilePicture: "/avatars/019f4f22-1464-7336-8406-853b453b026d.png",
+                profileId: "deleted",
+                userSince: Date(),
+                hideProfile: false
+            )
         } catch {
             print("Error fetching citizen public profile: \(error)")
         }

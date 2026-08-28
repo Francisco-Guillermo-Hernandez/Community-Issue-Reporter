@@ -17,7 +17,6 @@ final class MapExplorerController {
     static let shared = MapExplorerController()
     var authViewModel: AuthViewModel?
     var settings: SettingsStore?
-    
     var reports: [MapExplorerReport] = []
     var hasCenteredOnUser = false
     var searchText = ""

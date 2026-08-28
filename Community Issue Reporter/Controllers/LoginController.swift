@@ -19,10 +19,12 @@ typealias OnTokenReceived = (AuthPayload, LoginType) -> Void
 final class LoginController {
     
     static let shared = LoginController()
-    
     private(set) var enableBorderBeam: Bool = false
     private(set) var disableLoginButtons: Bool = false
     private(set) var userOAuthState: UserOAuthResultState = .unowned
+    var showErrorAlert: Bool = false
+    private(set) var messageError: String = ""
+    var lastAuthMethod: String? = KeychainService.loadToken(key: .authMethod)
     
     func performLoginActions() {
         disableLoginButtons.toggle()
@@ -37,8 +39,14 @@ final class LoginController {
                 userOAuthState = state
                 onTokenReceived(.init(token: sessionId), .guest)
                 
+            } catch CommonIntercommunicationErrors.unProcessable {
+                self.show(error: String(localized: "Your petition cannot be processed, please try again."))
+            } catch CommonIntercommunicationErrors.networkError(_) {
+                self.show(error: String(localized: "It looks like that your network is experiencing some delays, please try again."))
+            } catch CommonIntercommunicationErrors.serverError(_) {
+                self.show(error: String(localized: "Server error, please try again."))
             } catch {
-                
+                self.show(error: String(localized: "An unexpected error has occurred, please try again."))
             }
             
             performLoginActions()
@@ -105,6 +113,17 @@ final class LoginController {
             performLoginActions()
             
             onTokenReceived(payload, .user(authMethod: .Apple))
+        }
+    }
+    
+    func show(error: String) {
+        self.messageError = error
+        self.showErrorAlert = true
+    }
+    
+    func handle(error: Error?) {
+        if let error = error {
+            show(error: error.localizedDescription)
         }
     }
 }

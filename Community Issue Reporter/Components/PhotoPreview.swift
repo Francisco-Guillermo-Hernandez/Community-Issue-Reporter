@@ -202,70 +202,74 @@ struct PhotoPreview: View {
                         }
                     }
                     .overlay(alignment: .topTrailing) {
-                          
-                        Button {
-                            controller.showPopover.toggle()
-                        } label: {
-                            Image(systemName: "ellipsis")
-                                .padding(6)
-                        }
-                        .buttonBorderShape(.circle)
-                        .buttonStyle(.glass)
-                        .popover(isPresented: $controller.showPopover, arrowEdge: .top) {
-                            VStack(alignment: .leading, spacing: 15) {
-                                Text("Content options")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                                    .padding(.bottom, 5)
-                                
-                                ForEach(controller.options, id: \.self) { option in
-                                    Button(action: {
-                                        Task {
-                                            controller.selectedOption = option
-                                            controller.showPopover = false /// Closes popover upon selection
-                                            try? await Task.sleep(for: .milliseconds(128))
-                                            controller.presentAlert.toggle()
-                                        }
-                                    }) {
-                                        HStack {
-                                            Text(option)
-                                            
-                                            Spacer()
-                                        }
-                                        .contentShape(Rectangle()) /// Ensures the whole row is clickable
-                                    }
-                                    .foregroundColor(.primary)
+                        
+                        if !UserRepository.shared.isGuestUser() {
+                            
+
+                            Button {
+                                controller.showPopover.toggle()
+                            } label: {
+                                Image(systemName: "ellipsis")
+                                    .padding(6)
+                            }
+                            .buttonBorderShape(.circle)
+                            .buttonStyle(.glass)
+                            .popover(isPresented: $controller.showPopover, arrowEdge: .top) {
+                                VStack(alignment: .leading, spacing: 15) {
+                                    Text("Content options")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                        .padding(.bottom, 5)
                                     
-                                    if option != controller.options.last {
-                                        Divider() /// Visual separator between choices
+                                    ForEach(controller.options, id: \.self) { option in
+                                        Button(action: {
+                                            Task {
+                                                controller.selectedOption = option
+                                                controller.showPopover = false /// Closes popover upon selection
+                                                try? await Task.sleep(for: .milliseconds(128))
+                                                controller.presentAlert.toggle()
+                                            }
+                                        }) {
+                                            HStack {
+                                                Text(option)
+                                                
+                                                Spacer()
+                                            }
+                                            .contentShape(Rectangle()) /// Ensures the whole row is clickable
+                                        }
+                                        .foregroundColor(.primary)
+                                        
+                                        if option != controller.options.last {
+                                            Divider() /// Visual separator between choices
+                                        }
                                     }
                                 }
+                                .padding()
+                                .frame(width: 256) /// Sets a fixed width for desktop/iPad presentation
+                                .presentationCompactAdaptation(.popover) /// Forces popover look on iPhone
                             }
-                            .padding()
-                            .frame(width: 256) /// Sets a fixed width for desktop/iPad presentation
-                            .presentationCompactAdaptation(.popover) /// Forces popover look on iPhone
-                        }
-                        .padding(.top, 10)
-                        .alert(String(localized: "Confirm content blocking"), isPresented: $controller.presentAlert) {
-                            
-                            TextField(String(localized: "Type your reason"), text: $controller.reason)
-                            
-                            Button(String(localized: "Cancel"), role: .cancel) { }
-                            Button(String(localized: "Block"), role: .destructive) {
-                                controller.report(attachment)
+                            .padding(.top, 10)
+                            .alert(String(localized: "Confirm content blocking"), isPresented: $controller.presentAlert) {
+                                
+                                TextField(String(localized: "Type your reason"), text: $controller.reason)
+                                
+                                Button(String(localized: "Cancel"), role: .cancel) { }
+                                Button(String(localized: "Block"), role: .destructive) {
+                                    controller.report(attachment)
+                                }
+                            } message: {
+                                Text(String(localized: "I confirm that this content violates our community guidelines."))
                             }
-                        } message: {
-                            Text(String(localized: "I confirm that this content violates our community guidelines."))
-                        }
-                        .alert(String(localized: "Error"), isPresented: $controller.showAlert) {
-                            Button(String(localized: "OK"), role: .cancel) { }
-                        } message: {
-                            Text(controller.alertMessage)
-                        }
-                        .alert(String(localized: "Confirmation"), isPresented: $controller.showSuccessfulAlert) {
-                            Button(String(localized: "OK"), role: .cancel) { }
-                        } message: {
-                            Text(controller.alertMessage)
+                            .alert(String(localized: "Error"), isPresented: $controller.showAlert) {
+                                Button(String(localized: "OK"), role: .cancel) { }
+                            } message: {
+                                Text(controller.alertMessage)
+                            }
+                            .alert(String(localized: "Confirmation"), isPresented: $controller.showSuccessfulAlert) {
+                                Button(String(localized: "OK"), role: .cancel) { }
+                            } message: {
+                                Text(controller.alertMessage)
+                            }
                         }
                         
                     }

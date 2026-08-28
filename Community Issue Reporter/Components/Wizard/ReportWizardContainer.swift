@@ -134,10 +134,11 @@ struct ReportWizardContainer: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            BottomFadedView {
-                wizardFooter()
-                    .padding()
-            }
+            
+            wizardFooter()
+                .padding(.horizontal)
+                .padding(.top, 0)
+                .padding(.bottom)
         }
         .navigationTitle("Create a Report")
         .navigationSubtitle(String(localized: "Step \(controller.currentStep.rawValue) of 4"))

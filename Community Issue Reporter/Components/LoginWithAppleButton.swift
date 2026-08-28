@@ -11,7 +11,7 @@ import AuthenticationServices
 
 enum AppleAuthError: Error {
     case noData(errorDescription: String)
-    case noAuthorized(errorDescription: String)
+    case noAuthorized(errorDescription: Error)
     case noToken(errorDescription: String)
     
 }
@@ -47,11 +47,11 @@ struct LoginWithAppleButton: View {
             case .success(let authResults):
               action(authResults, nil)
             case .failure(let error):
-                action(nil, .noAuthorized(errorDescription: error.localizedDescription))
+                action(nil, .noAuthorized(errorDescription: error))
             }
         }
         .id(colorScheme)
-        .opacity(isEnabled ? 1.0 : 0.75)
+        .opacity(isEnabled ? 1.0 : 0.67)
         .contentShape(.capsule)
         .clipShape(.capsule)
         .buttonBorderShape(.capsule)

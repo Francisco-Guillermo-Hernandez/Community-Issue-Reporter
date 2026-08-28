@@ -48,7 +48,7 @@ struct ThemedButton: View {
                 Text(message)
             }
             .padding(.themeSpacing * 3)
-            .frame(maxWidth: .infinity, maxHeight: 48)
+            .frame(maxWidth: .infinity, maxHeight: 54)
         }
         .buttonSizing(.flexible)
         .modifier(ButtonStyleMapper(type: type, style: style, isLoading: loading))

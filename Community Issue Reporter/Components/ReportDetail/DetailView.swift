@@ -348,6 +348,7 @@ struct DetailView: View {
                             } label: {
                                 Label("Report content", systemImage: "hand.raised.slash.fill")
                             }
+                            .disabled(UserRepository.shared.isGuestUser())
                             .accessibilityIdentifier("ReportThisContentButton")
                     
                         } label: {

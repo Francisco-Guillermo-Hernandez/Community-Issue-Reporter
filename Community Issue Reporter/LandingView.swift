@@ -71,12 +71,16 @@ struct LandingView: View {
             }
         }
         .alert(String(localized: "Account Deleted"), isPresented: $controller.accountDeleted) {
-            Button(String(localized: "OK"), role: .cancel) { }
+            Button(String(localized: "OK"), role: .close) {
+                /// This Implementation closes the alert
+            }
         } message: {
             Text(String(localized: "Your account was deleted, but you can register again whenever you want. "))
         }
         .alert(controller.alertTitle, isPresented: $controller.presentAlert) {
-            Button(String(localized: "OK"), role: .cancel) { }
+            Button(String(localized: "OK"), role: .close) {
+                /// This Implementation closes the alert
+            }
         } message: {
             Text(controller.message)
         }

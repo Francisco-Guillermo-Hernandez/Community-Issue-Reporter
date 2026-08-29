@@ -33,6 +33,6 @@ final class UserPersonalizationDataModel {
     }
     
     var isFormValid: Bool {
-        isUserNameValid && isEmailValid && userNameAvailabilityStatus == .available
+        isUserNameValid && userNameAvailabilityStatus == .available
     }
 }

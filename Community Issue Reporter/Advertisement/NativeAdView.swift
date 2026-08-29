@@ -16,6 +16,7 @@ public struct AdMobNativeAdView: UIViewControllerRepresentable {
     }
     
     public func updateUIViewController(_ uiViewController: NativeAdViewController, context: Context) {
+        /// Not used for this case
     }
 }
 

@@ -298,6 +298,8 @@ final class UserRepository {
             } else {
                 throw CommonIntercommunicationErrors.genericError(result.message)
             }
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
         } catch ServiceError.networkError(let error) {
             throw CommonIntercommunicationErrors.networkError(error.localizedDescription)
         } catch {
@@ -311,7 +313,6 @@ final class UserRepository {
         do {
             
             let deviceId = DeviceService.shared.getDeviceId()
-            print("deviceId: \(deviceId)")
             let deviceToken: DeviceTokenRequest = .init(deviceToken: token, deviceId: deviceId, platform: .iOS)
             
             let result = try await self.service.send(deviceToken, headers)

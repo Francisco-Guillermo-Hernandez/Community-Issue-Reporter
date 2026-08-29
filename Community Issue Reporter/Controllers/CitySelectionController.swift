@@ -24,6 +24,8 @@ final class CitySelectionController {
     var isSearchActive: Bool = false
     var searchOptionsSelection: CityFilter = .city
     var triggerFeedBack: Bool = false
+    var showErrorAlert: Bool = false
+    private(set) var messageError: String = ""
     
     init(countryCode: CountryCode) {
         self.countryCode = countryCode
@@ -87,11 +89,22 @@ final class CitySelectionController {
                 if result == .updated {
                     onUpdated()
                 }
+            } catch CommonIntercommunicationErrors.unProcessable {
+                self.show(error: String(localized: "Your petition cannot be processed, please try again."))
+            } catch CommonIntercommunicationErrors.networkError(_) {
+                self.show(error: String(localized: "It looks like that your network is experiencing some delays, please try again."))
+            } catch CommonIntercommunicationErrors.serverError(_) {
+                self.show(error: String(localized: "Server error, please try again."))
             } catch {
-                /// TODO: Implement retry in case of error
+                self.show(error: String(localized: "An unexpected error has occurred, please try again."))
             }
             
             isLoading = false
         }
+    }
+    
+    func show(error: String) {
+        self.messageError = error
+        self.showErrorAlert = true
     }
 }

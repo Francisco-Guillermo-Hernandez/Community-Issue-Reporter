@@ -20,6 +20,7 @@ struct CustomCameraView: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: CustomCameraViewController, context: Context) {
+        /// Not used in this case
     }
     
     func makeCoordinator() -> Coordinator {

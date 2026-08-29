@@ -137,7 +137,9 @@ struct PhotoChooser: View {
                             url: tracker.url,
                             currentValue: Binding(
                                 get: { tracker.uploadProgress },
-                                set: { _ in }
+                                set: { _ in
+                                    /// Not used in this context
+                                }
                             ),
                             total: 1.0,
                             delete: { name in
@@ -170,42 +172,70 @@ struct PhotoChooser: View {
             }
             .fullScreenCover(isPresented: $isImagePreviewPresented) {
                 if isImagePreviewPresented, let previewID {
-                    ZStack {
-                        Rectangle()
-                            .opacity(0.001)
-                            .ignoresSafeArea()
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .onTapGesture {
-                                dismissPreview()
-                            }
-                        
-                        GeometryReader { proxy in
-                            Group {
-                                if let previewImage {
-                                    Image(uiImage: previewImage)
-                                        .resizable()
-                                } else if let previewURL {
-                                    CachedAsyncImage(url: previewURL) { image in
-                                        image
+                    NavigationStack {
+                        ZStack(alignment: .top) {
+                            Color.theme.background
+                                .ignoresSafeArea()
+                           
+                            /// Top Glow Gradient representing the active step color
+                            Color.theme.primary
+                                .opacity(0.12)
+                                .frame(height: 280)
+                                .mask(
+                                    LinearGradient(
+                                        colors: [.white, .clear],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .blur(radius: 20)
+                                .ignoresSafeArea()
+                            
+//                            Rectangle()
+//                                .background(.black)
+//    //                            .opacity(0.001)
+//                                .ignoresSafeArea()
+//                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                                .onTapGesture {
+//                                    dismissPreview()
+//                                }
+                            
+                            GeometryReader { proxy in
+                                Group {
+                                    if let previewImage {
+                                        Image(uiImage: previewImage)
                                             .resizable()
-                                    } placeholder: {
-                                        ZStack {
-                                            Color.gray.opacity(0.1)
-                                            ProgressView()
+                                    } else if let previewURL {
+                                        CachedAsyncImage(url: previewURL) { image in
+                                            image
+                                                .resizable()
+                                        } placeholder: {
+                                            ZStack {
+                                                Color.gray.opacity(0.1)
+                                                ProgressView()
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            .scaledToFit()
-                            .clipShape(RoundedRectangle(cornerRadius: 32))
-                            .shadow(radius: 16)
-                            .contentShape(RoundedRectangle(cornerRadius: 32))
-                            .frame(width: proxy.size.width - 32, height: proxy.size.height / 2)
-                            .position(x: proxy.size.width / 2 , y: proxy.size.height / 2)
-                            .onTapGesture {
-                                dismissPreview()
+                                .scaledToFit()
+                                .clipShape(RoundedRectangle(cornerRadius: 32))
+                                .shadow(radius: 16)
+                                .contentShape(RoundedRectangle(cornerRadius: 32))
+                                .frame(width: proxy.size.width - 32, height: proxy.size.height)
+                                .position(x: proxy.size.width / 2 , y: proxy.size.height / 2)
+                                .onTapGesture {
+                                    dismissPreview()
+                                }
                             }
                         }
+                        .toolbar {
+                            ToolbarItem(placement: .automatic) {
+                                Button(role: .close) {
+                                    dismissPreview()
+                                }
+                            }
+                        }
+    //                    .presentationBackground(.clear)
                     }
                     .navigationTransition(.zoom(sourceID: previewID, in: nameSpace))
                 }
@@ -335,7 +365,9 @@ struct ImagePicker: UIViewControllerRepresentable {
         return picker
     }
     
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
+        /// Not used in this scenario
+    }
     
     @objc class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
         private let onImagePicked: (MediaResources?) -> Void

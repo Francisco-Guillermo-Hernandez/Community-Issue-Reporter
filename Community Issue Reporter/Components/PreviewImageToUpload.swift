@@ -10,6 +10,7 @@ import Foundation
 
 struct PreviewImageToUpload: View {
     @Environment(\.colorScheme) var colorScheme: ColorScheme
+    @State private var showDeleteAlert: Bool = false
     var name: String
     var phase: ImagePhase
     var data: UIImage?
@@ -81,14 +82,25 @@ struct PreviewImageToUpload: View {
                     .padding()
                 }
             }
+            .alert(String(localized: "Delete"), isPresented: $showDeleteAlert) {
+                Button(String(localized: "No"), role: .cancel) {
+                    showDeleteAlert = false
+                }
+                
+                Button(String(localized: "Yes"), role: .destructive) {
+                    delete(name)
+                }
+            } message: {
+                Text(String(localized: "Do you want to delete this image?"))
+            }
             
             
-            
+            /// Delete button
             if phase != .failure {
                 Button {
-                    delete(name)
+                   showDeleteAlert = true
                 } label: {
-                    Image(systemName: "xmark")
+                    Image(systemName: "trash")
                         .symbolRenderingMode(.multicolor)
                 }
                 .buttonBorderShape(.circle)

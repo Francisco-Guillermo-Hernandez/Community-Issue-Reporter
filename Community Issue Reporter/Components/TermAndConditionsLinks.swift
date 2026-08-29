@@ -126,8 +126,8 @@ struct LinksView: View {
         Text(getLinks(type))
             .font(.footnote)
             .foregroundColor(.secondary)
-            .tint(Color.theme.primary)
-            .kerning(-0.2)
+//            .tint(Color.theme.primary)
+            .kerning(-0.1)
             .environment(\.openURL, OpenURLAction { url in
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 webViewURL = url

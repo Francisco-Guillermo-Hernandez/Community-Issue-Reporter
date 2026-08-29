@@ -31,9 +31,6 @@ struct ReportWizardContainer: View {
         self.showCancelButton = showCancelButton
         self.reportToModify = reportToModify
         self.controller = ReportController()
-        
-        print("Report state: ")
-        print(model.report.reportState )
     }
     
     var body: some View {
@@ -146,8 +143,6 @@ struct ReportWizardContainer: View {
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: controller.currentStep) { oldValue, newValue in
             return newValue > oldValue
         }
-//        .toolbarTitleDisplayMode(.inline)
-//        .toolbarVisibility(.hidden, for: .navigationBar)
         .enableInteractivePopGesture()
         .sensoryFeedback(.success, trigger: controller.doneTrigger)
         .task {
@@ -200,7 +195,7 @@ struct ReportWizardContainer: View {
                     action: {
                         controller.submit(model, model.uploadTrackers)
                     },
-                    type: .primary,
+                    type: .secondary,
                     style: .prominent,
                     icon: "",
                     isLoading: $controller.isLoading

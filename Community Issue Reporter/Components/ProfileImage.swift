@@ -453,9 +453,12 @@ struct UserAvatarPersonalizationSheet: View {
         
         Task {
             if let image = view.asImage() {
-               
+                let generator = UIImpactFeedbackGenerator(style: .heavy)
+                generator.prepare()
+
                 viewModel.uploadProfilePicture(image, from: options == .initials ? .initials : .monogram)
                 try? await Task.sleep(for: .milliseconds(128))
+                generator.impactOccurred()
                 dismiss()
                 
             }
@@ -473,9 +476,14 @@ struct UserAvatarPersonalizationSheet: View {
 
     private func onSelect(_ image: UIImage) {
         Task {
+            let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.impactOccurred()
+
             viewModel.uploadProfilePicture(image, from: .photo)
             /// Lets wait to hide the sheet correctly
             try? await Task.sleep(for: .milliseconds(128))
+            
+            generator.impactOccurred()
             dismiss()
         }
     }
@@ -545,6 +553,7 @@ struct ProfileImage: View {
         .overlay(alignment: .bottomTrailing) {
             Button {
                 viewModel.showPicker.toggle()
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             } label: {
                 Image(systemName: "pencil.circle.fill")
                     .symbolRenderingMode(.multicolor)

@@ -261,12 +261,16 @@ struct PhotoPreview: View {
                                 Text(String(localized: "I confirm that this content violates our community guidelines."))
                             }
                             .alert(String(localized: "Error"), isPresented: $controller.showAlert) {
-                                Button(String(localized: "OK"), role: .cancel) { }
+                                Button(String(localized: "OK"), role: .close) {
+                                    /// This Implementation closes the alert
+                                }
                             } message: {
                                 Text(controller.alertMessage)
                             }
                             .alert(String(localized: "Confirmation"), isPresented: $controller.showSuccessfulAlert) {
-                                Button(String(localized: "OK"), role: .cancel) { }
+                                Button(String(localized: "OK"), role: .close) {
+                                    /// This Implementation closes the alert
+                                }
                             } message: {
                                 Text(controller.alertMessage)
                             }

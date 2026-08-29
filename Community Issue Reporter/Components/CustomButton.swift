@@ -103,9 +103,9 @@ struct ButtonStyleMapper: ViewModifier {
     func body(content: Content) -> some View {
         switch type {
         case .primary:
-            content.buttonStyle(ThemedPrimaryButtonStyle(isLoading: isLoading))
+            content.buttonStyle(ThemedPrimaryButtonStyle(isLoading: isLoading, style: style))
         case .secondary:
-            content.buttonStyle(ThemedSecondaryButtonStyle())
+            content.buttonStyle(ThemedSecondaryButtonStyle(isLoading: isLoading, style: style))
         case .outline:
             content.buttonStyle(ThemedButtonOutlineStyle(style: style, isLoading: isLoading))
         case .danger:
@@ -165,15 +165,17 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) var isEnabled
     @Environment(\.colorScheme) var colorScheme
     let isLoading: Bool
+    let style: ThemedButtonStyle
     
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
             .background(backgroundView(isPressed: configuration.isPressed))
             .foregroundStyle(foregroundColor(isPressed: configuration.isPressed))
-            .contentShape(Capsule())
-            .clipShape(Capsule())
-            .font(Font.body.bold())
+            .contentShape(.capsule)
+            .clipShape(.capsule)
+            .font(style == .normal ? Font.body.bold() : Font.title2.bold())
+            .kerning(0.6)
             .overlay {
                 Capsule()
                     .stroke(borderColor, lineWidth: isEnabled ? 1 : 0)
@@ -181,7 +183,7 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
             .opacity(isEnabled ? 1.0 : 0.51) // disabled:opacity-50
             .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
             .animation(.easeOut(duration: 0.2), value: isEnabled)
-            .glassEffect(.regular, in: Capsule())
+            .glassEffect(.regular, in: .capsule)
             .modifier(GlassBounceModifier(isPressed: configuration.isPressed))
     }
     
@@ -207,9 +209,9 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
     
     private func foregroundColor(isPressed: Bool) -> Color {
         if colorScheme == .dark {
-            return isPressed ? Color(hex: "#fed4a0") : Color.white  //Color.theme.cardBackground
+            return isPressed ? Color(hex: "#fed4a0") : Color.init(hex: "452602")  //Color.theme.cardBackground
         } else {
-            return isPressed ? Color.init(hex: "#f2ebdd") : Color.white
+            return isPressed ? Color.init(hex: "#f2ebdd") : Color.theme.foreground
         }
     }
     
@@ -223,20 +225,57 @@ struct ThemedPrimaryButtonStyle: ButtonStyle {
 }
 
 struct ThemedSecondaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) var isEnabled
+    @Environment(\.colorScheme) var colorScheme
+    
+    let isLoading: Bool
+    let style: ThemedButtonStyle
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
+            .font(style == .normal ? Font.body.bold() : Font.title2.bold())
+            .kerning(0.3)
             .foregroundStyle(Color.white)
-            .background(Color.theme.secondary)
+            .background(backgroundView(isPressed: configuration.isPressed))
+            .opacity(isEnabled ? 1.0 : 0.51)
             .contentShape(.capsule)
             .clipShape(.capsule)
-            .font(Font.body.bold())
             .overlay {
                 Capsule()
-                    .stroke(Color.theme.secondary.mix(with: .white, by: 0.3), lineWidth: 1)
+                    .stroke(Color.theme.secondary.mix(with: .black, by: 0.01), lineWidth: 1)
             }
             .glassEffect(in: .capsule)
             .modifier(GlassBounceModifier(isPressed: configuration.isPressed))
+    }
+    
+    @ViewBuilder
+    private func backgroundView(isPressed: Bool) -> some View {
+        if isLoading {
+            ShimmerView(
+                baseColor: backgroundColor(isPressed: isPressed),
+                shimmerColor: Color.white.opacity(0.35)
+            )
+        } else {
+            backgroundColor(isPressed: isPressed)
+        }
+    }
+    
+    private func backgroundColor(isPressed: Bool) -> Color {
+        if colorScheme == .dark {
+            return isPressed ? Color.theme.secondary.opacity(0.86) : Color.theme.secondary
+        } else {
+            return isPressed ? Color.theme.secondary.opacity(0.75) : Color.theme.secondary
+        }
+    }
+    
+    
+    
+    private var borderColor: Color {
+        if colorScheme == .dark {
+            return Color.theme.secondary.mix(with: .white, by: 0.1)
+        } else {
+            return Color.theme.secondary.mix(with: .white, by: 0.4)
+        }
     }
 }
 
@@ -319,11 +358,12 @@ struct LinkButtonStyle: ButtonStyle {
 #Preview {
     VStack(spacing: .themeSpacing * 4) {
         
-        ThemedButton(message: "Next Step", action: {}, type: .primary).disabled(true)
+        ThemedButton(message: "Next Step", action: {}, type: .primary, style: .prominent).disabled(true)
         Spacer()
         ThemedButton(message: "Get Started", action: {}, type: .primary, isLoading: .constant(false))
         
-        ThemedButton(message: "Get Started", action: {}, type: .secondary)
+        ThemedButton(message: "Get Started", action: {}, type: .secondary, style: .prominent)//.disabled(true)
+        ThemedButton(message: "Get Started", action: {}, type: .secondary, style: .prominent, isLoading: .constant(true))
         
         ThemedButton(message: "Get Started", action: {}, type: .outline, isLoading: .constant(false))
         

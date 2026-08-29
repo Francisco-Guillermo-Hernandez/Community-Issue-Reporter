@@ -400,12 +400,16 @@ struct DetailView: View {
                             Text(String(localized: "I confirm that this report violates our community guidelines."))
                         }
                         .alert(String(localized: "Error"), isPresented: $controller.showErrorAlert) {
-                            Button(String(localized: "OK"), role: .cancel) { }
+                            Button(String(localized: "OK"), role: .close) {
+                                /// This Implementation closes the alert
+                            }
                         } message: {
                             Text(controller.errorMessage)
                         }
                         .alert(String(localized: "Moderation report sent"), isPresented: $controller.showSuccessfulAlert) {
-                            Button(String(localized: "OK"), role: .cancel) { }
+                            Button(String(localized: "OK"), role: .close) {
+                                /// This Implementation closes the alert
+                            }
                         } message: {
                             Text(controller.message)
                         }

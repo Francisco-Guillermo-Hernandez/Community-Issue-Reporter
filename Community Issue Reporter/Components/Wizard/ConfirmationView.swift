@@ -18,7 +18,7 @@ struct ConfirmationView: View {
         VStack(spacing: .themeSpacing * 6) {
             VStack(spacing: .themeSpacing * 4) {
                 Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 56))
+                    .font(.system(size: 64))
                     .symbolColorRenderingMode(.gradient)
                     .foregroundStyle(
                         Color.white,
@@ -27,7 +27,7 @@ struct ConfirmationView: View {
                     )
                     .symbolEffect(.drawOn, isActive: isAnimating)
                     .task {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.785) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.385) {
                             isAnimating = false
                         }
                     }

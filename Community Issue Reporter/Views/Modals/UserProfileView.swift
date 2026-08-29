@@ -198,10 +198,17 @@ struct UserProfileView: View {
                         action: {
                             Task {
                                 do {
+                                    let generator = UIImpactFeedbackGenerator(style: .heavy)
+                                    generator.impactOccurred()
+                                    ///
                                     isLoading.toggle()
-                                    
+                                    ///
                                     _ = try await UserRepository.shared.logout()
+                                    ///
                                     controller.logout()
+                                    ///
+                                    generator.impactOccurred()
+                                    ///
                                     dismiss()
                                 } catch {
                                     Toast.shared.show(message: error.localizedDescription, type: .error)

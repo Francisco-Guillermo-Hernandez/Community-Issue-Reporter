@@ -48,7 +48,7 @@ struct EssentialInformationView: View {
                         .opacity(0.67)
                     
                     Toggle("Email notifications", isOn: $notifications.email)
-                        .tint(Color.theme.secondary)
+                        .tint(Color.theme.primary)
                         .foregroundStyle(Color.theme.inputText)
                         .onChange(of: notifications.email) { oldValue, newValue in
                             settings.enableEmailNotifications = newValue
@@ -96,7 +96,7 @@ struct EssentialInformationView: View {
                     message = String(localized: "Start reporting")
                     finalStep()
                 },
-                type: .primary,
+                type: .secondary,
                 isLoading: $isLoading
             )
             .padding(.horizontal, 36)
@@ -187,8 +187,10 @@ struct EssentialInformationView: View {
                 isLoading = true
                 message = String(localized: "Initializing Insights")
                 _ = try await InsightsRepository.shared.initialize()
+            } catch CommonIntercommunicationErrors.networkError(_) {
+                self.show(error: String(localized: "It looks like that your network is experiencing some delays, please try again."))
             } catch {
-                
+             print(error)
             }
             
             isLoading = false

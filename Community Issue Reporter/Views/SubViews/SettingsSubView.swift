@@ -121,7 +121,7 @@ import RevenueCat
 import RevenueCatUI
 
 struct SettingsSubView: View {
-    
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @State private var settings = SettingsStore.shared
     @State private var router = DeepLinkRouter.shared
@@ -303,7 +303,7 @@ struct SettingsSubView: View {
 
                         Toggle("Email notifications", isOn: $settings.enableEmailNotifications)
                             .accessibilityIdentifier("EmailNotificationsToggle")
-                            .tint(Color.theme.secondary)
+                            .tint(Color.theme.primary)
                             .foregroundStyle(Color.theme.inputText)
                             .onChange(of: settings.enableEmailNotifications) { oldValue, newValue in
                                 controller.updateNotificationSettings()

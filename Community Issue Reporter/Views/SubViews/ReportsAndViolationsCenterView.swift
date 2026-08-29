@@ -273,7 +273,7 @@ struct ReportsAndViolationsCenterView: View {
                                             role: .reporter,
                                             observation: violation.observation
                                         )
-                                        .disabled(violation.status == .removed)
+                                        .disabled(violation.status == .removed || violation.status == .approved)
                                     }
                                 }
                             }
@@ -486,10 +486,22 @@ struct ReportsAndViolationsCenterView: View {
         }
         .padding(.horizontal)
         .padding(.top, 8)
-        .opacity(status == .removed ? 0.3 : 1)
+        .opacity(setOpacityByStatus(status))
     }
     
     
+    private func setOpacityByStatus(_ status: ReportViolationStatus) -> Double {
+        switch status {
+        case .rejected:
+            return 0.3
+        case .appealing:
+            return 0.3
+        case .approved:
+            return 0.3
+        default:
+            return 1
+        }
+    }
     
     private func disableButtonByStatus(_ status: ReportViolationStatus) -> Bool {
         switch status {

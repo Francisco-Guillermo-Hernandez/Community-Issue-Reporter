@@ -161,7 +161,7 @@ struct AcceptanceView: View {
                 action: {
                     nextStep()
                 },
-                type: .primary
+                type: .secondary
             )
             .disabled(!accepted)
             .padding(.horizontal, 36)

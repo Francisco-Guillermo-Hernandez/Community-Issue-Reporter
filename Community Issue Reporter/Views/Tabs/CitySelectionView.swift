@@ -23,23 +23,23 @@ struct CityCellView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .kerning(0.2)
             
-            if city.isCapitalCity == 1 {
-                Text("Is the capital of \(city.firstLevel)")
-                    .font(.caption2)
-                    .fontWeight(.bold)
-                    .foregroundStyle(Color.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+//            if city.isCapitalCity == 1 {
+//                Text("Is the capital of \(city.firstLevel)")
+//                    .font(.caption2)
+//                    .fontWeight(.bold)
+//                    .foregroundStyle(Color.secondary)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//            }
 
             Text(city.legalGroupName)
                 .font(.caption)
-                .foregroundStyle(Color.secondary)
+                .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             if city.groupingName != nil && city.groupingName != "" {
                 Text(city.groupingName ?? "")
                     .font(.caption)
-                    .foregroundStyle(Color.secondary)
+                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
@@ -128,11 +128,12 @@ struct CitySelectionView: View {
                         
                         controller.triggerFeedBack.toggle()
                     },
-                    type: .primary,
+                    type: .secondary,
+                    style: .prominent,
                     isLoading: $controller.isLoading
                 )
                 .padding(.horizontal, 36)
-                .padding(.bottom, 4)
+                .padding(.bottom, mode == .modify ? 16 : 4)
                 .padding(.top)
             }
             .sensoryFeedback(
@@ -153,7 +154,7 @@ struct CitySelectionView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     
-                    // Menu to filter cities by its options
+                    /// Menu to filter cities by its options
                     Menu {
                         Picker("Options", selection: $controller.searchOptionsSelection) {
 
@@ -169,13 +170,22 @@ struct CitySelectionView: View {
                     }
                 }
             }
+            .alert(String(localized: "Error"), isPresented: $controller.showErrorAlert) {
+                Button(role: .close) {
+                    
+                } label: {
+                    Text("Ok")
+                }
+            } message: {
+                Text(controller.messageError)
+            }
         }
     }
     
     private var buttonMessage: String {
         if mode == .modify {
             return String(
-                localized: "Select a city", 
+                localized: "Select",
                 comment: "Update city"
             )
         } else {
@@ -276,7 +286,7 @@ private struct RowContentBoth: View {
             .overlay {
                 if isSelected {
                         RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous)
-                            .stroke(Color.theme.secondary.opacity(0.67), lineWidth: 6)
+                            .stroke(Color.theme.primary.opacity(0.67), lineWidth: 6)
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: isSelected)

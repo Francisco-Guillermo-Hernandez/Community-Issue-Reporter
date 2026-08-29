@@ -258,7 +258,7 @@ struct UserPersonalizationView: View {
                         triggerFeedBack.toggle()
                         updateUsername()
                     },
-                    type: .primary,
+                    type: .secondary,
                     isLoading: $model.isLoading
                 )
                 .disabled(!model.isFormValid)

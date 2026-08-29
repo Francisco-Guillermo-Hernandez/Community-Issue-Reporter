@@ -31,6 +31,7 @@ struct WelcomeView: View {
                         .navigationDestination(isPresented: $showGuestCitySelection) {
                             CitySelectionView(
                                 countryCode: controller.countryCode,
+                                mode: .modify,
                                 selectedCity: $controller.selectedCity,
                                 nextStep: {
                                     

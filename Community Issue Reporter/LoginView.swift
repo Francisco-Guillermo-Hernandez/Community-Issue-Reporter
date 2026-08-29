@@ -39,25 +39,40 @@ struct LoginView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 VStack(spacing: .themeRadius) {
-                    LoginWithAppleButton { (result, error) in
-                        
-                        if let result = result {
-                            controller.loginWithApple(result, onTokenReceived: onTokenReceived)
+                    VStack(spacing: 4) {
+                        LoginWithAppleButton { (result, error) in
+                            
+                            if let result = result {
+                                controller.loginWithApple(result, onTokenReceived: onTokenReceived)
+                            }
+                            
+                            controller.handle(error: error)
                         }
+                        .disabled(controller.disableLoginButtons)
                         
-                        if let error = error {
-                            print(error)
+                        if controller.lastAuthMethod == AuthMethod.Apple.rawValue {
+                            Text("Last login")
+                                .foregroundStyle(.secondary)
+                                .font(.caption2).bold()
                         }
                     }
-                    .disabled(controller.disableLoginButtons)
                     
-                    GooglePillButton(action: {
-                        controller.loginWithGoogle(onTokenReceived: onTokenReceived)
-                    })
-                    .disabled(controller.disableLoginButtons)
-                    .accessibilityIdentifier("LoginWithGoogle")
-                    .accessibilityLabel(String(localized: "Sign in with Google"))
-                    .frame(maxWidth: .infinity, maxHeight: 44)
+                    
+                    VStack(spacing: 4) {
+                        GooglePillButton(action: {
+                            controller.loginWithGoogle(onTokenReceived: onTokenReceived)
+                        })
+                        .disabled(controller.disableLoginButtons)
+                        .accessibilityIdentifier("LoginWithGoogle")
+                        .accessibilityLabel(String(localized: "Sign in with Google"))
+                        .frame(maxWidth: .infinity, maxHeight: 44)
+                        
+                        if controller.lastAuthMethod == AuthMethod.Google.rawValue {
+                            Text("Last login")
+                                .foregroundStyle(.secondary)
+                                .font(.caption2).bold()
+                        }
+                    }
                     
                     ThemedButton(
                         message: String(localized: "Login as a Guest"),
@@ -99,6 +114,15 @@ struct LoginView: View {
             .padding(.bottom, 8)
         }
         .ignoresSafeArea(edges: .bottom)
+        .alert(String(localized: "Error"), isPresented: $controller.showErrorAlert) {
+            Button(role: .close) {
+                
+            } label: {
+                Text("Ok")
+            }
+        } message: {
+            Text(controller.messageError)
+        }
     }
 }
 

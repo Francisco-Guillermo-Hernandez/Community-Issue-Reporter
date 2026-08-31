@@ -28,6 +28,10 @@ struct MediaStepView: View {
                 )
             }
             #else
+            PhotoChooser(
+                reportContainer: model.reportSession.reportContainer,
+                uploadTrackers: $uploadTrackers
+            )
             #endif
             
         }

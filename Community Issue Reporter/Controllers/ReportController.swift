@@ -63,7 +63,8 @@ class ReportController {
     }
     
     func createShareableLink(_ model: ReportDataModel) async throws {
-        let url = try await ShareRepository.shared.createShareableLink(using: model)
+//        let url = try await ShareRepository.shared.createShareableLink(using: model)
+        let url = ""
         shareableLink = url
     }
     

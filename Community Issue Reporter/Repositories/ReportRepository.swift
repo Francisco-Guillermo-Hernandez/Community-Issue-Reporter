@@ -198,6 +198,8 @@ final class ReportRepository {
     /// Creates a new report using model
     func create(using model: ReportDataModel) async throws -> String {
         do {
+            print("Model of report.")
+            dump(model)
             let response = try await self.reportsService.createReport(
                 report: model.report,
                 headers: [

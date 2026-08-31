@@ -18,10 +18,14 @@ final class UserPersonalizationDataModel {
     
     var isEmailValid: Bool
     var isUserNameValid: Bool
+    var usernameState: UserNameState
     
     var userNameErrorMessage: String = ""
     var isLoading: Bool = false
     var isSubmitting: Bool = false
+    
+    var showErrorAlert: Bool = false
+    private(set) var messageError: String = ""
     init() {
         userName = ""
         userNameAvailabilityStatus = .untouched
@@ -30,9 +34,15 @@ final class UserPersonalizationDataModel {
         
         isEmailValid = false
         isUserNameValid = false
+        usernameState = .unTouched
     }
     
     var isFormValid: Bool {
-        isUserNameValid && userNameAvailabilityStatus == .available
+        isUserNameValid && userNameAvailabilityStatus == .available || usernameState == .updated
+    }
+    
+    func show(error: String) {
+        messageError = error
+        showErrorAlert = true
     }
 }

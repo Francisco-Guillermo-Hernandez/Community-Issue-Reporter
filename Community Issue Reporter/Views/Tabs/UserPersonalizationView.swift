@@ -160,7 +160,7 @@ struct UserPersonalizationView: View {
         
         
            /// Check if conditions met
-            if model.userName.count >= 3 && model.userName.count < 21 && model.userNameAvailabilityStatus != .available  {
+            if model.userName.count >= 3 && model.userName.count < 21 && model.userNameAvailabilityStatus != .available && model.usernameState == .unTouched {
                
                /// Debouncing time
                try? await Task.sleep(for: .milliseconds(400))
@@ -226,6 +226,15 @@ struct UserPersonalizationView: View {
             }
             .ignoresSafeArea()
         }
+        .alert(String(localized: "Error"), isPresented: $model.showErrorAlert) {
+            Button(role: .close) {
+                model.showErrorAlert = false
+            } label: {
+                Text("Ok")
+            }
+        } message: {
+            Text(model.messageError)
+        }
         .task {
             ///
             guard let authMethod = UserRepository.shared.getAuthMethod() else { return }
@@ -261,6 +270,8 @@ struct UserPersonalizationView: View {
                     type: .secondary,
                     isLoading: $model.isLoading
                 )
+                .accessibilityIdentifier("NextStepButton")
+                .accessibilityLabel(String(localized: "Next Step"))
                 .disabled(!model.isFormValid)
                 .padding(.top, 0)
             }
@@ -310,17 +321,22 @@ struct UserPersonalizationView: View {
                 case .success(let message):
                     print(message)
                     model.isLoading.toggle()
+                    model.usernameState = .updated
                     nextStep()
                     
                     /// Error handling
                 case .failure(let error):
                     
                     model.isLoading.toggle()
+                    model.usernameState = .error
                     print("error from update user name")
                     switch error {
                     case .serverError(let message):
                       print(message)
+                      model.show(error: String(localized: "Server error, please try again."))
+                     
                     default:
+                        model.show(error: String(localized: "An unexpected error has occurred, please try again."))
                         break
                     }
                 }

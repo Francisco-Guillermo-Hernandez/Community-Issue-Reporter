@@ -165,7 +165,14 @@ struct MiniMapLocator: View {
               let address = mapItem.address?.fullAddress ??  mapItem.address?.shortAddress ?? "Unknown"
               let countryCode = mapItem.addressRepresentations?.region?.identifier ?? "SV"
               
-              let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
+              var cityName = mapItem.addressRepresentations?.cityName ?? "San Salvador"
+              
+              /// Workaround
+              /// Rename the city name because in Apple Maps is Wrong!
+              if cityName == "Sesuntepeque" {
+                  cityName = "Sensuntepeque"
+              }
+              
               self.locator = LocatorDAO.shared.findBy(countryCode: countryCode, cityName: cityName)
               self.locator.address = address
               ReportDataModel.shared.updateLocator(with: locator)

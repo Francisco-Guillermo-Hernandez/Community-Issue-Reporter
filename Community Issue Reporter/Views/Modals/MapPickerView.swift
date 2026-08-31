@@ -313,7 +313,12 @@ struct MapPickerView: View {
               
               let country = mapItem.addressRepresentations?.region?.identifier ?? "SV"
               
-              let cityName = mapItem.addressRepresentations?.cityName ?? "-1"
+              var cityName = mapItem.addressRepresentations?.cityName ?? "San Salvador"
+              /// Workaround
+              /// Rename the city name because in Apple Maps is Wrong!
+              if cityName == "Sesuntepeque" {
+                  cityName = "Sensuntepeque"
+              }
               self.locator = LocatorDAO.shared.findBy(countryCode: country, cityName: cityName )
               self.locator.address = address
               ReportDataModel.shared.updateLocator(with: locator)
@@ -334,14 +339,6 @@ func getLocation(c coordinate: Coordinate) -> CLLocationCoordinate2D {
         longitude: coordinate.lng
     )
 }
-
-//func handleMapMovement(center: CLLocationCoordinate2D)  {
-//    Task {
-//        let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
-//        await GeoCodingRepository.shared.updateLocationDetails(from: location)
-//    }
-//  }
-
 
 #Preview {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)

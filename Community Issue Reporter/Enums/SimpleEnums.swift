@@ -102,3 +102,9 @@ enum VotingType: String, Equatable, CaseIterable, Codable {
         }
     }
 }
+
+enum UserNameState: Equatable, CaseIterable, Codable {
+    case updated
+    case unTouched
+    case error
+}

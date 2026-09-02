@@ -27,7 +27,7 @@ struct migrationTests {
     @Test func testSwiftDataMigrationAndFinders() async throws {
         // Create an in-memory container for testing
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: District.self, Canton.self, configurations: config)
+        let container = try ModelContainer(for: District.self, Canton.self, MapExplorerReportEntity.self, MyReportDAOEntity.self, configurations: config)
         let context = ModelContext(container)
         
         // Perform migration

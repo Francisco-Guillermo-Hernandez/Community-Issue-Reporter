@@ -66,3 +66,4 @@ examples/*
 skills-lock.json
 
 GoogleService-Info.plist
+logs/*

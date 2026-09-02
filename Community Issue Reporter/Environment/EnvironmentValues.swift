@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Observation
+import Firebase
 
 @Observable
 final class SettingsStore {
@@ -58,7 +59,10 @@ final class SettingsStore {
     }
     
     var enableAnonymousTelemetry: Bool {
-        didSet { UserDefaults.standard.set(enableAnonymousTelemetry, forKey: "enableAnonymousTelemetry") }
+        didSet { 
+            UserDefaults.standard.set(enableAnonymousTelemetry, forKey: "enableAnonymousTelemetry") 
+            Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(enableAnonymousTelemetry)
+        }
     }
     
     var selectedLanguageID: Int {

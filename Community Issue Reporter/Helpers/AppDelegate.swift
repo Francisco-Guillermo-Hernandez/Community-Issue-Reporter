@@ -12,6 +12,7 @@ import GoogleMobileAds
 //import FirebaseCore
 import Firebase
 
+
 @_spi(Experimental) import RevenueCatAdMob
 
 class AppDelegate: NSObject, UIApplicationDelegate {

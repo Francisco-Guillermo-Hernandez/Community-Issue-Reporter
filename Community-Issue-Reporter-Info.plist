@@ -8,6 +8,8 @@
 	<string>$(ADMOB_REPORT_VALIDATION_AD_UNIT)</string>
 	<key>ADMOB_SIGN_PETITION_AD_UNIT</key>
 	<string>$(ADMOB_SIGN_PETITION_AD_UNIT)</string>
+	<key>ADMOB_VIEW_AD_TO_REPORT_A_PROBLEM</key>
+	<string>$(ADMOB_VIEW_AD_TO_REPORT_A_PROBLEM)</string>
 	<key>API_URL</key>
 	<string>$(API_URL)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>

@@ -8,24 +8,47 @@
 import SwiftUI
 
 struct NoNetwork: View {
-    var retry: () -> Void
+    @Environment(\.colorScheme) private var colorScheme
+    var retry: () async -> Void
     var body: some View {
-        ContentUnavailableView {
-            Label(String(localized: "Network Unavailable"), systemImage: "wifi.slash")
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(
-                    Color.theme.foreground.opacity(0.7),
-                    Color.theme.primary,
-                    Color.theme.foreground.opacity(0.7)
-                )
-        } description: {
-            Text(String(localized: "Please check your internet connection and try again."))
-        } actions: {
-            Button("Retry") {
-               retry()
+        VStack {
+            ContentUnavailableView {
+                Label(String(localized: "Network Unavailable"), systemImage: "wifi.slash")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(
+                        Color.theme.foreground.opacity(0.7),
+                        Color.theme.primary,
+                        Color.theme.foreground.opacity(0.7)
+                    )
+            } description: {
+                Text(String(localized: "Please check your internet connection and try again."))
+            } actions: {
+                Button("Retry") {
+                    Task {
+                        await retry()
+                    }
+                }
             }
-            .buttonStyle(.borderedProminent)
         }
+        .ignoresSafeArea(edges: .all)
+        .background {
+            ZStack(alignment: .top) {
+                GeometryReader { geo in
+                    RadialGradient(
+                        gradient: Gradient(colors: [
+                            Color.theme.secondary.mix(with: colorScheme == .dark ? .black : .white, by: 0.4).opacity(0.67),
+                            Color.theme.background
+                        ]),
+                        center: .topLeading,
+                        startRadius: 0,
+                        endRadius: geo.size.width * 0.54
+                    )
+                    
+                }
+            }
+            .ignoresSafeArea()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

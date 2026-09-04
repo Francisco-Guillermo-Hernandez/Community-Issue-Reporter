@@ -222,34 +222,48 @@ struct DetailView: View {
                         affectedAction: { status in
                         },
                         boostReportValidationAction: { status in
-                            Task {
-                                let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_REPORT_VALIDATION_AD_UNIT") as? String ?? ""
-                                await AdMobManager.shared.loadRewardedAd(adUnitID: adUnitID)
-                                
+                            checkAdMobDomainStatus { isReachable, error in
                                 DispatchQueue.main.async {
-                                    AdMobManager.shared.showRewardedAd {
+                                    if isReachable {
                                         Task {
-                                            do {
-                                                let wasValidated = try await VotingRepository.shared.vote(type: .report, payload: .init(type: .report, resourceId: report.id))
-                                                
-                                                DispatchQueue.main.async {
-                                                   
-                                                    if wasValidated == .done {
-                                                        controller.message = String(localized: "Boost applied and validated!")
-                                                        controller.voteCount += 1
+                                            let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_REPORT_VALIDATION_AD_UNIT") as? String ?? ""
+                                            let isAdLoaded = await AdMobManager.shared.loadRewardedAd(adUnitID: adUnitID)
+                                            
+                                            DispatchQueue.main.async {
+                                                if isAdLoaded {
+                                                    AdMobManager.shared.showRewardedAd {
+                                                        Task {
+                                                            do {
+                                                                let wasValidated = try await VotingRepository.shared.vote(type: .report, payload: .init(type: .report, resourceId: report.id))
+                                                                
+                                                                DispatchQueue.main.async {
+                                                                   
+                                                                    if wasValidated == .done {
+                                                                        controller.message = String(localized: "Boost applied and validated!")
+                                                                        controller.voteCount += 1
+                                                                    }
+                                                                    
+                                                                    controller.message = String(localized: "Boost applied!")
+                                                                    controller.showBoostAlert = true
+                                                                }
+                                                            } catch {
+                                                                DispatchQueue.main.async {
+                                                                   
+                                                                    controller.message = String(localized: "Failed to boost report")
+                                                                    controller.showBoostAlert = true
+                                                                }
+                                                            }
+                                                        }
                                                     }
-                                                    
-                                                    controller.message = String(localized: "Boost applied!")
-                                                    controller.showBoostAlert = true
-                                                }
-                                            } catch {
-                                                DispatchQueue.main.async {
-                                                   
-                                                    controller.message = String(localized: "Failed to boost report")
+                                                } else {
+                                                    controller.message = String(localized: "No ad is available to show right now. Please try again later.")
                                                     controller.showBoostAlert = true
                                                 }
                                             }
                                         }
+                                    } else {
+                                        controller.message = String(localized: "Cannot connect to ad server. Please check your internet connection or try again later.")
+                                        controller.showBoostAlert = true
                                     }
                                 }
                             }

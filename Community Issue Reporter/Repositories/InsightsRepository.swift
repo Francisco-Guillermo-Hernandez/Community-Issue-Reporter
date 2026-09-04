@@ -32,15 +32,25 @@ final class InsightsRepository {
         } catch ServiceError.serverError(let error) {
             throw CommonIntercommunicationErrors.serverError(error)
         } catch {
-            print(error)
             throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
         }
-        
     }
     
     func insightsForThisMonth() async throws -> MonthlyInsightsResponse {
-        let filter = InsightsFilter(year: getFullYear(), month: getMonthName())
-        return try await service.getMonthlyInsights(filter)
+        do {
+            let filter = InsightsFilter(year: getFullYear(), month: getMonthName())
+            return try await service.getMonthlyInsights(filter)
+        } catch ServiceError.badRequest(let error) {
+            throw CommonIntercommunicationErrors.invalidPetition(error.message)
+        } catch ServiceError.unauthorized {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.forbidden {
+            throw CommonIntercommunicationErrors.notAuthorized
+        } catch ServiceError.serverError(let error) {
+            throw CommonIntercommunicationErrors.serverError(error)
+        } catch {
+            throw CommonIntercommunicationErrors.genericError(error.localizedDescription)
+        }
     }
     
     func filterInsights(by filter: InsightsFilter) async throws -> MonthlyInsightsResponse {

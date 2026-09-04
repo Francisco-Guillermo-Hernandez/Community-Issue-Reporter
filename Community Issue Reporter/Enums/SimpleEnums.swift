@@ -108,3 +108,16 @@ enum UserNameState: Equatable, CaseIterable, Codable {
     case unTouched
     case error
 }
+
+enum InteractionType: String, Equatable, CaseIterable, Codable {
+    case viewAd
+    case paidASubscription
+    case noThanks
+}
+
+enum PlanType: String, Equatable, CaseIterable, Codable {
+    case freemium
+    case paid
+    case revenueAd
+    case freemiumForGuests
+}

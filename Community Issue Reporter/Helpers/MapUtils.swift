@@ -37,3 +37,11 @@ func openOnGoogleMaps(_ location: CLLocationCoordinate2D, title: String) {
         UIApplication.shared.open(url)
     }
 }
+
+func getCountryCode(_ identifier: String) -> CountryCode {
+    return CountryCode.allCases.first(where: { $0.id == identifier }) ?? .SV
+}
+
+func isAllowedCountry(_ identifier: String) -> Bool {
+    return ALLOWED_COUNTRIES.contains(getCountryCode(identifier))
+}

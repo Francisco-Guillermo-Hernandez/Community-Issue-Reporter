@@ -36,7 +36,7 @@ struct WelcomeView: View {
                                 nextStep: {
                                     
                                     _ = KeychainService.save(key: .userType, value: UserType.guest.description)
-                                    
+                                    _ = KeychainService.save(key: .planType, value: PlanType.freemiumForGuests.rawValue)
                                     appState.selectedCity = controller.selectedCity
                                    
                                     appState.setCameraPosition(

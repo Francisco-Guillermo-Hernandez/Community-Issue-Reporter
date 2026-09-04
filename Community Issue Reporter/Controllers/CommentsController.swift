@@ -99,8 +99,11 @@ final class CommentsController {
             )
             
             if let newComments = result.documents {
+                
+                #if DEBUG
                 print("load more")
                 dump(newComments)
+                #endif
             }
         } catch {
             print(error)

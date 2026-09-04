@@ -26,6 +26,11 @@ final class SettingsStore {
         didSet { UserDefaults.standard.set(reportsCount, forKey: "reportsCount") }
     }
     
+    var lastReportDate: Date? {
+        get { UserDefaults.standard.object(forKey: "lastReportDate") as? Date }
+        set { UserDefaults.standard.set(newValue, forKey: "lastReportDate") }
+    }
+    
     var signaturesCount: Int {
         didSet { UserDefaults.standard.set(signaturesCount, forKey: "signaturesCount") }
     }

@@ -19,6 +19,7 @@ struct MiniMapLocator: View {
     @State private var cameraPosition: MapCameraPosition
     @State private var selectedCoordinate: CLLocationCoordinate2D
     @State private var locationManager = LocationManager()
+    @State private var notAllowedCountry: Bool = false
     
     private let span = MKCoordinateSpan(latitudeDelta: 0.00704, longitudeDelta: 0.00704)
     
@@ -81,6 +82,14 @@ struct MiniMapLocator: View {
                             )
                         )
                     }
+                }
+                .alert(String(localized: "Out of bounds"), isPresented: $notAllowedCountry) {
+                    Button(String(localized: "OK"), role: .close) {
+                        cameraPosition = AuthViewModel.shared.cameraPosition
+                        notAllowedCountry = false
+                    }
+                } message: {
+                    Text(String(localized: "This country is not supported at the moment."))
                 }
                
                 mapControls
@@ -167,10 +176,22 @@ struct MiniMapLocator: View {
               
               var cityName = mapItem.addressRepresentations?.cityName ?? "San Salvador"
               
+              let isAllowedCountry = isAllowedCountry(countryCode)
+              
+              notAllowedCountry = !isAllowedCountry
+              
+              print(address)
+              print(countryCode)
+              print(cityName)
+              
               /// Workaround
               /// Rename the city name because in Apple Maps is Wrong!
               if cityName == "Sesuntepeque" {
                   cityName = "Sensuntepeque"
+              }
+              
+              if cityName == "Unión" || cityName == "Union" {
+                  cityName = "La Unión"
               }
               
               self.locator = LocatorDAO.shared.findBy(countryCode: countryCode, cityName: cityName)
@@ -178,6 +199,7 @@ struct MiniMapLocator: View {
               ReportDataModel.shared.updateLocator(with: locator)
           }
       }
+    
 }
 
 #Preview("Map Picker") {

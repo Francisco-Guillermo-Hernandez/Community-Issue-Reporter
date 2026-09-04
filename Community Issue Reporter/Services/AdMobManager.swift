@@ -13,14 +13,18 @@ class AdMobManager: NSObject, ObservableObject {
         super.init()
     }
     
-    func loadRewardedAd(adUnitID: String) async {
+    @discardableResult
+    func loadRewardedAd(adUnitID: String) async -> Bool {
         let request = Request()
         
         do {
             self.rewardedAd = try await RewardedAd.loadAndTrack(withAdUnitID: adUnitID, request: request)
+            return true
         } catch {
             print(error)
             print("Failed to load rewarded ad: \(error.localizedDescription)")
+            self.rewardedAd = nil
+            return false
         }
     }
     

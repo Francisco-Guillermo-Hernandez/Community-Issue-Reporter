@@ -26,8 +26,6 @@ class ReportController {
         do {
             if model.report.reportState == .modifying {
                 
-                print("Modifying report")
-                
                 guard let reportId = model.report.id else {
                     throw ReportError.noIdentifier
                 }
@@ -46,11 +44,6 @@ class ReportController {
                 /// Set locator using metadata information
                 model.setLocator(countryCode: countryCode, cityId: cityId)
                 
-                print("setLocator")
-                dump(model.locator)
-                
-                print("reportsession")
-                dump(model.reportSession)
             } else {
                 let result = try await ReportRepository.shared.start()
                 model.updateReportSession(result.data)
@@ -63,8 +56,7 @@ class ReportController {
     }
     
     func createShareableLink(_ model: ReportDataModel) async throws {
-//        let url = try await ShareRepository.shared.createShareableLink(using: model)
-        let url = ""
+        let url = try await ShareRepository.shared.createShareableLink(using: model)
         shareableLink = url
     }
     
@@ -84,9 +76,6 @@ class ReportController {
         if model.report.reportState == .modifying, let id = model.report.id {
             reportId = id
         }
-        
-        print("reportId: \(reportId)")
-        print("AttachmentContainer: \(model.reportSession.reportContainer)")
         
         let payload = newAttachments.map { tracker in
             GroupedAttachmentPayload(
@@ -146,10 +135,27 @@ class ReportController {
                         
                         group.addTask {
                             try await self.createShareableLink(model)
+                            
+                            if await !UserRepository.shared.isGuestUser() {
+                                try await CounterRepository.shared.increase()
+                            }
                         }
                         
-                        for try await _ in group {}
+                        for try await _ in group {
+                            /// Iterate the group
+                            /// and because its Void it doesn't return nothing
+                        }
                     }
+                    
+                    /// remove elements
+                    model.removeAttachments()
+                    
+                    /// Increase local counter
+                    SettingsStore.shared.reportsCount += 1
+                    SettingsStore.shared.lastReportDate = Date()
+                    
+                    /// Closure
+                    onComplete()
                 } catch CommonIntercommunicationErrors.invalidPetition(let code) {
                     showAlert(message: code)
                 } catch CommonIntercommunicationErrors.networkError(let error) {
@@ -161,10 +167,8 @@ class ReportController {
                 }
             }
             
-            model.removeAttachments()
             isLoading = false
             
-            onComplete()
         }
      }
      

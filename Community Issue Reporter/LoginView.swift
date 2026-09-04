@@ -22,7 +22,7 @@ struct LoginView: View {
                 .resizable()
                 .backgroundExtensionEffect()
             
-            VStack(spacing: .themeSpacing * 5) {
+            VStack(spacing: .themeSpacing * 4) {
                 
                 VStack(alignment: .leading) {
                     Text("Repórtamelo")
@@ -38,8 +38,8 @@ struct LoginView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
-                VStack(spacing: .themeRadius) {
-                    VStack(spacing: 4) {
+                VStack(spacing: .themeSpacing * 3) {
+                    VStack(spacing: .themeSpacing) {
                         LoginWithAppleButton { (result, error) in
                             
                             if let result = result {
@@ -58,7 +58,7 @@ struct LoginView: View {
                     }
                     
                     
-                    VStack(spacing: 4) {
+                    VStack(spacing: .themeSpacing) {
                         GooglePillButton(action: {
                             controller.loginWithGoogle(onTokenReceived: onTokenReceived)
                         })
@@ -89,7 +89,7 @@ struct LoginView: View {
                     .accessibilityLabel(String(localized: "Login as a Guest"))
                 }
                 .padding(.top, 8)
-                .padding(.bottom, 16)
+                .padding(.bottom, 8)
                 
                 /// Terms and conditions
                 LinksView()

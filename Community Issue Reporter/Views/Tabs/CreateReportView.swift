@@ -18,6 +18,7 @@ enum ReportNavigationDestination: Hashable {
 // MARK: - View
 struct CreateReportView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @State private var settings = SettingsStore.shared
     @State private var model = ReportDataModel.shared
     @State private var controller = CreateReportController()
     
@@ -55,6 +56,18 @@ struct CreateReportView: View {
                     }
                     .padding(.horizontal)
                 }
+                .sheet(isPresented: $controller.showReportsLimitSheet, onDismiss: controller.handleSheetDismissal) {
+                    ReportLimit() { interaction in
+                        controller.handleUserAction(interaction)
+                    }
+                    .interactiveDismissDisabled()
+                }
+                .task {
+                    await controller.getReportsCount()
+                }
+                .onDisappear {
+                    controller.showReportsLimitSheet = false
+                }
                 .sensoryFeedback(.selection, trigger: controller.feedbackTrigger)
                 .toolbar {
                     ToolbarItem(placement: .automatic) {
@@ -81,6 +94,13 @@ struct CreateReportView: View {
                 .navigationSubtitle("what do you want to report?")
                 .scrollContentBackground(.hidden)
                 
+            }
+            
+        }
+        .overlay {
+            if controller.showReportsLimitSheet {
+                CustomBlurryOverlay(show: $controller.showReportsLimitSheet)
+                    
             }
         }
     }

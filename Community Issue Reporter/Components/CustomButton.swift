@@ -233,7 +233,7 @@ struct ThemedSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration
             .label
-            .font(style == .normal ? Font.body.bold() : Font.title2.bold())
+            .font(style == .normal ? .system(size: 16, weight: .regular) : Font.headline.weight(.bold))
             .kerning(0.3)
             .foregroundStyle(Color.white)
             .background(backgroundView(isPressed: configuration.isPressed))

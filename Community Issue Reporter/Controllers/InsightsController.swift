@@ -20,10 +20,20 @@ final class InsightsController {
     
     func getInsights() async {
         do {
+            isLoading = true
             let response = try await InsightsRepository.shared.insightsForThisMonth()
            insights = response
+        } catch CommonIntercommunicationErrors.serverError(_) {
+            show(error: String(localized: "Server Error"))
         } catch {
-            print(error)
+            
         }
+        
+        isLoading = false
+    }
+    
+    private func show(error: String) {
+        self.message = error
+        self.showAlert = true
     }
 }

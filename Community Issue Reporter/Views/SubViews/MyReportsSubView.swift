@@ -191,6 +191,7 @@ struct ReportCellView: View {
 
 // MARK: - sub view
 struct MyReportsSubView: View {
+    @Environment(NetworkMonitor.self) var networkMonitor
     @Environment(\.colorScheme) private var colorScheme
     @State private var controller = MyReportsController()
     @Binding var path: [InsightsNavigation]
@@ -286,6 +287,15 @@ struct MyReportsSubView: View {
                 }
                 .navigationLinkIndicatorVisibility(.hidden)
                 .listStyle(.plain)
+                .refreshable {
+                    await controller.fetchReports()
+                }
+            }
+            
+            if !networkMonitor.isConnected {
+                NoNetwork {
+                    await controller.fetchReports()
+                }
             }
 
         }
@@ -321,15 +331,15 @@ struct MyReportsSubView: View {
             }
             .ignoresSafeArea()
         }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if controller.isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .controlSize(.regular)
-                }
-            }
-        }
+//        .toolbar {
+//            ToolbarItem(placement: .navigationBarTrailing) {
+//                if controller.isLoading {
+//                    ProgressView()
+//                        .progressViewStyle(.circular)
+//                        .controlSize(.regular)
+//                }
+//            }
+//        }
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(subViewName)
         
@@ -398,5 +408,6 @@ struct MyReportsSubView: View {
     @State var path: [InsightsNavigation] = []
     return NavigationStack {
         MyReportsSubView(path: $path, subViewName: "My Reports")
+            .environment(NetworkMonitor())
     }
 }

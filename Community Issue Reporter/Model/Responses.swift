@@ -232,3 +232,7 @@ struct VotingResolution: Decodable {
     let hasVoted: Bool
     let voteCount: Int
 }
+
+struct ReportCounter: Decodable {
+    let count: Int
+}

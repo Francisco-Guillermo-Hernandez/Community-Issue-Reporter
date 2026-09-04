@@ -33,8 +33,6 @@ class SubscriptionManager: NSObject {
     func performLogin() async {
         let userId = KeychainService.loadToken(key: .userId)
         guard let userId else { return }
-        
-        print("[User ID: \(userId)]")
         await performUserLogin(userId)
     }
     
@@ -46,6 +44,11 @@ class SubscriptionManager: NSObject {
             DispatchQueue.main.async {
                 self?.customerInfo = customerInfo
                 self?.isPro = customerInfo?.entitlements.all["Reportamelo Pro"]?.isActive == true
+                if (self?.isPro) != nil {
+                    _ = KeychainService.save(key: .planType, value: PlanType.paid.rawValue)
+                } else {
+                    _ = KeychainService.save(key: .planType, value: PlanType.freemium.rawValue)
+                }
             }
         }
     }

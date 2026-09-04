@@ -44,6 +44,7 @@ struct MapPickerView: View {
     @State private var isSearchActive: Bool = false
     @State private var showTraffic: Bool = false
     @State private var showLabels: Bool = true
+    @State private var notAllowedCountry: Bool = false
     @State private var selectedMode: MapModeOption = .standard
     @Environment(\.dismissSearch) private var dismissSearch
     
@@ -120,6 +121,14 @@ struct MapPickerView: View {
                     .searchFocused($isSearchFocused)
                     .onChange(of: searchText) { _, newValue in
                         searchCompleter.update(query: newValue, region: currentRegion(c: cameraPosition))
+                    }
+                    .alert(String(localized: "Out of bounds"), isPresented: $notAllowedCountry) {
+                        Button(String(localized: "OK"), role: .close) {
+                            cameraPosition = AuthViewModel.shared.cameraPosition
+                            notAllowedCountry = false
+                        }
+                    } message: {
+                        Text(String(localized: "This country is not supported at the moment."))
                     }
                     
                     centerMarker
@@ -312,6 +321,10 @@ struct MapPickerView: View {
               let address = mapItem.address?.fullAddress ??  mapItem.address?.shortAddress ?? "Unknown"
               
               let country = mapItem.addressRepresentations?.region?.identifier ?? "SV"
+              
+              let isAllowedCountry = isAllowedCountry(country)
+              
+              notAllowedCountry = !isAllowedCountry
               
               var cityName = mapItem.addressRepresentations?.cityName ?? "San Salvador"
               /// Workaround

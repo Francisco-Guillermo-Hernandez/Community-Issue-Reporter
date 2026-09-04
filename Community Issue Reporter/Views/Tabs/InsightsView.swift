@@ -37,6 +37,17 @@ struct InsightsView: View {
                             .padding(.bottom, 48)
                            
                         InsightsCalendarView(path: $controller.navigationPath, activityData: controller.insights.recentActivity)
+                        
+                    }
+                }
+                .toolbar {
+                    if controller.isLoading {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                                .controlSize(.regular)
+                        }
+                        .sharedBackgroundVisibility(.hidden)
                     }
                 }
                 .navigationDestination(for: InsightsNavigation.self) { destination in

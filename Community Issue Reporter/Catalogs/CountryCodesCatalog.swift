@@ -7,11 +7,13 @@
 
 import Foundation
 
-enum CountryCode: String, Codable, CaseIterable {
+enum CountryCode: String, Identifiable, Codable, CaseIterable {
     case SV = "SV"
     case US = "US"
     case GT = "GT"
     case NI = "NI"
+    
+    var id: String { self.rawValue }
     
     var iso3166Alpha3Code: String {
         switch self {

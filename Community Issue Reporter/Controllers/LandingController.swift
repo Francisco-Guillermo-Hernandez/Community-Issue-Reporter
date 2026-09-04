@@ -226,6 +226,7 @@ final class LandingController {
         _ = KeychainService.save(key: .userId, value: data.userId)
         _ = KeychainService.save(key: .profileId, value: data.profileId)
         _ = KeychainService.save(key: .userType, value: data.userType.description)
+        _ = KeychainService.save(key: .planType, value: PlanType.freemium.rawValue)
     }
     
     private func setSettingsFromAuthenticatedUser(with data: PublicUserData) -> Void {
@@ -271,15 +272,17 @@ final class LandingController {
         AuthViewModel.shared.selectedCity = nil
         
         /// Remove values from devices' keychain
+        ///
         _ = KeychainService.deleteToken(key: .name)
         _ = KeychainService.deleteToken(key: .email)
         _ = KeychainService.deleteToken(key: .query)
         _ = KeychainService.deleteToken(key: .userId)
         _ = KeychainService.deleteToken(key: .deviceId)
-        _ = KeychainService.deleteToken(key: .authMethod)
+        _ = KeychainService.deleteToken(key: .planType)
         _ = KeychainService.deleteToken(key: .mutation)
         _ = KeychainService.deleteToken(key: .userType)
         _ = KeychainService.deleteToken(key: .profileId)
+        _ = KeychainService.deleteToken(key: .authMethod)
         _ = KeychainService.deleteToken(key: .landingPageComplete)
         _ = KeychainService.deleteToken(key: .sessionStateVerification)
         

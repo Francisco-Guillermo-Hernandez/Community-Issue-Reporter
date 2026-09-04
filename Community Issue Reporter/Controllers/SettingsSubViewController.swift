@@ -58,14 +58,11 @@ final class SettingsSubViewController {
                     )
                 )
                 
-                print("refreshing")
-                
                 /// Refresh token
                 try await UserRepository.shared.refresh()
                 isPrivacySettingsUpdated = true
                 
             } catch CommonIntercommunicationErrors.networkError(let error) {
-                print(error)
                 showNetworkError = true
             } catch {
                 print(error)

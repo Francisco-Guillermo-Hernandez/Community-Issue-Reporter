@@ -121,8 +121,11 @@ final class MapExplorerController {
                 statusIds: statusIds
             )
             
+            #if DEBUG
             print("[QUERY] : debugging")
             dump(query)
+            
+            #endif
             
             let stream = MapExplorerRepository.shared.listReportsStream(
                 for: query,

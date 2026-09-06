@@ -101,6 +101,31 @@ final class Report: Identifiable, Codable, Hashable {
             self.shareUrl = shareUrl
             self.observations = observations
         }
+
+    func update(from other: Report) {
+        self.coordinate = other.coordinate
+        self.address = other.address
+        self.title = other.title
+        self.description = other.description
+        self.severityId = other.severityId
+        self.statusId = other.statusId
+        self.issueTypeId = other.issueTypeId
+        self.matterToSolveId = other.matterToSolveId
+        self.reportedAt = other.reportedAt
+        self.cellIndex = other.cellIndex
+        self.olc = other.olc
+        self.createdAt = other.createdAt
+        self.updatedAt = other.updatedAt
+        self.reportedBy = other.reportedBy
+        self.suggestedTitle = other.suggestedTitle
+        self.suggestedDescription = other.suggestedDescription
+        self.reportState = other.reportState
+        self.attachments = other.attachments
+        self.cityId = other.cityId
+        self.reportContainer = other.reportContainer
+        self.shareUrl = other.shareUrl
+        self.observations = other.observations
+    }
 }
 
 

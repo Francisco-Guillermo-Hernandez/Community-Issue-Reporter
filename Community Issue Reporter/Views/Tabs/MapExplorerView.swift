@@ -64,6 +64,9 @@ struct MapExplorerView: View {
                     UserDefaults.standard.set(context.region.span.latitudeDelta, forKey: "map_latitude_delta")
                     UserDefaults.standard.set(context.region.span.longitudeDelta, forKey: "map_longitude_delta")
                     
+                    print("delta latitude: \(context.region.span.latitudeDelta)")
+                    print("delta longitude: \(context.region.span.longitudeDelta)")
+                    
                     if settings.saveLastLocation {
                         appState.updateLastLocation(
                             latitude: context.camera.centerCoordinate.latitude,

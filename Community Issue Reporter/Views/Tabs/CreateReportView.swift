@@ -77,6 +77,7 @@ struct CreateReportView: View {
                                     Text(issueType.title).tag(issueType.title)
                                 }
                             }
+                            
                             Picker("Severity", selection: $controller.severity) {
                                 ForEach(Severity.allCases, id: \.self) { severity in
                                     Text(severity.title).tag(severity.title)

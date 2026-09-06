@@ -49,14 +49,24 @@ final class MyReportsController {
                 
                 let newReports = documents.map { $0.toModel() }
                 
+                var mergedReports: [Report] = []
+                for newReport in newReports {
+                    if let existing = self.reports.first(where: { $0.id == newReport.id }) {
+                        existing.update(from: newReport)
+                        mergedReports.append(existing)
+                    } else {
+                        mergedReports.append(newReport)
+                    }
+                }
+                
                 if loadMore {
                     if self.reports.count >= startIndex {
-                        self.reports = Array(self.reports.prefix(startIndex)) + newReports
+                        self.reports = Array(self.reports.prefix(startIndex)) + mergedReports
                     } else {
-                        self.reports.append(contentsOf: newReports)
+                        self.reports.append(contentsOf: mergedReports)
                     }
                 } else {
-                    self.reports = newReports
+                    self.reports = mergedReports
                 }
             }
         } catch {

@@ -128,5 +128,33 @@ let mattersToResolve: [MatterToSolve] = [
         image: "pixel-shot-kxTwgF_uHow-unsplash",
         suggestions: ["improve waste collection systems", "increase recycling programs", "promote waste reduction", "organize community clean-ups", "implement recycling incentives", "encourage composting", "provide information on recycling and waste reduction", "request for volunteers to assist with waste management tasks"],
         primaryEntity: .municipality
+    ),
+    MatterToSolve(
+        id: 9,
+        title: String(
+            localized: "Animal abuse"
+        ),
+        description: String(
+            localized: "Animal abuse, animal cruelty"
+        ),
+        issueType: .other,
+        severity: .high,
+        image: "thebugadi-y7YP97DLqWU-unsplash",
+        suggestions: ["animal welfare programs", "animal control services", "community outreach and education campaigns"],
+        primaryEntity: .municipality
+    ),
+    MatterToSolve(
+        id: 10,
+        title: String(
+            localized: "Lid sewer"
+        ),
+        description: String(
+            localized: "Missing lid sewer"
+        ),
+        issueType: .road,
+        severity: .medium,
+        image: "zoshua-colah-XiJZ4r76Uik-unsplash",
+        suggestions: ["lid", "sewer", "drainage"],
+        primaryEntity: .municipality
     )
 ]

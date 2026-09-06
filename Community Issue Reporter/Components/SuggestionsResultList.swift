@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
+@_spi(Experimental) import RevenueCatAdMob
 
 struct SuggestionsResultList: View {
     
+    @Environment(SubscriptionManager.self) var subscriptionManager
     @Binding var searchText: String
     @State var searchCompleter: SearchCompleter
     var applySuggestion: (SearchSuggestion) -> Void
@@ -21,7 +24,7 @@ struct SuggestionsResultList: View {
             ContentUnavailableView.search(text: String(localized: "No matches found."))
         } else {
             List {
-                ForEach(searchCompleter.suggestions) { suggestion in
+                ForEach(Array(searchCompleter.suggestions.enumerated()), id: \.element.id) { index, suggestion in
                     Button {
                         applySuggestion(suggestion)
                     } label: {
@@ -55,6 +58,17 @@ struct SuggestionsResultList: View {
                     }
                     .buttonStyle(.plain)
                     .listRowBackground(Color.clear)
+                    
+                    if !subscriptionManager.isPro, AdBackoffUtils.shouldShowAd(at: index) {
+                        if let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_NATIVE_AD_UNIT") as? String, !adUnitID.isEmpty {
+                            AdMobNativeAdView(adUnitID: adUnitID)
+                                .frame(height: 120)
+                                .padding(.horizontal)
+                                .padding(.bottom, .themeSpacing * 4)
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                        }
+                    }
                 }
             }
             .listStyle(.plain)

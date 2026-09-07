@@ -8,6 +8,7 @@
 import Foundation
 internal import Combine
 import Observation
+import FirebaseCrashlytics
 
 @MainActor
 @Observable
@@ -167,12 +168,17 @@ class ReportController {
                     /// Closure
                     onComplete()
                 } catch CommonIntercommunicationErrors.invalidPetition(let code) {
+                    Crashlytics.crashlytics().setCustomValue(model, forKey: "report_model")
+
                     showAlert(message: code)
                 } catch CommonIntercommunicationErrors.networkError(let error) {
+                    Crashlytics.crashlytics().setCustomValue(model, forKey: "report_model")
                     showAlert(message: error)
                 } catch CommonIntercommunicationErrors.serverError {
+                    Crashlytics.crashlytics().setCustomValue(model, forKey: "report_model")
                     showAlert(message: "Something went wrong, please try again later")
                 } catch {
+                    Crashlytics.crashlytics().setCustomValue(model, forKey: "report_model")
                     showAlert(message: error.localizedDescription)
                 }
             }

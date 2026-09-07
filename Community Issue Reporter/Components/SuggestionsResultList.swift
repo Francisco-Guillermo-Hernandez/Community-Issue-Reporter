@@ -62,7 +62,7 @@ struct SuggestionsResultList: View {
                     if !subscriptionManager.isPro, AdBackoffUtils.shouldShowAd(at: index) {
                         if let adUnitID = Bundle.main.object(forInfoDictionaryKey: "ADMOB_NATIVE_AD_UNIT") as? String, !adUnitID.isEmpty {
                             AdMobNativeAdView(adUnitID: adUnitID)
-                                .frame(height: 120)
+                                .frame(height: 220)
                                 .padding(.horizontal)
                                 .padding(.bottom, .themeSpacing * 4)
                                 .listRowBackground(Color.clear)

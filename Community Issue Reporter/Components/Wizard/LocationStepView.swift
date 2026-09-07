@@ -23,11 +23,17 @@ struct LocationStepView: View {
                     MiniMapLocator(
                         coordinate: $model.report.coordinate,
                         locator: $model.locator,
+                        isLoading: $model.isLoadingAddress,
                         onExpandMap: { _ in
                             showMapPickerSheet.toggle()
                         },
-                        onChange: {
-                            model.isDifferentLocation = true
+                        onChange: { type in
+                            
+                            print("type: \(type)")
+                            
+                            if type == .user {
+                                model.isDifferentLocation = true
+                            }
                         }
                     )
                     
@@ -38,7 +44,7 @@ struct LocationStepView: View {
                 )
                 .cornerRadius(.themeRadius * 2)
                 .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1) // shadow-sm
-                .sheet(isPresented: $showMapPickerSheet)  {
+                .sheet(isPresented: $showMapPickerSheet) {
                     
                     ZStack(alignment: .top) {
 //                        // Screen Background
@@ -65,7 +71,7 @@ struct LocationStepView: View {
                                 model.updateLocator(with: locator)
                                 self.showMapPickerSheet = false
                             },
-                            onChange: {
+                            onChange: { _ in
                                 model.isDifferentLocation = true
                             }
                         )

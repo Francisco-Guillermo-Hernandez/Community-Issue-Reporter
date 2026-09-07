@@ -208,10 +208,11 @@ struct ReportWizardContainer: View {
                     type: .secondary,
                     style: .prominent,
                     icon: "",
-                    isLoading: $controller.isLoading
+                    isLoading: isLoading
                 )
                 .disabled(disableButton)
                 .accessibilityIdentifier("Report\(controller.currentStep.rawValue)Button")
+                .accessibilityLabel(controller.buttonMessage)
                 
             } else {
                 ThemedButton(
@@ -227,10 +228,21 @@ struct ReportWizardContainer: View {
     }
   
     
-    // MARK: - validations
+    // MARK: - computed validations
+    
+    var isLoading: Binding<Bool> {
+        Binding<Bool> (
+            get: {
+                controller.isLoading || model.isLoadingAddress
+            },
+            set: { _ in
+                /// Is not necessary
+            }
+        )
+    }
     
     var isLocationStepReadyToContinue: Bool {
-        model.isDifferentLocation
+        model.isDifferentLocation && !model.locator.cityId.isEmpty
     }
  
     var isReadyToContinue: Bool {

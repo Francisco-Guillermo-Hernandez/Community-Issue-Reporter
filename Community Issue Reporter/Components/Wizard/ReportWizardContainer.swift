@@ -12,6 +12,7 @@ import SwiftUI
 
 struct ReportWizardContainer: View {
     @Bindable var model: ReportDataModel
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
     @State private var controller: ReportController
     @FocusState private var focusedField: WizardElements?
@@ -54,9 +55,6 @@ struct ReportWizardContainer: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                /// FIXED HEADER
-//                wizardHeader()
-//                    .padding()
                 
                 /// STEP FLOW
                 ScrollViewReader { proxy in
@@ -66,7 +64,8 @@ struct ReportWizardContainer: View {
                                 StepCardView(
                                     step: step,
                                     currentStep: controller.currentStep,
-                                    metadata: stepsMetadata[step.metadataKey]
+                                    metadata: stepsMetadata[step.metadataKey],
+                                    state: model.report.reportState
                                 ) {
                                     Group {
                                         switch step {
@@ -131,13 +130,24 @@ struct ReportWizardContainer: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            
             wizardFooter()
                 .padding(.horizontal)
-                .padding(.top, 0)
+                .padding(.top, 36)
                 .padding(.bottom)
+                .background(
+                    LinearGradient(
+                        stops: [
+                            .init(color:  .black.opacity(0.0), location: 0),
+                            .init(color: colorScheme == .dark ? .black.opacity(0.8) : .white.opacity(0.8), location: 0.3),
+                            .init(color: colorScheme == .dark ? .black : .white, location: 0.7)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .ignoresSafeArea(edges: .bottom)
+                )
         }
-        .navigationTitle("Create a Report")
+        .navigationTitle(controller.getNavigationTitle(model.report.reportState))
         .navigationSubtitle(String(localized: "Step \(controller.currentStep.rawValue) of 4"))
         .navigationBarTitleDisplayMode(.inline)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: controller.currentStep) { oldValue, newValue in

@@ -32,6 +32,8 @@ struct CustomTabBar: View {
                             .glassEffect(.regular.interactive(), in: .circle)
                             .contentShape(.circle)
                     }
+                    .accessibilityLabel("Location")
+                    .accessibilityIdentifier("LocationButton")
                 }
                 
                 ExpandableSearchBar()

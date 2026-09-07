@@ -13,6 +13,7 @@ struct StepCardView<Content: View>: View {
     let step: ReportStep
     let currentStep: ReportStep
     let metadata: StepsMetadata?
+    let state: ReportStates
     @ViewBuilder let content: Content
     
     var body: some View {
@@ -57,12 +58,12 @@ struct StepCardView<Content: View>: View {
                 HStack(spacing: .themeSpacing * 2) {
                     Image(systemName: metadata?.icon ?? "")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(step < currentStep ? Color.theme.foreground : Color.theme.foreground.opacity(0.7))
+                        .foregroundColor(step < currentStep ? Color.theme.foreground : Color.theme.foreground.opacity(opacity))
                         .frame(width: 24, height: 24)
                     
                     Text(metadata?.title ?? "")
                         .font(.headline)
-                        .foregroundColor(step < currentStep ? Color.theme.foreground : Color.theme.foreground.opacity(0.7))
+                        .foregroundColor(step < currentStep ? Color.theme.foreground : Color.theme.foreground.opacity(opacity))
                     
                     Spacer()
                     
@@ -102,7 +103,11 @@ struct StepCardView<Content: View>: View {
         if step == currentStep {
             return 1.0
         } else {
-            return step < currentStep ? 0.75 : 0.55
+            if state == .modifying {
+                return 1.0
+            } else {
+                return step < currentStep ? 0.75 : 0.55
+            }
         }
     }
 }
@@ -110,7 +115,11 @@ struct StepCardView<Content: View>: View {
 #Preview {
     
     
-    StepCardView(step: .details, currentStep: .confirmation, metadata: stepsMetadata["Details"]) {
+    StepCardView(step: .details, currentStep: .confirmation, metadata: stepsMetadata["Details"], state: .modifying) {
+        
+    }
+    
+    StepCardView(step: .details, currentStep: .confirmation, metadata: stepsMetadata["Details"], state: .new) {
         
     }
 }

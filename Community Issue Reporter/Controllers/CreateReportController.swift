@@ -36,6 +36,13 @@ final class CreateReportController {
     
     private func checkState() -> Void {
         
+        /// lets check the entitlement  to know if the current user have an active subscription
+        SubscriptionManager.shared.checkEntitlement()
+        
+        /// lets get if its pro
+        let isPro = SubscriptionManager.shared.isPro
+        
+        /// get plan type
         let planType = KeychainService.getToken(.planType)
         
         if planType.isEmpty || planType == PlanType.freemium.rawValue {
@@ -66,6 +73,7 @@ final class CreateReportController {
             let currentDate = Date()
             let calendar = Calendar.current
             
+            /// reset the countdown each month
             if let lastDate = settings.lastReportDate {
                 let currentMonth = calendar.component(.month, from: currentDate)
                 let currentYear = calendar.component(.year, from: currentDate)
@@ -79,7 +87,6 @@ final class CreateReportController {
             
             reportsCount = settings.reportsCount
         } else {
-            SubscriptionManager.shared.checkEntitlement()
             let reportCount = await CounterRepository.shared.count()
              
              if let reportCount {
@@ -89,8 +96,6 @@ final class CreateReportController {
                  reportsCount = settings.reportsCount
              }
         }
-        
-        print("count: \(reportsCount)")
         
         /// Evaluates
        checkState()
@@ -116,6 +121,7 @@ final class CreateReportController {
         }
     }
     
+    /// Perform actions
     func handleUserAction(_ interaction: InteractionType) -> Void {
         
         if interaction == .paidASubscription {
@@ -133,6 +139,7 @@ final class CreateReportController {
         
     }
     
+    /// Route user to the first tab 
     private func noThanks() -> Void {
         Task {
             showReportsLimitSheet = false

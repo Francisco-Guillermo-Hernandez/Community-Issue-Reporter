@@ -101,6 +101,9 @@ class ReportController {
             
             shareableLink = url
             
+            print("modified:")
+            dump(attachments)
+            
             let result = try await ReportRepository.shared.update(model.report)
             if result == .updated {
                 _ = try await submitGroupedAttachments(with: attachments, using: model)
@@ -118,7 +121,14 @@ class ReportController {
             
             if model.report.reportState == .modifying {
                
+                /// Updating elements
                 await modify(using: model, with: attachments)
+                
+                /// remove elements
+                model.removeAttachments()
+                
+                /// Closure
+                onComplete()
                
             } else {
                 
@@ -189,6 +199,10 @@ class ReportController {
         if let prev = ReportStep(rawValue: currentStep.rawValue - 1) {
             currentStep = prev
         }
+    }
+    
+    func getNavigationTitle(_ reportState: ReportStates) -> String {
+        return reportState == .new ? String(localized: "Create a Report") : String(localized: "Modifying a Report")
     }
     
     var buttonMessage: String {

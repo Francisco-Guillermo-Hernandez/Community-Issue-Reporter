@@ -39,6 +39,7 @@ final class MapExplorerController {
     var isSearchExpanded: Bool = false
     var isSearchActivated: Bool = false
     var searchItems: [String] = []
+    var isAwaitingLocation = false
     
     init() {
         self.searchItems = [
@@ -303,7 +304,11 @@ final class MapExplorerController {
     func centerMapOnUserLocation() {
         guard let authViewModel = authViewModel else { return }
         locationManager.requestAuthorization()
-        guard let location = locationManager.lastLocation else { return }
+        guard let location = locationManager.lastLocation else {
+            isAwaitingLocation = true
+            return
+        }
+        isAwaitingLocation = false
         hasCenteredOnUser = true
         authViewModel.cameraPosition = .region(
             MKCoordinateRegion(

@@ -124,7 +124,9 @@ struct MapExplorerView: View {
             monetizationManager.requestTrackingAuthorization()
         }
         .onChange(of: controller.locationManager.lastLocation) { _, newLocation in
-            // Handled or observed if needed
+            if controller.isAwaitingLocation, newLocation != nil {
+                controller.centerMapOnUserLocation()
+            }
         }
         .fullScreenCover(isPresented: $controller.showUserProfileOverlay) {
             UserProfileView()

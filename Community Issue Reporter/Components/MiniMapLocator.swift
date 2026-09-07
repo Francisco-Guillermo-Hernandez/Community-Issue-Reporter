@@ -20,6 +20,7 @@ struct MiniMapLocator: View {
     @State private var selectedCoordinate: CLLocationCoordinate2D
     @State private var locationManager = LocationManager()
     @State private var notAllowedCountry: Bool = false
+    @State private var isAwaitingLocation: Bool = false
     
     private let span = MKCoordinateSpan(latitudeDelta: 0.00704, longitudeDelta: 0.00704)
     
@@ -83,6 +84,11 @@ struct MiniMapLocator: View {
                         )
                     }
                 }
+                .onChange(of: locationManager.lastLocation) { _, newLocation in
+                    if isAwaitingLocation, newLocation != nil {
+                        centerOnUser()
+                    }
+                }
                 .alert(String(localized: "Out of bounds"), isPresented: $notAllowedCountry) {
                     Button(String(localized: "OK"), role: .close) {
                         cameraPosition = AuthViewModel.shared.cameraPosition
@@ -119,6 +125,7 @@ struct MiniMapLocator: View {
                     .background(Color.black.opacity(0.001))
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("LocateButton")
             .accessibilityLabel("Locate")
             
             Button {
@@ -148,6 +155,7 @@ struct MiniMapLocator: View {
     
     private func centerOnUser() {
         if let lastLocation = locationManager.lastLocation {
+            isAwaitingLocation = false
             cameraPosition = .region(
                 MKCoordinateRegion(
                     center: lastLocation.coordinate,
@@ -157,6 +165,7 @@ struct MiniMapLocator: View {
             selectedCoordinate = lastLocation.coordinate
             onChange()
         } else {
+            isAwaitingLocation = true
             locationManager.requestAuthorization()
         }
     }

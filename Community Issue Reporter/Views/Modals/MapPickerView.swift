@@ -45,6 +45,7 @@ struct MapPickerView: View {
     @State private var showTraffic: Bool = false
     @State private var showLabels: Bool = true
     @State private var notAllowedCountry: Bool = false
+    @State private var isAwaitingLocation: Bool = false
     @State private var selectedMode: MapModeOption = .standard
     @Environment(\.dismissSearch) private var dismissSearch
     
@@ -121,6 +122,11 @@ struct MapPickerView: View {
                     .searchFocused($isSearchFocused)
                     .onChange(of: searchText) { _, newValue in
                         searchCompleter.update(query: newValue, region: currentRegion(c: cameraPosition))
+                    }
+                    .onChange(of: locationManager.lastLocation) { _, newLocation in
+                        if isAwaitingLocation, newLocation != nil {
+                            centerOnUser()
+                        }
                     }
                     .alert(String(localized: "Out of bounds"), isPresented: $notAllowedCountry) {
                         Button(String(localized: "OK"), role: .close) {
@@ -295,6 +301,7 @@ struct MapPickerView: View {
 
     private func centerOnUser() {
         if let lastLocation = locationManager.lastLocation {
+            isAwaitingLocation = false
             cameraPosition = .region(
                 MKCoordinateRegion(
                     center: lastLocation.coordinate,
@@ -304,6 +311,7 @@ struct MapPickerView: View {
             selectedCoordinate = lastLocation.coordinate
             onChange()
         } else {
+            isAwaitingLocation = true
             locationManager.requestAuthorization()
         }
     }

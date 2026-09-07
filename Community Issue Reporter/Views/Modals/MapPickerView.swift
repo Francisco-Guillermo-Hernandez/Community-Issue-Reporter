@@ -52,11 +52,11 @@ struct MapPickerView: View {
     private let span = MKCoordinateSpan(latitudeDelta: 0.00088, longitudeDelta: 0.00088)
     
     var onConfirm: OnConfirm
-    var onChange: () -> Void
+    var onChange: (ChangeLocationType) -> Void
     
     init(coordinate: Binding<Coordinate>,
          locator: Binding<Locator>,
-         onConfirm: OnConfirm = nil, onChange: @escaping @Sendable () -> Void) {
+         onConfirm: OnConfirm = nil, onChange: @escaping @Sendable (ChangeLocationType) -> Void) {
     
         self._coordinate = coordinate
         self._locator = locator
@@ -108,12 +108,12 @@ struct MapPickerView: View {
                     .allowsHitTesting(true)
                     .onMapCameraChange { context in
                         selectedCoordinate = context.camera.centerCoordinate
+                        locator.cityId = ""
+                        ReportDataModel.shared.locator.cityId = ""
                         handleMapMovement(center: context.camera.centerCoordinate)
                     }
                     .onMapCameraChange(frequency: .onEnd) { context in
-                        if cameraPosition.positionedByUser {
-                            onChange()
-                        }
+                        // onChange will be called when handleMapMovement finishes
                     }
                     .task {
                         self.isSearchFocused = false
@@ -299,6 +299,8 @@ struct MapPickerView: View {
         }
     }
 
+    @State private var geocodeTask: Task<Void, Never>?
+    
     private func centerOnUser() {
         if let lastLocation = locationManager.lastLocation {
             isAwaitingLocation = false
@@ -309,7 +311,9 @@ struct MapPickerView: View {
                 )
             )
             selectedCoordinate = lastLocation.coordinate
-            onChange()
+            locator.cityId = ""
+            ReportDataModel.shared.locator.cityId = ""
+            handleMapMovement(center: lastLocation.coordinate)
         } else {
             isAwaitingLocation = true
             locationManager.requestAuthorization()
@@ -319,11 +323,13 @@ struct MapPickerView: View {
     private func handleMapMovement(center: CLLocationCoordinate2D) {
           let location = CLLocation(latitude: center.latitude, longitude: center.longitude)
 
-          Task {
+          geocodeTask?.cancel()
+          geocodeTask = Task {
               try? await Task.sleep(for: .milliseconds(500))
               guard !Task.isCancelled else { return }
               guard let request = MKReverseGeocodingRequest(location: location) else { return }
               let mapItems = try? await request.mapItems
+              guard !Task.isCancelled else { return }
               guard let mapItem = mapItems?.first else { return }
               
               let address = mapItem.address?.fullAddress ??  mapItem.address?.shortAddress ?? "Unknown"
@@ -335,14 +341,30 @@ struct MapPickerView: View {
               notAllowedCountry = !isAllowedCountry
               
               var cityName = mapItem.addressRepresentations?.cityName ?? "San Salvador"
+              
+              
               /// Workaround
               /// Rename the city name because in Apple Maps is Wrong!
               if cityName == "Sesuntepeque" {
                   cityName = "Sensuntepeque"
               }
-              self.locator = LocatorDAO.shared.findBy(countryCode: country, cityName: cityName )
-              self.locator.address = address
-              ReportDataModel.shared.updateLocator(with: locator)
+              
+              if cityName == "Unión" || cityName == "Union" {
+                  cityName = "La Unión"
+              }
+              
+              var newLocator = LocatorDAO.shared.findBy(countryCode: country, cityName: cityName )
+              if newLocator.cityId.isEmpty {
+                  newLocator = LocatorDAO.shared.findByNearest(countryCode: country, lat: location.coordinate.latitude, lng: location.coordinate.longitude)
+              }
+              newLocator.address = address
+              
+              await MainActor.run {
+                  self.locator = newLocator
+                  ReportDataModel.shared.updateLocator(with: newLocator)
+                  dump(newLocator)
+                  self.onChange(.user)
+              }
           }
       }
 }
@@ -364,6 +386,8 @@ func getLocation(c coordinate: Coordinate) -> CLLocationCoordinate2D {
 #Preview {
     @Previewable @State var coordinate: Coordinate = .init(lat: 13.6929, lng: -89.2182)
     @Previewable @State var locator: Locator = .init()
-    MapPickerView(coordinate: $coordinate, locator: $locator, onChange: {})
+    MapPickerView(coordinate: $coordinate, locator: $locator, onChange: { _ in
+        
+    })
 
 }

@@ -81,12 +81,6 @@ struct MapExplorerView: View {
         .ignoresSafeArea(edges: .bottom)
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 16) {
-//                Text("Repórtamelo")
-//                    .font(.custom("Lora", size: 16, relativeTo: .title))
-//                    .padding(.top, 16)
-//                    .padding(.horizontal)
-//                    .kerning(0.6)
-//                    .frame(maxWidth: .infinity, alignment: .leading)
                 CustomTabBar(
                     items: controller.searchItems,
                     searchHint: String(localized: "Reports, Petitions, Places..."),

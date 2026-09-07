@@ -5942,7 +5942,7 @@
         "es-419" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tienes el control de tus datos y puedes optar por borrar tu cuenta en cualquier momento."
+            "value" : "Tienes el control de tus datos y puedes optar por borrar tu cuenta en cualquier momento. Algunos datos pueden tardar en borrarse debido a las políticas de cache implementadas."
           }
         }
       }

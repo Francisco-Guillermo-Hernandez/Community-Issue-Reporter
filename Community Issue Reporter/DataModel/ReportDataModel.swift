@@ -24,6 +24,7 @@ final class ReportDataModel {
     var isDifferentLocation: Bool = false
     var titlePlaceholder: String = "e.g. Street Repair"
     var descriptionPlaceholder: String = "e.g. Street is blocked"
+    var isLoadingAddress: Bool = false
     private init() {
         self.reportSession = .init(
             reportContainer: "", 

@@ -65,8 +65,54 @@ final class LocatorDAO {
         return locator
     }
     
-    func findBy(countryCode: String, cityNameSortKey: String) -> Locator {
-        return .init()
+    func findByNearest(countryCode: String, lat: Double, lng: Double) -> Locator {
+        let query = "SELECT countryCode, firstLevel, secondLevel, thirdLevel, groupingId, cityId, groupingName, groupingNameCode, lat, lng, geoCode, zipCode, isCapitalCity, isDepartmentalCapital, cityNameSortKey, legalGroupName FROM cities WHERE countryCode = ?;"
+        var statement: OpaquePointer? = nil
+        
+        let bestLocator = Locator()
+        var minDistance: Double = .infinity
+        
+        let status = sqlite3_prepare(dbManager.db, query, -1, &statement, nil)
+        
+        if status == SQLITE_OK {
+            sqlite3_bind_text(statement, 1, (countryCode as NSString).utf8String, -1, nil)
+            
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let currentLat = sqlite3_column_double(statement, 8)
+                let currentLng = sqlite3_column_double(statement, 9)
+                
+                let latDiff = currentLat - lat
+                let lngDiff = currentLng - lng
+                let distance = latDiff * latDiff + lngDiff * lngDiff // Squared distance is sufficient for nearest comparison
+                
+                if distance < minDistance {
+                    minDistance = distance
+                    
+                    bestLocator.countryCode = string(from: statement, at: 0)
+                    bestLocator.firstLevel = string(from: statement, at: 1)
+                    bestLocator.secondLevel = string(from: statement, at: 2)
+                    bestLocator.thirdLevel = string(from: statement, at: 3)
+                    bestLocator.groupingId = string(from: statement, at: 4)
+                    bestLocator.cityId = string(from: statement, at: 5)
+                    bestLocator.groupingName = string(from: statement, at: 6)
+                    bestLocator.groupingNameCode = string(from: statement, at: 7)
+                    bestLocator.lat = currentLat
+                    bestLocator.lng = currentLng
+                    bestLocator.geoCode = string(from: statement, at: 10)
+                    bestLocator.zipCode = string(from: statement, at: 11)
+                    bestLocator.isCapitalCityRaw = Int(sqlite3_column_int(statement, 12))
+                    bestLocator.isDepartmentalCapitalRaw = Int(sqlite3_column_int(statement, 13))
+                    bestLocator.cityNameSortKey = string(from: statement, at: 14)
+                    bestLocator.legalGroupName = string(from: statement, at: 15)
+                }
+            }
+        } else {
+            let errorMessage = String(cString: sqlite3_errmsg(dbManager.db))
+            print("Error preparing statement: \(errorMessage)")
+        }
+        
+        sqlite3_finalize(statement)
+        return bestLocator
     }
     
     func findBy(countryCode: String, cityId: String) -> Locator {

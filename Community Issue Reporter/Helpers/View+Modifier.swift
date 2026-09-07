@@ -39,13 +39,7 @@ struct SimpleCellViewModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .foregroundColor(.theme.foreground)
-//            .padding(0)
-//            .listRowSpacing(0)
-            
-//            .padding()
-//            .background(Color.theme.cardBackground)
             .listRowBackground(Color.clear)
-//            .listRowSeparator(.hidden)
             .listRowInsets(
                 EdgeInsets(
                     top: 16,
@@ -80,7 +74,7 @@ extension View {
         thirdLevel: "San Salvador",
         ZipCode: "1101",
         legalGroupName: "Distrito de San Salvador",
-        coordinates: .init(lat: 13.701270, lng: -89.224432),
+        coordinates: .init(lat: 13.6979857, lng: -89.1918083),
         isCapitalCity: 1,
         isDepartmentalCapital: 1
     )

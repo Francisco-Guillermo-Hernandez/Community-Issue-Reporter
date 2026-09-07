@@ -41,15 +41,20 @@ class SubscriptionManager: NSObject {
             if let error = error {
                 print("Error fetching customer info: \(error.localizedDescription)")
             }
+            
             DispatchQueue.main.async {
                 self?.customerInfo = customerInfo
                 self?.isPro = customerInfo?.entitlements.all["Reportamelo Pro"]?.isActive == true
-                if (self?.isPro) != nil {
-                    _ = KeychainService.save(key: .planType, value: PlanType.paid.rawValue)
-                } else {
-                    _ = KeychainService.save(key: .planType, value: PlanType.freemium.rawValue)
-                }
+                self?.setPlanType()
             }
+        }
+    }
+    
+    func setPlanType() {
+        if isPro {
+            _ = KeychainService.save(key: .planType, value: PlanType.paid.rawValue)
+        } else {
+            _ = KeychainService.save(key: .planType, value: PlanType.freemium.rawValue)
         }
     }
     
@@ -59,6 +64,7 @@ class SubscriptionManager: NSObject {
           let (customerInfo, created) = try await Purchases.shared.logIn(userId)
             self.customerInfo = customerInfo
             self.isPro = customerInfo.entitlements.all["Reportamelo Pro"]?.isActive == true
+            self.setPlanType()
             self.created = created
         } catch {
             print("RevenueCat login failed: \(error.localizedDescription)")
@@ -74,6 +80,7 @@ class SubscriptionManager: NSObject {
             DispatchQueue.main.async {
                 self?.customerInfo = customerInfo
                 self?.isPro = customerInfo?.entitlements.all["Reportamelo Pro"]?.isActive == true
+                self?.setPlanType()
             }
         }
     }
@@ -84,6 +91,7 @@ class SubscriptionManager: NSObject {
             let customerInfo = try await Purchases.shared.restorePurchases()
             self.customerInfo = customerInfo
             self.isPro = customerInfo.entitlements.all["Reportamelo Pro"]?.isActive == true
+            self.setPlanType()
             return true
         } catch {
             print("Restore error: \(error.localizedDescription)")
@@ -97,6 +105,7 @@ class SubscriptionManager: NSObject {
             let customerInfo = try await Purchases.shared.logOut()
             self.customerInfo = customerInfo
             self.isPro = false
+            self.setPlanType()
         } catch {
             print("RevenueCat logout error: \(error.localizedDescription)")
         }
@@ -109,6 +118,7 @@ extension SubscriptionManager: PurchasesDelegate {
         DispatchQueue.main.async {
             self.customerInfo = customerInfo
             self.isPro = customerInfo.entitlements.all["Reportamelo Pro"]?.isActive == true
+            self.setPlanType()
         }
     }
 }

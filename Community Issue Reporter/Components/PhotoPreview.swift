@@ -113,16 +113,22 @@ struct PhotoPreview: View {
     var body: some View {
         if let url = attachment.url {
             CachedAsyncImage(url: url) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+                Color.clear
+                    .aspectRatio(mode == .full ? 3.0 / 4.0 : nil, contentMode: .fit)
+                    .overlay {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    }
                     .frame(
                         width: mode == .sized ? width : nil,
                         height: mode == .sized ? height : nil,
                         alignment: .top
                     )
                     .frame(
+                        minWidth: 0,
                         maxWidth: mode == .full ? .infinity : nil,
+                        minHeight: 0,
                         maxHeight: mode == .full ? .infinity : nil,
                         alignment: .top
                     )
@@ -133,7 +139,6 @@ struct PhotoPreview: View {
                     .overlay  {
                         if self.attachment.state == .pending {
                             ZStack {
-                                
                                 Image(systemName: "hourglass")
                                     .font(.system(size: 36, weight: .bold))
                                     .foregroundColor(.white)
@@ -151,7 +156,6 @@ struct PhotoPreview: View {
                         
                         if self.attachment.state == .deleted {
                             ZStack {
-                                
                                 Image(systemName: "xmark.bin.circle.fill")
                                     .font(.system(size: 36, weight: .bold))
                                     .foregroundColor(.white)
@@ -160,17 +164,14 @@ struct PhotoPreview: View {
                         
                         if self.attachment.state == .manualRevision {
                             ZStack {
-                                
                                 Image(systemName: "rectangle.and.hand.point.up.left.filled")
                                     .font(.system(size: 36, weight: .bold))
                                     .foregroundColor(.white)
                             }
                         }
-                            
                     }
                     .overlay {
                         ZStack(alignment: .bottomLeading) {
-                            
                             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                                 .fill(
                                     LinearGradient(
@@ -202,10 +203,7 @@ struct PhotoPreview: View {
                         }
                     }
                     .overlay(alignment: .topTrailing) {
-                        
                         if !UserRepository.shared.isGuestUser() {
-                            
-
                             Button {
                                 controller.showPopover.toggle()
                             } label: {
@@ -225,34 +223,31 @@ struct PhotoPreview: View {
                                         Button(action: {
                                             Task {
                                                 controller.selectedOption = option
-                                                controller.showPopover = false /// Closes popover upon selection
+                                                controller.showPopover = false
                                                 try? await Task.sleep(for: .milliseconds(128))
                                                 controller.presentAlert.toggle()
                                             }
                                         }) {
                                             HStack {
                                                 Text(option)
-                                                
                                                 Spacer()
                                             }
-                                            .contentShape(Rectangle()) /// Ensures the whole row is clickable
+                                            .contentShape(Rectangle())
                                         }
                                         .foregroundColor(.primary)
                                         
                                         if option != controller.options.last {
-                                            Divider() /// Visual separator between choices
+                                            Divider()
                                         }
                                     }
                                 }
                                 .padding()
-                                .frame(width: 256) /// Sets a fixed width for desktop/iPad presentation
-                                .presentationCompactAdaptation(.popover) /// Forces popover look on iPhone
+                                .frame(width: 256)
+                                .presentationCompactAdaptation(.popover)
                             }
                             .padding(.top, 10)
                             .alert(String(localized: "Confirm content blocking"), isPresented: $controller.presentAlert) {
-                                
                                 TextField(String(localized: "Type your reason"), text: $controller.reason)
-                                
                                 Button(String(localized: "Cancel"), role: .cancel) { }
                                 Button(String(localized: "Block"), role: .destructive) {
                                     controller.report(attachment)
@@ -261,27 +256,34 @@ struct PhotoPreview: View {
                                 Text(String(localized: "I confirm that this content violates our community guidelines."))
                             }
                             .alert(String(localized: "Error"), isPresented: $controller.showAlert) {
-                                Button(String(localized: "OK"), role: .close) {
-                                    /// This Implementation closes the alert
-                                }
+                                Button(String(localized: "OK"), role: .close) { }
                             } message: {
                                 Text(controller.alertMessage)
                             }
                             .alert(String(localized: "Confirmation"), isPresented: $controller.showSuccessfulAlert) {
-                                Button(String(localized: "OK"), role: .close) {
-                                    /// This Implementation closes the alert
-                                }
+                                Button(String(localized: "OK"), role: .close) { }
                             } message: {
                                 Text(controller.alertMessage)
                             }
                         }
-                        
                     }
-            
-                   
             } placeholder: {
-                ProgressView()
-                    .frame(width: width, height: height)
+                Color.clear
+                    .aspectRatio(mode == .full ? 3.0 / 4.0 : nil, contentMode: .fit)
+                    .overlay {
+                        ProgressView()
+                    }
+                    .frame(
+                        width: mode == .sized ? width : nil,
+                        height: mode == .sized ? height : nil
+                    )
+                    .frame(
+                        minWidth: 0,
+                        maxWidth: mode == .full ? .infinity : nil,
+                        minHeight: 0,
+                        maxHeight: mode == .full ? .infinity : nil
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             }
             .id(url)
         }

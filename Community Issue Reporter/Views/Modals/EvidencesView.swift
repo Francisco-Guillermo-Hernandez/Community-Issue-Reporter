@@ -230,7 +230,6 @@ struct EvidencesView: View {
         }
         .toolbar {
             
-            
             if response.documents?.count ?? 0 < 24 {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     

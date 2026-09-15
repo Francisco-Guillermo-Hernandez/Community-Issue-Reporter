@@ -88,17 +88,64 @@ enum ReportAttachmentState: String, Codable {
 }
 
 struct Attachment: Codable, Identifiable {
-    let id: String
+    let id: String?
     let type: AttachmentType
-    let createdAt: Date
-    let updatedAt: Date?
-    let uploadedBy: String
-    let ValidatedAt: Date?
+    let createdAtRaw: Int64
+    let updatedAtRaw: Int64?
+    let uploaderUserName: String
+    let validatedAtRaw: Int64?
     let validatedBy: AttachmentValidatedBy?
     let state: ReportAttachmentState
     let notes: String
-    let url: String
-    let previewUrl: String
+    let key: String?
+    let fileName: String?
+    let reportContainer: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id = "attachmentId"
+        case type
+        case createdAtRaw = "createdAt"
+        case updatedAtRaw = "updatedAt"
+        case uploaderUserName
+        case validatedAtRaw = "validatedAt"
+        case validatedBy
+        case state
+        case notes
+        case key
+        case fileName
+        case reportContainer
+    }
+    
+    var createdAt: Date {
+        return Date(timeIntervalSince1970: Double(createdAtRaw) / 1000.0)
+    }
+    
+    var updatedAt: Date? {
+        guard let updatedAtRaw = updatedAtRaw else { return nil }
+        return Date(timeIntervalSince1970: Double(updatedAtRaw) / 1000.0)
+    }
+    
+    var validatedAt: Date? {
+        guard let validatedAtRaw = validatedAtRaw else { return nil }
+        return Date(timeIntervalSince1970: Double(validatedAtRaw) / 1000.0)
+    }
+    
+    var url: String {
+        guard let key = key else { return "" }
+        if #available(iOS 16.0, *) {
+            return Endpoints.baseURL.appending(path: key).absoluteString
+        } else {
+            return Endpoints.baseURL.appendingPathComponent(key).absoluteString
+        }
+    }
+    
+    var previewUrl: String {
+        return url
+    }
+    
+    var createdDate: String {
+        formatRelativeDate(from: self.createdAt)
+    }
 }
 
 struct GroupedAttachmentPayload: Codable {

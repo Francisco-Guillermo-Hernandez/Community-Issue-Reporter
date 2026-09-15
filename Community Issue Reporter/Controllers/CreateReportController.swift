@@ -39,9 +39,6 @@ final class CreateReportController {
         /// lets check the entitlement  to know if the current user have an active subscription
         SubscriptionManager.shared.checkEntitlement()
         
-        /// lets get if its pro
-        let isPro = SubscriptionManager.shared.isPro
-        
         /// get plan type
         let planType = KeychainService.getToken(.planType)
         

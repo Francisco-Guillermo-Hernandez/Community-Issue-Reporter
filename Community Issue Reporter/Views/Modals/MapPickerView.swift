@@ -35,7 +35,7 @@ struct MapPickerView: View {
     @State private var cameraPosition: MapCameraPosition
     @State private var selectedCoordinate: CLLocationCoordinate2D
     @State private var searchText: String
-    @State private var hasCenteredOnUser = false
+    @State private var hasCenteredOnUser: Bool
     @State private var locationManager = LocationManager()
     @State private var searchCompleter = SearchCompleter()
     @FocusState private var isSearchFocused: Bool

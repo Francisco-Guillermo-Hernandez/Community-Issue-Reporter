@@ -10,7 +10,15 @@ import SwiftUI
 struct CommentsSubView: View {
     
     @Environment(\.colorScheme) private var colorScheme
-    @State private var paginatedResult: PaginatedResponse<Comment>
+    @State private var paginatedResult: PaginatedResponse<Comment> = PaginatedResponse<Comment>(
+        documents: [],
+        total: 0,
+        page: 0,
+        documentsPerPage: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
+    )
     @State private var comments: [Comment] = []
     @Environment(\.dismiss) private var dismiss
     @State private var isLoading: Bool = false
@@ -22,15 +30,6 @@ struct CommentsSubView: View {
         self.subViewName = subViewName
         self.mode = mode
         self.comments = []
-        self.paginatedResult = PaginatedResponse<Comment>(
-            documents: [],
-            total: 0,
-            page: 0,
-            documentsPerPage: 0,
-            totalPages: 0,
-            hasNext: false,
-            hasPrev: false,
-        )
     }
     
     

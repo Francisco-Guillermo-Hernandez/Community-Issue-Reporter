@@ -19,6 +19,25 @@ class ImageCache {
     }
 }
 
+struct FailureImage: View {
+   
+    var height: CGFloat = 170
+    var width: CGFloat = 170
+    var body: some View {
+        Image("Placeholder")
+            .resizable()
+            .frame(width: width, height: height)
+            .padding()
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 1.4, style: .continuous))
+    }
+}
+
+#Preview {
+    FailureImage()
+}
+
 struct CachedAsyncImage<Content: View, Placeholder: View>: View {
     let url: URL
     let scale: CGFloat
@@ -51,7 +70,7 @@ struct CachedAsyncImage<Content: View, Placeholder: View>: View {
                         saveToCache(from: url)
                         return AnyView(content(image))
                     case .failure(_):
-                        return AnyView(placeholder())
+                        return AnyView(FailureImage())
                     case .empty:
                         return AnyView(placeholder())
                     @unknown default:

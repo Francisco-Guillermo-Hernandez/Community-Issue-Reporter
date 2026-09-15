@@ -18,18 +18,7 @@
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).processing</string>
 	</array>
 	<key>CFBundleDocumentTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeName</key>
-			<string>MKDirectionsRequest</string>
-			<key>LSHandlerRank</key>
-			<string>Default</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>com.apple.maps.directionsrequest</string>
-			</array>
-		</dict>
-	</array>
+	<array/>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -60,26 +49,10 @@
 		<string>googlechromes</string>
 		<string>comgooglemaps</string>
 	</array>
-	<key>MKDirectionsApplicationSupportedModes</key>
-	<array>
-		<string>MKDirectionsModeBus</string>
-		<string>MKDirectionsModePedestrian</string>
-		<string>MKDirectionsModeStreetCar</string>
-	</array>
 	<key>REVENUECAT_API_KEY</key>
 	<string>$(REVENUECAT_API_KEY)</string>
 	<key>SHARE_URL</key>
 	<string>$(SHARE_URL)</string>
-	<key>UIAppFonts</key>
-	<array>
-		<string>Lora.ttf</string>
-		<string>Lora-Italic.ttf</string>
-	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>processing</string>
-		<string>fetch</string>
-	</array>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
@@ -282,6 +255,16 @@
 			<key>SKAdNetworkIdentifier</key>
 			<string>3qcr597p9d.skadnetwork</string>
 		</dict>
+	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Lora.ttf</string>
+		<string>Lora-Italic.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>processing</string>
+		<string>fetch</string>
 	</array>
 </dict>
 </plist>

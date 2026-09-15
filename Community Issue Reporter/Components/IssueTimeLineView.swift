@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PDFKit
 
 enum TimeLinePresentationMode: String {
     case sheet
@@ -104,16 +105,24 @@ struct IssueTimelineView: View {
                         /// 1. Reported
                         TimelineNode(status: .reported) {
                             MilestoneHeader(title: String(localized: "Reported"), date: resolution.history.reported?.date)
-                            Text("By \(resolution.history.reported?.by ?? "Unknown")")
+                            Text("By a citizen")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                            
+                            
+//                            Text("By \(resolution.history.reported?.by ?? "Unknown")")
+//                                .font(.subheadline)
+//                                .foregroundStyle(.secondary)
+                            
+                            
                         }
                         
                         /// 2. Confirmed
                         if let confirmed = resolution.history.confirmed {
                             TimelineNode(status: .confirmed) {
                                 MilestoneHeader(title: String(localized: "Confirmed"), date: confirmed.date ?? confirmed.computedConfirmationDate)
-                                Text("Issue verified by the community").font(.subheadline)
+                                Text("Report confirmed by \(confirmed.by ?? "-")")
+                                    .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -164,6 +173,8 @@ struct IssueTimelineView: View {
                                         .foregroundStyle(.secondary)
                                     
                                     if let attachments = fixed.attachments {
+                                        
+                                        
                                         NavigationLink(destination: AttachmentDetailView(attachments: attachments)) {
                                             HStack {
                                                 Image(systemName: "checkmark.seal.fill")
@@ -171,10 +182,17 @@ struct IssueTimelineView: View {
                                                 
                                             }
                                             .font(.system(size: 14, weight: .bold))
+                                            .kerning(0.3)
                                             .padding()
-                                            .background(Color.blue)
+                                            .background(Color.theme.secondary)
                                             .foregroundColor(.white)
-                                            .cornerRadius(10)
+                                            .contentShape(Capsule())
+                                            .clipShape(Capsule())
+                                            .overlay {
+                                                Capsule()
+                                                    .stroke(Color.theme.secondary.mix(with: .black, by: 0.01), lineWidth: 1)
+                                            }
+                                            .glassEffect(in: .capsule)
                                         }
                                         .padding(.top, 8)
                                     }
@@ -240,24 +258,95 @@ struct MilestoneHeader: View {
     }
 }
 
+struct PDFViewer: View {
+    let url: URL
+    
+    init(_ url: URL) {
+        self.url = url
+    }
+    
+    @State private var pdfView = PDFView()
+    var body: some View {
+        VStack {
+            PDFKitView(pdfView: pdfView, url: url)
+                .ignoresSafeArea(edges: .all)
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .automatic) {
+                
+                Button {
+                    pdfView.autoScales = true
+                } label: {
+                    Image(systemName: "arrow.down.forward.and.arrow.up.backward.rectangle")
+                }
+                
+                Button {
+                    if pdfView.canZoomOut { pdfView.zoomOut(nil) }
+                } label: {
+                    Image(systemName: "minus.magnifyingglass")
+                }
+                .disabled(!pdfView.canZoomOut)
+                .accessibility(identifier: "zoom out")
+                
+                Button {
+                    if pdfView.canZoomIn { pdfView.zoomIn(nil) }
+                } label: {
+                    Image(systemName: "plus.magnifyingglass")
+                }
+            }
+        }
+        .navigationTitle("Final evidence")
+        .navigationBarTitleDisplayMode(.inline)
+        .background(Color.theme.background)
+    }
+}
+
+struct PDFKitView: UIViewRepresentable {
+    let pdfView: PDFView
+    let url: URL
+
+    func makeUIView(context: Context) -> PDFView {
+        pdfView.document = PDFDocument(url: url)
+        pdfView.autoScales = true
+        pdfView.maxScaleFactor = 4.0 /// Sets maximum allowable zoom level
+        pdfView.minScaleFactor = 0.5 /// Sets minimum allowable zoom level
+        return pdfView
+    }
+
+    func updateUIView(_ uiView: PDFView, context: Context) {}
+}
+
 struct AttachmentDetailView: View {
     let attachments: [Attachment]
     
     var body: some View {
         List(attachments) { item in
-            HStack {
-                Image(systemName: getIcon(for: item))
-                    .frame(width: 30)
-                VStack(alignment: .leading) {
-                    Text(item.type.rawValue.capitalized)
-                        .font(.body)
-                    Text(item.url)
-                        .font(.caption)
-                        .foregroundColor(.blue)
+            if item.type == .document, let url = URL(string: item.url) {
+                NavigationLink(destination: PDFViewer(url).navigationTitle("Document Preview").navigationBarTitleDisplayMode(.inline)) {
+                    attachmentRow(for: item)
                 }
+            } else {
+                attachmentRow(for: item)
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.theme.background)
         .navigationTitle("Attachments")
+    }
+    
+    @ViewBuilder
+    private func attachmentRow(for item: Attachment) -> some View {
+        HStack {
+            Image(systemName: getIcon(for: item))
+                .frame(width: 30)
+            VStack(alignment: .leading) {
+                Text(item.type.rawValue.capitalized)
+                    .font(.body)
+                Text(item.url)
+                    .font(.caption)
+                    .foregroundColor(.orange)
+            }
+        }
     }
     
     private func getIcon(for attachment: Attachment) -> String {
@@ -329,7 +418,7 @@ extension Resolution {
                         comments: "Budget approved for heavy machinery.",
                         status: "approved",
                         attachments: [
-                            Attachment(id: "", type: .document, createdAt: Date(), updatedAt: Date(), uploadedBy: "", ValidatedAt: Date(), validatedBy: .citizen, state: .confirmed, notes: "", url: "", previewUrl: ""),
+                            Attachment(id: "", type: .document, createdAtRaw: Int64(Date().timeIntervalSince1970 * 1000), updatedAtRaw: Int64(Date().timeIntervalSince1970 * 1000), uploaderUserName: "", validatedAtRaw: Int64(Date().timeIntervalSince1970 * 1000), validatedBy: .citizen, state: .confirmed, notes: "", key: "", fileName: "", reportContainer: ""),
                         ]
                     ),
                     IssueUpdate(
@@ -347,7 +436,7 @@ extension Resolution {
                 by: "MOP",
                 comments: "The road has been successfully repaved.",
                 attachments: [
-                    Attachment(id: "", type: .document, createdAt: Date(), updatedAt: Date(), uploadedBy: "", ValidatedAt: Date(), validatedBy: .citizen, state: .confirmed, notes: "", url: "", previewUrl: ""),
+                    Attachment(id: "", type: .document, createdAtRaw: Int64(Date().timeIntervalSince1970 * 1000), updatedAtRaw: Int64(Date().timeIntervalSince1970 * 1000), uploaderUserName: "", validatedAtRaw: Int64(Date().timeIntervalSince1970 * 1000), validatedBy: .citizen, state: .confirmed, notes: "", key: "", fileName: "", reportContainer: ""),
                 ]
             ),
         ),

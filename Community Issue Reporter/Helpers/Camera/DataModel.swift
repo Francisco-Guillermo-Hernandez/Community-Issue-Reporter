@@ -20,7 +20,7 @@ final class DataModel {
     
     func handleCameraPreviews() async {
         let imageStream = camera.previewStream
-            .map { await $0.image }
+            .map { $0.image }
 
         for await image in imageStream {
             Task { @MainActor in

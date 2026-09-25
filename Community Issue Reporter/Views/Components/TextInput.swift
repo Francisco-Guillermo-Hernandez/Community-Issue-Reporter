@@ -265,13 +265,9 @@ enum TestFieldsMock: Hashable {
 }
 
 #Preview {
-    @Previewable
-    @State var value: String = ""
-    
-    @Previewable
-    @State var isValid: Bool = false
-    
-    @State var resetId: UUID = UUID()
+    @Previewable @State var value: String = ""
+    @Previewable @State var isValid: Bool = false
+    @Previewable @State var resetId: UUID = UUID()
     
     VStack(spacing: 20) {
         TextInput(name: "hello@reportamelo.app", label: "Email", regex: .email, isValid: $isValid, value: $value, resetTrigger: resetId)

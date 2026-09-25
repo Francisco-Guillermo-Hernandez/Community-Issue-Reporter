@@ -66,7 +66,7 @@ struct PetitionDetailsView: View {
 
 #Preview {
     @Previewable @State var controller = PetitionController()
-    @Previewable @FocusState var focusedField: PetitionWizardElements?
+    @FocusState var focusedField: PetitionWizardElements?
     
     ScrollView {
         PetitionDetailsView(controller, $focusedField)

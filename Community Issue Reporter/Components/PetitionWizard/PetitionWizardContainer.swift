@@ -194,7 +194,7 @@ struct PetitionWizardContainer: View {
 
 #Preview {
     @Previewable @State var controller = PetitionController()
-    @State var isPresented: Bool = true
+    @Previewable @State var isPresented: Bool = true
     
     Button("Open") {
         isPresented.toggle()

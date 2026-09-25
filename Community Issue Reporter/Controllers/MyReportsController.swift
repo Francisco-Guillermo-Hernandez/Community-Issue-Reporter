@@ -158,7 +158,7 @@ final class MyReportsController {
         Task {
             
             do {
-                let result = try await MapExplorerRepository.shared.report(reportId, countryCode: .SV, cityId: cityId)
+                _ = try await MapExplorerRepository.shared.report(reportId, countryCode: .SV, cityId: cityId)
 //                MapExplorerController.shared.expandedItem = result
             } catch {
                 

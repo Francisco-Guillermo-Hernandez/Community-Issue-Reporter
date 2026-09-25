@@ -52,7 +52,7 @@ struct ProgressRing: View {
 
 #Preview {
     @Previewable @State var progress: Double = 0.1
-    @State var value: Double = 10
+    @Previewable @State var value: Double = 10
     var maxValue: Double {
         100.0
     }

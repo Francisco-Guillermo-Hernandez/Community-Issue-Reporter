@@ -46,7 +46,7 @@ public class Toast {
         
         Task {
             try? await Task.sleep(for: .seconds(3))
-            await hide()
+            hide()
         }
     }
     

@@ -89,10 +89,8 @@ struct LandingView: View {
 }
 
 #Preview {
-    @Previewable
-    @State var isGuest: Bool = false
-    
-    @State var controller = LandingController.shared
+    @Previewable @State var isGuest: Bool = false
+    @Previewable @State var controller = LandingController.shared
     LandingView(controller: controller)
         .environmentObject(AuthViewModel())
 }

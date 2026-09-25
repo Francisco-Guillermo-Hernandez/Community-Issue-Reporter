@@ -84,6 +84,7 @@ final class LandingController {
                 /// Lets check if its the first login attempt and lets set  name
                 if let name = payload.name, !name.isEmpty {
                     _ = KeychainService.save(key: .name, value: name)
+                    UserRepository.shared.setNames(name)
                 }
                 
                 _ = KeychainService.save(key: .authMethod, value: AuthMethod.Apple.rawValue)

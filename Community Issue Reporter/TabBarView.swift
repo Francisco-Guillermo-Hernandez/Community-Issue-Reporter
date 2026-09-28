@@ -43,11 +43,19 @@ struct TabBarView: View {
             .accessibilityIdentifier("UserProfileTab")
             .accessibilityLabel(String(localized: "Profile"))
             
-            Tab(String(localized: "Add"), systemImage: "plus", value: 5, role: .search) {
-                CreateReportView()
+            if #available(iOS 27, *) {
+                Tab(String(localized: "Add"), systemImage: "plus", value: 5, role: .prominent) {
+                    CreateReportView()
+                }
+            } else {
+                Tab(String(localized: "Add"), systemImage: "plus", value: 5, role: .search) {
+                    CreateReportView()
+                }
+                .accessibilityIdentifier("CreateReportTab")
+                .accessibilityLabel(String(localized: "Add"))
             }
-            .accessibilityIdentifier("CreateReportTab")
-            .accessibilityLabel(String(localized: "Add"))
+            
+            
         }
         .alert("Status Update", isPresented: $router.presentAlert) {
             Button("OK", role: .cancel) {

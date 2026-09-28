@@ -285,7 +285,6 @@ struct MyReportsSubView: View {
                         .listRowSeparator(.hidden)
                     }
                 }
-                
                 .scrollEdgeEffectStyle(.soft, for: .top)
                 .scrollEdgeEffectStyle(.soft, for: .bottom)
                 .navigationLinkIndicatorVisibility(.hidden)

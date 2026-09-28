@@ -450,6 +450,7 @@ struct SettingsSubView: View {
               
                 }
             }
+            .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
             .padding(.horizontal)
             .background(Color.theme.background)
             .task {

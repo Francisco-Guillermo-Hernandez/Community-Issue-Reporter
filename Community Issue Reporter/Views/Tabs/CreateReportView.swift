@@ -56,6 +56,8 @@ struct CreateReportView: View {
                     }
                     .padding(.horizontal)
                 }
+                .scrollEdgeEffectStyle(.soft, for: .top)
+                .scrollEdgeEffectStyle(.soft, for: .bottom)
                 .sheet(isPresented: $controller.showReportsLimitSheet, onDismiss: controller.handleSheetDismissal) {
                     ReportLimit() { interaction in
                         controller.handleUserAction(interaction)

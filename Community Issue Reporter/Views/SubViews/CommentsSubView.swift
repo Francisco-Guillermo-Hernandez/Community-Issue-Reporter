@@ -85,6 +85,7 @@ struct CommentsSubView: View {
                             }
                     }
                 }
+                .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
                 .listStyle(.plain)
             }
         }
@@ -103,7 +104,7 @@ struct CommentsSubView: View {
             
             isLoading = false
         }
-//        .background(Color.theme.background)
+        .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
         .background {
             ZStack(alignment: .top) {
                 GeometryReader { geo in

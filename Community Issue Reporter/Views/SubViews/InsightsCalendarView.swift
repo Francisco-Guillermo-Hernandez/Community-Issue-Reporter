@@ -185,6 +185,7 @@ struct SimpleView: View {
                }
            }
        }
+       .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
        .scrollContentBackground(.hidden)
        .toolbarTitleDisplayMode(.inline)
        .navigationBarTitle(dynamicTitle)

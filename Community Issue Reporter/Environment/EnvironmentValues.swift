@@ -114,6 +114,15 @@ final class SettingsStore {
         didSet { UserDefaults.standard.set(showMyUseNameWhenShare, forKey: "showMyUseNameWhenShare") }
     }
     
+
+    static func defaultDeviceLanguage() -> String {
+        let preferredLanguage = Locale.preferredLanguages.first ?? "en"
+        if preferredLanguage.hasPrefix("es") {
+            return "es-419"
+        }
+        return "en"
+    }
+    
     init () {
 
         self.geographicalRegion = UserDefaults.standard.object(forKey: "geographicalRegion") as? Int ?? 2
@@ -125,7 +134,7 @@ final class SettingsStore {
         self.enableBackgroundSync = UserDefaults.standard.object(forKey: "enableBackgroundSync") as? Bool ?? true
         self.enableAnonymousTelemetry = UserDefaults.standard.bool(forKey: "enableAnonymousTelemetry")
         self.selectedLanguageID = UserDefaults.standard.object(forKey: "selectedLanguageID") as? Int ?? 1
-        self.selectedLanguageCode = UserDefaults.standard.string(forKey: "selectedLanguageCode") ?? "es-419"
+        self.selectedLanguageCode = UserDefaults.standard.string(forKey: "selectedLanguageCode") ?? SettingsStore.defaultDeviceLanguage()
         self.enableAutomaticIdentification = UserDefaults.standard.object(forKey: "enableAutomaticIdentification") as? Bool ?? false
         self.enableNotifications = UserDefaults.standard.object(forKey: "enableNotifications") as? Bool ?? false
         self.enablePushNotifications = UserDefaults.standard.bool(forKey: "enablePushNotifications")
@@ -148,7 +157,7 @@ final class SettingsStore {
             "enableBackgroundSync": true,
             "enableAnonymousTelemetry": true,
             "selectedLanguageID": 1,
-            "selectedLanguageCode": "es-419",
+            "selectedLanguageCode": SettingsStore.defaultDeviceLanguage(),
             "enableAutomaticIdentification": false,
             "enableNotifications": false,
             "enableWebNotifications": false,

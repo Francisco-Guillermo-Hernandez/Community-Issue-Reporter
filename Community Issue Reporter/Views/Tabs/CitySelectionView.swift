@@ -104,6 +104,7 @@ struct CitySelectionView: View {
                     .ignoresSafeArea()
                 }
             }
+            .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
             .toolbarTitleDisplayMode(.inline)
             .navigationTitle("Select a city")
             .background(Color.theme.background)

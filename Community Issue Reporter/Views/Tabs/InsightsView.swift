@@ -50,6 +50,7 @@ struct InsightsView: View {
                         .sharedBackgroundVisibility(.hidden)
                     }
                 }
+                .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
                 .navigationDestination(for: InsightsNavigation.self) { destination in
                     switch destination {
                         case .myReports:

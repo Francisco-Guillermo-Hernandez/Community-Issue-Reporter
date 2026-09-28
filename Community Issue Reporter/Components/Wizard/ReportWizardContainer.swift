@@ -100,6 +100,8 @@ struct ReportWizardContainer: View {
                         .padding(.horizontal, 20)
                         .padding(.top, 10)
                     }
+                    .scrollEdgeEffectStyle(.soft, for: .top)
+                    .scrollEdgeEffectStyle(.soft, for: .bottom)
                     .onChange(of: controller.currentStep) { _, newValue in
                         if newValue == .confirmation {
                             

@@ -156,39 +156,42 @@ extension PetitionDetailView {
     @ViewBuilder
     private var imageCarousel: some View {
         if !petition.attachments.isEmpty {
-            ZStack(alignment: .bottom) {
-                TabView(selection: $currentImageIndex) {
-                    ForEach(Array(petition.attachments.enumerated()), id: \.element.id) { index, attachment in
-                        PhotoPreview(attachment, height: UIScreen.main.bounds.width, width: 300)
-                            .frame(maxWidth: .infinity)
-                            .clipped()
-                            .tag(index)
+            GeometryReader { geometry in
+                ZStack(alignment: .bottom) {
+                    TabView(selection: $currentImageIndex) {
+                        ForEach(Array(petition.attachments.enumerated()), id: \.element.id) { index, attachment in
+                            PhotoPreview(attachment, height: geometry.size.width, width: 300)
+                                .frame(maxWidth: .infinity)
+                                .clipped()
+                                .tag(index)
+                        }
                     }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+                    .frame(height: 300)
+                    
+                    // Bottom gradient overlay
+                    LinearGradient(
+                        stops: [
+                            .init(color: Color.theme.background, location: 0),
+                            .init(color: Color.theme.background.opacity(0.6), location: 0.4),
+                            .init(color: .clear, location: 1)
+                        ],
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    .frame(height: 80)
+                    .allowsHitTesting(false)
+                    
+                    // Page indicator
+                    pageIndicator
+                        .padding(.bottom, 12)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                .frame(height: 300)
-                
-                // Bottom gradient overlay
-                LinearGradient(
-                    stops: [
-                        .init(color: Color.theme.background, location: 0),
-                        .init(color: Color.theme.background.opacity(0.6), location: 0.4),
-                        .init(color: .clear, location: 1)
-                    ],
-                    startPoint: .bottom,
-                    endPoint: .top
-                )
-                .frame(height: 80)
-                .allowsHitTesting(false)
-                
-                // Page indicator
-                pageIndicator
-                    .padding(.bottom, 12)
+                .onChange(of: currentImageIndex) {
+                    // Reset auto-scroll timer when user swipes manually
+                    restartAutoScroll()
+                }
             }
-            .onChange(of: currentImageIndex) {
-                // Reset auto-scroll timer when user swipes manually
-                restartAutoScroll()
-            }
+            .frame(height: 300)
         }
     }
     

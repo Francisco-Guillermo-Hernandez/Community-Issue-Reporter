@@ -285,6 +285,8 @@ struct MyReportsSubView: View {
                         .listRowSeparator(.hidden)
                     }
                 }
+                .scrollEdgeEffectStyle(.soft, for: .top)
+                .scrollEdgeEffectStyle(.soft, for: .bottom)
                 .navigationLinkIndicatorVisibility(.hidden)
                 .listStyle(.plain)
                 .refreshable {
@@ -314,6 +316,7 @@ struct MyReportsSubView: View {
             guard !Task.isCancelled else { return }
             await controller.fetchReports()
         }
+        .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
         .background {
             ZStack(alignment: .top) {
                 GeometryReader { geo in

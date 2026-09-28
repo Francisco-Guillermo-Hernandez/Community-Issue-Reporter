@@ -91,6 +91,7 @@ struct CommentsSectionView: View {
                 }
             }
         }
+        .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("Comments for: \(title)")
         .navigationSubtitle(subtitle)

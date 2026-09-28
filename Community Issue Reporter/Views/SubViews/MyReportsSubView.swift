@@ -316,6 +316,7 @@ struct MyReportsSubView: View {
             guard !Task.isCancelled else { return }
             await controller.fetchReports()
         }
+        .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
         .background {
             ZStack(alignment: .top) {
                 GeometryReader { geo in

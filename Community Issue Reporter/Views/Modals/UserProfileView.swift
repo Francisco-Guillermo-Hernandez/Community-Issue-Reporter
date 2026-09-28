@@ -173,6 +173,7 @@ struct UserProfileView: View {
                         
                 }
             }
+            .scrollEdgeEffectStyle(.soft, for: [.top, .bottom])
             .background {
                 ZStack(alignment: .top) {
                     GeometryReader { geo in

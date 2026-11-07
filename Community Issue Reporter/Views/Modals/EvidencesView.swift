@@ -173,12 +173,8 @@ struct EvidencesView: View {
                         ForEach(response.documents ?? [], id: \.id) { photo in
                             NavigationLink(value: photo) {
                                 PhotoPreview(photo, .full)
-                                    .matchedTransitionSource(id: photo.id, in: nameSpace)
                             }
                             .buttonStyle(.plain)
-                            .simultaneousGesture(TapGesture().onEnded {
-                                previewID = photo.id
-                            })
                         }
                     }
                     .padding(.horizontal, .themePadding)
@@ -187,13 +183,21 @@ struct EvidencesView: View {
             
             
         }
-        .sheet(isPresented: $attachingNewEvidences) {
+        .sheet(isPresented: $attachingNewEvidences, onDismiss: {
+            Task {
+                await fetchEvidences(showLoading: false)
+            }
+        }) {
             AttachEvidencesView(reportId: id, reportContainer: reportContainer)
                 
         }
         .navigationDestination(for: PreviewAttachment.self) { photo in
-            PhotoDetailView(photos: response.documents ?? [], previewID: $previewID, nameSpace: nameSpace)
-                .navigationTransition(.zoom(sourceID: previewID, in: nameSpace))
+            PhotoDetailView(
+                photos: response.documents ?? [],
+                initialPhotoID: photo.id,
+                previewID: $previewID,
+                nameSpace: nameSpace
+            )
         }
         .scrollContentBackground(.hidden)
         .fullScreenCover(isPresented: $isCameraPresented) {
@@ -210,23 +214,8 @@ struct EvidencesView: View {
             .edgesIgnoringSafeArea(.all)
         }
         .task {
-            isLoading = true
-            defer { isLoading = false }
-            do {
-                let res = try await ReportRepository.shared.fetchAttachments(id, page: page)
-                let filteredDocs = res.documents?.filter { $0.state != .deleted && $0.state != .inappropriate }
-                response = PaginatedResponse(
-                    documents: filteredDocs,
-                    total: res.total,
-                    page: res.page,
-                    documentsPerPage: res.documentsPerPage,
-                    totalPages: res.totalPages,
-                    hasNext: res.hasNext,
-                    hasPrev: res.hasPrev
-                )
-            } catch {
-                
-            }
+            guard (response.documents ?? []).isEmpty else { return }
+            await fetchEvidences(showLoading: true)
         }
         .toolbar {
             
@@ -259,6 +248,32 @@ struct EvidencesView: View {
         GridItem(.flexible(), spacing: 4),
         GridItem(.flexible(), spacing: 4)
     ]
+    
+    private func fetchEvidences(showLoading: Bool) async {
+        if showLoading {
+            isLoading = true
+        }
+        defer {
+            if showLoading {
+                isLoading = false
+            }
+        }
+        do {
+            let res = try await ReportRepository.shared.fetchAttachments(id, page: page)
+            let filteredDocs = res.documents?.filter { $0.state != .deleted && $0.state != .inappropriate }
+            response = PaginatedResponse(
+                documents: filteredDocs,
+                total: res.total,
+                page: res.page,
+                documentsPerPage: res.documentsPerPage,
+                totalPages: res.totalPages,
+                hasNext: res.hasNext,
+                hasPrev: res.hasPrev
+            )
+        } catch {
+            
+        }
+    }
     
     
     private func takePhotoUsingCamera(onComplete: @escaping (UIImage) -> Void) {

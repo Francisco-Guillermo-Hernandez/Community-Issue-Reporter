@@ -303,3 +303,28 @@ extension Color {
         )
     }
 }
+
+
+@available(anyAppleOS 27.1, *)
+extension View {
+    func contentMargins(
+        _ guide: ContentMarginGuide,
+        _ edges: Edge.Set = .all,
+        for placement: ContentMarginPlacement
+    ) -> some View {
+        modifier(ContainerContentMargins(guide: guide, edges: edges, placement: placement))
+    }
+}
+ 
+@available(anyAppleOS 27.1, *)
+private struct ContainerContentMargins: ViewModifier {
+    let guide: ContentMarginGuide
+    let edges: Edge.Set
+    let placement: ContentMarginPlacement
+ 
+    func body(content: Content) -> some View {
+        GeometryReader { geometry in
+            content.contentMargins(edges, geometry.contentMargins(for: guide), for: placement)
+        }
+    }
+}

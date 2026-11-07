@@ -72,7 +72,7 @@ struct CitySelectionView: View {
                 GeometryReader { geometry in
                     let scrollViewFrame = geometry.frame(in: .local)
                     ScrollView {
-                        ForEach(Array(controller.cities.enumerated()), id: \.offset) { offset, city in
+                        ForEach(Array(controller.cities.enumerated()), id: \.element.cityId) { offset, city in
                             RowContentBoth(offset: offset, scrollViewFrame: scrollViewFrame, city: city, isSelected: selectedCity.cityId == city.cityId)
                                 .onTapGesture {
                                     selectedCity = city
@@ -115,32 +115,21 @@ struct CitySelectionView: View {
                 prompt: String(localized: "Search a city")
             )
             .safeAreaInset(edge: .bottom, spacing: 0) {
-
-                ThemedButton(
-                    message: buttonMessage,
+                CitySelectionBottomBar(
+                    controller: controller,
+                    mode: mode,
+                    buttonMessage: buttonMessage,
                     action: {
                         controller.updateCity(city: selectedCity) {
-                            
                             nextStep()
                             if mode == .modify {
                                 dismiss()
                             }
                         }
-                        
                         controller.triggerFeedBack.toggle()
-                    },
-                    type: .secondary,
-                    style: .prominent,
-                    isLoading: $controller.isLoading
+                    }
                 )
-                .padding(.horizontal, 36)
-                .padding(.bottom, mode == .modify ? 16 : 4)
-                .padding(.top)
             }
-            .sensoryFeedback(
-                .impact(weight: .medium),
-                trigger: controller.triggerFeedBack
-            )
             .task {
                 controller.loadLocalCities()
             }
@@ -264,6 +253,30 @@ struct BottomFadedView<Content: View>: View {
 
 // MARK: -
 
+private struct CitySelectionBottomBar: View {
+    @Bindable var controller: CitySelectionController
+    let mode: CitySelectionMode
+    let buttonMessage: String
+    let action: () -> Void
+
+    var body: some View {
+        ThemedButton(
+            message: buttonMessage,
+            action: action,
+            type: .secondary,
+            style: .prominent,
+            isLoading: $controller.isLoading
+        )
+        .padding(.horizontal, 36)
+        .padding(.bottom, mode == .modify ? 16 : 4)
+        .padding(.top)
+        .sensoryFeedback(
+            .impact(weight: .medium),
+            trigger: controller.triggerFeedBack
+        )
+    }
+}
+
 private struct RowContentBoth: View {
     let offset: Int
     let scrollViewFrame: CGRect
@@ -295,7 +308,10 @@ private struct RowContentBoth: View {
             .clipShape(RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
             .glassEffect( in: RoundedRectangle(cornerRadius: .themeRadius * 2, style: .continuous))
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .scrollView) } action: { newValue in
-                zIndex = min(newValue.minY, min(scrollViewFrame.midY - newValue.midY, 0))
+                let nextZIndex = min(newValue.minY, min(scrollViewFrame.midY - newValue.midY, 0))
+                if abs(zIndex - nextZIndex) > 0.5 {
+                    zIndex = nextZIndex
+                }
             }
             .zIndex(zIndex * Double(offset))
             .visualEffect { content, proxy in

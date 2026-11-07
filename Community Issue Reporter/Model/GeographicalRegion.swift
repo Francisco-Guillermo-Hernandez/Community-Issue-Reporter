@@ -75,7 +75,8 @@ struct GeographicalRegion: Identifiable, Codable {
     let countries: [Country]
 }
 
-struct FriendlyCityDistribution: Codable {
+struct FriendlyCityDistribution: Identifiable, Codable, Equatable, Hashable {
+    var id: String { cityId }
     let cityId: String
     let firstLevel: String
     let secondLevel: String

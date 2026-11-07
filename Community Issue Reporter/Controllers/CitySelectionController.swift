@@ -18,7 +18,12 @@ final class CitySelectionController {
         documents: [],
         hasNext: false,
         hasPrev: false
-    )
+    ) {
+        didSet {
+            cities = (friendlyCities.documents ?? []).sorted { ($0.isCapitalCity ?? 0) > ($1.isCapitalCity ?? 0) }
+        }
+    }
+    private(set) var cities: [FriendlyCityDistribution] = []
     var searchText: String = ""
     var isLoading: Bool = false
     var isSearchActive: Bool = false
@@ -29,11 +34,6 @@ final class CitySelectionController {
     
     init(countryCode: CountryCode) {
         self.countryCode = countryCode
-    }
-    
-    var cities: [FriendlyCityDistribution] {
-        guard let documents = friendlyCities.documents else { return [] }
-        return documents.sorted { ($0.isCapitalCity ?? 0) > ($1.isCapitalCity ?? 0) }
     }
     
     func loadLocalCities() {
@@ -86,20 +86,23 @@ final class CitySelectionController {
             do {
                 isLoading = true
                 let result = try await UserRepository.shared.updateDefaultReporting(city.cityId)
+                isLoading = false
                 if result == .updated {
                     onUpdated()
                 }
             } catch CommonIntercommunicationErrors.unProcessable {
+                isLoading = false
                 self.show(error: String(localized: "Your petition cannot be processed, please try again."))
             } catch CommonIntercommunicationErrors.networkError(_) {
+                isLoading = false
                 self.show(error: String(localized: "It looks like that your network is experiencing some delays, please try again."))
             } catch CommonIntercommunicationErrors.serverError(_) {
+                isLoading = false
                 self.show(error: String(localized: "Server error, please try again."))
             } catch {
+                isLoading = false
                 self.show(error: String(localized: "An unexpected error has occurred, please try again."))
             }
-            
-            isLoading = false
         }
     }
     

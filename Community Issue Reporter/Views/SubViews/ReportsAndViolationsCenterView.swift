@@ -150,50 +150,53 @@ struct ReportsAndViolationsCenterView: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            /// Header
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Find information related with your content such as images, comments, reports, and petitions that violate our Community Guidelines. If you believe your we've mistakenly taken action , you can submit an appeal to have the action reversed.")
-                    .font(.footnote)
-                    .foregroundColor(.secondary)
-                
-                LinksView(type: .policies)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-           
-            
-            /// Tabs
-            HStack(spacing: 32) {
-                Button(action: { controller.selectedTab = 0 }) {
-                    VStack {
-                        Text("Your account")
-                            .font(.subheadline)
-                            .fontWeight(controller.selectedTab == 0 ? .semibold : .regular)
-                            .foregroundColor(controller.selectedTab == 0 ? .primary : .secondary)
-                        
-                        Rectangle()
-                            .fill(controller.selectedTab == 0 ? Color.primary : Color.clear)
-                            .frame(height: 2)
-                    }
+            VStack(spacing: .themeSpacing * 2) {
+                /// Header
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Find information related with your content such as images, comments, reports, and petitions that violate our Community Guidelines. If you believe your we've mistakenly taken action , you can submit an appeal to have the action reversed.")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    
+                    LinksView(type: .policies)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+               
                 
-                Button(action: { controller.selectedTab = 1 }) {
-                    VStack {
-                        Text("Your reports")
-                            .font(.subheadline)
-                            .fontWeight(controller.selectedTab == 1 ? .semibold : .regular)
-                            .foregroundColor(controller.selectedTab == 1 ? .primary : .secondary)
-                        
-                        Rectangle()
-                            .fill(controller.selectedTab == 1 ? Color.primary : Color.clear)
-                            .frame(height: 2)
+                /// Tabs
+                HStack(spacing: 32) {
+                    Button(action: { controller.selectedTab = 0 }) {
+                        VStack {
+                            Text("Your account")
+                                .font(.subheadline)
+                                .fontWeight(controller.selectedTab == 0 ? .semibold : .regular)
+                                .foregroundColor(controller.selectedTab == 0 ? .primary : .secondary)
+                            
+                            Rectangle()
+                                .fill(controller.selectedTab == 0 ? Color.primary : Color.clear)
+                                .frame(height: 2)
+                        }
                     }
+                    
+                    Button(action: { controller.selectedTab = 1 }) {
+                        VStack {
+                            Text("Your reports")
+                                .font(.subheadline)
+                                .fontWeight(controller.selectedTab == 1 ? .semibold : .regular)
+                                .foregroundColor(controller.selectedTab == 1 ? .primary : .secondary)
+                            
+                            Rectangle()
+                                .fill(controller.selectedTab == 1 ? Color.primary : Color.clear)
+                                .frame(height: 2)
+                        }
+                    }
+                    
+                    Spacer()
                 }
-                
-                Spacer()
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
+            .background(Color.theme.cardBackground)
             
             Divider()
             

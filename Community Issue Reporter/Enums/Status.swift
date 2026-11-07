@@ -18,6 +18,7 @@ enum IssueStatus: String, CaseIterable, Identifiable {
     case rectification = "eraser.trianglebadge.exclamationmark"
     case humanReview = "person.crop.circle.badge.plus"
     case underReview = "person.fill.checkmark"
+    case done = "checkmark.circle"
     
     var id: String { self.rawValue }
     
@@ -35,6 +36,7 @@ enum IssueStatus: String, CaseIterable, Identifiable {
             case .rectification: return String(localized: "Rectification")
             case .humanReview: return String(localized: "Human Review")
             case .underReview: return String(localized: "Under Review")
+            case .done: return String(localized: "Done")
         }
     }
     
@@ -50,6 +52,7 @@ enum IssueStatus: String, CaseIterable, Identifiable {
             case .rectification: return .gray
             case .humanReview: return .cyan
             case .underReview: return .blue
+            case .done: return .green
         }
     }
     
@@ -75,6 +78,8 @@ enum IssueStatus: String, CaseIterable, Identifiable {
                 return 9
             case .underReview:
                 return 10
+            case .done:
+                return 11
         }
     }
 }

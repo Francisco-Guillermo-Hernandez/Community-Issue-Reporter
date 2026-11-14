@@ -41,6 +41,8 @@ struct Community_Issue_ReporterApp: App {
     /// Router
     @State private var router = DeepLinkRouter.shared
     
+    @State private var dashboardController = DashboardController.shared
+    
     init() {
         #if DEBUG
         try? Tips.configure([
@@ -71,19 +73,41 @@ struct Community_Issue_ReporterApp: App {
     
     var body: some Scene {
         WindowGroup {
-            WelcomeView()
-                .withToast()
-                .environment(router)
-                .environmentObject(authViewModel)
-                .environment(settingsStore)
-                .environment(notificationManager)
-                .environment(networkMonitor)
-                .environment(subscriptionManager)
-                .environment(\.locale, .init(identifier: settingsStore.selectedLanguageCode))
-                .onOpenURL { url in
-                    GIDSignIn.sharedInstance.handle(url)
-                    router.handleIncomingURL(url)
-                }
+            if ProcessInfo.processInfo.isiOSAppOnMac {
+                DashboardView()
+                    .withToast()
+                    .environment(router)
+                    .environmentObject(authViewModel)
+                    .environment(settingsStore)
+                    .environment(notificationManager)
+                    .environment(networkMonitor)
+                    .environment(subscriptionManager)
+                    .environment(\.locale, .init(identifier: settingsStore.selectedLanguageCode))
+                    .frame(minWidth: 375.0, minHeight: 375.0)
+                    .onGeometryChange(for: CGSize.self) { geometry in
+                        geometry.size
+                    } action: {
+                        dashboardController.windowSize = $0
+                    }
+                    .onOpenURL { url in
+                        GIDSignIn.sharedInstance.handle(url)
+                        router.handleIncomingURL(url)
+                    }
+            } else {
+                WelcomeView()
+                    .withToast()
+                    .environment(router)
+                    .environmentObject(authViewModel)
+                    .environment(settingsStore)
+                    .environment(notificationManager)
+                    .environment(networkMonitor)
+                    .environment(subscriptionManager)
+                    .environment(\.locale, .init(identifier: settingsStore.selectedLanguageCode))
+                    .onOpenURL { url in
+                        GIDSignIn.sharedInstance.handle(url)
+                        router.handleIncomingURL(url)
+                    }
+            }
         }
     }
 }

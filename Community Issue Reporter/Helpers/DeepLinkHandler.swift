@@ -20,9 +20,12 @@ func deepLinkHandler(_ url: URL) -> DeepLink? {
 
     // components[0] = "7BTheYpPwK1L" hash
     // components[1] = "report"
-    // components[2] = "a-big-pothole-in-the-middle-of-the-street"
-    
-    guard components.count >= 3 else { return nil }
+    // components[2] = "20261027" date
+    // components[3] = "SSC" city code
+    // components[4] = "SV" country code
+    // components[5] = "a-big-pothole-in-the-middle-of-the-street" slug
+
+    guard components.count >= 6 else { return nil }
     
     let resourceHash = components[0]
     let resourceType = components[1]
